@@ -1,0 +1,318 @@
+{
+  "format_version": "1.0.0",
+  "package": {
+    "id": "com.woodson.bullying-report",
+    "name": "bullying-report",
+    "display_name": "Bullying Report",
+    "version": "1.0.0",
+    "description": "Anonymous bullying incident reporting system for students. Reports are sent to counselors, principals, and administrators for review and action.",
+    "author": "Woodson ISD",
+    "license": "proprietary",
+    "category": "safety",
+    "icon": "bi-shield-exclamation",
+    "base_url": "/modules/sections/bullying-report/",
+    "created_at": "2025-10-22"
+  },
+  "compatibility": {
+    "hub_version": ">=1.0.0",
+    "php_version": ">=8.2.0",
+    "mysql_version": ">=10.11.0"
+  },
+  "requirements": {
+    "php_extensions": ["pdo", "json"],
+    "core_modules": ["users"],
+    "packages": {}
+  },
+  "conflicts": {},
+  "fields": [
+    {
+      "name": "report_date",
+      "type": "date",
+      "label": "Date of Incident",
+      "order": 1,
+      "required": true,
+      "searchable": true,
+      "visible_in_list": true,
+      "help_text": "When did this incident occur?",
+      "validation": {
+        "max_date": "today"
+      }
+    },
+    {
+      "name": "report_time",
+      "type": "time",
+      "label": "Time of Incident",
+      "order": 2,
+      "required": false,
+      "searchable": false,
+      "visible_in_list": false,
+      "help_text": "Approximate time (optional)"
+    },
+    {
+      "name": "incident_location",
+      "type": "select",
+      "label": "Where did this happen?",
+      "order": 3,
+      "required": true,
+      "searchable": true,
+      "visible_in_list": true,
+      "options": {
+        "choices": [
+          {"value": "classroom", "label": "Classroom"},
+          {"value": "hallway", "label": "Hallway"},
+          {"value": "cafeteria", "label": "Cafeteria"},
+          {"value": "bathroom", "label": "Bathroom"},
+          {"value": "gym", "label": "Gym/PE Area"},
+          {"value": "playground", "label": "Playground/Outdoors"},
+          {"value": "bus", "label": "School Bus"},
+          {"value": "bus_stop", "label": "Bus Stop"},
+          {"value": "online", "label": "Online/Social Media"},
+          {"value": "other", "label": "Other Location"}
+        ]
+      }
+    },
+    {
+      "name": "incident_type",
+      "type": "multi_select",
+      "label": "Type of Incident",
+      "order": 4,
+      "required": true,
+      "searchable": true,
+      "visible_in_list": true,
+      "help_text": "Select all that apply",
+      "options": {
+        "choices": [
+          {"value": "physical", "label": "Physical (hitting, pushing, fighting)"},
+          {"value": "verbal", "label": "Verbal (name-calling, threats)"},
+          {"value": "social", "label": "Social (exclusion, rumors, humiliation)"},
+          {"value": "cyberbullying", "label": "Cyberbullying (online harassment)"},
+          {"value": "property", "label": "Property damage or theft"},
+          {"value": "discrimination", "label": "Discrimination (race, gender, religion, etc.)"},
+          {"value": "sexual", "label": "Sexual harassment"},
+          {"value": "other", "label": "Other"}
+        ]
+      }
+    },
+    {
+      "name": "student_involved",
+      "type": "text",
+      "label": "Student(s) Involved",
+      "order": 5,
+      "required": false,
+      "searchable": true,
+      "visible_in_list": false,
+      "help_text": "Name(s) of student(s) who were bullying (if known)",
+      "placeholder": "John Doe, Jane Smith"
+    },
+    {
+      "name": "witness_present",
+      "type": "radio",
+      "label": "Were there witnesses?",
+      "order": 6,
+      "required": true,
+      "searchable": false,
+      "visible_in_list": false,
+      "options": {
+        "choices": [
+          {"value": "yes", "label": "Yes"},
+          {"value": "no", "label": "No"},
+          {"value": "unsure", "label": "Not sure"}
+        ]
+      }
+    },
+    {
+      "name": "witness_names",
+      "type": "text",
+      "label": "Witness Names",
+      "order": 7,
+      "required": false,
+      "searchable": false,
+      "visible_in_list": false,
+      "help_text": "If yes, who saw what happened?",
+      "placeholder": "Names of witnesses (optional)"
+    },
+    {
+      "name": "incident_description",
+      "type": "textarea",
+      "label": "What happened?",
+      "order": 8,
+      "required": true,
+      "searchable": true,
+      "visible_in_list": false,
+      "help_text": "Please describe the incident in detail. Include what was said or done.",
+      "placeholder": "Describe what happened...",
+      "validation": {
+        "min_length": 20,
+        "max_length": 2000
+      }
+    },
+    {
+      "name": "previous_incidents",
+      "type": "radio",
+      "label": "Has this happened before?",
+      "order": 9,
+      "required": true,
+      "searchable": false,
+      "visible_in_list": false,
+      "options": {
+        "choices": [
+          {"value": "first_time", "label": "First time"},
+          {"value": "few_times", "label": "A few times before"},
+          {"value": "ongoing", "label": "Ongoing problem"}
+        ]
+      }
+    },
+    {
+      "name": "reporter_name",
+      "type": "text",
+      "label": "Your Name",
+      "order": 10,
+      "required": false,
+      "searchable": true,
+      "visible_in_list": true,
+      "help_text": "Optional - You can report anonymously",
+      "placeholder": "Leave blank for anonymous report"
+    },
+    {
+      "name": "reporter_grade",
+      "type": "select",
+      "label": "Your Grade",
+      "order": 11,
+      "required": false,
+      "searchable": false,
+      "visible_in_list": false,
+      "options": {
+        "choices": [
+          {"value": "pk", "label": "Pre-K"},
+          {"value": "k", "label": "Kindergarten"},
+          {"value": "1", "label": "1st Grade"},
+          {"value": "2", "label": "2nd Grade"},
+          {"value": "3", "label": "3rd Grade"},
+          {"value": "4", "label": "4th Grade"},
+          {"value": "5", "label": "5th Grade"},
+          {"value": "6", "label": "6th Grade"},
+          {"value": "7", "label": "7th Grade"},
+          {"value": "8", "label": "8th Grade"},
+          {"value": "9", "label": "9th Grade"},
+          {"value": "10", "label": "10th Grade"},
+          {"value": "11", "label": "11th Grade"},
+          {"value": "12", "label": "12th Grade"}
+        ]
+      }
+    },
+    {
+      "name": "reporter_contact",
+      "type": "email",
+      "label": "Contact Email",
+      "order": 12,
+      "required": false,
+      "searchable": false,
+      "visible_in_list": false,
+      "help_text": "Optional - If you want someone to follow up with you",
+      "placeholder": "your.email@example.com"
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "label": "Report Status",
+      "order": 13,
+      "required": true,
+      "searchable": true,
+      "visible_in_list": true,
+      "default": "new",
+      "help_text": "Current status of this report (staff use only)",
+      "options": {
+        "choices": [
+          {"value": "new", "label": "New - Not Reviewed"},
+          {"value": "reviewing", "label": "Under Review"},
+          {"value": "investigating", "label": "Investigating"},
+          {"value": "action_taken", "label": "Action Taken"},
+          {"value": "resolved", "label": "Resolved"},
+          {"value": "no_action", "label": "No Action Needed"}
+        ]
+      }
+    },
+    {
+      "name": "assigned_to",
+      "type": "user_select",
+      "label": "Assigned To",
+      "order": 14,
+      "required": false,
+      "searchable": true,
+      "visible_in_list": true,
+      "help_text": "Staff member handling this case"
+    },
+    {
+      "name": "staff_notes",
+      "type": "textarea",
+      "label": "Staff Notes",
+      "order": 15,
+      "required": false,
+      "searchable": true,
+      "visible_in_list": false,
+      "help_text": "Internal notes for staff - NOT visible to students",
+      "placeholder": "Actions taken, follow-up notes, etc."
+    },
+    {
+      "name": "resolution_date",
+      "type": "date",
+      "label": "Resolution Date",
+      "order": 16,
+      "required": false,
+      "searchable": false,
+      "visible_in_list": false,
+      "help_text": "Date case was resolved"
+    }
+  ],
+  "permissions": {
+    "super_admin": true,
+    "admin": true,
+    "principal": true,
+    "counselor": true,
+    "staff": false,
+    "user": false
+  },
+  "menu_items": [
+    {
+      "label": "Submit Report",
+      "url": "/modules/sections/bullying-report/submit.php",
+      "icon": "bi-file-earmark-plus",
+      "order": 1,
+      "minimum_role": "user",
+      "parent_id": null
+    },
+    {
+      "label": "View All Reports",
+      "url": "/modules/sections/bullying-report/list.php",
+      "icon": "bi-list-ul",
+      "order": 2,
+      "minimum_role": "counselor",
+      "parent_id": null
+    },
+    {
+      "label": "New Reports",
+      "url": "/modules/sections/bullying-report/list.php?status=new",
+      "icon": "bi-exclamation-circle",
+      "order": 3,
+      "minimum_role": "counselor",
+      "parent_id": null
+    },
+    {
+      "label": "Report Statistics",
+      "url": "/modules/sections/bullying-report/stats.php",
+      "icon": "bi-bar-chart",
+      "order": 4,
+      "minimum_role": "principal",
+      "parent_id": null
+    }
+  ],
+  "metadata": {
+    "tags": ["safety", "student-welfare", "reporting", "incident-management"],
+    "documentation_url": "https://hub.woodsonisd.net/docs/bullying-report",
+    "support_email": "support@woodsonisd.net",
+    "screenshots": [],
+    "changelog": {
+      "1.0.0": "Initial release - Basic bullying incident reporting system"
+    }
+  }
+}
