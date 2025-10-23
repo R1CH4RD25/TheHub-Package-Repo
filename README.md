@@ -6,7 +6,7 @@ Official package repository for The Hub dynamic sections system. This repository
 
 | Package | Version | Description | Download |
 |---------|---------|-------------|----------|
-| **Bullying Report** | 1.0.0 | Anonymous bullying incident reporting system with comprehensive tracking | [Download](packages/bullying-report/bullying-report_1.0.0.hubpkg) |
+| **Bullying Report** | 1.0.0 | Anonymous bullying incident reporting system with comprehensive tracking | [Download](packages/reporting/bullying-report/bullying-report_1.0.0.hubpkg) |
 
 ## 🚀 Quick Start
 
