@@ -16,15 +16,15 @@ switch ($action) {
         // Count packages needing validation
         $pendingPackages = $db->fetchAll(
             "SELECT id, display_name FROM section_packages 
-             WHERE is_active = 1 
+             WHERE is_deprecated = 0 
              AND (validation_status IS NULL OR validation_status = 'pending')
              LIMIT 10"
         );
         
-        // Count available updates
+        // Count available updates (for now, just count deprecated as needing updates)
         $updateResult = $db->fetchOne(
             "SELECT COUNT(*) as count FROM section_packages 
-             WHERE is_active = 1"
+             WHERE is_deprecated = 1"
         );
         $updateCount = $updateResult['count'] ?? 0;
         
