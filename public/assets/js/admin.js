@@ -3190,39 +3190,43 @@ async function validatePackage(packageId, packageName) {
     try {
         console.log('🎯 validatePackage START - packageId:', packageId, 'packageName:', packageName);
         
-        // Open modal immediately with progress state
+        // Open modal immediately with progress state - COMPACT REDESIGN
         const modalHtml = `
-            <div class="modal-overlay show" id="validationModal">
-                <div class="modal-content modal-large" onclick="event.stopPropagation()">
-                    <span class="modal-close" onclick="closeValidationModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem; cursor: pointer; z-index: 10;">&times;</span>
-                    <div class="validation-report-header">
+            <div class="modal-overlay show" id="validationModal" onclick="if(event.target === this) closeValidationModal()">
+                <div class="modal-content modal-validation" onclick="event.stopPropagation()">
+                    <!-- Header with Close Button -->
+                    <div class="validation-modal-header">
                         <h2 class="validation-report-title">
                             <i class="bi bi-clipboard-check"></i>
-                            Validating ${escapeHtml(packageName)}
+                            <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
                         </h2>
+                        <button class="modal-close-btn" onclick="closeValidationModal()" title="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
                     
-                    <div class="validation-progress-section">
-                        <div class="progress-bar-container">
+                    <!-- Compact Progress Section -->
+                    <div class="validation-progress-compact">
+                        <div class="progress-bar-wrapper">
                             <div class="progress-bar" id="validationProgressBar"></div>
                         </div>
-                        <div class="validation-live-stats" id="validationLiveStats">
-                            <span class="stat-item stat-running">
-                                <i class="bi bi-hourglass-split"></i>
-                                Running validation...
-                            </span>
+                        <div class="validation-status" id="validationLiveStats">
+                            <i class="bi bi-hourglass-split spin-icon"></i>
+                            <span>Running validation...</span>
                         </div>
                     </div>
                     
-                    <div class="validation-checks-container" id="validationChecksContainer">
-                        <div class="validation-checks-list" id="validationChecksList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 24px;">
-                            <!-- Checks will be pre-populated here -->
+                    <!-- Compact Checks Grid (3 columns, no scroll) -->
+                    <div class="validation-checks-compact" id="validationChecksContainer">
+                        <div class="checks-grid" id="validationChecksList">
+                            <!-- Checks will be pre-populated here in 3-column grid -->
                         </div>
                     </div>
                     
-                    <div class="modal-actions">
-                        <button class="btn btn-secondary" disabled id="closeValidationBtn" type="button">
-                            Close
+                    <!-- Footer Actions -->
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="closeValidationBtn" type="button" onclick="closeValidationModal()">
+                            <i class="bi bi-x-circle"></i> Close
                         </button>
                     </div>
                 </div>
