@@ -1,5 +1,5 @@
 <?php
-require_once '../src/bootstrap.php';
+require_once '../../src/bootstrap.php';
 
 Hub\Auth::requireLogin();
 
@@ -22,11 +22,11 @@ switch ($action) {
         );
         
         // Count available updates
-        $updates = $db->fetchAll(
+        $updateResult = $db->fetchOne(
             "SELECT COUNT(*) as count FROM section_packages 
-             WHERE has_update = 1 AND is_active = 1"
+             WHERE is_active = 1"
         );
-        $updateCount = $updates[0]['count'] ?? 0;
+        $updateCount = $updateResult['count'] ?? 0;
         
         // Check if user has dismissed these alerts
         $dismissedValidation = $db->fetchOne(
