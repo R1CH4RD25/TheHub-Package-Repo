@@ -105,8 +105,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize cascading dependencies for optional features
     initializeDependencies();
     
-    // Check for package alerts badge (for super admins)
-    checkPackageAlerts(false); // Only update badge on initial load
+    // Check for package alerts (for super admins)
+    // If packages tab is already active on load, show alerts; otherwise just update badge
+    const packagesTabActive = document.getElementById('tab-packages')?.classList.contains('active');
+    checkPackageAlerts(packagesTabActive); 
     
     // Hamburger Menu for Admin Sidebar (Responsive)
     const hamburgerMenu = document.querySelector('.hamburger-menu');
