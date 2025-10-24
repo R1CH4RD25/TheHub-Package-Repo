@@ -3968,7 +3968,9 @@ async function checkPackageAlerts() {
     if (!container) return; // Not on packages tab or not super admin
     
     try {
-        const response = await fetch('/api/package-alerts.php?action=check');
+        const response = await fetch('/api/package-alerts.php?action=check', {
+            credentials: 'same-origin'
+        });
         const result = await response.json();
         
         if (!result.success) return;
@@ -4052,6 +4054,7 @@ async function dismissPackageAlert(alertType) {
         
         const response = await fetch('/api/package-alerts.php?action=dismiss', {
             method: 'POST',
+            credentials: 'same-origin',
             body: formData
         });
         
