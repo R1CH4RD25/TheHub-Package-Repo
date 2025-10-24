@@ -3980,10 +3980,11 @@ async function checkPackageAlerts(showAlerts = true) {
         
         if (!result.success) return;
         
-        const { validation, updates } = result.alerts;
+        const { validation, installed, updates } = result.alerts;
         
-        // Always update sidebar badge
+        // Always update sidebar badge and subtab badges
         updatePackageAlertBadge(validation, updates);
+        updateSubtabBadges(validation, installed, updates);
         
         // Only show alert banners if requested and container exists
         if (!showAlerts) return;
@@ -4061,6 +4062,42 @@ function updatePackageAlertBadge(validation, updates) {
     }
 }
 
+// Update the subtab badges with counts
+function updateSubtabBadges(validation, installed, updates) {
+    // Installed Packages badge (always shows count, no dismiss)
+    const installedBadge = document.getElementById('installedPackagesBadge');
+    if (installedBadge) {
+        if (installed.count > 0) {
+            installedBadge.textContent = installed.count;
+            installedBadge.style.display = 'inline-block';
+        } else {
+            installedBadge.style.display = 'none';
+        }
+    }
+    
+    // Available Packages badge (shows validation count, can be dismissed)
+    const availableBadge = document.getElementById('availablePackagesBadge');
+    if (availableBadge) {
+        if (validation.count > 0 && !validation.dismissed) {
+            availableBadge.textContent = validation.count;
+            availableBadge.style.display = 'inline-block';
+        } else {
+            availableBadge.style.display = 'none';
+        }
+    }
+    
+    // Updates badge (can be dismissed)
+    const updatesBadge = document.getElementById('updatesBadge');
+    if (updatesBadge) {
+        if (updates.count > 0 && !updates.dismissed) {
+            updatesBadge.textContent = updates.count;
+            updatesBadge.style.display = 'inline-block';
+        } else {
+            updatesBadge.style.display = 'none';
+        }
+    }
+}
+
 // Dismiss a package alert
 async function dismissPackageAlert(alertType) {
     try {
@@ -4077,12 +4114,34 @@ async function dismissPackageAlert(alertType) {
         const result = await response.json();
         
         if (result.success) {
-            // Fade out and remove the alert
+            // Fade out and remove the alert banner
             const alert = document.querySelector(`.package-alert[data-alert-type="${alertType}"]`);
             if (alert) {
                 alert.classList.add('hiding');
                 setTimeout(() => alert.remove(), 300);
             }
+            
+            // Update badges to hide dismissed alerts
+            if (alertType === 'package_validation') {
+                const badge = document.getElementById('availablePackagesBadge');
+                if (badge) badge.style.display = 'none';
+            } else if (alertType === 'package_updates') {
+                const badge = document.getElementById('updatesBadge');
+                if (badge) badge.style.display = 'none';
+            }
+            
+            // Update sidebar badge
+            const sidebarBadge = document.getElementById('sidebarPackageBadge');
+            if (sidebarBadge) {
+                const currentCount = parseInt(sidebarBadge.textContent) || 0;
+                const newCount = currentCount - 1;
+                if (newCount > 0) {
+                    sidebarBadge.textContent = newCount;
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
+            }
+            
             showMessage('Alert dismissed for 7 days', 'success');
         }
     } catch (error) {

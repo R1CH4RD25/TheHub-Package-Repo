@@ -250,7 +250,10 @@ $users = $userModel->getAll();
                     <div class="tab-content-scroll">
                         <!-- Package Sub-tabs -->
                         <div class="user-subtabs">
-                            <button class="subtab-btn active" data-subtab="installed-packages">Installed Packages</button>
+                            <button class="subtab-btn active" data-subtab="installed-packages">
+                                Installed Packages
+                                <span class="notification-badge" id="installedPackagesBadge" style="display: none;"></span>
+                            </button>
                             <button class="subtab-btn" data-subtab="available-packages">
                                 Available Packages
                                 <span class="notification-badge" id="availablePackagesBadge" style="display: none;"></span>

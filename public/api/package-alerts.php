@@ -21,6 +21,15 @@ switch ($action) {
              LIMIT 10"
         );
         
+        // Count installed packages (validated and can_install = 1)
+        $installedResult = $db->fetchOne(
+            "SELECT COUNT(*) as count FROM section_packages 
+             WHERE is_deprecated = 0 
+             AND validation_status = 'valid' 
+             AND can_install = 1"
+        );
+        $installedCount = $installedResult['count'] ?? 0;
+        
         // Count available updates (for now, just count deprecated as needing updates)
         $updateResult = $db->fetchOne(
             "SELECT COUNT(*) as count FROM section_packages 
@@ -50,6 +59,9 @@ switch ($action) {
                     'count' => count($pendingPackages),
                     'packages' => $pendingPackages,
                     'dismissed' => !empty($dismissedValidation)
+                ],
+                'installed' => [
+                    'count' => $installedCount
                 ],
                 'updates' => [
                     'count' => $updateCount,
