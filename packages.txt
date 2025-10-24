@@ -1,0 +1,219 @@
+# The Hub - System Package Requirements
+# This file lists all system packages needed for installation
+# Use with your package manager (apt, yum, dnf, etc.)
+
+# ============================================
+# UBUNTU/DEBIAN INSTALLATION
+# ============================================
+# Run these commands to install all requirements:
+
+# Update package list
+# sudo apt update
+
+# Web Server (choose one)
+# apache2                    # Apache HTTP Server 2.4+
+# nginx                      # Nginx 1.18+ (alternative)
+
+# Database
+# mariadb-server             # MariaDB 10.5+ (recommended)
+# mariadb-client
+# mysql-server               # MySQL 8.0+ (alternative)
+# mysql-client
+
+# PHP 8.0+ and Extensions
+# php8.1                     # PHP 8.1 (or php8.0, php8.2)
+# php8.1-cli
+# php8.1-fpm
+# php8.1-mysql               # PDO MySQL driver
+# php8.1-mbstring            # Multibyte string support
+# php8.1-xml                 # XML processing
+# php8.1-curl                # HTTP client (OAuth)
+# php8.1-zip                 # ZIP archive handling
+# php8.1-gd                  # Image processing
+# php8.1-intl                # Internationalization
+# php8.1-bcmath              # Precision math
+
+# Apache modules (if using Apache)
+# libapache2-mod-php8.1      # PHP module for Apache
+
+# SSL/TLS
+# certbot                    # Let's Encrypt SSL certificates
+# python3-certbot-apache     # Certbot Apache plugin
+# python3-certbot-nginx      # Certbot Nginx plugin (if using Nginx)
+
+# Version Control
+# git                        # Git version control
+
+# Utilities
+# curl                       # Command-line HTTP client
+# wget                       # File downloader
+# unzip                      # ZIP extraction
+# nano                       # Text editor (or vim)
+
+# ============================================
+# UBUNTU/DEBIAN - ONE-LINE INSTALL
+# ============================================
+# Copy and paste this command:
+
+# sudo apt update && sudo apt install -y \
+#   apache2 \
+#   mariadb-server mariadb-client \
+#   php8.1 php8.1-cli php8.1-fpm php8.1-mysql php8.1-mbstring php8.1-xml \
+#   php8.1-curl php8.1-zip php8.1-gd php8.1-intl php8.1-bcmath \
+#   libapache2-mod-php8.1 \
+#   certbot python3-certbot-apache \
+#   git curl wget unzip nano
+
+# ============================================
+# CENTOS/RHEL/ROCKY/ALMA INSTALLATION
+# ============================================
+
+# Web Server (choose one)
+# httpd                      # Apache HTTP Server 2.4+
+# nginx                      # Nginx 1.18+ (alternative)
+
+# Database
+# mariadb-server             # MariaDB 10.5+
+# mariadb                    # MariaDB client
+# mysql-server               # MySQL 8.0+ (alternative)
+# mysql                      # MySQL client
+
+# PHP 8.0+ and Extensions
+# php                        # PHP 8.0+
+# php-cli
+# php-fpm
+# php-mysqlnd                # PDO MySQL driver
+# php-mbstring               # Multibyte string support
+# php-xml                    # XML processing
+# php-curl                   # HTTP client (OAuth)
+# php-zip                    # ZIP archive handling
+# php-gd                     # Image processing
+# php-intl                   # Internationalization
+# php-bcmath                 # Precision math
+# php-json                   # JSON handling
+
+# SSL/TLS
+# certbot                    # Let's Encrypt SSL certificates
+# python3-certbot-apache     # Certbot Apache plugin
+# python3-certbot-nginx      # Certbot Nginx plugin (if using Nginx)
+
+# Version Control
+# git                        # Git version control
+
+# Utilities
+# curl                       # Command-line HTTP client
+# wget                       # File downloader
+# unzip                      # ZIP extraction
+# nano                       # Text editor (or vim)
+
+# ============================================
+# CENTOS/RHEL/ROCKY/ALMA - ONE-LINE INSTALL
+# ============================================
+
+# sudo dnf install -y \
+#   httpd \
+#   mariadb-server mariadb \
+#   php php-cli php-fpm php-mysqlnd php-mbstring php-xml \
+#   php-curl php-zip php-gd php-intl php-bcmath php-json \
+#   certbot python3-certbot-apache \
+#   git curl wget unzip nano
+
+# ============================================
+# COMPOSER (PHP Dependency Manager)
+# ============================================
+# Install globally (all Linux distributions):
+
+# curl -sS https://getcomposer.org/installer | php
+# sudo mv composer.phar /usr/local/bin/composer
+# sudo chmod +x /usr/local/bin/composer
+
+# Verify:
+# composer --version
+
+# ============================================
+# VERIFICATION COMMANDS
+# ============================================
+
+# Check installed versions:
+# php -v                     # Should show 8.0 or higher
+# mysql --version            # Should show MariaDB 10.5+ or MySQL 8.0+
+# apache2 -v                 # Should show Apache 2.4+ (or nginx -v)
+# composer --version         # Should show 2.0+
+# git --version              # Should show 2.0+
+
+# Check PHP extensions:
+# php -m | grep -E 'pdo_mysql|mbstring|xml|curl|zip|gd|intl|bcmath'
+
+# Check services:
+# sudo systemctl status apache2    # or nginx
+# sudo systemctl status mariadb    # or mysqld
+
+# ============================================
+# POST-INSTALLATION STEPS
+# ============================================
+
+# 1. Enable Apache modules (Ubuntu/Debian):
+# sudo a2enmod rewrite ssl headers
+# sudo systemctl restart apache2
+
+# 2. Secure MariaDB/MySQL:
+# sudo mysql_secure_installation
+
+# 3. Start and enable services:
+# sudo systemctl enable apache2    # or nginx
+# sudo systemctl enable mariadb    # or mysqld
+# sudo systemctl start apache2
+# sudo systemctl start mariadb
+
+# 4. Configure firewall:
+# Ubuntu/Debian:
+#   sudo ufw allow 80/tcp
+#   sudo ufw allow 443/tcp
+#   sudo ufw allow 22/tcp
+#   sudo ufw enable
+#
+# CentOS/RHEL:
+#   sudo firewall-cmd --permanent --add-service=http
+#   sudo firewall-cmd --permanent --add-service=https
+#   sudo firewall-cmd --permanent --add-service=ssh
+#   sudo firewall-cmd --reload
+
+# ============================================
+# OPTIONAL PACKAGES
+# ============================================
+
+# Development tools:
+# vim                        # Advanced text editor
+# htop                       # System monitor
+# rsync                      # File synchronization
+# screen                     # Terminal multiplexer
+# tmux                       # Terminal multiplexer (alternative)
+
+# Performance monitoring:
+# php8.1-apcu                # PHP opcode cache
+# memcached                  # Memory caching
+# redis-server               # Redis caching (alternative)
+
+# Backup tools:
+# mysqldump                  # MySQL backup (usually included with mysql-client)
+# rsnapshot                  # Filesystem snapshot backup
+# borgbackup                 # Deduplicating backup
+
+# ============================================
+# MINIMUM VERSIONS REQUIRED
+# ============================================
+# PHP:        8.0 or higher
+# MariaDB:    10.5 or higher (OR MySQL 8.0+)
+# Apache:     2.4 or higher (OR Nginx 1.18+)
+# Composer:   2.0 or higher
+# Git:        2.0 or higher
+# SSL/TLS:    TLS 1.2 or higher
+
+# ============================================
+# NOTES
+# ============================================
+# - This is a PHP application, not Python
+# - No Python packages required
+# - All dependencies managed by Composer (see composer.json)
+# - System packages only (web server, database, PHP)
+# - After installing system packages, run: composer install

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSS Diagnostic</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test-container { border: 2px solid #000; padding: 20px; margin: 20px 0; }
+        .test-tab { display: none; border: 2px solid blue; padding: 10px; margin: 10px; }
+        .test-tab.active { display: block; }
+        .test-subtab { display: none; border: 2px solid green; padding: 10px; margin: 10px; }
+        .test-subtab.active { display: block; }
+        .test-footer { position: relative; background: yellow; padding: 10px; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>CSS Display Test</h1>
+    
+    <div class="test-container">
+        <h2>Tab 1 (Active)</h2>
+        <div class="test-tab active">
+            <p>This is Tab 1 content - should be visible</p>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Tab 2 (Inactive - should be hidden)</h2>
+        <div class="test-tab">
+            <p>This is Tab 2 content - should be HIDDEN</p>
+            <div class="test-subtab">
+                <p>Subtab content - should be HIDDEN</p>
+                <div class="test-footer">
+                    Footer in hidden subtab - should be HIDDEN
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('Tab 1 display:', window.getComputedStyle(document.querySelector('.test-container:nth-child(2) .test-tab')).display);
+        console.log('Tab 2 display:', window.getComputedStyle(document.querySelector('.test-container:nth-child(3) .test-tab')).display);
+        console.log('Hidden subtab display:', window.getComputedStyle(document.querySelector('.test-subtab')).display);
+        console.log('Hidden footer display:', window.getComputedStyle(document.querySelector('.test-footer')).display);
+    </script>
+</body>
+</html>

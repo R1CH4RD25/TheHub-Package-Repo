@@ -1,0 +1,131 @@
+/* ==========================================================================
+   HUB PAGE STYLES
+   Landing page with section tiles
+   ========================================================================== */
+
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+}
+
+/* Hub Container */
+.hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* Hub Header */
+.hub-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.hub-header-icon {
+    font-size: 4rem;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.hub-header h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--hub-title-color, #000);
+}
+
+.hub-header p {
+    font-size: 1.2rem;
+    color: var(--hub-subtitle-color, #666);
+}
+
+/* Sections Grid */
+.sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* Section Cards */
+.section-card {
+    background: var(--hub-tile-bg, white);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--hub-tile-text, #333);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.section-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.section-card:hover::before {
+    transform: scaleX(1);
+}
+
+.section-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--hub-tile-text, #333);
+}
+
+.section-description {
+    font-size: 0.95rem;
+    color: var(--text-muted, #666);
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+/* No Sections Message */
+.no-sections {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 12px;
+    color: #666;
+}
+
+.no-sections h3 {
+    color: var(--hub-tile-text, #333);
+    margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVE
+   ========================================================================== */
+@media (max-width: 768px) {
+    .hub-header h1 {
+        font-size: 2rem;
+    }
+    
+    .sections-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}

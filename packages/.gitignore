@@ -1,0 +1,14 @@
+# Ignore temporary files
+temp/*
+!temp/.gitkeep
+
+# Ignore imported packages (may contain sensitive data)
+imported/*.hubpkg
+
+# Keep marketplace cache but ignore downloaded packages
+marketplace/*.hubpkg
+!marketplace/index.json
+
+# Local packages are kept (user's own exports)
+# Comment this line if you want to commit local packages to git:
+# local/*.hubpkg

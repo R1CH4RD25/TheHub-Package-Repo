@@ -1,0 +1,368 @@
+                        <!-- Colors & Theme Subtab - COMPACT VERSION -->
+                        <div id="subtab-colors" class="user-subtab">
+                            
+                            <!-- Main Theme Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        <span>🎨</span> Main Theme Colors
+                                        <span class="color-section-badge">4</span>
+                                    </h3>
+                                    <span class="color-section-toggle">▼</span>
+                                </div>
+                                <div class="color-section-body">
+                                    <div class="color-section-content">
+                                        <div class="color-grid">
+                                            <div class="color-item">
+                                                <label>Primary Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="primaryColor" value="#C99700">
+                                                    <input type="text" id="primaryColorHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Links, active states, focus rings</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Navbar Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="navbarColor" value="#000000">
+                                                    <input type="text" id="navbarColorHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Top navigation bar</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Page Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="backgroundColor" value="#FFFFFF">
+                                                    <input type="text" id="backgroundColorHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                                <small>Main content area</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Accent Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="accentColor" value="#FFD700">
+                                                    <input type="text" id="accentColorHex" value="#FFD700" maxlength="7">
+                                                </div>
+                                                <small>Hover highlights</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Text Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        <span>📝</span> Text Colors
+                                        <span class="color-section-badge">6</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="color-grid-compact">
+                                            <div class="color-item">
+                                                <label>Primary Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textPrimary" value="#111827">
+                                                    <input type="text" id="textPrimaryHex" value="#111827" maxlength="7">
+                                                </div>
+                                                <small>Main headings & body</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Secondary Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textSecondary" value="#374151">
+                                                    <input type="text" id="textSecondaryHex" value="#374151" maxlength="7">
+                                                </div>
+                                                <small>Subheadings</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Muted Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textMuted" value="#6B7280">
+                                                    <input type="text" id="textMutedHex" value="#6B7280" maxlength="7">
+                                                </div>
+                                                <small>Helper text</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Disabled Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textDisabled" value="#D1D5DB">
+                                                    <input type="text" id="textDisabledHex" value="#D1D5DB" maxlength="7">
+                                                </div>
+                                                <small>Inactive elements</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Inverse Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textInverse" value="#FFFFFF">
+                                                    <input type="text" id="textInverseHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                                <small>Text on dark backgrounds</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Link Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="linkColor" value="#3B82F6">
+                                                    <input type="text" id="linkColorHex" value="#3B82F6" maxlength="7">
+                                                </div>
+                                                <small>Hyperlinks</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Button Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        <span>🔘</span> Button Colors
+                                        <span class="color-section-badge">9</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Primary Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonPrimaryBg" value="#C99700">
+                                                    <input type="text" id="buttonPrimaryBgHex" value="#C99700" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Primary Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonPrimaryText" value="#FFFFFF">
+                                                    <input type="text" id="buttonPrimaryTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Secondary Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSecondaryBg" value="#6B7280">
+                                                    <input type="text" id="buttonSecondaryBgHex" value="#6B7280" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Secondary Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSecondaryText" value="#FFFFFF">
+                                                    <input type="text" id="buttonSecondaryTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Danger Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonDangerBg" value="#DC2626">
+                                                    <input type="text" id="buttonDangerBgHex" value="#DC2626" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Danger Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonDangerText" value="#FFFFFF">
+                                                    <input type="text" id="buttonDangerTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Success Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSuccessBg" value="#059669">
+                                                    <input type="text" id="buttonSuccessBgHex" value="#059669" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Success Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSuccessText" value="#FFFFFF">
+                                                    <input type="text" id="buttonSuccessTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-item">
+                                            <label>Unsaved Changes Glow</label>
+                                            <div class="color-input-group">
+                                                <input type="color" id="unsavedChangesGlowColor" value="#C99700">
+                                                <input type="text" id="unsavedChangesGlowColorHex" value="#C99700" maxlength="7">
+                                            </div>
+                                            <small>Save button glow animation</small>
+                                        </div>
+                                        
+                                        <div class="color-preview-bar">
+                                            <button class="btn btn-primary" style="pointer-events: none;">Primary</button>
+                                            <button class="btn btn-secondary" style="pointer-events: none;">Secondary</button>
+                                            <button class="btn btn-danger" style="pointer-events: none;">Danger</button>
+                                            <button class="btn btn-success" style="pointer-events: none;">Success</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Role Badge Colors - Collapsible section with all 6 roles -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        <span>👥</span> Role Badge Colors
+                                        <span class="color-section-badge">12</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <!-- Staff -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="staffBadgePreview" style="background: #e0e7ff; color: #3730a3;">Staff</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleStaffBg" value="#E0E7FF">
+                                                        <input type="text" id="roleStaffBgHex" value="#E0E7FF" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleStaffText" value="#3730A3">
+                                                        <input type="text" id="roleStaffTextHex" value="#3730A3" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Maintenance -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="maintenanceBadgePreview" style="background: #fef3c7; color: #92400e;">Maintenance</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceBg" value="#FEF3C7">
+                                                        <input type="text" id="roleMaintenanceBgHex" value="#FEF3C7" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceText" value="#92400E">
+                                                        <input type="text" id="roleMaintenanceTextHex" value="#92400E" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Maintenance Director -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="directorBadgePreview" style="background: #fed7aa; color: #9a3412;">Maintenance Director</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceDirectorBg" value="#FED7AA">
+                                                        <input type="text" id="roleMaintenanceDirectorBgHex" value="#FED7AA" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceDirectorText" value="#9A3412">
+                                                        <input type="text" id="roleMaintenanceDirectorTextHex" value="#9A3412" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Manager -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="managerBadgePreview" style="background: #ddd6fe; color: #5b21b6;">Manager</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleManagerBg" value="#DDD6FE">
+                                                        <input type="text" id="roleManagerBgHex" value="#DDD6FE" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleManagerText" value="#5B21B6">
+                                                        <input type="text" id="roleManagerTextHex" value="#5B21B6" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Admin -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="adminBadgePreview" style="background: #fce7f3; color: #9f1239;">Admin</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleAdminBg" value="#FCE7F3">
+                                                        <input type="text" id="roleAdminBgHex" value="#FCE7F3" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleAdminText" value="#9F1239">
+                                                        <input type="text" id="roleAdminTextHex" value="#9F1239" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Super Admin -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="superAdminBadgePreview" style="background: #fee2e2; color: #991b1b;">Super Admin</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleSuperAdminBg" value="#FEE2E2">
+                                                        <input type="text" id="roleSuperAdminBgHex" value="#FEE2E2" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleSuperAdminText" value="#991B1B">
+                                                        <input type="text" id="roleSuperAdminTextHex" value="#991B1B" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- More compact sections would go here for Borders, Backgrounds, Status Colors, etc. -->
+                            <!-- I'll create these as needed based on feedback -->
+                            
+                        </div>
+                        <!-- End subtab-colors -->

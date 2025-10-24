@@ -1,0 +1,51 @@
+Cleanup Backup Manifest
+Created: Wed Oct 22 03:47:11 PM UTC 2025
+======================
+
+This backup contains 38 files that were removed during cleanup.
+
+To restore all files:
+  ./cleanup-safe.sh --restore
+
+To permanently delete this backup after verifying everything works:
+  rm -rf .cleanup-backup-20251022-154710
+
+Files in this backup:
+ADVANCED_SETTINGS_ENHANCED.md
+ADVANCED_SETTINGS_IMPLEMENTATION.md
+cleanup-report.json
+cleanup.sh
+cli/cleanup-analyzer.py
+cli/migrate-additional-badges.php
+cli/migrate-complete-color-system.php
+cli/migrate-env.php
+cli/migrate-role-badge-colors.php
+cli/recreate-all-themes.php
+cli/test-email.php
+cli/test-themes.php
+CSS_BUILD_IMPLEMENTATION.md
+docs/ADVANCED_SETTINGS.md
+docs/CASCADING_DEPENDENCIES_INDEX.md
+docs/CASCADING_DEPENDENCIES_SUMMARY.md
+docs/CASCADING_DEPENDENCIES_VISUAL.md
+docs/CENTRALIZED_ROLES_IMPLEMENTATION.md
+docs/COLOR_SYSTEM_AUDIT.md
+docs/COLOR_SYSTEM_COMPLETE.md
+docs/CSS_BUILD_SYSTEM.md
+docs/CSS_DATABASE_INTEGRATION.md
+docs/CSS_MINIFICATION.md
+docs/HUB_COLOR_CUSTOMIZATION.md
+docs/ROLE_BADGES_REFERENCE.md
+docs/SECTION_TYPES_IMPLEMENTATION.md
+IMPLEMENTATION_SUMMARY.md
+MIGRATION_CHECKLIST.md
+MIGRATION_STATUS.md
+NAMESPACE_MIGRATION.md
+PROJECT_SUMMARY.md
+public/test.php
+RESPONSIVE_IMPLEMENTATION.md
+test-groups.php
+THEME_SAVING_IMPLEMENTATION.md
+THEME_SYSTEM_FIXES.md
+THEME_SYSTEM_REFACTOR.md
+UPGRADING.md

@@ -1,0 +1,399 @@
+/* ==========================================================================
+   MODERN HUB STYLES - Enhanced with animations and effects
+   ========================================================================== */
+
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header first-load animation - only on initial page load */
+.navbar {
+    transform-origin: top;
+}
+
+/* Animate only if not already shown in this session */
+html:not(.animations-played) .navbar {
+    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+html.animations-played .navbar {
+    opacity: 1;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Footer first-load animation */
+html:not(.animations-played) .admin-footer,
+html:not(.animations-played) footer {
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+html.animations-played .admin-footer,
+html.animations-played footer {
+    opacity: 1;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animated particle background */
+.hub-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(201, 151, 0, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(201, 151, 0, 0.05) 0%, transparent 50%);
+    z-index: 0;
+    animation: backgroundPulse 10s ease-in-out infinite;
+}
+
+@keyframes backgroundPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Hub Container */
+.hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hub Header - Enhanced with animations */
+.hub-header {
+    text-align: center;
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hub-header-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    line-height: 1;
+    animation: bounceIn 1s ease-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.hub-header h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--hub-title-color, #000);
+    font-weight: 800;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+.hub-header p {
+    font-size: 1.2rem;
+    color: var(--hub-subtitle-color, #666);
+    animation: slideInLeft 0.8s ease-out 0.4s both;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Sections Grid - Staggered animation */
+.sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* Section Cards - Modern glassmorphism design */
+.section-card {
+    background: var(--hub-tile-bg, rgba(255, 255, 255, 0.95));
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 35px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--hub-tile-text, #333);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 
+        0 4px 20px rgba(0,0,0,0.08),
+        0 0 0 1px rgba(0,0,0,0.05);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Staggered animation for cards */
+.section-card:nth-child(1) { animation-delay: 0.1s; }
+.section-card:nth-child(2) { animation-delay: 0.2s; }
+.section-card:nth-child(3) { animation-delay: 0.3s; }
+.section-card:nth-child(4) { animation-delay: 0.4s; }
+.section-card:nth-child(5) { animation-delay: 0.5s; }
+.section-card:nth-child(6) { animation-delay: 0.6s; }
+.section-card:nth-child(7) { animation-delay: 0.7s; }
+.section-card:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Gradient border on top */
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--gold-gradient, linear-gradient(90deg, #C99700 0%, #FFD700 100%));
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    border-radius: 20px 20px 0 0;
+}
+
+/* Animated background gradient */
+.section-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(201, 151, 0, 0.03) 0%, 
+        rgba(255, 215, 0, 0.03) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 20px;
+    z-index: 0;
+}
+
+.section-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(201, 151, 0, 0.2),
+        0 0 0 1px rgba(201, 151, 0, 0.1);
+}
+
+.section-card:hover::before {
+    transform: scaleX(1);
+    animation: gradientSlide 2s linear infinite;
+}
+
+@keyframes gradientSlide {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.section-card:hover::after {
+    opacity: 1;
+}
+
+/* Section Icon - 3D tilt effect ready */
+.section-icon {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+    display: block;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s ease;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+.section-card:hover .section-icon {
+    transform: scale(1.1) rotateZ(-5deg);
+    animation: iconBounce 0.6s ease;
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: scale(1.1) rotateZ(-5deg); }
+    50% { transform: scale(1.2) rotateZ(5deg); }
+}
+
+/* Section Title - Enhanced typography */
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--hub-tile-text, #333);
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+.section-card:hover .section-title {
+    color: var(--primary-color, #C99700);
+    animation: titlePulse 0.6s ease;
+}
+
+@keyframes titlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Section Description */
+.section-description {
+    font-size: 0.95rem;
+    color: var(--text-muted, #666);
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+.section-card:hover .section-description {
+    color: #555;
+}
+
+/* Empty state */
+.no-sections {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.no-sections h3 {
+    color: var(--primary-color, #C99700);
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.no-sections p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hub-header h1 {
+        font-size: 2rem;
+    }
+    
+    .hub-header p {
+        font-size: 1rem;
+    }
+    
+    .sections-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .section-card {
+        padding: 25px;
+    }
+    
+    .section-icon {
+        font-size: 3.5rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .section-card {
+        background: rgba(30, 30, 30, 0.95);
+        color: #fff;
+    }
+    
+    .section-title {
+        color: #fff;
+    }
+    
+    .section-description {
+        color: #aaa;
+    }
+}
+
+/* Loading animation (can be triggered via JS) */
+.hub-loading {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+/* Add pulse effect to cards on page load */
+@keyframes cardPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Success state animation */
+.section-card.clicked {
+    animation: cardClick 0.3s ease;
+}
+
+@keyframes cardClick {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+}

@@ -1,0 +1,1724 @@
+<?php
+
+require_once __DIR__ . '/../../src/bootstrap.php';
+
+use WoodsonISD\Maintenance\Auth;
+use WoodsonISD\Maintenance\Database;
+use WoodsonISD\Maintenance\Vehicle;
+use WoodsonISD\Maintenance\User;
+use WoodsonISD\Maintenance\Roles;
+use WoodsonISD\Maintenance\SiteSettings;
+use WoodsonISD\Maintenance\Layout;
+
+// Allow access to maintenance_director and above
+Auth::requireRole(['super_admin', 'admin', 'manager', 'maintenance_director']);
+
+$db = Database::getInstance();
+$vehicleModel = new Vehicle();
+$userModel = new User();
+
+$user = Auth::getCurrentUser();
+$userRole = Auth::getEffectiveRole();
+$isSuperAdmin = Auth::isSuperAdmin();
+$canManageVehicles = Auth::canManageVehicles();
+$canManageUsers = Auth::canManageUsers();
+
+// Onion Layer Access Control
+$canSeeFuelRecords = in_array($userRole, ['super_admin', 'admin', 'maintenance_director']);
+$canSeeVehicles = in_array($userRole, ['super_admin', 'admin', 'maintenance_director']);
+$canSeeUserManagement = in_array($userRole, ['super_admin', 'admin']);
+$canSeeSectionAccess = in_array($userRole, ['super_admin', 'admin']);
+$canSeeManageSections = ($userRole === 'super_admin');
+$canSeeExport = in_array($userRole, ['super_admin', 'admin', 'maintenance_director']);
+
+// Get data for dropdowns
+$vehicles = $vehicleModel->getAll(true);
+$tripPurposes = $db->fetchAll("SELECT * FROM trip_purposes ORDER BY sort_order");
+$users = $userModel->getAll();
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?php Layout::renderHead('Admin Dashboard - ' . SiteSettings::get('organization_name', 'Woodson ISD') . "'s " . SiteSettings::get('site_name', 'The Hub'), 'dashboard'); ?>
+</head>
+<body>
+    <!-- Hamburger Menu Button (Mobile/Tablet) -->
+    <button class="hamburger-menu" aria-label="Toggle menu" style="display: none;">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
+    <!-- Sidebar Overlay (Mobile/Tablet) -->
+    <div class="sidebar-overlay"></div>
+    
+    <div class="page-wrapper">
+        <?php include __DIR__ . '/../partials/header.php'; ?>
+
+        <!-- Content -->
+        <div class="admin-container">
+        <div class="admin-sidebar">
+            <ul class="admin-menu">
+                <?php if ($canSeeUserManagement): ?>
+                <li><a href="#" data-tab="users" class="active">User Management</a></li>
+                <?php endif; ?>
+                <?php if ($canSeeVehicles): ?>
+                <li><a href="#" data-tab="vehicles">Vehicles</a></li>
+                <?php endif; ?>
+                <?php if ($canSeeSectionAccess || $canSeeManageSections): ?>
+                <li><a href="#" data-tab="sections">Sections</a></li>
+                <?php endif; ?>
+                <?php if ($isSuperAdmin): ?>
+                <li><a href="#" data-tab="site-settings">Site Settings</a></li>
+                <li><a href="#" data-tab="logs">Activity Logs</a></li>
+                <?php endif; ?>
+                <?php if ($canSeeExport): ?>
+                <li><a href="#" data-tab="export">Export Data</a></li>
+                <?php endif; ?>
+            </ul>
+        </div>
+
+        <div class="admin-content">
+            <!-- Users Tab (with sub-tabs) -->
+            <div id="tab-users" class="admin-tab active">
+                <div class="tab-header">
+                    <h1>User Management</h1>
+                    <div class="tab-actions">
+                        <button id="sendInvitation" class="btn btn-primary">Send Invitation</button>
+                    </div>
+                </div>
+
+                <div class="tab-content-scroll">
+                    <!-- User Sub-tabs -->
+                    <div class="user-subtabs">
+                    <button class="subtab-btn active" data-subtab="active-users">Active Users</button>
+                    <button class="subtab-btn" data-subtab="pending-users">Pending Approvals</button>
+                    <button class="subtab-btn" data-subtab="invitations">Invitations</button>
+                    <?php if ($isSuperAdmin): ?>
+                    <button class="subtab-btn" data-subtab="role-management">Role Management</button>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Active Users Subtab -->
+                <div id="subtab-active-users" class="user-subtab active">
+                    <div id="usersTable" class="data-table-container">
+                        Loading...
+                    </div>
+                </div>
+
+                <!-- Pending Users Subtab -->
+                <div id="subtab-pending-users" class="user-subtab">
+                    <div id="pendingTable" class="data-table-container">
+                        Loading...
+                    </div>
+                </div>
+
+                <!-- Invitations Subtab -->
+                <div id="subtab-invitations" class="user-subtab">
+                    <div id="invitationsTable" class="data-table-container">
+                        Loading...
+                    </div>
+                </div>
+
+                <!-- Role Management Subtab (Super Admin Only) -->
+                <?php if ($isSuperAdmin): ?>
+                <div id="subtab-role-management" class="user-subtab">
+                    <div class="role-management">
+                        <p class="info-text">
+                            <strong>🎭 Role Management:</strong> Enable or disable roles system-wide. 
+                            Inactive roles are hidden from all dropdowns, section access, and user assignment forms.
+                            <span style="color: #d32f2f; font-weight: 600;">⚠️ Cannot disable Super Admin or Staff roles (core system roles).</span>
+                        </p>
+
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px;">Status</th>
+                                        <th style="min-width: 200px;">Role</th>
+                                        <th style="min-width: 250px;">Description</th>
+                                        <th style="width: 100px; text-align: center;">Hierarchy</th>
+                                        <th style="width: 120px; text-align: center;">Active Users</th>
+                                        <th style="min-width: 200px;">Notes</th>
+                                        <th style="width: 120px; text-align: center;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rolesManagementTableBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 40px;">
+                                            Loading roles...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="info-panel" style="margin-top: 2rem; padding: 1.5rem; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 8px;">
+                            <h3 style="margin: 0 0 1rem 0; color: #1e40af; font-size: 1.1rem;">💡 How to Add New Roles</h3>
+                            <p style="margin: 0 0 0.75rem 0;">Roles are defined in the codebase for security and consistency. To add a new role:</p>
+                            <ol style="margin: 0; padding-left: 1.5rem;">
+                                <li style="margin-bottom: 0.5rem;">Edit <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">/src/Roles.php</code> and add your role to the <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">getAll()</code> method</li>
+                                <li style="margin-bottom: 0.5rem;">Set a unique <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">value</code>, descriptive <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">label</code>, and appropriate <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">hierarchy</code> (1-100)</li>
+                                <li style="margin-bottom: 0.5rem;">Run database migration: <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">php cli/migrate.php</code></li>
+                                <li>Refresh this page - your new role will appear above and can be assigned to users</li>
+                            </ol>
+                            <p style="margin: 1rem 0 0 0; font-size: 0.9rem; color: #64748b;"><strong>Note:</strong> Higher hierarchy numbers = more permissions. Super Admin (100) has the highest level.</p>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+                </div><!-- end tab-content-scroll -->
+            </div>
+
+            <!-- Vehicles Tab (with sub-tabs) -->
+            <div id="tab-vehicles" class="admin-tab">
+                <div class="tab-header">
+                    <h1>Vehicles & Fuel</h1>
+                    <div class="tab-actions">
+                        <button id="addVehicle" class="btn btn-primary">+ Add Vehicle</button>
+                    </div>
+                </div>
+
+                <div class="tab-content-scroll">
+                    <!-- Vehicle Sub-tabs -->
+                    <div class="user-subtabs">
+                    <button class="subtab-btn active" data-subtab="vehicles-list">Vehicles</button>
+                    <button class="subtab-btn" data-subtab="fuel-records">Fuel Records</button>
+                </div>
+
+                <!-- Vehicles List Subtab -->
+                <div id="subtab-vehicles-list" class="user-subtab active">
+                    <div id="vehiclesTable" class="data-table-container">
+                        Loading...
+                    </div>
+                </div>
+
+                <!-- Fuel Records Subtab -->
+                <div id="subtab-fuel-records" class="user-subtab">
+                    <div class="filters">
+                        <input type="date" id="filterStartDate" placeholder="Start Date">
+                        <input type="date" id="filterEndDate" placeholder="End Date">
+                        <select id="filterVehicle">
+                            <option value="">All Vehicles</option>
+                            <?php foreach ($vehicles as $v): ?>
+                                <option value="<?php echo $v['id']; ?>"><?php echo e($v['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <select id="filterPurpose">
+                            <option value="">All Purposes</option>
+                            <?php foreach ($tripPurposes as $p): ?>
+                                <option value="<?php echo e($p['code']); ?>"><?php echo e($p['code']); ?> - <?php echo e($p['description']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+                        <button id="clearFilters" class="btn btn-secondary">Clear</button>
+                    </div>
+
+                    <div id="recordsTable" class="data-table-container">
+                        Loading...
+                    </div>
+                </div>
+                </div><!-- end tab-content-scroll -->
+            </div>
+
+            <!-- Sections Tab (with sub-tabs) -->
+            <div id="tab-sections" class="admin-tab">
+                <div class="tab-header">
+                    <h1>Sections</h1>
+                    <div class="tab-actions">
+                        <?php if ($canSeeSectionAccess): ?>
+                        <button id="saveSectionAccessBtn" class="btn btn-primary" style="display: none;">Save All Changes</button>
+                        <?php endif; ?>
+                        <?php if ($isSuperAdmin): ?>
+                        <button id="addSection" class="btn btn-primary" style="<?php echo $canSeeSectionAccess ? 'display: none;' : ''; ?>">+ Add New Section</button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="tab-content-scroll">
+                    <!-- Sections Sub-tabs -->
+                    <div class="user-subtabs">
+                    <?php if ($canSeeSectionAccess): ?>
+                    <button class="subtab-btn active" data-subtab="section-access">Section Access</button>
+                    <?php endif; ?>
+                    <?php if ($isSuperAdmin): ?>
+                    <button class="subtab-btn <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>" data-subtab="manage-sections">Manage Sections</button>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Section Access Subtab -->
+                <?php if ($canSeeSectionAccess): ?>
+                <div id="subtab-section-access" class="user-subtab active">
+                    <div class="section-access-container">
+                        <p class="info-text">
+                            <strong>🔐 Role-Based Section Access:</strong> Grant access to entire <strong>roles</strong> instead of individual users. 
+                            Anyone with a checked role will automatically see that section. Super Admins always have access to everything.
+                        </p>
+
+                        <div class="section-access-grid">
+                            <div id="sectionAccessTable">
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Manage Sections Subtab (Super Admin Only) -->
+                <?php if ($isSuperAdmin): ?>
+                <div id="subtab-manage-sections" class="user-subtab <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>">
+                    <div class="sections-management">
+                        <p class="info-text">
+                            <strong>Future-Proofing:</strong> Create new sections seamlessly and toggle them on/off. 
+                            Inactive sections are hidden from ALL users, including admins.
+                        </p>
+
+                        <div id="sectionsManagementTable">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+                </div><!-- end tab-content-scroll -->
+            </div>
+
+            <!-- Export Tab -->
+            <div id="tab-export" class="admin-tab">
+                <div class="tab-header">
+                    <h1>Export Data</h1>
+                </div>
+                <div class="tab-content-scroll">
+                    <div class="export-form">
+                    <h3>Export Fuel Records</h3>
+                    <div class="form-group">
+                        <label>Date Range</label>
+                        <input type="date" id="exportStartDate">
+                        <span>to</span>
+                        <input type="date" id="exportEndDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle</label>
+                        <select id="exportVehicle">
+                            <option value="">All Vehicles</option>
+                            <?php foreach ($vehicles as $v): ?>
+                                <option value="<?php echo $v['id']; ?>"><?php echo e($v['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Format</label>
+                        <select id="exportFormat">
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel (XLSX)</option>
+                        </select>
+                    </div>
+                    <button id="exportData" class="btn btn-primary btn-large">Export Data</button>
+                </div>
+                </div><!-- end tab-content-scroll -->
+            </div>
+
+            <!-- Site Settings Tab (Super Admin Only) -->
+            <?php if ($isSuperAdmin): ?>
+            <div id="tab-site-settings" class="admin-tab">
+                <div class="tab-header">
+                    <h1>Site Settings</h1>
+                    <div class="tab-actions">
+                        <button id="saveSiteSettings" class="btn btn-primary">Save Changes</button>
+                        <button id="overwriteActiveTheme" class="btn btn-warning" style="display: none;">Overwrite Active Theme</button>
+                        <button id="cancelSiteSettings" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="tab-content-scroll">
+                    <!-- Site Settings Sub-tabs -->
+                    <div class="user-subtabs">
+                        <button class="subtab-btn active" data-subtab="header-footer">Header & Footer</button>
+                        <button class="subtab-btn" data-subtab="branding">Branding & Images</button>
+                        <button class="subtab-btn" data-subtab="sidebar">Sidebar & Menu</button>
+                        <button class="subtab-btn" data-subtab="colors">Color Scheme</button>
+                        <button class="subtab-btn" data-subtab="themes">Themes</button>
+                        <button class="subtab-btn" data-subtab="advanced">Advanced</button>
+                    </div>
+
+                    <div class="site-settings-container">
+                        <!-- Header & Footer Subtab -->
+                        <div id="subtab-header-footer" class="user-subtab active">
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                Click sections to expand and customize header and footer settings.
+                            </p>
+                            
+                            <!-- Header Configuration -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Header Configuration
+                                        <span class="color-section-badge">11</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="headerHeight">Header Height (pixels)</label>
+                                        <input type="number" id="headerHeight" value="80" min="60" max="150" placeholder="80">
+                                        <small>Navbar height in pixels (60-150px)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="headerMatchLogoHeight">
+                                            <strong>Auto-adjust to Logo Height</strong>
+                                        </label>
+                                        <small>Header will automatically match uploaded logo height + padding</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="navbarSubtitle">Navbar Subtitle</label>
+                                        <input type="text" id="navbarSubtitle" value="The Hub" placeholder="The Hub">
+                                        <small>Shown under organization name in navbar</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="headerBgColor">Header Background Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="headerBgColor" value="#000000">
+                                            <input type="text" id="headerBgColorHex" value="#000000" placeholder="#000000">
+                                        </div>
+                                        <small>Navbar background color</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="headerTextColor">Header Text Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="headerTextColor" value="#FFFFFF">
+                                            <input type="text" id="headerTextColorHex" value="#FFFFFF" placeholder="#FFFFFF">
+                                        </div>
+                                        <small>Navbar text and link color</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="headerSubtitleColor">Header Subtitle Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="headerSubtitleColor" value="#FFD700">
+                                            <input type="text" id="headerSubtitleColorHex" value="#FFD700" placeholder="#FFD700">
+                                        </div>
+                                        <small>Color for the subtitle under organization name</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="headerTitleFont">Header Title Font</label>
+                                        <select id="headerTitleFont">
+                                            <option value="Roboto">Roboto</option>
+                                            <option value="Open Sans">Open Sans</option>
+                                            <option value="Lato">Lato</option>
+                                            <option value="Montserrat">Montserrat</option>
+                                            <option value="Raleway">Raleway</option>
+                                            <option value="Poppins">Poppins</option>
+                                            <option value="Oswald">Oswald</option>
+                                            <option value="Merriweather">Merriweather</option>
+                                            <option value="Playfair Display">Playfair Display</option>
+                                            <option value="Ubuntu">Ubuntu</option>
+                                        </select>
+                                        <small>Google Font for organization name</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="headerSubtitleFont">Header Subtitle Font</label>
+                                        <select id="headerSubtitleFont">
+                                            <option value="Roboto">Roboto</option>
+                                            <option value="Open Sans">Open Sans</option>
+                                            <option value="Lato">Lato</option>
+                                            <option value="Montserrat">Montserrat</option>
+                                            <option value="Raleway">Raleway</option>
+                                            <option value="Poppins">Poppins</option>
+                                            <option value="Oswald">Oswald</option>
+                                            <option value="Merriweather">Merriweather</option>
+                                            <option value="Playfair Display">Playfair Display</option>
+                                            <option value="Ubuntu">Ubuntu</option>
+                                        </select>
+                                        <small>Google Font for subtitle text</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="headerTitleFontSize">Header Title Font Size (rem)</label>
+                                        <input type="number" id="headerTitleFontSize" value="1.3" min="0.5" max="3" step="0.05" placeholder="1.3">
+                                        <small>Font size for organization name (0.5-3rem)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="headerSubtitleFontSize">Header Subtitle Font Size (rem)</label>
+                                        <input type="number" id="headerSubtitleFontSize" value="0.85" min="0.5" max="2" step="0.05" placeholder="0.85">
+                                        <small>Font size for subtitle text (0.5-2rem)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="headerShowSubtitle" checked>
+                                            <strong>Show Header Subtitle</strong>
+                                        </label>
+                                        <small>Display subtitle below organization name</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Footer Configuration -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Footer Configuration
+                                        <span class="color-section-badge">7</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="footerHeight">Footer Height (pixels)</label>
+                                        <input type="number" id="footerHeight" value="40" min="30" max="80" placeholder="40">
+                                        <small>Footer height in pixels (30-80px)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="footerTextSize">Footer Text Size (rem)</label>
+                                        <input type="number" id="footerTextSize" value="0.875" min="0.5" max="1.5" step="0.05" placeholder="0.875">
+                                        <small>Font size for footer text (0.5-1.5rem)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="footerShowVersion" checked>
+                                            <strong>Show Version Number</strong>
+                                        </label>
+                                        <small>Display version info in footer</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="footerShowUser" checked>
+                                            <strong>Show Current User</strong>
+                                        </label>
+                                        <small>Display logged-in username in footer</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="footerCustomText">Custom Footer Text</label>
+                                        <input type="text" id="footerCustomText" value="" placeholder="Optional custom footer message">
+                                        <small>Additional text to display in footer (optional)</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="footerBgColor">Footer Background Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="footerBgColor" value="#F3F4F6">
+                                            <input type="text" id="footerBgColorHex" value="#F3F4F6" placeholder="#F3F4F6">
+                                        </div>
+                                        <small>Footer background color</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="footerTextColor">Footer Text Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="footerTextColor" value="#6B7280">
+                                            <input type="text" id="footerTextColorHex" value="#6B7280" placeholder="#6B7280">
+                                        </div>
+                                        <small>Footer text color</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar & Menu Subtab -->
+                        <div id="subtab-sidebar" class="user-subtab">
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                Click sections to expand and customize sidebar and menu settings.
+                            </p>
+                            
+                            <!-- Active Menu Item Styling -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Active Menu Item Styling
+                                        <span class="color-section-badge">2</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="activeMenuFontSize">Active Menu Item Font Size</label>
+                                        <input type="number" id="activeMenuFontSize" value="16" min="12" max="24" placeholder="16">
+                                        <small>Font size for active/selected menu items (12-24px)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="activeMenuBold">
+                                            <strong>Bold Active Menu Items</strong>
+                                        </label>
+                                        <small>Make active menu item text bold</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sidebar Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Sidebar Colors
+                                        <span class="color-section-badge">5</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="sidebarBg">Sidebar Background Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="sidebarBg" value="#FFFFFF">
+                                            <input type="text" id="sidebarBgHex" value="#FFFFFF" placeholder="#FFFFFF">
+                                        </div>
+                                        <small>Background color of the admin sidebar</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="sidebarTextColor">Sidebar Text Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="sidebarTextColor" value="#374151">
+                                            <input type="text" id="sidebarTextColorHex" value="#374151" placeholder="#374151">
+                                        </div>
+                                        <small>Text color for regular menu items</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="sidebarActiveHighlight">Active Item Background</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="sidebarActiveHighlight" value="#FEF3C7">
+                                            <input type="text" id="sidebarActiveHighlightHex" value="#FEF3C7" placeholder="#FEF3C7">
+                                        </div>
+                                        <small>Background color for active/selected menu item</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="sidebarActiveTextColor">Active Item Text Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="sidebarActiveTextColor" value="#C99700">
+                                            <input type="text" id="sidebarActiveTextColorHex" value="#C99700" placeholder="#C99700">
+                                        </div>
+                                        <small>Text color for active menu item</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="sidebarHoverBg">Hover Background Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="sidebarHoverBg" value="#F9FAFB">
+                                            <input type="text" id="sidebarHoverBgHex" value="#F9FAFB" placeholder="#F9FAFB">
+                                        </div>
+                                        <small>Background color when hovering over menu items</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Branding & Images Subtab -->
+                        <div id="subtab-branding" class="user-subtab">
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                Click sections to expand and customize branding elements.
+                            </p>
+                            
+                            <!-- Site Identity -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Site Identity
+                                        <span class="color-section-badge">5</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="organizationName">Organization Name</label>
+                                        <input type="text" id="organizationName" value="Woodson ISD" placeholder="Woodson ISD">
+                                        <small>Your school/district name - displayed in navbar, footer, and login page</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="siteName">Site Name</label>
+                                        <input type="text" id="siteName" value="The Hub" placeholder="The Hub">
+                                        <small>Displayed in browser tabs and page headers</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="welcomeMessage">Welcome Message</label>
+                                        <input type="text" id="welcomeMessage" value="Central hub for student services and resources" placeholder="Central hub for student services and resources">
+                                        <small>Displayed on the hub landing page</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="landingPageTitle">Landing Page Title</label>
+                                        <input type="text" id="landingPageTitle" value="The Hub" placeholder="The Hub">
+                                        <small>Main title displayed on hub landing page</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; cursor: pointer;">
+                                            <span>Show Hub Title Icon in Header</span>
+                                            <input type="checkbox" id="landingPageShowIcon" checked>
+                                        </label>
+                                        <small>Display the uploaded Hub Title Icon above the landing page title</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Logo -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Logo
+                                        <span class="color-section-badge">4</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <div class="logo-preview-container" style="margin-bottom: 1rem;">
+                                            <img id="currentLogoPreview" src="/assets/images/branding/Branding_NoBG.png" alt="Current Logo" style="max-height: 100px; max-width: 300px; background: #f3f4f6; padding: 1rem; border-radius: 8px;">
+                                        </div>
+                                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                                            <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp" style="display: none;">
+                                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('logoUpload').click();">Upload New Logo</button>
+                                            <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; cursor: pointer;">
+                                                <span>Enable Logo Glow Effect</span>
+                                                <input type="checkbox" id="logoGlowEnabled" checked>
+                                            </label>
+                                        </div>
+                                        <small style="display: block; margin-top: 0.5rem;">Accepts PNG, JPG, SVG, WebP. Transparent background recommended.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="logoGlowColor">Logo Glow Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="logoGlowColor" value="#FFD700">
+                                            <input type="text" id="logoGlowColorHex" value="#FFD700" placeholder="#FFD700">
+                                        </div>
+                                        <small>Color for the logo glow effect when enabled</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="logoHeight">Logo Height (Desktop)</label>
+                                        <input type="number" id="logoHeight" value="90" min="40" max="150" placeholder="90">
+                                        <small>Logo height in pixels for desktop (40-150px)</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="logoHeightMobile">Logo Height (Mobile)</label>
+                                        <input type="number" id="logoHeightMobile" value="50" min="30" max="100" placeholder="50">
+                                        <small>Logo height in pixels for mobile (30-100px)</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Favicon -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Favicon
+                                        <span class="color-section-badge">1</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <div class="logo-preview-container" style="margin-bottom: 1rem;">
+                                            <img id="currentFaviconPreview" src="/assets/images/Cowboy_SM_favicon.png" alt="Current Favicon" style="max-height: 48px; max-width: 48px; background: #f3f4f6; padding: 0.5rem; border-radius: 8px;">
+                                        </div>
+                                        <div>
+                                            <input type="file" id="faviconUpload" accept="image/png,image/x-icon,image/vnd.microsoft.icon" style="display: none;">
+                                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('faviconUpload').click();">Upload New Favicon</button>
+                                            <small style="display: block; margin-top: 0.5rem;">Accepts PNG, ICO. Recommended size: 32x32 or 48x48 pixels.</small>
+                                        </div>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hub Title Icon -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Hub Title Icon
+                                        <span class="color-section-badge">2</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <div class="logo-preview-container" style="margin-bottom: 1rem;">
+                                            <img id="currentHubTileIconPreview" src="/assets/images/branding/Branding_NoBG.png" alt="Current Hub Title Icon" style="max-height: 80px; max-width: 80px; background: #f3f4f6; padding: 0.5rem; border-radius: 8px;">
+                                        </div>
+                                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+                                            <input type="file" id="hubTileIconUpload" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp" style="display: none;">
+                                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('hubTileIconUpload').click();">Upload Custom Icon</button>
+                                            <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; cursor: pointer;">
+                                                <span>Use Custom Icon</span>
+                                                <input type="checkbox" id="hubTileIconCustomEnabled">
+                                            </label>
+                                        </div>
+                                        <small style="display: block;">When enabled, this icon will appear in the landing page header (if enabled above) AND on all section tiles. Accepts PNG, JPG, SVG, WebP. Recommended size: 120x120 pixels.</small>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Colors & Theme Subtab - COMPACT VERSION -->
+                        <div id="subtab-colors" class="user-subtab">
+                            
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                Click sections to expand and customize colors. Changes apply immediately to the site preview.
+                            </p>
+                            
+                            <!-- Main Theme Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Main Theme Colors
+                                        <span class="color-section-badge">6</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="color-grid">
+                                            <div class="color-item">
+                                                <label>Primary Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="primaryColor" value="#C99700">
+                                                    <input type="text" id="primaryColorHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Links, active states, focus rings</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Navbar Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="navbarColor" value="#000000">
+                                                    <input type="text" id="navbarColorHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Top navigation bar</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Page Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="backgroundColor" value="#FFFFFF">
+                                                    <input type="text" id="backgroundColorHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                                <small>Main content area</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Accent Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="accentColor" value="#FFD700">
+                                                    <input type="text" id="accentColorHex" value="#FFD700" maxlength="7">
+                                                </div>
+                                                <small>Hover highlights</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Hub Page Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubPageBg" value="#FFFFFF">
+                                                    <input type="text" id="hubPageBgHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                                <small>Hub landing page background</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Hub Tile Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubTileBg" value="#FFFFFF">
+                                                    <input type="text" id="hubTileBgHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                                <small>Section tile cards on Hub</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Text Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Text Colors
+                                        <span class="color-section-badge">9</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="color-pairs-grid">
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Primary Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textPrimary" value="#111827">
+                                                    <input type="text" id="textPrimaryHex" value="#111827" maxlength="7">
+                                                </div>
+                                                <small>Main headings & body</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Secondary Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textSecondary" value="#374151">
+                                                    <input type="text" id="textSecondaryHex" value="#374151" maxlength="7">
+                                                </div>
+                                                <small>Subheadings</small>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Muted Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textMuted" value="#6B7280">
+                                                    <input type="text" id="textMutedHex" value="#6B7280" maxlength="7">
+                                                </div>
+                                                <small>Helper text</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Disabled Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textDisabled" value="#D1D5DB">
+                                                    <input type="text" id="textDisabledHex" value="#D1D5DB" maxlength="7">
+                                                </div>
+                                                <small>Inactive elements</small>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Inverse Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="textInverse" value="#FFFFFF">
+                                                    <input type="text" id="textInverseHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                                <small>Text on dark backgrounds</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Link Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="linkColor" value="#3B82F6">
+                                                    <input type="text" id="linkColorHex" value="#3B82F6" maxlength="7">
+                                                </div>
+                                                <small>Hyperlinks</small>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Hub Tile Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubTileText" value="#333333">
+                                                    <input type="text" id="hubTileTextHex" value="#333333" maxlength="7">
+                                                </div>
+                                                <small>Text on Hub section tiles</small>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Hub Title Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubTitleColor" value="#000000">
+                                                    <input type="text" id="hubTitleColorHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Hub page main title (Site Name)</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Hub Subtitle Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubSubtitleColor" value="#666666">
+                                                    <input type="text" id="hubSubtitleColorHex" value="#666666" maxlength="7">
+                                                </div>
+                                                <small>Hub page subtitle (Welcome Message)</small>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Button Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Button Colors
+                                        <span class="color-section-badge">9</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <div class="color-pairs-grid">
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Primary Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonPrimaryBg" value="#C99700">
+                                                    <input type="text" id="buttonPrimaryBgHex" value="#C99700" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Primary Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonPrimaryText" value="#FFFFFF">
+                                                    <input type="text" id="buttonPrimaryTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Secondary Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSecondaryBg" value="#6B7280">
+                                                    <input type="text" id="buttonSecondaryBgHex" value="#6B7280" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Secondary Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSecondaryText" value="#FFFFFF">
+                                                    <input type="text" id="buttonSecondaryTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Danger Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonDangerBg" value="#DC2626">
+                                                    <input type="text" id="buttonDangerBgHex" value="#DC2626" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Danger Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonDangerText" value="#FFFFFF">
+                                                    <input type="text" id="buttonDangerTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-pair">
+                                            <div class="color-item">
+                                                <label>Success Button Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSuccessBg" value="#059669">
+                                                    <input type="text" id="buttonSuccessBgHex" value="#059669" maxlength="7">
+                                                </div>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Success Button Text</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="buttonSuccessText" value="#FFFFFF">
+                                                    <input type="text" id="buttonSuccessTextHex" value="#FFFFFF" maxlength="7">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        
+                                        <div class="color-item" style="margin-top: 1rem;">
+                                            <label>Unsaved Changes Glow</label>
+                                            <div class="color-input-group">
+                                                <input type="color" id="unsavedChangesGlowColor" value="#C99700">
+                                                <input type="text" id="unsavedChangesGlowColorHex" value="#C99700" maxlength="7">
+                                            </div>
+                                            <small>Save button glow animation</small>
+                                        </div>
+                                        
+                                        <div class="color-preview-bar">
+                                            <button class="btn btn-primary" style="pointer-events: none;">Primary</button>
+                                            <button class="btn btn-secondary" style="pointer-events: none;">Secondary</button>
+                                            <button class="btn btn-danger" style="pointer-events: none;">Danger</button>
+                                            <button class="btn btn-success" style="pointer-events: none;">Success</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Role Badge Colors -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Role Badge Colors
+                                        <span class="color-section-badge">14</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <!-- Staff -->
+                                        <div class="role-badge-section">
+                                            <?php
+                                            $staffBg = SiteSettings::get('role_staff_bg', '#e0e7ff');
+                                            $staffText = SiteSettings::get('role_staff_text', '#3730a3');
+                                            ?>
+                                            <h4>
+                                                <span class="role-badge-preview" id="staffBadgePreview" style="background: <?php echo htmlspecialchars($staffBg); ?>; color: <?php echo htmlspecialchars($staffText); ?>;">Staff</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleStaffBg" value="<?php echo htmlspecialchars($staffBg); ?>">
+                                                        <input type="text" id="roleStaffBgHex" value="<?php echo htmlspecialchars($staffBg); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleStaffText" value="<?php echo htmlspecialchars($staffText); ?>">
+                                                        <input type="text" id="roleStaffTextHex" value="<?php echo htmlspecialchars($staffText); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Maintenance -->
+                                        <div class="role-badge-section">
+                                            <?php
+                                            $maintenanceBg = SiteSettings::get('role_maintenance_bg', '#fef3c7');
+                                            $maintenanceText = SiteSettings::get('role_maintenance_text', '#92400e');
+                                            ?>
+                                            <h4>
+                                                <span class="role-badge-preview" id="maintenanceBadgePreview" style="background: <?php echo htmlspecialchars($maintenanceBg); ?>; color: <?php echo htmlspecialchars($maintenanceText); ?>;">Maintenance</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceBg" value="<?php echo htmlspecialchars($maintenanceBg); ?>">
+                                                        <input type="text" id="roleMaintenanceBgHex" value="<?php echo htmlspecialchars($maintenanceBg); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceText" value="<?php echo htmlspecialchars($maintenanceText); ?>">
+                                                        <input type="text" id="roleMaintenanceTextHex" value="<?php echo htmlspecialchars($maintenanceText); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Maintenance Director -->
+                                        <div class="role-badge-section">
+                                            <?php
+                                            $directorBg = SiteSettings::get('role_maintenance_director_bg', '#fed7aa');
+                                            $directorText = SiteSettings::get('role_maintenance_director_text', '#9a3412');
+                                            ?>
+                                            <h4>
+                                                <span class="role-badge-preview" id="directorBadgePreview" style="background: <?php echo htmlspecialchars($directorBg); ?>; color: <?php echo htmlspecialchars($directorText); ?>;">Maintenance Director</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceDirectorBg" value="<?php echo htmlspecialchars($directorBg); ?>">
+                                                        <input type="text" id="roleMaintenanceDirectorBgHex" value="<?php echo htmlspecialchars($directorBg); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleMaintenanceDirectorText" value="<?php echo htmlspecialchars($directorText); ?>">
+                                                        <input type="text" id="roleMaintenanceDirectorTextHex" value="<?php echo htmlspecialchars($directorText); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Manager -->
+                                        <div class="role-badge-section">
+                                            <?php
+                                            $managerBg = SiteSettings::get('role_manager_bg', '#ddd6fe');
+                                            $managerText = SiteSettings::get('role_manager_text', '#5b21b6');
+                                            ?>
+                                            <h4>
+                                                <span class="role-badge-preview" id="managerBadgePreview" style="background: <?php echo htmlspecialchars($managerBg); ?>; color: <?php echo htmlspecialchars($managerText); ?>;">Manager</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleManagerBg" value="<?php echo htmlspecialchars($managerBg); ?>">
+                                                        <input type="text" id="roleManagerBgHex" value="<?php echo htmlspecialchars($managerBg); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleManagerText" value="<?php echo htmlspecialchars($managerText); ?>">
+                                                        <input type="text" id="roleManagerTextHex" value="<?php echo htmlspecialchars($managerText); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Admin -->
+                                        <div class="role-badge-section">
+                                            <?php
+                                            $adminBg = SiteSettings::get('role_admin_bg', '#fce7f3');
+                                            $adminText = SiteSettings::get('role_admin_text', '#9f1239');
+                                            ?>
+                                            <h4>
+                                                <span class="role-badge-preview" id="adminBadgePreview" style="background: <?php echo htmlspecialchars($adminBg); ?>; color: <?php echo htmlspecialchars($adminText); ?>;">Admin</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleAdminBg" value="<?php echo htmlspecialchars($adminBg); ?>">
+                                                        <input type="text" id="roleAdminBgHex" value="<?php echo htmlspecialchars($adminBg); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleAdminText" value="<?php echo htmlspecialchars($adminText); ?>">
+                                                        <input type="text" id="roleAdminTextHex" value="<?php echo htmlspecialchars($adminText); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Super Admin -->
+                                        <div class="role-badge-section">
+                                            <?php
+                                            $superAdminBg = SiteSettings::get('role_super_admin_bg', '#fee2e2');
+                                            $superAdminText = SiteSettings::get('role_super_admin_text', '#991b1b');
+                                            ?>
+                                            <h4>
+                                                <span class="role-badge-preview" id="superAdminBadgePreview" style="background: <?php echo htmlspecialchars($superAdminBg); ?>; color: <?php echo htmlspecialchars($superAdminText); ?>;">Super Admin</span>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleSuperAdminBg" value="<?php echo htmlspecialchars($superAdminBg); ?>">
+                                                        <input type="text" id="roleSuperAdminBgHex" value="<?php echo htmlspecialchars($superAdminBg); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="roleSuperAdminText" value="<?php echo htmlspecialchars($superAdminText); ?>">
+                                                        <input type="text" id="roleSuperAdminTextHex" value="<?php echo htmlspecialchars($superAdminText); ?>" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Success Badge -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="successBadgePreview" style="background: #059669; color: white;">Success</span>
+                                                <small style="font-weight: normal; margin-left: 0.5rem;">Used for active status, successful actions</small>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="badgeSuccessBg" value="#059669">
+                                                        <input type="text" id="badgeSuccessBgHex" value="#059669" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="badgeSuccessText" value="#FFFFFF">
+                                                        <input type="text" id="badgeSuccessTextHex" value="#FFFFFF" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- System Badge -->
+                                        <div class="role-badge-section">
+                                            <h4>
+                                                <span class="role-badge-preview" id="systemBadgePreview" style="background: #6366f1; color: white;">SYSTEM</span>
+                                                <small style="font-weight: normal; margin-left: 0.5rem;">System themes and automated actions</small>
+                                            </h4>
+                                            <div class="color-pair">
+                                                <div class="color-item">
+                                                    <label>Background</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="badgeSystemBg" value="#6366F1">
+                                                        <input type="text" id="badgeSystemBgHex" value="#6366F1" maxlength="7">
+                                                    </div>
+                                                </div>
+                                                <div class="color-item">
+                                                    <label>Text</label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" id="badgeSystemText" value="#FFFFFF">
+                                                        <input type="text" id="badgeSystemTextHex" value="#FFFFFF" maxlength="7">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <!-- End subtab-colors -->
+
+                        <!-- Themes Subtab -->
+                        <div id="subtab-themes" class="user-subtab">
+                            <div class="settings-section">
+                                <h2>Theme Management</h2>
+                                <p style="color: #6B7280; margin-bottom: 1rem;">Save current color scheme as a theme, load saved themes, or update existing themes with current settings</p>
+                                
+                                <!-- Save or Update Theme -->
+                                <div style="background: #F9FAFB; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 2px solid #E5E7EB;">
+                                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600;">Save Current Color Scheme</h3>
+                                    <div class="settings-grid">
+                                        <div class="form-group">
+                                            <label for="newThemeName">Theme Name *</label>
+                                            <input type="text" id="newThemeName" placeholder="My Custom Theme">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="newThemeDescription">Description</label>
+                                            <input type="text" id="newThemeDescription" placeholder="Optional description">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        <button id="saveCurrentTheme" class="btn btn-primary">Save as New Theme</button>
+                                        <button id="updateSelectedTheme" class="btn btn-secondary" style="display: none;">Update Selected Theme</button>
+                                    </div>
+                                    <div id="updateThemeNotice" style="display: none; margin-top: 1rem; padding: 0.75rem; background: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 4px;">
+                                        <strong>Update Mode:</strong> <span id="updateThemeName"></span>
+                                        <button onclick="cancelUpdateMode()" style="float: right; background: none; border: none; cursor: pointer; font-weight: bold;">✕</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Saved Themes List -->
+                                <div id="themesList">
+                                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600;">Saved Themes</h3>
+                                    <div id="themesContainer" style="display: grid; gap: 1rem;">
+                                        Loading themes...
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- end subtab-themes -->
+
+                        <!-- Advanced Subtab -->
+                        <div id="subtab-advanced" class="user-subtab">
+                            
+                            <div class="settings-section" style="border: 2px solid #DC2626; background: #FEF2F2;">
+                                <h2 style="color: #DC2626;">⚙️ System Configuration</h2>
+                                <p style="color: #991B1B; margin-bottom: 1rem; font-weight: 600;">
+                                    ⚠️ These settings control core system functionality. Changes here can break the application if configured incorrectly.
+                                </p>
+                            </div>
+
+                            <!-- Authentication Settings -->
+                            <div class="settings-section">
+                                <h2>🔐 Authentication & Login</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                    Configure how users authenticate and access the system
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="googleOnlyLogin" style="width: auto; margin-right: 0.5rem;">
+                                            Google OAuth Only
+                                        </label>
+                                        <small>When enabled, only Google authentication is allowed. Disable to allow local user accounts.</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="allowLocalUsers" style="width: auto; margin-right: 0.5rem;">
+                                            Allow Local User Accounts
+                                        </label>
+                                        <small>Enable this during initial setup to create admin accounts before Google OAuth is configured.</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="requireDomainMatch" style="width: auto; margin-right: 0.5rem;">
+                                            Require Domain Match
+                                        </label>
+                                        <small>Only allow Google accounts from specific domain(s). Configure domains below.</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="allowedDomains">Allowed Email Domains</label>
+                                        <input type="text" id="allowedDomains" placeholder="woodsonisd.net, example.com">
+                                        <small>Comma-separated list of allowed email domains for Google login</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="sessionTimeout">Session Timeout (hours)</label>
+                                        <input type="number" id="sessionTimeout" min="1" max="168" value="2">
+                                        <small>How long users stay logged in before requiring re-authentication</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Google OAuth Configuration -->
+                            <div class="settings-section">
+                                <h2>🔑 Google OAuth Configuration</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                    Configure Google Cloud Console OAuth 2.0 credentials. Required for Google login.
+                                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: var(--primary-color);">
+                                        → Open Google Cloud Console
+                                    </a>
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="googleClientId">Google Client ID</label>
+                                        <input type="text" id="googleClientId" placeholder="xxxxx.apps.googleusercontent.com">
+                                        <small>From Google Cloud Console → Credentials → OAuth 2.0 Client ID</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="googleClientSecret">Google Client Secret</label>
+                                        <input type="password" id="googleClientSecret" placeholder="GOCSPX-xxxxx">
+                                        <small>Secret key from Google Cloud Console OAuth client</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="googleRedirectUri">Google Redirect URI</label>
+                                        <input type="text" id="googleRedirectUri" placeholder="https://yourdomain.com/auth/google_callback.php">
+                                        <small>Must match exactly what's configured in Google Cloud Console</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Google Groups Integration -->
+                            <div class="settings-section">
+                                <h2>👥 Google Workspace Groups Integration</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                    Automatically approve users based on Google Workspace group membership. Requires a service account.
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="enableGoogleGroups" style="width: auto; margin-right: 0.5rem;">
+                                            Enable Google Groups Auto-Approval
+                                        </label>
+                                        <small>Automatically approve users who are members of specified Google Workspace groups</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="googleServiceAccountEmail">Service Account Email</label>
+                                        <input type="text" id="googleServiceAccountEmail" placeholder="service-account@project-id.iam.gserviceaccount.com">
+                                        <small>Email address of the Google service account with Directory API access</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="googleAdminEmail">Google Workspace Admin Email</label>
+                                        <input type="text" id="googleAdminEmail" placeholder="admin@woodsonisd.net">
+                                        <small>Admin account that service account will impersonate for Directory API calls</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="googleServiceAccountKeyPath">Service Account Key File Path</label>
+                                        <input type="text" id="googleServiceAccountKeyPath" placeholder="config/service-account-key.json">
+                                        <small>Relative path from project root to the JSON key file</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="googleAutoApprovalGroups">Auto-Approval Groups</label>
+                                        <textarea id="googleAutoApprovalGroups" rows="3" placeholder="staff@woodsonisd.net&#10;teachers@woodsonisd.net"></textarea>
+                                        <small>One group email per line. Users in these groups will be auto-approved.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Database Configuration -->
+                            <div class="settings-section">
+                                <h2>🗄️ Database Configuration</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                    Database connection settings. Changes require application restart/refresh to take effect.
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="dbHost">Database Host</label>
+                                        <input type="text" id="dbHost" placeholder="localhost">
+                                        <small>MySQL server hostname or IP address</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="dbName">Database Name</label>
+                                        <input type="text" id="dbName" placeholder="woodson_maintenance">
+                                        <small>Name of the database to connect to</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="dbUser">Database Username</label>
+                                        <input type="text" id="dbUser" placeholder="db_user">
+                                        <small>Database user with full permissions on the database</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="dbPassword">Database Password</label>
+                                        <input type="password" id="dbPassword" placeholder="••••••••">
+                                        <small>Password for database user (stored encrypted in .env)</small>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 1rem; padding: 1rem; background: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 4px;">
+                                    <strong>⚠️ Database Test:</strong>
+                                    <button id="testDbConnection" class="btn btn-sm btn-secondary" style="margin-left: 1rem;">Test Connection</button>
+                                    <div id="dbTestResult" style="margin-top: 0.5rem;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Application Settings -->
+                            <div class="settings-section">
+                                <h2>🌐 Application Settings</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                    Core application configuration
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="appUrl">Application URL</label>
+                                        <input type="text" id="appUrl" placeholder="https://hub.woodsonisd.net">
+                                        <small>Full URL where The Hub is accessed (used for OAuth callbacks)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="appEnvironment">Environment</label>
+                                        <select id="appEnvironment">
+                                            <option value="production">Production</option>
+                                            <option value="development">Development</option>
+                                            <option value="staging">Staging</option>
+                                        </select>
+                                        <small>Current environment mode (affects debugging and error display)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="debugMode" style="width: auto; margin-right: 0.5rem;">
+                                            Enable Debug Mode
+                                        </label>
+                                        <small>Show detailed error messages (disable in production!)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="maxUploadSize">Max Upload Size (MB)</label>
+                                        <input type="number" id="maxUploadSize" min="1" max="100" value="10">
+                                        <small>Maximum file size for logo and branding uploads</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="maintenanceMode" style="width: auto; margin-right: 0.5rem;">
+                                            Maintenance Mode
+                                        </label>
+                                        <small>Temporarily disable access for non-admin users</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email Configuration -->
+                            <div class="settings-section">
+                                <h2>📧 Email Configuration (Future)</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                    SMTP settings for sending system emails (invitation notifications, password resets, etc.)
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <label for="smtpHost">SMTP Host</label>
+                                        <input type="text" id="smtpHost" placeholder="smtp.gmail.com">
+                                        <small>SMTP server hostname</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="smtpPort">SMTP Port</label>
+                                        <input type="number" id="smtpPort" placeholder="587">
+                                        <small>Usually 587 (TLS) or 465 (SSL)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="smtpUsername">SMTP Username</label>
+                                        <input type="text" id="smtpUsername" placeholder="noreply@woodsonisd.net">
+                                        <small>Email account for sending</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="smtpPassword">SMTP Password</label>
+                                        <input type="password" id="smtpPassword" placeholder="••••••••">
+                                        <small>Password or app-specific password</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="smtpFromEmail">From Email Address</label>
+                                        <input type="email" id="smtpFromEmail" placeholder="noreply@woodsonisd.net">
+                                        <small>Email address shown as sender</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="smtpFromName">From Name</label>
+                                        <input type="text" id="smtpFromName" placeholder="Woodson Hub">
+                                        <small>Name shown as sender</small>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 1rem;">
+                                    <button id="testEmailConfig" class="btn btn-sm btn-secondary">Send Test Email</button>
+                                    <span style="color: var(--text-muted); margin-left: 1rem; font-size: 0.875rem;">Not yet implemented</span>
+                                </div>
+                            </div>
+
+                            <!-- Danger Zone -->
+                            <div class="settings-section" style="border: 2px solid #DC2626;">
+                                <h2 style="color: #DC2626;">🚨 Danger Zone</h2>
+                                <p style="color: #991B1B; margin-bottom: 1.5rem;">
+                                    These actions cannot be undone. Proceed with extreme caution.
+                                </p>
+                                
+                                <div class="settings-grid">
+                                    <div class="form-group">
+                                        <button id="resetToDefaults" class="btn btn-danger">Reset All Color Settings to Defaults</button>
+                                        <small>⚠️ This will restore all color/branding settings to their original values</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button id="clearAllSessions" class="btn btn-danger">Clear All Active Sessions</button>
+                                        <small>⚠️ Force logout all users (including yourself)</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button id="regenerateEnv" class="btn btn-danger">Regenerate .env File</button>
+                                        <small>⚠️ Re-create .env from current database settings (backup current .env first!)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Save Advanced Settings -->
+                            <div style="position: sticky; bottom: 0; background: white; padding: 1rem; border-top: 2px solid var(--border-primary); margin-top: 2rem; box-shadow: 0 -4px 6px rgba(0,0,0,0.1);">
+                                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                                    <button id="saveAdvancedSettings" class="btn btn-primary">💾 Save Advanced Settings</button>
+                                    <button id="reloadAdvancedSettings" class="btn btn-secondary">🔄 Reload Settings</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- end site-settings-container -->
+                </div><!-- end tab-content-scroll -->
+            </div>
+            <?php endif; ?>
+
+            <!-- Activity Logs Tab (Super Admin Only) -->
+            <?php if ($isSuperAdmin): ?>
+            <div id="tab-logs" class="admin-tab">
+                <div class="tab-header">
+                    <h1>Activity Logs</h1>
+                    <div class="tab-actions">
+                        <button id="refreshLogs" class="btn btn-secondary">Refresh</button>
+                        <button id="clearLogFilters" class="btn btn-secondary">Clear Filters</button>
+                    </div>
+                </div>
+
+                <div class="tab-content-scroll">
+                    <div class="logs-filters" style="background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.875rem; font-weight: 600;">Action</label>
+                            <select id="filterAction" style="width: 100%;">
+                                <option value="">All Actions</option>
+                                <option value="create">Create</option>
+                                <option value="update">Update</option>
+                                <option value="delete">Delete</option>
+                                <option value="approve">Approve</option>
+                                <option value="activate">Activate</option>
+                                <option value="deactivate">Deactivate</option>
+                                <option value="grant_access">Grant Access</option>
+                                <option value="revoke_access">Revoke Access</option>
+                                <option value="login_success">Login Success</option>
+                                <option value="login_failed">Login Failed</option>
+                                <option value="logout">Logout</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.875rem; font-weight: 600;">Table</label>
+                            <select id="filterTable" style="width: 100%;">
+                                <option value="">All Tables</option>
+                                <option value="users">Users</option>
+                                <option value="user_global_roles">User Roles</option>
+                                <option value="vehicles">Vehicles</option>
+                                <option value="fuel_records">Fuel Records</option>
+                                <option value="sections">Sections</option>
+                                <option value="section_access">Section Access</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.875rem; font-weight: 600;">Limit</label>
+                            <select id="filterLimit" style="width: 100%;">
+                                <option value="50">50 records</option>
+                                <option value="100" selected>100 records</option>
+                                <option value="250">250 records</option>
+                                <option value="500">500 records</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="applyLogFilters" class="btn btn-primary" style="margin-top: 1rem;">Apply Filters</button>
+                </div>
+
+                <div id="logsTable" class="data-table-container">
+                    Loading...
+                </div>
+
+                <div id="logsPagination" style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+                    <!-- Pagination will be added by JavaScript -->
+                </div>
+                </div><!-- end tab-content-scroll -->
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+        <?php include __DIR__ . '/../partials/footer.php'; ?>
+    </div><!-- end page-wrapper -->
+
+    <?php include __DIR__ . '/partials/modals.php'; ?>
+
+    <script>
+        window.isSuperAdmin = <?php echo $isSuperAdmin ? 'true' : 'false'; ?>;
+        window.canManageVehicles = <?php echo $canManageVehicles ? 'true' : 'false'; ?>;
+        window.canManageUsers = <?php echo $canManageUsers ? 'true' : 'false'; ?>;
+        window.userRole = '<?php echo $user['role']; ?>';
+        window.csrfToken = '<?php echo generateCsrfToken(); ?>';
+    </script>
+    <script src="/assets/js/admin.js"></script>
+    <script src="/assets/js/site-settings.js"></script>
+</body>
+</html>
