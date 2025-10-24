@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize cascading dependencies for optional features
     initializeDependencies();
     
-    // Check for package alerts (for super admins)
-    checkPackageAlerts();
+    // Check for package alerts badge (for super admins)
+    checkPackageAlerts(false); // Only update badge on initial load
     
     // Hamburger Menu for Admin Sidebar (Responsive)
     const hamburgerMenu = document.querySelector('.hamburger-menu');
@@ -320,6 +320,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (!logsTable.dataset.loaded || !hasContent) {
                 loadAuditLogs();
             }
+        }
+        
+        // If switching to packages tab, check and show alerts
+        if (tabName === 'packages' && window.isSuperAdmin) {
+            checkPackageAlerts(true);
         }
         
         // Trigger animations for the new tab (if animation controller is loaded)
@@ -2751,6 +2756,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadInstalledPackages();
             loadAvailablePackages();
             loadPackageUpdates();
+            checkPackageAlerts(true); // Show alerts when tab is clicked
         });
     }
     
@@ -3963,10 +3969,7 @@ function formatDate(dateString) {
 // ============================================================================
 
 // Check for package alerts and display if not dismissed
-async function checkPackageAlerts() {
-    const container = document.getElementById('packageAlertsContainer');
-    if (!container) return; // Not on packages tab or not super admin
-    
+async function checkPackageAlerts(showAlerts = true) {
     try {
         const response = await fetch('/api/package-alerts.php?action=check', {
             credentials: 'same-origin'
@@ -3976,6 +3979,15 @@ async function checkPackageAlerts() {
         if (!result.success) return;
         
         const { validation, updates } = result.alerts;
+        
+        // Always update sidebar badge
+        updatePackageAlertBadge(validation, updates);
+        
+        // Only show alert banners if requested and container exists
+        if (!showAlerts) return;
+        
+        const container = document.getElementById('packageAlertsContainer');
+        if (!container) return; // Not on packages tab yet
         let alertsHtml = '';
         
         // Validation alert
@@ -4028,20 +4040,22 @@ async function checkPackageAlerts() {
             }, 100);
         }
         
-        // Update sidebar badge
-        const sidebarBadge = document.getElementById('sidebarPackageBadge');
-        if (sidebarBadge) {
-            const totalAlerts = (validation.dismissed ? 0 : validation.count) + (updates.dismissed ? 0 : updates.count);
-            if (totalAlerts > 0) {
-                sidebarBadge.textContent = totalAlerts;
-                sidebarBadge.style.display = 'inline-block';
-            } else {
-                sidebarBadge.style.display = 'none';
-            }
-        }
-        
     } catch (error) {
         console.error('Error checking package alerts:', error);
+    }
+}
+
+// Update the sidebar badge with alert counts
+function updatePackageAlertBadge(validation, updates) {
+    const sidebarBadge = document.getElementById('sidebarPackageBadge');
+    if (sidebarBadge) {
+        const totalAlerts = (validation.dismissed ? 0 : validation.count) + (updates.dismissed ? 0 : updates.count);
+        if (totalAlerts > 0) {
+            sidebarBadge.textContent = totalAlerts;
+            sidebarBadge.style.display = 'inline-block';
+        } else {
+            sidebarBadge.style.display = 'none';
+        }
     }
 }
 
