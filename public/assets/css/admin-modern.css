@@ -619,6 +619,24 @@ textarea:focus {
     }
 }
 
+/* Sidebar Badge (for Package Manager) */
+.sidebar-badge {
+    display: inline-block;
+    min-width: 18px;
+    height: 18px;
+    padding: 2px 5px;
+    margin-left: 8px;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 9px;
+    line-height: 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(255, 68, 68, 0.5);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
 /* Stats Cards - Count Up with Bounce */
 .stat-card {
     opacity: 0;
@@ -987,6 +1005,98 @@ input[type="checkbox"]:checked + label::before {
         background-color: transparent;
         box-shadow: none;
     }
+}
+
+/* ============================================================================
+   PACKAGE ALERTS SYSTEM
+   ============================================================================ */
+
+#packageAlertsContainer {
+    padding: 0 1.5rem;
+    margin-top: 1rem;
+}
+
+.package-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.package-alert.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.package-alert.hiding {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #fffbea 100%);
+    border-left-color: #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #e8f5f7 100%);
+    border-left-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.alert-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.alert-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.alert-dismiss {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.alert-dismiss:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
+}
+
+.alert-dismiss i {
+    font-size: 0.9rem;
 }
 
 /* Responsive: Reduce Motion */

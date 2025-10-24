@@ -61,7 +61,12 @@ $users = $userModel->getAll();
                     <li><a href="#" data-tab="sections">Sections</a></li>
                     <?php endif; ?>
                     <?php if ($isSuperAdmin): ?>
-                    <li><a href="#" data-tab="packages">Package Manager</a></li>
+                    <li>
+                        <a href="#" data-tab="packages">
+                            Package Manager
+                            <span class="sidebar-badge" id="sidebarPackageBadge" style="display: none;"></span>
+                        </a>
+                    </li>
                     <li><a href="#" data-tab="site-settings">Site Settings</a></li>
                     <li><a href="#" data-tab="logs">Activity Logs</a></li>
                     <?php endif; ?>
@@ -238,6 +243,9 @@ $users = $userModel->getAll();
                             </button>
                         </div>
                     </div>
+
+                    <!-- Package Alerts Banner -->
+                    <div id="packageAlertsContainer"></div>
 
                     <div class="tab-content-scroll">
                         <!-- Package Sub-tabs -->

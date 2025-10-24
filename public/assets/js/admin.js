@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize cascading dependencies for optional features
     initializeDependencies();
     
+    // Check for package alerts (for super admins)
+    checkPackageAlerts();
+    
     // Hamburger Menu for Admin Sidebar (Responsive)
     const hamburgerMenu = document.querySelector('.hamburger-menu');
     const adminSidebar = document.querySelector('.admin-sidebar');
@@ -3953,4 +3956,117 @@ function formatDate(dateString) {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+}
+
+// ============================================================================
+// PACKAGE ALERTS SYSTEM
+// ============================================================================
+
+// Check for package alerts and display if not dismissed
+async function checkPackageAlerts() {
+    const container = document.getElementById('packageAlertsContainer');
+    if (!container) return; // Not on packages tab or not super admin
+    
+    try {
+        const response = await fetch('/api/package-alerts.php?action=check');
+        const result = await response.json();
+        
+        if (!result.success) return;
+        
+        const { validation, updates } = result.alerts;
+        let alertsHtml = '';
+        
+        // Validation alert
+        if (validation.count > 0 && !validation.dismissed) {
+            alertsHtml += `
+                <div class="alert alert-warning alert-dismissible package-alert" data-alert-type="package_validation">
+                    <div class="alert-content">
+                        <div class="alert-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="alert-text">
+                            <strong>Packages Need Validation</strong>
+                            <p>${validation.count} package(s) require validation before installation. Click "Available Packages" to review and validate them.</p>
+                        </div>
+                    </div>
+                    <button class="alert-dismiss" onclick="dismissPackageAlert('package_validation')" title="Dismiss for 7 days">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Updates alert
+        if (updates.count > 0 && !updates.dismissed) {
+            alertsHtml += `
+                <div class="alert alert-info alert-dismissible package-alert" data-alert-type="package_updates">
+                    <div class="alert-content">
+                        <div class="alert-icon">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <div class="alert-text">
+                            <strong>Updates Available</strong>
+                            <p>${updates.count} package(s) have updates available. Click "Updates" to view and install them.</p>
+                        </div>
+                    </div>
+                    <button class="alert-dismiss" onclick="dismissPackageAlert('package_updates')" title="Dismiss for 7 days">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        if (alertsHtml) {
+            container.innerHTML = alertsHtml;
+            // Animate in
+            setTimeout(() => {
+                container.querySelectorAll('.package-alert').forEach(alert => {
+                    alert.classList.add('show');
+                });
+            }, 100);
+        }
+        
+        // Update sidebar badge
+        const sidebarBadge = document.getElementById('sidebarPackageBadge');
+        if (sidebarBadge) {
+            const totalAlerts = (validation.dismissed ? 0 : validation.count) + (updates.dismissed ? 0 : updates.count);
+            if (totalAlerts > 0) {
+                sidebarBadge.textContent = totalAlerts;
+                sidebarBadge.style.display = 'inline-block';
+            } else {
+                sidebarBadge.style.display = 'none';
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error checking package alerts:', error);
+    }
+}
+
+// Dismiss a package alert
+async function dismissPackageAlert(alertType) {
+    try {
+        const formData = new FormData();
+        formData.append('csrf_token', window.csrfToken);
+        formData.append('alert_type', alertType);
+        
+        const response = await fetch('/api/package-alerts.php?action=dismiss', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Fade out and remove the alert
+            const alert = document.querySelector(`.package-alert[data-alert-type="${alertType}"]`);
+            if (alert) {
+                alert.classList.add('hiding');
+                setTimeout(() => alert.remove(), 300);
+            }
+            showMessage('Alert dismissed for 7 days', 'success');
+        }
+    } catch (error) {
+        console.error('Error dismissing alert:', error);
+    }
 }
