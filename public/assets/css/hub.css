@@ -95,11 +95,39 @@
     color: var(--hub-tile-text, #333);
 }
 
-.section-description {
-    font-size: 0.95rem;
-    color: var(--text-muted, #666);
-    line-height: 1.5;
-    margin-bottom: 15px;
+/* .section-description moved to hub-modern.css for hover effects */
+
+.section-title-tooltip {
+    font-size: 0.9rem;
+    color: var(--primary-color, #C99700);
+    cursor: help;
+    margin-left: 0.35rem;
+    position: relative;
+    display: inline-block;
+    z-index: 10;
+}
+
+.section-title-tooltip:hover::after {
+    content: attr(data-full-text);
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(44, 44, 44, 0.98);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: normal;
+    white-space: normal;
+    min-width: 250px;
+    max-width: 400px;
+    z-index: 9999999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    line-height: 1.6;
+    border: 1px solid rgba(255,255,255,0.15);
+    pointer-events: none;
+    backdrop-filter: blur(10px);
 }
 
 /* No Sections Message */
@@ -119,6 +147,15 @@
 /* ==========================================================================
    MOBILE RESPONSIVE
    ========================================================================== */
+
+/* Tablets and smaller */
+@media (max-width: 1024px) {
+    .section-description {
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile - hide descriptions completely */
 @media (max-width: 768px) {
     .hub-header h1 {
         font-size: 2rem;
@@ -127,5 +164,9 @@
     .sections-grid {
         grid-template-columns: 1fr;
         gap: 15px;
+    }
+    
+    .section-description {
+        display: none;
     }
 }

@@ -17,6 +17,8 @@
     max-height: var(--footer-height, 40px);
     height: var(--footer-height, 40px);
     overflow: hidden;
+    position: relative;
+    z-index: 10;
 }
 
 /* Footer Content Layout */

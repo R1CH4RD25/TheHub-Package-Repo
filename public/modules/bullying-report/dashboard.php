@@ -7,13 +7,26 @@
 require_once __DIR__ . '/../../../src/bootstrap.php';
 
 use Hub\Auth;
+use Hub\SectionPermissions;
 
-// Require login and specific roles
+// Require login and check review permissions
 Auth::requireLogin();
-Auth::requireRole(['counselor', 'principal', 'admin', 'super_admin']);
 
 $currentUser = Auth::getCurrentUser();
+
+// Check if user can review bullying reports
+if (!SectionPermissions::canReview($currentUser['id'], 'bullying-report')) {
+    http_response_code(403);
+    die('<h1>Access Denied</h1><p>You do not have permission to view bullying reports.</p><a href="/">Return to Hub</a>');
+}
+
+// Get user's specific permissions
+$permissions = SectionPermissions::getReviewPermissions($currentUser['id'], 'bullying-report');
 $userRole = Auth::getUserRole();
+
+// Get review guidelines
+$reviewGuidelines = SectionPermissions::getGuidelines('bullying-report', 'review');
+$generalGuidelines = SectionPermissions::getGuidelines('bullying-report', 'general');
 
 ?>
 <!DOCTYPE html>
@@ -297,6 +310,70 @@ $userRole = Auth::getUserRole();
             background: #d32f2f;
             color: white;
         }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .guidelines-section {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .guidelines-section h3 {
+            color: #1565c0;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .guidelines-section h3::after {
+            content: '▼';
+            font-size: 0.8rem;
+        }
+        
+        .guidelines-section h3.collapsed::after {
+            content: '▶';
+        }
+        
+        .guidelines-content {
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .guidelines-content.hidden {
+            display: none;
+        }
+        
+        .guideline-item {
+            margin-bottom: 10px;
+        }
+        
+        .guideline-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .guideline-title {
+            font-weight: 600;
+            color: #0d47a1;
+            margin-bottom: 3px;
+        }
+        
+        .permission-notice {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -304,6 +381,47 @@ $userRole = Auth::getUserRole();
         <header class="dashboard-header">
             <h1>🛡️ Bullying Reports Dashboard</h1>
             <p>Confidential incident reports - <?php echo e($currentUser['first_name'] . ' ' . $currentUser['last_name']); ?> (<?php echo Auth::formatRole($userRole); ?>)</p>
+            
+            <?php if (!empty($reviewGuidelines) || !empty($generalGuidelines)): ?>
+            <div class="guidelines-section">
+                <h3 onclick="toggleReviewGuidelines(this)">📋 Review Guidelines</h3>
+                <div class="guidelines-content" id="reviewGuidelines">
+                    <?php foreach ($reviewGuidelines as $guideline): ?>
+                    <div class="guideline-item">
+                        <?php if (!empty($guideline['title'])): ?>
+                            <div class="guideline-title"><?php echo e($guideline['title']); ?></div>
+                        <?php endif; ?>
+                        <div><?php echo nl2br(e($guideline['content'])); ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <?php foreach ($generalGuidelines as $guideline): ?>
+                    <div class="guideline-item">
+                        <?php if (!empty($guideline['title'])): ?>
+                            <div class="guideline-title"><?php echo e($guideline['title']); ?></div>
+                        <?php endif; ?>
+                        <div><?php echo nl2br(e($guideline['content'])); ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php
+            // Show permission notice if user has limited permissions
+            $limitedPerms = [];
+            if (!$permissions['can_edit']) $limitedPerms[] = 'edit reports';
+            if (!$permissions['can_delete']) $limitedPerms[] = 'delete reports';
+            if (!$permissions['can_change_status']) $limitedPerms[] = 'change status';
+            if (!$permissions['can_assign']) $limitedPerms[] = 'assign reports';
+            if (!$permissions['can_export']) $limitedPerms[] = 'export data';
+            
+            if (!empty($limitedPerms)):
+            ?>
+            <div class="permission-notice">
+                ℹ️ <strong>Note:</strong> Your permissions do not include: <?php echo implode(', ', $limitedPerms); ?>
+            </div>
+            <?php endif; ?>
             
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
@@ -415,6 +533,13 @@ $userRole = Auth::getUserRole();
     
     <script>
         window.csrfToken = '<?php echo generateCsrfToken(); ?>';
+        window.userPermissions = <?php echo json_encode($permissions); ?>;
+        
+        function toggleReviewGuidelines(element) {
+            const content = document.getElementById('reviewGuidelines');
+            content.classList.toggle('hidden');
+            element.classList.toggle('collapsed');
+        }
         
         async function loadReports() {
             const filters = {
@@ -469,7 +594,9 @@ $userRole = Auth::getUserRole();
                     <td><span class="priority-badge priority-${report.priority}">${report.priority.toUpperCase()}</span></td>
                     <td><span class="status-badge status-${report.status}">${formatStatus(report.status)}</span></td>
                     <td>${report.assigned_to_name || '<em>Unassigned</em>'}</td>
-                    <td><button class="btn btn-primary btn-sm">View</button></td>
+                    <td>
+                        ${window.userPermissions.can_view ? '<button class="btn btn-primary btn-sm" onclick="viewReport(' + report.id + '); event.stopPropagation();">View</button>' : '<span style="color: #999;">No access</span>'}
+                    </td>
                 </tr>
             `).join('');
         }

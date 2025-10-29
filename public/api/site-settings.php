@@ -38,7 +38,10 @@ try {
                 if ($setting['setting_type'] === 'boolean') {
                     $value = (bool)$value;
                 } elseif ($setting['setting_type'] === 'number') {
-                    $value = is_numeric($value) ? (int)$value : $value;
+                    // Check if it's a float (contains decimal point) or integer
+                    if (is_numeric($value)) {
+                        $value = strpos($value, '.') !== false ? (float)$value : (int)$value;
+                    }
                 }
                 
                 $settingsObject[$setting['setting_key']] = $value;

@@ -53,17 +53,35 @@ class Layout
                         <a href="/">Back to The Hub</a>
                     <?php endif; ?>
                     
-                    <a href="/logout.php">Logout</a>
-                    
-                    <div class="nav-user-profile">
-                        <?php if (!empty($user['picture'])): ?>
-                            <img src="<?php echo e($user['picture']); ?>" alt="<?php echo e($user['name']); ?>" class="nav-user-avatar">
-                        <?php else: ?>
-                            <img src="/assets/images/default-avatar.svg" alt="Default Avatar" class="nav-user-avatar">
-                        <?php endif; ?>
-                        <div class="nav-user-info">
-                            <div class="nav-user-name"><?php echo e($user['name']); ?></div>
-                            <div class="nav-user-role"><?php echo ucfirst(str_replace('_', ' ', $userRole)); ?></div>
+                    <!-- User Profile Dropdown -->
+                    <div class="nav-user-dropdown">
+                        <button class="nav-user-trigger" onclick="toggleUserDropdown(event)">
+                            <?php if (!empty($user['picture'])): ?>
+                                <img src="<?php echo e($user['picture']); ?>" alt="<?php echo e($user['name']); ?>" class="nav-user-avatar">
+                            <?php else: ?>
+                                <img src="/assets/images/default-avatar.svg" alt="Default Avatar" class="nav-user-avatar">
+                            <?php endif; ?>
+                            <div class="nav-user-info">
+                                <div class="nav-user-name"><?php echo e($user['name']); ?></div>
+                                <div class="nav-user-role"><?php echo ucfirst(str_replace('_', ' ', $userRole)); ?></div>
+                            </div>
+                            <span class="nav-user-arrow">▼</span>
+                        </button>
+                        
+                        <div class="nav-user-menu" id="userDropdownMenu">
+                            <a href="/profile.php" class="user-menu-item">
+                                <span class="user-menu-icon"><i class="fas fa-user"></i></span>
+                                <span>My Profile</span>
+                            </a>
+                            <a href="/profile.php?tab=contact" class="user-menu-item">
+                                <span class="user-menu-icon"><i class="fas fa-envelope"></i></span>
+                                <span>Contact Preferences</span>
+                            </a>
+                            <div class="user-menu-divider"></div>
+                            <a href="/logout.php" class="user-menu-item">
+                                <span class="user-menu-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span>Logout</span>
+                            </a>
                         </div>
                     </div>
                     
@@ -110,6 +128,26 @@ class Layout
             🔧 <strong>MAINTENANCE MODE ACTIVE</strong> - The system is currently unavailable to regular users. Click here to disable.
         </a>
         <?php endif; ?>
+        
+        <script>
+        // Toggle user dropdown menu (global function)
+        function toggleUserDropdown(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('userDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.nav-user-dropdown');
+            const menu = document.getElementById('userDropdownMenu');
+            if (dropdown && menu && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+        </script>
         <?php
     }
     
@@ -180,6 +218,9 @@ class Layout
             
             // Bootstrap Icons 1.11.3
             $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">";
+            
+            // FontAwesome 6.5.1
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css\" integrity=\"sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\">";
             
             // Alpine.js 3.14.1
             $libraries[] = "<script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js\"></script>";
@@ -375,6 +416,7 @@ class Layout
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-colors.css?v={$timestamp}\">";
         } elseif ($pageType === 'hub') {
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub.css?v={$timestamp}\">";
+            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub-modern.css?v={$timestamp}\">";
         }
         
         // Media queries last

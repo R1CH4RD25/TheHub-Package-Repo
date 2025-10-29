@@ -61,7 +61,16 @@ if (count($userModules) === 1) {
             <div class="modules-grid">
                 <?php foreach ($userModules as $module): ?>
                     <a href="<?php echo e($module['base_url']); ?>" class="module-card">
-                        <div class="module-icon"><?php echo e($module['icon']); ?></div>
+                        <div class="module-icon">
+                            <?php 
+                            // Render icon - check if it's a Bootstrap Icons class or emoji
+                            if (strpos($module['icon'], 'bi-') === 0) {
+                                echo '<i class="bi ' . e($module['icon']) . '"></i>';
+                            } else {
+                                echo e($module['icon'] ?: '📦');
+                            }
+                            ?>
+                        </div>
                         <div class="module-title"><?php echo e($module['display_name']); ?></div>
                         <div class="module-description"><?php echo e($module['description'] ?? ''); ?></div>
                         <div>

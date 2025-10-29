@@ -735,9 +735,10 @@ textarea:focus {
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 1.5rem;
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-    color: white;
+    background: #ffffff;
+    color: #1f2937;
     border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .validation-modal-header .validation-report-title {
@@ -750,9 +751,9 @@ textarea:focus {
 }
 
 .modal-close-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
     width: 36px;
     height: 36px;
     border-radius: 8px;
@@ -765,8 +766,9 @@ textarea:focus {
 }
 
 .modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
+    background: #e5e7eb;
+    color: #374151;
+    transform: scale(1.05);
 }
 
 /* Compact Progress */
@@ -806,7 +808,7 @@ textarea:focus {
 
 /* Compact Checks Grid - 3 Columns */
 .validation-checks-compact {
-    padding: 1.5rem;
+    padding: 1rem;
     flex: 1;
     overflow-y: auto;
     max-height: calc(85vh - 220px);
@@ -815,14 +817,14 @@ textarea:focus {
 .checks-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .validation-check-checkbox {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.5rem;
     background: #f8f9fa;
     border-radius: 8px;
     border: 2px solid #e9ecef;
@@ -1108,4 +1110,334 @@ input[type="checkbox"]:checked + label::before {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* ==========================================================================
+   COLLAPSIBLE MENU GROUPS
+   ========================================================================== */
+
+.admin-menu .menu-group {
+    margin: 0;
+}
+
+.menu-group-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: var(--primary-text, #333);
+    background: var(--secondary-bg, #f5f5f5);
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.menu-group-header:hover {
+    background: var(--hover-bg, #e8e8e8);
+}
+
+.menu-group-arrow {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.menu-group.collapsed .menu-group-arrow {
+    transform: rotate(-90deg);
+}
+
+.menu-group-items {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0;
+    opacity: 0;
+}
+
+.menu-group-items li {
+    margin: 0;
+}
+
+.menu-group-items li a {
+    padding: 10px 20px;
+    font-size: 0.95em;
+}
+
+/* Menu spacer to push items to bottom */
+.menu-spacer {
+    flex: 1;
+    min-height: 20px;
+}
+
+/* Make sidebar flex column to support spacer */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-user-arrow {
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show ~ .nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+}
+
+.nav-user-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+
+/* Adjust nav-user-profile to work with dropdown */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.nav-user-name {
+    font-weight: 600;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-role {
+    font-size: 0.85em;
+    color: var(--secondary-text, #666);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+    }
+    
+    .nav-user-arrow {
+        display: none;
+    }
+    
+    .nav-user-menu {
+        right: -10px;
+    }
+    
+    .menu-group-header {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+}
+
+
+/* Override nav-user-name to match header subtitle color */
+.nav-user-name {
+    font-weight: 600;
+    color: var(--header-subtitle-color, var(--primary-color, #007bff));
+}
+
+
+/* Hide the user dropdown arrow */
+.nav-user-arrow {
+    display: none !important;
+}
+
+/* Increase z-index for user dropdown menu */
+.nav-user-menu {
+    z-index: 9999 !important;
+}
+
+
+/* Icon spacing and sizing for sidebar and dropdown */
+.menu-group-header i,
+.admin-menu > li > a i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.user-menu-icon i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Force dropdown above all content with fixed positioning */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10000;
+}
+
+.nav-user-menu {
+    position: fixed !important;
+    z-index: 10001 !important;
+}
+
+/* Start menu groups collapsed by default and implement accordion behavior */
+.menu-group {
+    margin-bottom: 0;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0 !important;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.menu-group:not(.collapsed) .menu-group-items {
+    max-height: 500px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Fix dropdown positioning - use absolute but with higher z-index */
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 999999 !important;
+}
+
+.nav-user-dropdown {
+    z-index: 999998;
+}
+
+/* 
+   Z-INDEX HIERARCHY FIX
+   Proper stacking order for dropdowns above header content
+*/
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10002; /* Above nav-content (10001) */
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 10003 !important; /* Above dropdown trigger */
+}
+
+/* Ensure dropdown visibility when shown */
+.nav-user-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+}
+
+/* FINAL z-index fix - ensure dropdown is absolutely on top */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 100000 !important;
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 100001 !important;
+}
+
+.nav-user-menu.show {
+    z-index: 100001 !important;
+}
+
+/* Fix navbar overflow clipping dropdown - allow visible overflow */
+.navbar {
+    overflow: visible !important;
+}
+
+/* Clean z-index hierarchy for dropdown */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10002 !important; /* Above nav-content (10001) */
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 10002 !important; /* Same as parent, positioned correctly */
+}
+
+.nav-user-menu.show {
+    z-index: 10002 !important;
 }

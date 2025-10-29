@@ -87,6 +87,31 @@ class SiteSettings
         $css .= "    --hub-title-color: " . self::get('hub_title_color', '#000000') . ";\n";
         $css .= "    --hub-subtitle-color: " . self::get('hub_subtitle_color', '#666666') . ";\n";
         
+        // Hub Tiles & Effects
+        $css .= "    --hub-card-hover-shadow: " . self::get('hub_card_hover_shadow', '#C99700') . ";\n";
+        $css .= "    --hub-card-hover-border: " . self::get('hub_card_hover_border', '#C99700') . ";\n";
+        $css .= "    --hub-card-hover-title: " . self::get('hub_card_hover_title', '#C99700') . ";\n";
+        $css .= "    --hub-particle-glow-1: " . self::get('hub_particle_glow_1', '#C99700') . ";\n";
+        $css .= "    --hub-particle-glow-2: " . self::get('hub_particle_glow_2', '#FFD700') . ";\n";
+        $css .= "    --hub-particle-size: " . self::get('hub_particle_size', '600') . "px;\n";
+        $css .= "    --hub-particle-blur: " . self::get('hub_particle_blur', '150') . "px;\n";
+        $css .= "    --hub-particle-opacity: " . self::get('hub_particle_opacity', '0.15') . ";\n";
+        $css .= "    --hub-particle-speed: " . self::get('hub_particle_speed', '20') . "s;\n";
+        $particleDisplay = (self::get('hub_particle_enabled', '1') === '1' || self::get('hub_particle_enabled', '1') === true) ? 'block' : 'none';
+        $css .= "    --hub-particle-display: " . $particleDisplay . ";\n";
+        $css .= "    --hub-card-glow-center: " . self::get('hub_card_glow_center', '#C99700') . ";\n";
+        $css .= "    --hub-card-glow-edge: " . self::get('hub_card_glow_edge', '#000000') . ";\n";
+        $css .= "    --hub-icon-shadow: " . self::get('hub_icon_shadow', '#C99700') . ";\n";
+        $css .= "    --hub-icon-color: " . self::get('hub_icon_color', '#C99700') . ";\n";
+        $css .= "    --hub-icon-hover-color: " . self::get('hub_icon_hover_color', '#FFD700') . ";\n";
+        $css .= "    --hub-card-shadow: " . self::get('hub_card_shadow', '#000000') . ";\n";
+        $css .= "    --hub-card-border: " . self::get('hub_card_border', '#E5E7EB') . ";\n";
+        $css .= "    --hub-card-description: " . self::get('hub_card_description', '#6B7280') . ";\n";
+        $css .= "    --hub-card-hover-description: " . self::get('hub_card_hover_description', '#374151') . ";\n";
+        $css .= "    --hub-card-hover-description-shadow: " . self::get('hub_card_hover_description_shadow', '#000000') . ";\n";
+        $css .= "    --hub-no-sections-bg: " . self::get('hub_no_sections_bg', '#F9FAFB') . ";\n";
+        $css .= "    --hub-no-sections-shadow: " . self::get('hub_no_sections_shadow', '#000000') . ";\n";
+        
         // Header and footer
         $css .= "    --header-height: " . self::get('header_height', '80') . "px;\n";
         $css .= "    --footer-height: " . self::get('footer_height', '40') . "px;\n";

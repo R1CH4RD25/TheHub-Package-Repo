@@ -13,12 +13,20 @@ switch ($action) {
         // Check if user has dismissed package alerts
         $db = Hub\Database::getInstance();
         
-        // Count packages needing validation
+        // Count packages needing validation (excluding dismissed ones)
         $pendingPackages = $db->fetchAll(
-            "SELECT id, display_name FROM section_packages 
-             WHERE is_deprecated = 0 
-             AND (validation_status IS NULL OR validation_status = 'pending')
-             LIMIT 10"
+            "SELECT sp.id, sp.display_name 
+             FROM section_packages sp
+             LEFT JOIN user_dismissed_alerts uda ON (
+                 uda.user_id = ? 
+                 AND uda.alert_type = 'package_validation' 
+                 AND (uda.alert_key = CONCAT('package_', sp.id) OR uda.alert_key = 'all')
+             )
+             WHERE sp.is_deprecated = 0 
+             AND (sp.validation_status IS NULL OR sp.validation_status = 'pending')
+             AND uda.id IS NULL
+             LIMIT 10",
+            [$userId]
         );
         
         // Count installed packages (validated and can_install = 1)
@@ -52,7 +60,7 @@ switch ($action) {
             [$userId]
         );
         
-        jsonResponse([
+        $response = [
             'success' => true,
             'alerts' => [
                 'validation' => [
@@ -68,13 +76,16 @@ switch ($action) {
                     'dismissed' => !empty($dismissedUpdates)
                 ]
             ]
-        ]);
+        ];
+        
+        jsonResponse($response);
         break;
         
     case 'dismiss':
-        verifyCsrfToken();
+        verifyCsrfToken($_POST['csrf_token'] ?? '');
         
         $alertType = $_POST['alert_type'] ?? '';
+        $packageId = $_POST['package_id'] ?? null; // Optional: specific package to dismiss
         
         if (!in_array($alertType, ['package_validation', 'package_updates'])) {
             jsonResponse(['success' => false, 'error' => 'Invalid alert type'], 400);
@@ -82,12 +93,15 @@ switch ($action) {
         
         $db = Hub\Database::getInstance();
         
-        // Insert or update dismissed alert
+        // Use package_id as alert_key if provided, otherwise 'all'
+        $alertKey = $packageId ? "package_{$packageId}" : 'all';
+        
+        // Insert or update dismissed alert (never expires - permanent dismissal)
         $db->execute(
             "INSERT INTO user_dismissed_alerts (user_id, alert_type, alert_key, dismissed_at) 
-             VALUES (?, ?, 'all', NOW()) 
+             VALUES (?, ?, ?, NOW()) 
              ON DUPLICATE KEY UPDATE dismissed_at = NOW()",
-            [$userId, $alertType]
+            [$userId, $alertType, $alertKey]
         );
         
         jsonResponse([

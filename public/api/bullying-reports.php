@@ -13,6 +13,8 @@ require_once __DIR__ . '/../../src/bootstrap.php';
 use Hub\Auth;
 use Hub\Database;
 use Hub\AuditLogger;
+use Hub\SectionPermissions;
+use Hub\NotificationService;
 
 header('Content-Type: application/json');
 
@@ -27,9 +29,13 @@ try {
             break;
             
         case 'GET':
-            // VIEW REPORTS - Requires specific roles
+            // VIEW REPORTS - Check review permissions
             Auth::requireLogin();
-            Auth::requireRole(['counselor', 'principal', 'admin', 'super_admin']);
+            
+            $currentUser = Auth::getCurrentUser();
+            if (!SectionPermissions::canReview($currentUser['id'], 'bullying-report')) {
+                jsonResponse(['error' => 'You do not have permission to view reports'], 403);
+            }
             
             if (isset($_GET['id'])) {
                 handleGetReport($db, $_GET['id']);
@@ -40,10 +46,17 @@ try {
             
         case 'PUT':
         case 'PATCH':
-            // UPDATE REPORT - Requires specific roles
+            // UPDATE REPORT - Check edit permissions
             Auth::requireLogin();
-            Auth::requireRole(['counselor', 'principal', 'admin', 'super_admin']);
-            handleUpdateReport($db);
+            
+            $currentUser = Auth::getCurrentUser();
+            $perms = SectionPermissions::getReviewPermissions($currentUser['id'], 'bullying-report');
+            
+            if (!$perms['can_edit']) {
+                jsonResponse(['error' => 'You do not have permission to edit reports'], 403);
+            }
+            
+            handleUpdateReport($db, $perms);
             break;
             
         default:
@@ -129,8 +142,17 @@ function handleSubmitReport($db) {
         ]
     );
     
-    // Send notifications to counselor/principal/admin
-    sendNotifications($db, $reportId, $data);
+    // Send notifications using new notification system
+    $notificationData = [
+        'section_name' => 'Bullying Report',
+        'report_id' => $reportId,
+        'priority' => $data['priority'],
+        'details' => 'Type: ' . ucfirst($data['incident_type']) . "\n" .
+                    'Location: ' . $data['incident_location'] . "\n" .
+                    'Date: ' . $data['incident_date']
+    ];
+    
+    NotificationService::notifySection('bullying-report', 'submission', $notificationData);
     
     jsonResponse([
         'success' => true,
@@ -250,9 +272,9 @@ function handleGetReport($db, $reportId) {
 }
 
 /**
- * Update report (restricted access)
+ * Update report (restricted access with permission check)
  */
-function handleUpdateReport($db) {
+function handleUpdateReport($db, $perms) {
     parse_str(file_get_contents('php://input'), $_PUT);
     
     if (empty($_PUT['id'])) {
@@ -262,11 +284,21 @@ function handleUpdateReport($db) {
     $currentUser = Auth::getCurrentUser();
     $reportId = $_PUT['id'];
     
-    // Build update query dynamically based on provided fields
+    // Build update query dynamically based on provided fields and permissions
     $updateFields = [];
     $params = ['id' => $reportId];
     
-    $allowedFields = ['status', 'priority', 'assigned_to', 'action_taken', 'resolution_notes', 'follow_up_required', 'follow_up_date'];
+    // Allow fields based on permissions
+    $allowedFields = [];
+    if ($perms['can_change_status']) {
+        $allowedFields = array_merge($allowedFields, ['status', 'priority']);
+    }
+    if ($perms['can_assign']) {
+        $allowedFields[] = 'assigned_to';
+    }
+    if ($perms['can_edit']) {
+        $allowedFields = array_merge($allowedFields, ['action_taken', 'resolution_notes', 'follow_up_required', 'follow_up_date']);
+    }
     
     foreach ($allowedFields as $field) {
         if (isset($_PUT[$field])) {

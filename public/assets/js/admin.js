@@ -105,10 +105,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize cascading dependencies for optional features
     initializeDependencies();
     
-    // Check for package alerts (for super admins)
-    // If packages tab is already active on load, show alerts; otherwise just update badge
-    const packagesTabActive = document.getElementById('tab-packages')?.classList.contains('active');
-    checkPackageAlerts(packagesTabActive); 
+    // Check for package alerts on dashboard load (for super admins)
+    // Always check to update badges, but only show alert banners if packages tab is active
+    if (window.isSuperAdmin) {
+        const packagesTabActive = document.getElementById('tab-packages')?.classList.contains('active');
+        checkPackageAlerts(packagesTabActive); 
+    }
     
     // Hamburger Menu for Admin Sidebar (Responsive)
     const hamburgerMenu = document.querySelector('.hamburger-menu');
@@ -200,11 +202,59 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     if (savedTab && document.getElementById(`tab-${savedTab}`)) {
         // Switch to saved tab (this will load the appropriate data)
+        console.log('🔄 Restoring saved tab:', savedTab);
         switchTab(savedTab);
     } else {
         // No saved tab, load default User Management data
         loadUsers();
     }
+    
+    // Additional check for packages tab loading after a brief delay
+    setTimeout(() => {
+        const packagesTab = document.getElementById('tab-packages');
+        if (packagesTab && packagesTab.classList.contains('active')) {
+            console.log('📦 Packages tab is active on page load, ensuring content is loaded...');
+            const activeSubtab = document.querySelector('#tab-packages .subtab-nav a.active');
+            if (activeSubtab) {
+                const subtabName = activeSubtab.dataset.subtab;
+                console.log('📋 Loading initial packages subtab:', subtabName);
+                
+                if (subtabName === 'installed-packages') {
+                    loadInstalledPackages();
+                } else if (subtabName === 'available-packages') {
+                    loadAvailablePackages();
+                } else if (subtabName === 'package-updates') {
+                    loadPackageUpdates();
+                }
+            } else {
+                console.log('📋 No active subtab found, loading installed packages as default');
+                // Click the first subtab to activate it and load content
+                const firstSubtab = document.querySelector('#tab-packages .subtab-nav a[data-subtab="installed-packages"]');
+                if (firstSubtab) {
+                    firstSubtab.click();
+                }
+            }
+        }
+    }, 200);
+    
+    // After tab initialization, ensure packages content is loaded if packages tab is active
+    setTimeout(() => {
+        const packagesTab = document.getElementById('tab-packages');
+        if (packagesTab && packagesTab.classList.contains('active')) {
+            const activeSubtab = document.querySelector('#tab-packages .subtab-nav a.active');
+            if (activeSubtab) {
+                const subtabName = activeSubtab.dataset.subtab;
+                console.log('Loading initial packages subtab:', subtabName);
+                if (subtabName === 'installed-packages') {
+                    loadInstalledPackages();
+                } else if (subtabName === 'available-packages') {
+                    loadAvailablePackages();
+                } else if (subtabName === 'package-updates') {
+                    loadPackageUpdates();
+                }
+            }
+        }
+    }, 100); // Small delay to ensure DOM is ready
 
     // Modal controls - Attach to ALL modals
     document.querySelectorAll('.modal-close').forEach(btn => {
@@ -324,9 +374,34 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }
         
+        // If switching to section-config tab, load section configuration
+        if (tabName === 'section-config') {
+            if (typeof loadSectionConfig === 'function' && typeof sectionsConfigData !== 'undefined') {
+                if (sectionsConfigData.length === 0) {
+                    loadSectionConfig();
+                }
+            }
+        }
+        
         // If switching to packages tab, check and show alerts
         if (tabName === 'packages' && window.isSuperAdmin) {
             checkPackageAlerts(true);
+            
+            // Load content for the currently active packages subtab
+            const activePackagesSubtab = document.querySelector('#tab-packages .subtab-nav a.active');
+            if (activePackagesSubtab) {
+                const subtabName = activePackagesSubtab.dataset.subtab;
+                if (subtabName === 'installed-packages') {
+                    loadInstalledPackages();
+                } else if (subtabName === 'available-packages') {
+                    loadAvailablePackages();
+                } else if (subtabName === 'package-updates') {
+                    loadPackageUpdates();
+                }
+            } else {
+                // No active subtab found, default to installed packages
+                loadInstalledPackages();
+            }
         }
         
         // Trigger animations for the new tab (if animation controller is loaded)
@@ -835,13 +910,44 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // Add row for each section
             data.sections.forEach(section => {
+                // Render icon - check if it's a Bootstrap Icons class or emoji
+                let iconHtml = '';
+                if (section.icon && section.icon.startsWith('bi-')) {
+                    // Bootstrap Icons class
+                    iconHtml = `<i class="bi ${section.icon}"></i>`;
+                } else {
+                    // Emoji or other text icon
+                    iconHtml = escapeHtml(section.icon || '📦');
+                }
+                
+                // Truncate description to 60 characters
+                let descriptionHtml = '';
+                let nameWithIcon = escapeHtml(section.display_name);
+                
+                if (section.description) {
+                    const fullDesc = section.description;
+                    const truncatedDesc = fullDesc.length > 60 ? fullDesc.substring(0, 60) + '...' : fullDesc;
+                    const needsIcon = fullDesc.length > 60;
+                    
+                    if (needsIcon) {
+                        // Add icon next to section name with properly escaped tooltip
+                        // Use double escaping for data attribute: once for HTML, once for attribute value
+                        const tooltipText = fullDesc.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        nameWithIcon = `${escapeHtml(section.display_name)} <i class="bi bi-info-circle section-description-icon" data-full-text="${tooltipText}"></i>`;
+                    }
+                    
+                    descriptionHtml = `<div class="section-description">
+                        <span class="section-description-text">${escapeHtml(truncatedDesc)}</span>
+                    </div>`;
+                }
+                
                 html += `<tr>
                     <td class="sticky-col">
                         <div class="section-name-cell">
-                            <span class="section-icon">${section.icon}</span>
+                            <span class="section-icon">${iconHtml}</span>
                             <div>
-                                <div class="section-name">${escapeHtml(section.display_name)}</div>
-                                ${section.description ? `<div class="section-description">${escapeHtml(section.description)}</div>` : ''}
+                                <div class="section-name">${nameWithIcon}</div>
+                                ${descriptionHtml}
                             </div>
                         </div>
                     </td>`;
@@ -921,17 +1027,28 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         try {
             // Update each section
-            const updates = Object.entries(sections).map(([sectionId, roles]) => {
-                const formData = new FormData();
-                formData.append('csrf_token', window.csrfToken);
-                formData.append('section_id', sectionId);
-                roles.forEach(role => formData.append('roles[]', role));
+            const updates = Object.entries(sections)
+                .filter(([sectionId, roles]) => {
+                    // Only update sections that have valid IDs
+                    const id = parseInt(sectionId);
+                    return id > 0 && !isNaN(id);
+                })
+                .map(([sectionId, roles]) => {
+                    const formData = new FormData();
+                    formData.append('csrf_token', window.csrfToken);
+                    formData.append('section_id', sectionId);
+                    roles.forEach(role => formData.append('roles[]', role));
 
-                return fetch('/api/section-role-access.php', {
-                    method: 'POST',
-                    body: formData
+                    return fetch('/api/section-role-access.php', {
+                        method: 'POST',
+                        body: formData
+                    }).then(response => {
+                        if (!response.ok) {
+                            console.error(`Failed to update section ${sectionId}:`, response.status);
+                        }
+                        return response;
+                    });
                 });
-            });
 
             const results = await Promise.all(updates);
             const allSuccessful = results.every(r => r.ok);
@@ -1081,11 +1198,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Section Management (Super Admin Only)
     async function loadSectionsManagement() {
         const container = document.getElementById('sectionsManagementTable');
-        if (!container) return;
+        if (!container) {
+            console.error('❌ sectionsManagementTable container not found!');
+            return;
+        }
+
+        console.log('📋 Loading sections management table...');
 
         try {
             const response = await fetch('/api/sections.php');
             const sections = await response.json();
+            
+            console.log('📋 Loaded sections:', sections.length, 'sections');
+            console.log('🔍 Section data:', sections);
 
             let html = `<div class="table-responsive">
                 <table class="data-table table-sticky-first-col">
@@ -1110,8 +1235,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                         '<span class="badge badge-success">Active</span>' : 
                         '<span class="badge badge-inactive">Inactive</span>';
 
+                    // Render icon - check if it's a Bootstrap Icons class or emoji
+                    let iconDisplay = '';
+                    if (section.icon && section.icon.startsWith('bi-')) {
+                        iconDisplay = `<i class="bi ${section.icon}" style="font-size: 2rem;"></i>`;
+                    } else {
+                        iconDisplay = escapeHtml(section.icon || '📦');
+                    }
+
                     html += `<tr>
-                        <td class="sticky-col" style="font-size: 2rem;">${section.icon}</td>
+                        <td class="sticky-col" style="font-size: 2rem;">${iconDisplay}</td>
                         <td><code>${escapeHtml(section.name)}</code></td>
                         <td>${escapeHtml(section.display_name)}</td>
                         <td><small>${escapeHtml(section.base_url)}</small></td>
@@ -1129,9 +1262,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             html += '</tbody></table></div>';
+            console.log('📝 HTML length:', html.length, 'characters');
+            console.log('🎯 Setting innerHTML on container:', container.id);
             container.innerHTML = html;
+            console.log('✅ Sections management table rendered successfully');
+            console.log('👀 Container now has', container.querySelectorAll('tr').length - 1, 'data rows');
         } catch (error) {
-            console.error('Error loading sections:', error);
+            console.error('❌ Error loading sections:', error);
             container.innerHTML = '<p class="error">Failed to load sections.</p>';
         }
     }
@@ -1187,13 +1324,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (result.success) {
                 showToast(`Section ${action}d successfully`, 'success');
-                loadSectionsManagement();
+                
+                // Force reload the sections table
+                console.log('🔄 Reloading sections management table...');
+                await loadSectionsManagement();
+                console.log('✅ Sections table reloaded');
             } else {
                 showToast(result.error || 'Failed to update section', 'error');
             }
         } catch (error) {
             console.error('Error toggling section:', error);
-            showToast('Failed to update section', 'error');
+            showToast('Failed to update section: ' + error.message, 'error');
         }
     };
 
@@ -1645,78 +1786,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         } catch (error) {
             console.error('Error updating theme:', error);
             showMessage('Error updating theme', 'error');
-        }
-    });
-
-    // Overwrite Active Theme button - shows when active theme exists and settings have changed
-    let activeThemeData = null;
-    
-    async function updateOverwriteActiveButton() {
-        try {
-            const response = await fetch('/api/themes.php?_=' + Date.now());
-            if (response.ok) {
-                const themes = await response.json();
-                const activeTheme = themes.find(t => t.is_active == 1);
-                activeThemeData = activeTheme;
-                
-                const btn = document.getElementById('overwriteActiveTheme');
-                if (btn && activeTheme && !activeTheme.is_system) {
-                    btn.style.display = 'inline-block';
-                    btn.title = `Overwrite "${activeTheme.name}" with current settings`;
-                } else if (btn) {
-                    btn.style.display = 'none';
-                }
-            }
-        } catch (error) {
-            console.error('Error checking active theme:', error);
-        }
-    }
-    
-    // Call on load
-    updateOverwriteActiveButton();
-    
-    // Overwrite active theme button click
-    document.getElementById('overwriteActiveTheme')?.addEventListener('click', async function() {
-        if (!activeThemeData) {
-            showMessage('No active theme found', 'error');
-            return;
-        }
-        
-        if (activeThemeData.is_system) {
-            showMessage('Cannot overwrite system themes', 'error');
-            return;
-        }
-        
-        if (!confirm(`Overwrite "${activeThemeData.name}" with current color settings? This cannot be undone.`)) {
-            return;
-        }
-        
-        try {
-            const formData = new FormData();
-            formData.append('action', 'update');
-            formData.append('id', activeThemeData.id);
-            formData.append('csrf_token', window.csrfToken);
-            
-            const response = await fetch('/api/themes.php', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(formData).toString()
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok && result.success) {
-                showMessage(`Theme "${activeThemeData.name}" overwritten successfully!`, 'success');
-                loadThemes();
-                updateOverwriteActiveButton();
-            } else {
-                showMessage(result.error || 'Failed to update theme', 'error');
-            }
-        } catch (error) {
-            console.error('Error overwriting active theme:', error);
-            showMessage('Error overwriting active theme', 'error');
         }
     });
 
@@ -2881,7 +2950,12 @@ async function uploadPackageFile(file) {
 // Load installed packages
 async function loadInstalledPackages() {
     const container = document.getElementById('installedPackagesTable');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ installedPackagesTable container not found!');
+        return;
+    }
+    
+    console.log('🔄 Loading installed packages...');
     
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading...</p>';
@@ -2892,9 +2966,21 @@ async function loadInstalledPackages() {
         if (!result.success) throw new Error(result.error);
         
         const packages = result.packages;
+        console.log('📦 Loaded', packages.length, 'installed packages');
         
         if (packages.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #6c757d;">No packages installed yet.</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 2rem 1rem; color: #6c757d;">
+                    <i class="bi bi-box-seam" style="font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.5;"></i>
+                    <h4 style="margin-bottom: 0.75rem; color: #495057; font-size: 1.1rem;">No Packages Installed</h4>
+                    <p style="margin-bottom: 1.25rem; font-size: 0.95em;">You haven't installed any packages yet.</p>
+                    <p style="font-size: 0.9rem;">
+                        <a href="#" onclick="switchSubtab('packages', 'available-packages'); return false;" class="btn btn-primary btn-sm">
+                            <i class="bi bi-download"></i> Browse Available Packages
+                        </a>
+                    </p>
+                </div>
+            `;
             return;
         }
         
@@ -2958,7 +3044,17 @@ async function loadInstalledPackages() {
         container.innerHTML = html;
         
     } catch (error) {
-        container.innerHTML = `<p style="text-align: center; padding: 2rem; color: #d32f2f;">Error: ${error.message}</p>`;
+        console.error('Error loading installed packages:', error);
+        container.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #d32f2f;">
+                <i class="bi bi-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.7;"></i>
+                <h4 style="margin-bottom: 1rem;">Error Loading Packages</h4>
+                <p style="margin-bottom: 1.5rem;">Unable to load installed packages: ${error.message}</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadInstalledPackages()">
+                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                </button>
+            </div>
+        `;
     }
 }
 
@@ -2975,18 +3071,63 @@ async function loadAvailablePackages() {
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading...</p>';
         
-        const response = await fetch('/api/packages.php');
-        const result = await response.json();
+        // Fetch both packages and dismissed alerts
+        const [packagesResponse, alertsResponse] = await Promise.all([
+            fetch('/api/packages.php'),
+            fetch('/api/package-alerts.php?action=check')
+        ]);
         
-        console.log('📦 Packages API response:', result);
+        const [packagesResult, alertsResult] = await Promise.all([
+            packagesResponse.json(),
+            alertsResponse.json()
+        ]);
         
-        if (!result.success) throw new Error(result.error);
+        console.log('📦 Packages API response:', packagesResult);
+        console.log('📦 Alerts API response:', alertsResult);
         
-        const packages = result.packages;
-        console.log('📦 Found', packages.length, 'packages');
+        if (!packagesResult.success) throw new Error(packagesResult.error);
         
-        if (packages.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #6c757d;">No packages available. Upload a .hubpkg file to get started.</p>';
+        const packages = packagesResult.packages;
+        const dismissedPackages = new Set();
+        
+        // Track dismissed packages
+        if (alertsResult.success && alertsResult.alerts.validation.packages) {
+            // All packages not in the validation packages list are dismissed
+            const validationPackageIds = new Set(alertsResult.alerts.validation.packages.map(p => p.id));
+            packages.forEach(pkg => {
+                if (!validationPackageIds.has(pkg.id) && 
+                    (pkg.validation_status === 'pending' || !pkg.validation_status)) {
+                    dismissedPackages.add(pkg.id);
+                }
+            });
+        }
+        
+        // Filter out installed packages for the Available tab
+        const availablePackages = packages.filter(pkg => !pkg.is_installed);
+        
+        console.log('📦 Found', packages.length, 'total packages,', availablePackages.length, 'available for installation');
+        console.log('📦 Dismissed packages:', Array.from(dismissedPackages));
+        
+        if (availablePackages.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 2rem 1rem;">
+                    <div style="color: #6c757d; font-size: 1.1em; margin-bottom: 0.75rem;">
+                        <i class="fas fa-box-open" style="font-size: 1.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.5;"></i>
+                        No packages available for installation
+                    </div>
+                    <p style="color: #6c757d; margin-bottom: 1.5rem; font-size: 0.95em;">
+                        ${packages.length > 0 ? 'All uploaded packages are already installed.' : 'Upload a .hubpkg file to get started.'}
+                    </p>
+                    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="document.querySelector('input[type=file]').click()">
+                            <i class="fas fa-upload"></i> Upload Package
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="showPackageDiscovery()">
+                            <i class="fas fa-box-open"></i> Browse Available Packages
+                        </button>
+                    </div>
+                </div>
+            `;
             return;
         }
         
@@ -2998,18 +3139,16 @@ async function loadAvailablePackages() {
         html += '<th>Actions</th>';
         html += '</tr></thead><tbody>';
         
-        packages.forEach(pkg => {
+        availablePackages.forEach(pkg => {
             const canInstall = pkg.can_install;
-            const isInstalled = pkg.is_installed;
+            // isInstalled is always false since we filtered them out
             
             html += '<tr>';
             html += `<td><strong>${escapeHtml(pkg.display_name)}</strong><br><small style="color: #6c757d;">${escapeHtml(pkg.package_id)}</small></td>`;
             html += `<td><span class="badge badge-info">${escapeHtml(pkg.version)}</span></td>`;
             html += '<td>';
             
-            if (isInstalled) {
-                html += '<span class="badge badge-success">Installed</span>';
-            } else if (pkg.validation_status === 'pending' || !pkg.validation_status) {
+            if (pkg.validation_status === 'pending' || !pkg.validation_status) {
                 html += '<span class="badge badge-warning">⏳ Awaiting Validation</span>';
             } else if (canInstall) {
                 html += '<span class="badge badge-success">✓ Validated - Ready</span>';
@@ -3022,25 +3161,21 @@ async function loadAvailablePackages() {
             html += '<td>';
             
             // Validate button (primary action for unvalidated packages)
-            if (!isInstalled && (pkg.validation_status === 'pending' || !pkg.validation_status)) {
+            if (pkg.validation_status === 'pending' || !pkg.validation_status) {
                 html += `<button class="btn btn-sm btn-primary" onclick="validatePackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
                     Validate Package
                 </button>`;
             }
             // View Report button (for already validated packages)
-            else if (!isInstalled) {
+            else {
                 html += `<button class="btn btn-sm ${canInstall ? 'btn-success' : 'btn-warning'}" onclick="showValidationDetails(${pkg.id})">
                     ${canInstall ? 'View Report' : 'View Issues'}
                 </button>`;
             }
             
-            if (!isInstalled && canInstall && pkg.validation_status !== 'pending') {
+            if (canInstall && pkg.validation_status !== 'pending') {
                 html += `<button class="btn btn-sm btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
                     Install
-                </button>`;
-            } else if (isInstalled && pkg.has_update) {
-                html += `<button class="btn btn-sm btn-warning" onclick="upgradePackageById(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
-                    Upgrade
                 </button>`;
             }
             
@@ -3048,6 +3183,13 @@ async function loadAvailablePackages() {
                 html += `<button class="btn btn-sm btn-danger" onclick="deletePackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
                     Delete
                 </button>`;
+                
+                // Add dismiss button only for packages needing validation that haven't been dismissed
+                if ((pkg.validation_status === 'pending' || !pkg.validation_status) && !dismissedPackages.has(pkg.id)) {
+                    html += `<button class="btn btn-sm btn-secondary" onclick="dismissPackageRow(${pkg.id}, 'package_validation', event)" title="Don't show this alert again">
+                        <i class="bi bi-x-circle"></i> Dismiss Alert
+                    </button>`;
+                }
             }
             
             html += '</td>';
@@ -3055,12 +3197,25 @@ async function loadAvailablePackages() {
         });
         
         html += '</tbody></table>';
-        container.innerHTML = html;
-        console.log('✅ Packages table rendered with', packages.length, 'packages');
         
-        // Update notification badge for packages needing validation
-        const needingValidation = packages.filter(pkg => !pkg.is_installed && (!pkg.validation_status || pkg.validation_status === 'pending')).length;
-        updatePackageBadge('availablePackagesBadge', needingValidation);
+        // Add "Browse Available Packages" button after the table
+        html += `
+            <div class="find-more-packages-section" style="text-align: center; margin-top: 1.5rem; padding: 1.25rem;">
+                <button class="btn btn-outline-primary" onclick="showPackageDiscovery()">
+                    <i class="fas fa-box-open"></i> Browse Available Packages
+                </button>
+                <div style="margin-top: 0.75rem; color: #6c757d; font-size: 0.875rem;">
+                    <i class="fas fa-download"></i> Download additional packages from the repository
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        console.log('✅ Available packages table rendered with', availablePackages.length, 'packages (', packages.length - availablePackages.length, 'installed packages filtered out)');
+        
+        // Update notification badge for packages needing validation (use count from alerts API)
+        const validationCount = alertsResult.success ? alertsResult.alerts.validation.count : 0;
+        updatePackageBadge('availablePackagesBadge', validationCount);
         
     } catch (error) {
         console.error('❌ Error loading packages:', error);
@@ -3097,7 +3252,12 @@ async function loadPackageUpdates() {
         const updates = result.updates;
         
         if (updates.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #4CAF50;">✓ All packages are up to date!</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 2rem 1rem; color: #4CAF50;">
+                    <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.75rem; opacity: 0.7;"></i>
+                    <p style="margin: 0; font-size: 1rem;">✓ All packages are up to date!</p>
+                </div>
+            `;
             return;
         }
         
@@ -3138,6 +3298,9 @@ async function installPackage(packageId, packageName) {
     }
     
     try {
+        console.log('📦 Installing package:', packageId, packageName);
+        console.log('🔍 CSRF token available:', !!window.csrfToken, window.csrfToken?.substring(0, 10) + '...');
+        
         showMessage('Installing package...', 'info');
         
         const formData = new FormData();
@@ -3148,7 +3311,17 @@ async function installPackage(packageId, packageName) {
             body: formData
         });
         
-        const result = await response.json();
+        console.log('🔍 Install response status:', response.status);
+        
+        let result;
+        try {
+            result = await response.json();
+            console.log('🔍 Install response:', result);
+        } catch (parseError) {
+            const responseText = await response.text();
+            console.error('🔍 Failed to parse response as JSON:', responseText);
+            throw new Error('Server returned invalid response: ' + responseText);
+        }
         
         if (result.success) {
             showMessage(result.message, 'success');
@@ -3200,11 +3373,19 @@ async function upgradePackageById(packageId, packageName) {
 async function validatePackage(packageId, packageName) {
     try {
         console.log('🎯 validatePackage START - packageId:', packageId, 'packageName:', packageName);
+        console.log('🔍 DEBUG: Function called, about to create modal');
         
-        // Open modal immediately with progress state - COMPACT REDESIGN
+        // Check if modal already exists
+        const existingModal = document.getElementById('validationModal');
+        if (existingModal) {
+            console.log('🔍 DEBUG: Removing existing modal');
+            existingModal.remove();
+        }
+        
+        // Open modal immediately with progress state - CLEAN DESIGN
         const modalHtml = `
-            <div class="modal-overlay show" id="validationModal" onclick="if(event.target === this) closeValidationModal()">
-                <div class="modal-content modal-validation" onclick="event.stopPropagation()">
+            <div class="modal-overlay show" id="validationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem;" onclick="if(event.target === this) closeValidationModal()">
+                <div class="modal-content modal-validation" style="background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 0.3125rem;" onclick="event.stopPropagation()">
                     <!-- Header with Close Button -->
                     <div class="validation-modal-header">
                         <h2 class="validation-report-title">
@@ -3245,9 +3426,61 @@ async function validatePackage(packageId, packageName) {
         `;
         
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-        console.log('✅ Modal HTML added to DOM');
+        console.log('🔍 DEBUG: Modal HTML added to DOM');
         
         const modal = document.getElementById('validationModal');
+        if (!modal) {
+            console.error('❌ DEBUG: Modal not found in DOM after insertion!');
+            return;
+        }
+        console.log('✅ Modal found in DOM');
+        
+        // Force modal visibility with essential overrides
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+        modal.style.visibility = 'visible';
+        modal.style.background = 'rgba(0, 0, 0, 0.6)';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.zIndex = '999999';
+        modal.classList.add('show');
+        
+        console.log('✅ Modal forced visible');
+        
+        // Ensure modal content is properly displayed
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.opacity = '1';
+            modalContent.style.transform = 'none';
+            console.log('✅ Modal content made visible');
+        }
+        
+        // Prevent any CSS animations from hiding the modal
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.style.display = 'flex';
+            console.log('✅ Modal visibility reinforced after timeout');
+        }, 100);
+        
+        // Keep checking modal visibility during validation process
+        const visibilityChecker = setInterval(() => {
+            if (modal && document.body.contains(modal)) {
+                if (modal.style.opacity !== '1' || modal.style.display !== 'flex') {
+                    console.log('🔧 Modal became invisible, restoring...');
+                    modal.style.opacity = '1';
+                    modal.style.display = 'flex';
+                    modal.style.visibility = 'visible';
+                }
+            } else {
+                clearInterval(visibilityChecker);
+            }
+        }, 500);
+        
+        // Store the checker ID so we can clear it later
+        modal.setAttribute('data-visibility-checker', visibilityChecker);
         console.log('✅ Modal found in DOM:', modal !== null, 'Computed style:', modal ? window.getComputedStyle(modal).display : 'N/A');
         
         const progressBar = document.getElementById('validationProgressBar');
@@ -3358,14 +3591,17 @@ async function validatePackage(packageId, packageName) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Trigger actual validation
-        console.log('Sending validation request to API...');
+        console.log('🔍 DEBUG: About to send validation request to API...');
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
         
+        console.log('🔍 DEBUG: FormData created, making fetch request...');
         const response = await fetch(`/api/packages.php?action=validate&id=${packageId}`, {
             method: 'POST',
             body: formData
         });
+        
+        console.log('🔍 DEBUG: Fetch completed, response status:', response.status);
         
         // Clear progress simulation
         clearInterval(progressInterval);
@@ -3670,14 +3906,46 @@ async function validatePackage(packageId, packageName) {
         }
         
     } catch (error) {
+        console.error('🔍 DEBUG: validatePackage caught error:', error);
+        console.error('🔍 DEBUG: Error stack:', error.stack);
+        console.log('🔍 DEBUG: Error occurred, modal should still be visible');
+        
         showMessage('Validation error: ' + error.message, 'error');
-        document.getElementById('closeValidationBtn').disabled = false;
+        
+        // Keep modal open and enable close button
+        const closeBtn = document.getElementById('closeValidationBtn');
+        if (closeBtn) {
+            closeBtn.disabled = false;
+            console.log('🔍 DEBUG: Close button enabled after error');
+        }
+        
+        // Update modal to show error state
+        const liveStats = document.getElementById('validationLiveStats');
+        if (liveStats) {
+            liveStats.innerHTML = `
+                <span class="stat-item stat-error">
+                    <i class="bi bi-x-circle"></i>
+                    Error: ${error.message}
+                </span>
+            `;
+        }
     }
 }
 
 function closeValidationModal() {
+    console.log('🔍 DEBUG: closeValidationModal called');
+    
     const modal = document.getElementById('validationModal');
     if (modal) {
+        console.log('🔍 DEBUG: Closing modal');
+        
+        // Clear the visibility checker
+        const checkerId = modal.getAttribute('data-visibility-checker');
+        if (checkerId) {
+            clearInterval(parseInt(checkerId));
+            console.log('🔍 DEBUG: Cleared visibility checker');
+        }
+        
         // Add hiding class for exit animation
         modal.classList.add('hiding');
         modal.classList.remove('show');
@@ -3685,7 +3953,10 @@ function closeValidationModal() {
         // Wait for animation before removing
         setTimeout(() => {
             modal.remove();
+            console.log('🔍 DEBUG: Modal removed from DOM');
         }, 300);
+    } else {
+        console.log('🔍 DEBUG: No modal found to close');
     }
 }
 
@@ -3812,14 +4083,19 @@ async function showValidationDetails(packageId) {
                            (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
         
         let html = `
-            <div class="validation-report">
-                <div class="validation-report-header" style="padding: 24px 32px; background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
-                    <h2 class="validation-report-title" style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 600; color: #111827;">
-                        ${pkg.validation_status === 'pending' ? 'Package Validation In Progress' : 'Package Validation Report'}
-                    </h2>
-                    <h3 class="validation-report-subtitle" style="margin: 0; font-size: 1.1rem; font-weight: 400; color: #6b7280;">
-                        ${escapeHtml(pkg.display_name)} <small style="color: #9ca3af;">v${escapeHtml(pkg.version)}</small>
-                    </h3>
+            <div class="validation-report" style="display: flex; flex-direction: column; height: 100%; max-height: 85vh; padding: 0.3125rem;">
+                <div class="validation-report-header" style="padding: 20px 32px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 class="validation-report-title" style="margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 600; color: #111827;">
+                            ${pkg.validation_status === 'pending' ? 'Package Validation In Progress' : 'Package Validation Report'}
+                        </h2>
+                        <h3 class="validation-report-subtitle" style="margin: 0; font-size: 1.1rem; font-weight: 400; color: #6b7280;">
+                            ${escapeHtml(pkg.display_name)} <small style="color: #9ca3af;">v${escapeHtml(pkg.version)}</small>
+                        </h3>
+                    </div>
+                    <button onclick="closeModal()" style="background: #f3f4f6; border: 1px solid #d1d5db; color: #6b7280; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        ✕
+                    </button>
                 </div>
                 
                 ${pkg.validation_status === 'pending' ? `
@@ -3853,7 +4129,7 @@ async function showValidationDetails(packageId) {
                     All Compatibility Checks
                     <small style="color: #9ca3af;">(showing all ${checks.length} checks)</small>
                 </h3>
-                <div class="validation-checks-container">
+                <div class="validation-checks-container" style="max-height: 50vh; overflow-y: auto; flex: 1;">
         `;
         
         // Group checks by type
@@ -3875,10 +4151,10 @@ async function showValidationDetails(packageId) {
             
             html += `
                 <div class="validation-check-group">
-                    <div class="validation-check-group-header">
-                        <span class="validation-check-icon ${typeIconClass}">${typeIcon}</span>
+                    <div class="validation-check-group-header" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: 600; font-size: 0.9rem;">
+                        <span class="validation-check-icon ${typeIconClass}" style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">${typeIcon}</span>
                         ${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}
-                        <small>${typePassed}/${typeChecks.length} passed</small>
+                        <small style="margin-left: auto; color: #6b7280; font-weight: normal;">${typePassed}/${typeChecks.length} passed</small>
                     </div>
             `;
             
@@ -3886,12 +4162,12 @@ async function showValidationDetails(packageId) {
                 const icon = check.status === 'fail' ? '✗' : check.status === 'warning' ? '⚠' : '✓';
                 
                 html += `
-                    <div class="validation-check-item ${check.status}">
-                        <span class="validation-check-icon ${check.status}">${icon}</span>
-                        <div class="validation-check-content">
-                            <strong>${escapeHtml(check.check_name)}</strong>
-                            <div class="validation-check-message">${escapeHtml(check.message)}</div>
-                            ${check.resolution ? `<div class="validation-check-resolution">
+                    <div class="validation-check-item ${check.status}" style="display: flex; align-items: flex-start; gap: 12px; padding: 8px 16px; border-bottom: 1px solid #f3f4f6;">
+                        <span class="validation-check-icon ${check.status}" style="flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">${icon}</span>
+                        <div class="validation-check-content" style="flex: 1; min-width: 0;">
+                            <strong style="font-size: 0.9rem; color: #374151;">${escapeHtml(check.check_name)}</strong>
+                            <div class="validation-check-message" style="font-size: 0.85rem; color: #6b7280; margin-top: 2px;">${escapeHtml(check.message)}</div>
+                            ${check.resolution ? `<div class="validation-check-resolution" style="font-size: 0.8rem; color: #059669; margin-top: 4px;">
                                 <strong>Fix:</strong> ${escapeHtml(check.resolution)}
                             </div>` : ''}
                         </div>
@@ -3904,7 +4180,7 @@ async function showValidationDetails(packageId) {
         
         html += `
                 </div>
-                <div class="modal-actions">
+                <div class="modal-actions" style="flex-shrink: 0; padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end; background: #ffffff;">
                     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
                     ${pkg.can_install && !result.package.is_installed ? 
                         `<button class="btn btn-primary" onclick="closeModal(); installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
@@ -3930,10 +4206,10 @@ function showModalWithContent(htmlContent) {
     // Create modal
     modal = document.createElement('div');
     modal.id = 'dynamicModal';
-    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
     
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background: white; border-radius: 8px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+    modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15);';
     modalContent.innerHTML = htmlContent;
     
     modal.appendChild(modalContent);
@@ -3986,62 +4262,11 @@ async function checkPackageAlerts(showAlerts = true) {
         updatePackageAlertBadge(validation, updates);
         updateSubtabBadges(validation, installed, updates);
         
-        // Only show alert banners if requested and container exists
+        // Only show alert banners if requested
         if (!showAlerts) return;
         
-        const container = document.getElementById('packageAlertsContainer');
-        if (!container) return; // Not on packages tab yet
-        let alertsHtml = '';
-        
-        // Validation alert
-        if (validation.count > 0 && !validation.dismissed) {
-            alertsHtml += `
-                <div class="alert alert-warning alert-dismissible package-alert" data-alert-type="package_validation">
-                    <div class="alert-content">
-                        <div class="alert-icon">
-                            <i class="bi bi-exclamation-triangle"></i>
-                        </div>
-                        <div class="alert-text">
-                            <strong>Packages Need Validation</strong>
-                            <p>${validation.count} package(s) require validation before installation. Click "Available Packages" to review and validate them.</p>
-                        </div>
-                    </div>
-                    <button class="alert-dismiss" onclick="dismissPackageAlert('package_validation')" title="Dismiss for 7 days">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-            `;
-        }
-        
-        // Updates alert
-        if (updates.count > 0 && !updates.dismissed) {
-            alertsHtml += `
-                <div class="alert alert-info alert-dismissible package-alert" data-alert-type="package_updates">
-                    <div class="alert-content">
-                        <div class="alert-icon">
-                            <i class="bi bi-arrow-repeat"></i>
-                        </div>
-                        <div class="alert-text">
-                            <strong>Updates Available</strong>
-                            <p>${updates.count} package(s) have updates available. Click "Updates" to view and install them.</p>
-                        </div>
-                    </div>
-                    <button class="alert-dismiss" onclick="dismissPackageAlert('package_updates')" title="Dismiss for 7 days">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-            `;
-        }
-        
-        if (alertsHtml) {
-            container.innerHTML = alertsHtml;
-            // Animate in
-            setTimeout(() => {
-                container.querySelectorAll('.package-alert').forEach(alert => {
-                    alert.classList.add('show');
-                });
-            }, 100);
-        }
+        // Alert banners are no longer used - badges are sufficient
+        // The alerts are now shown through the subtab badges and sidebar badge
         
     } catch (error) {
         console.error('Error checking package alerts:', error);
@@ -4053,6 +4278,7 @@ function updatePackageAlertBadge(validation, updates) {
     const sidebarBadge = document.getElementById('sidebarPackageBadge');
     if (sidebarBadge) {
         const totalAlerts = (validation.dismissed ? 0 : validation.count) + (updates.dismissed ? 0 : updates.count);
+        
         if (totalAlerts > 0) {
             sidebarBadge.textContent = totalAlerts;
             sidebarBadge.style.display = 'inline-block';
@@ -4064,15 +4290,10 @@ function updatePackageAlertBadge(validation, updates) {
 
 // Update the subtab badges with counts
 function updateSubtabBadges(validation, installed, updates) {
-    // Installed Packages badge (always shows count, no dismiss)
+    // Installed Packages badge - NEVER show a badge (it's just informational)
     const installedBadge = document.getElementById('installedPackagesBadge');
     if (installedBadge) {
-        if (installed.count > 0) {
-            installedBadge.textContent = installed.count;
-            installedBadge.style.display = 'inline-block';
-        } else {
-            installedBadge.style.display = 'none';
-        }
+        installedBadge.style.display = 'none';
     }
     
     // Available Packages badge (shows validation count, can be dismissed)
@@ -4147,4 +4368,543 @@ async function dismissPackageAlert(alertType) {
     } catch (error) {
         console.error('Error dismissing alert:', error);
     }
+}
+
+// Dismiss a specific package row alert
+async function dismissPackageRow(packageId, alertType, event) {
+    // Prevent event bubbling
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('csrf_token', window.csrfToken);
+        formData.append('alert_type', alertType);
+        formData.append('package_id', packageId);
+        
+        const response = await fetch('/api/package-alerts.php?action=dismiss', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Simply hide the dismiss button for this package
+            const dismissBtn = event.target.closest('button');
+            if (dismissBtn) {
+                dismissBtn.style.display = 'none';
+            }
+            
+            // Update the available packages badge
+            const availableBadge = document.getElementById('availablePackagesBadge');
+            if (availableBadge) {
+                const currentCount = parseInt(availableBadge.textContent) || 0;
+                const newCount = currentCount - 1;
+                if (newCount > 0) {
+                    availableBadge.textContent = newCount;
+                } else {
+                    availableBadge.style.display = 'none';
+                }
+            }
+            
+            // Update sidebar badge
+            const sidebarBadge = document.getElementById('sidebarPackageBadge');
+            if (sidebarBadge) {
+                const currentCount = parseInt(sidebarBadge.textContent) || 0;
+                const newCount = currentCount - 1;
+                if (newCount > 0) {
+                    sidebarBadge.textContent = newCount;
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
+            }
+            
+            if (typeof showMessage === 'function') {
+                showMessage(`Alert dismissed for package "${packageId}"`, 'success');
+            } else {
+                console.log(`Alert dismissed for package "${packageId}"`);
+            }
+        } else {
+            const errorMsg = 'Failed to dismiss alert: ' + (result.error || 'Unknown error');
+            if (typeof showMessage === 'function') {
+                showMessage(errorMsg, 'error');
+            } else {
+                console.error(errorMsg);
+            }
+        }
+    } catch (error) {
+        console.error('Error dismissing package row alert:', error);
+        if (typeof showMessage === 'function') {
+            showMessage('Failed to dismiss alert', 'error');
+        }
+    }
+}
+
+// ============================================================================
+// Package Discovery Functions
+// ============================================================================
+
+function showPackageDiscovery() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade package-discovery-modal';
+    modal.id = 'packageDiscoveryModal';
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('aria-labelledby', 'packageDiscoveryModalLabel');
+    modal.setAttribute('aria-hidden', 'true');
+    
+    modal.innerHTML = `
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="packageDiscoveryModalLabel">
+                        <i class="fas fa-box-open text-primary"></i> Browse Available Packages
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Filters & Search -->
+                    <div class="package-filters mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="text" id="packageSearchInput" class="form-control" placeholder="🔍 Search packages...">
+                            </div>
+                            <div class="col-md-4">
+                                <select id="categoryFilter" class="form-select">
+                                    <option value="">All Categories</option>
+                                    <option value="analytics">📊 Analytics</option>
+                                    <option value="forms">📝 Forms</option>
+                                    <option value="integrations">🔌 Integrations</option>
+                                    <option value="redirects">🔀 Redirects</option>
+                                    <option value="reporting">📋 Reporting</option>
+                                    <option value="workflows">⚙️ Workflows</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button id="selectAllPackages" class="btn btn-outline-secondary btn-sm" style="display: none;">
+                                    <i class="fas fa-check-square"></i> Select All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results -->
+                    <div id="packageSearchResults" class="package-discovery-results">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="mt-2">Loading available packages...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <span id="selectedPackageCount" style="display: none;">
+                            <strong>0</strong> package(s) selected
+                        </span>
+                    </div>
+                    <button type="button" id="downloadSelectedBtn" class="btn btn-primary" style="display: none;">
+                        <i class="fas fa-download"></i> Download Selected (<span id="downloadCount">0</span>)
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Show the modal using Bootstrap 5 modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    // Store packages globally for filtering
+    window.discoveredPackages = [];
+    window.selectedPackages = new Set();
+    
+    // Add event listeners
+    document.getElementById('packageSearchInput').addEventListener('input', filterDiscoveredPackages);
+    document.getElementById('categoryFilter').addEventListener('change', filterDiscoveredPackages);
+    document.getElementById('selectAllPackages').addEventListener('click', toggleSelectAll);
+    document.getElementById('downloadSelectedBtn').addEventListener('click', downloadSelectedPackages);
+    
+    // Automatically search packages from the default repository
+    setTimeout(() => {
+        searchPackages();
+    }, 100);
+    
+    // Remove modal from DOM when hidden
+    modal.addEventListener('hidden.bs.modal', () => {
+        window.discoveredPackages = [];
+        window.selectedPackages = new Set();
+        modal.remove();
+    });
+}
+
+async function searchPackages() {
+    // Use the default Hub package repository
+    const repositoryUrl = 'https://github.com/R1CH4RD25/TheHub-Package-Repo';
+    const owner = 'R1CH4RD25';
+    const repo = 'TheHub-Package-Repo';
+    
+    const resultsContainer = document.getElementById('packageSearchResults');
+    
+    try {
+        resultsContainer.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-2">Loading available packages...</div>
+            </div>
+        `;
+        
+        const response = await fetch('/api/package-discovery.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken || ''
+            },
+            body: JSON.stringify({
+                repository_url: repositoryUrl,
+                owner: owner,
+                repo: repo
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to load packages');
+        }
+        
+        renderPackageSearchResults(result.packages);
+        
+    } catch (error) {
+        console.error('Error loading packages:', error);
+        resultsContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i> Error loading packages: ${error.message}
+                <div class="mt-2 small">
+                    Please ensure you have internet connectivity and try again.
+                </div>
+            </div>
+        `;
+    }
+}
+
+function renderPackageSearchResults(packages) {
+    const container = document.getElementById('packageSearchResults');
+    
+    // Store packages globally for filtering
+    window.discoveredPackages = packages || [];
+    
+    if (!packages || packages.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No packages available at this time
+                <div class="mt-2 small text-muted">
+                    Check back later for new packages or upload your own .hubpkg files
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Filter out already installed packages
+    const availablePackages = packages.filter(pkg => !pkg.is_installed);
+    const installedCount = packages.length - availablePackages.length;
+    
+    if (availablePackages.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> All available packages are already installed!
+                <div class="mt-2 small text-muted">
+                    You have ${packages.length} package${packages.length !== 1 ? 's' : ''} installed from the repository
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Show select all button if there are packages
+    document.getElementById('selectAllPackages').style.display = availablePackages.length > 0 ? 'inline-block' : 'none';
+    
+    let html = `
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1">
+                    <i class="fas fa-download text-primary"></i> 
+                    ${availablePackages.length} Package${availablePackages.length !== 1 ? 's' : ''} Available
+                </h6>
+    `;
+    
+    if (installedCount > 0) {
+        html += `
+            <small class="text-muted">
+                <i class="fas fa-check"></i> 
+                ${installedCount} already installed
+            </small>
+        `;
+    }
+    
+    html += `
+            </div>
+        </div>
+        <div class="row g-3">
+    `;
+    
+    availablePackages.forEach(pkg => {
+        // Extract category from path (e.g., packages/analytics/... => analytics)
+        const category = pkg.path ? pkg.path.split('/')[1] : 'other';
+        const isSelected = window.selectedPackages.has(pkg.download_url);
+        
+        html += `
+            <div class="col-md-6 package-card-wrapper" data-category="${category}" data-package-name="${escapeHtml(pkg.name.toLowerCase())}">
+                <div class="card package-card h-100 ${isSelected ? 'border-primary' : ''}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="form-check">
+                                <input 
+                                    class="form-check-input package-checkbox" 
+                                    type="checkbox" 
+                                    id="pkg_${escapeHtml(pkg.download_url)}"
+                                    data-download-url="${escapeHtml(pkg.download_url)}"
+                                    data-package-name="${escapeHtml(pkg.name)}"
+                                    ${isSelected ? 'checked' : ''}
+                                    onchange="togglePackageSelection(this)"
+                                >
+                                <label class="form-check-label fw-bold" for="pkg_${escapeHtml(pkg.download_url)}">
+                                    ${escapeHtml(pkg.name)}
+                                </label>
+                            </div>
+                            <span class="badge bg-${getCategoryColor(category)}">${getCategoryIcon(category)} ${category}</span>
+                        </div>
+                        <p class="card-text small text-muted mb-2">${escapeHtml(pkg.description || 'No description available')}</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <small class="text-muted">
+                                <i class="fas fa-tag"></i> v${escapeHtml(pkg.version)}
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-weight-hanging"></i> ${formatFileSize(pkg.size || 0)}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <button class="btn btn-sm btn-primary w-100" onclick="downloadPackageFromRepo('${escapeHtml(pkg.download_url)}', '${escapeHtml(pkg.name)}')">
+                            <i class="fas fa-download"></i> Download Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function getCategoryIcon(category) {
+    const icons = {
+        'analytics': '📊',
+        'forms': '📝',
+        'integrations': '🔌',
+        'redirects': '🔀',
+        'reporting': '📋',
+        'workflows': '⚙️'
+    };
+    return icons[category] || '📦';
+}
+
+function getCategoryColor(category) {
+    const colors = {
+        'analytics': 'info',
+        'forms': 'success',
+        'integrations': 'warning',
+        'redirects': 'secondary',
+        'reporting': 'primary',
+        'workflows': 'dark'
+    };
+    return colors[category] || 'secondary';
+}
+
+function togglePackageSelection(checkbox) {
+    const url = checkbox.dataset.downloadUrl;
+    const name = checkbox.dataset.packageName;
+    
+    if (checkbox.checked) {
+        window.selectedPackages.add(url);
+        checkbox.closest('.package-card').classList.add('border-primary');
+    } else {
+        window.selectedPackages.delete(url);
+        checkbox.closest('.package-card').classList.remove('border-primary');
+    }
+    
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const count = window.selectedPackages.size;
+    const countSpan = document.getElementById('selectedPackageCount');
+    const downloadBtn = document.getElementById('downloadSelectedBtn');
+    const downloadCount = document.getElementById('downloadCount');
+    
+    if (count > 0) {
+        countSpan.style.display = 'inline';
+        countSpan.querySelector('strong').textContent = count;
+        downloadBtn.style.display = 'inline-block';
+        downloadCount.textContent = count;
+    } else {
+        countSpan.style.display = 'none';
+        downloadBtn.style.display = 'none';
+    }
+}
+
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.package-checkbox:not(:disabled)');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+        togglePackageSelection(cb);
+    });
+    
+    const btn = document.getElementById('selectAllPackages');
+    btn.innerHTML = allChecked ? '<i class="fas fa-check-square"></i> Select All' : '<i class="fas fa-square"></i> Deselect All';
+}
+
+function filterDiscoveredPackages() {
+    const searchTerm = document.getElementById('packageSearchInput').value.toLowerCase();
+    const category = document.getElementById('categoryFilter').value;
+    
+    const cards = document.querySelectorAll('.package-card-wrapper');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        const packageName = card.dataset.packageName;
+        const packageCategory = card.dataset.category;
+        
+        const matchesSearch = !searchTerm || packageName.includes(searchTerm);
+        const matchesCategory = !category || packageCategory === category;
+        
+        if (matchesSearch && matchesCategory) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update count display
+    const container = document.getElementById('packageSearchResults');
+    const countDisplay = container.querySelector('h6');
+    if (countDisplay) {
+        countDisplay.innerHTML = `
+            <i class="fas fa-download text-primary"></i> 
+            ${visibleCount} Package${visibleCount !== 1 ? 's' : ''} Available
+        `;
+    }
+}
+
+async function downloadSelectedPackages() {
+    const selectedUrls = Array.from(window.selectedPackages);
+    
+    if (selectedUrls.length === 0) {
+        showMessage('Please select at least one package', 'warning');
+        return;
+    }
+    
+    const btn = document.getElementById('downloadSelectedBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Downloading...';
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const url of selectedUrls) {
+        const checkbox = document.querySelector(`[data-download-url="${url}"]`);
+        const packageName = checkbox?.dataset.packageName || 'Unknown';
+        
+        try {
+            await downloadPackageFromRepo(url, packageName, true); // Silent mode
+            successCount++;
+        } catch (error) {
+            console.error(`Failed to download ${packageName}:`, error);
+            failCount++;
+        }
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+    
+    // Show summary
+    if (successCount > 0) {
+        showMessage(`Successfully downloaded ${successCount} package(s)!`, 'success');
+        
+        // Close modal and refresh
+        const modal = bootstrap.Modal.getInstance(document.getElementById('packageDiscoveryModal'));
+        if (modal) modal.hide();
+        loadAvailablePackages();
+    }
+    
+    if (failCount > 0) {
+        showMessage(`Failed to download ${failCount} package(s)`, 'error');
+    }
+}
+
+async function downloadPackageFromRepo(downloadUrl, packageName, silent = false) {
+    try {
+        const response = await fetch('/api/package-discovery.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken || ''
+            },
+            body: JSON.stringify({
+                action: 'download',
+                download_url: downloadUrl,
+                package_name: packageName
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            if (!silent) {
+                showMessage(`Package "${packageName}" downloaded successfully! Check the Available Packages tab to install it.`, 'success');
+                
+                // Close the discovery modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('packageDiscoveryModal'));
+                if (modal) modal.hide();
+                
+                // Refresh the available packages tab
+                loadAvailablePackages();
+            }
+            return true;
+        } else {
+            throw new Error(result.error || 'Download failed');
+        }
+        
+    } catch (error) {
+        console.error('Error downloading package:', error);
+        if (!silent) {
+            showMessage(`Failed to download package: ${error.message}`, 'error');
+        }
+        throw error;
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }

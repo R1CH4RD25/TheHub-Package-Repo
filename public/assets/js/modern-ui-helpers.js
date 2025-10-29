@@ -6,7 +6,7 @@
 // Initialize Notyf for toast notifications
 window.notyf = new Notyf({
     duration: 4000,
-    position: { x: 'right', y: 'top' },
+    position: { x: 'center', y: 'bottom' },
     ripple: true,
     dismissible: true,
     types: [

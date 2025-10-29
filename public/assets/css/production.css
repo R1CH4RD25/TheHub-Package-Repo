@@ -2116,7 +2116,7 @@ body {
     padding: 18px 24px;
     border-radius: 8px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    z-index: 10002; /* Higher than modal (10001) so toasts appear on top */
+    z-index: 100000; /* Much higher z-index to ensure it's always on top */
     transition: bottom 0.3s ease;
     min-width: 320px;
     max-width: 500px;
@@ -2129,7 +2129,7 @@ body {
 }
 
 .toast.show {
-    bottom: 30px;
+    bottom: 2rem; /* Changed from 30px to 2rem for better responsive spacing */
 }
 
 .toast.success {

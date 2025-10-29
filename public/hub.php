@@ -127,13 +127,31 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
                         if ($useCustomIcon) {
                             $iconHtml = '<img src="' . e($customIconPath) . '" alt="Section Icon" style="width: 100%; height: 100%; object-fit: contain;">';
                         } else {
-                            $iconHtml = $section['icon'];
+                            // Check if icon is Bootstrap Icons class or emoji
+                            if (strpos($section['icon'], 'bi-') === 0) {
+                                $iconHtml = '<i class="bi ' . e($section['icon']) . '"></i>';
+                            } else {
+                                $iconHtml = e($section['icon'] ?: '📦');
+                            }
                         }
+                        // Truncate description to 100 characters for hub cards
+                        $description = $section['description'] ?? '';
+                        $truncatedDesc = strlen($description) > 100 ? substr($description, 0, 100) . '...' : $description;
+                        $needsTooltip = strlen($description) > 100;
                     ?>
                         <a href="<?php echo e($section['base_url']); ?>" class="section-card">
                             <span class="section-icon"><?php echo $iconHtml; ?></span>
-                            <div class="section-title"><?php echo e($section['display_name']); ?></div>
-                            <div class="section-description"><?php echo e($section['description']); ?></div>
+                            <div class="section-title">
+                                <?php echo e($section['display_name']); ?>
+                                <?php if ($needsTooltip): ?>
+                                <i class="bi bi-info-circle section-title-tooltip" data-full-text="<?php echo htmlspecialchars($description, ENT_QUOTES); ?>"></i>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($truncatedDesc): ?>
+                            <div class="section-description">
+                                <?php echo e($truncatedDesc); ?>
+                            </div>
+                            <?php endif; ?>
                         </a>
                     <?php endforeach; ?>
                 </div>

@@ -55,23 +55,55 @@ $users = $userModel->getAll();
             <div class="admin-sidebar">
                 <ul class="admin-menu">
                     <?php if ($canSeeUserManagement): ?>
-                    <li><a href="#" data-tab="users" class="active">User Management</a></li>
+                    <li><a href="#" data-tab="users" class="active"><i class="fas fa-users"></i> User Management</a></li>
                     <?php endif; ?>
-                    <?php if ($canSeeSectionAccess || $canSeeManageSections): ?>
-                    <li><a href="#" data-tab="sections">Sections</a></li>
-                    <?php endif; ?>
-                    <?php if ($isSuperAdmin): ?>
-                    <li>
-                        <a href="#" data-tab="packages">
-                            Package Manager
-                            <span class="sidebar-badge" id="sidebarPackageBadge" style="display: none;"></span>
-                        </a>
+                    
+                    <!-- Sections Group (Collapsible) -->
+                    <?php if ($canSeeSectionAccess || $canSeeManageSections || ($isSuperAdmin || in_array($userRole, ['admin']))): ?>
+                    <li class="menu-group">
+                        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
+                            <span><i class="fas fa-th-list"></i> Sections</span>
+                            <span class="menu-group-arrow">▼</span>
+                        </div>
+                        <ul class="menu-group-items">
+                            <?php if ($canSeeSectionAccess || $canSeeManageSections): ?>
+                            <li><a href="#" data-tab="sections">Section Access & Management</a></li>
+                            <?php endif; ?>
+                            <?php if ($isSuperAdmin || in_array($userRole, ['admin'])): ?>
+                            <li><a href="#" data-tab="section-config">Section Configuration</a></li>
+                            <?php endif; ?>
+                        </ul>
                     </li>
-                    <li><a href="#" data-tab="site-settings">Site Settings</a></li>
-                    <li><a href="#" data-tab="logs">Activity Logs</a></li>
+                    <?php endif; ?>
+                    
+                    <!-- Configuration Group (Collapsible) -->
+                    <?php if ($isSuperAdmin): ?>
+                    <li class="menu-group">
+                        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
+                            <span><i class="fas fa-cog"></i> Configuration</span>
+                            <span class="menu-group-arrow">▼</span>
+                        </div>
+                        <ul class="menu-group-items">
+                            <li>
+                                <a href="#" data-tab="packages">
+                                    Package Manager
+                                    <span class="sidebar-badge" id="sidebarPackageBadge" style="display: none;"></span>
+                                </a>
+                            </li>
+                            <li><a href="#" data-tab="site-settings">Site Settings</a></li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+                    
+                    <!-- Spacer to push bottom items down -->
+                    <li class="menu-spacer"></li>
+                    
+                    <!-- Bottom Items -->
+                    <?php if ($isSuperAdmin): ?>
+                    <li><a href="#" data-tab="logs"><i class="fas fa-chart-line"></i> Activity Logs</a></li>
                     <?php endif; ?>
                     <?php if ($canSeeExport): ?>
-                    <li><a href="#" data-tab="export">Export Data</a></li>
+                    <li><a href="#" data-tab="export"><i class="fas fa-download"></i> Export Data</a></li>
                     <?php endif; ?>
                 </ul>
             </div>
@@ -229,6 +261,13 @@ $users = $userModel->getAll();
                     </div><!-- end tab-content-scroll -->
                 </div><!-- end tab-sections -->
 
+                <!-- Section Configuration Tab (Admin & Super Admin) -->
+                <?php if ($isSuperAdmin || in_array($userRole, ['admin'])): ?>
+                <div id="tab-section-config" class="admin-tab">
+                    <?php include __DIR__ . '/section-config-tab.php'; ?>
+                </div>
+                <?php endif; ?>
+
                 <!-- Package Manager Tab (Super Admin Only) -->
                 <?php if ($isSuperAdmin): ?>
                 <div id="tab-packages" class="admin-tab">
@@ -243,9 +282,6 @@ $users = $userModel->getAll();
                             </button>
                         </div>
                     </div>
-
-                    <!-- Package Alerts Banner -->
-                    <div id="packageAlertsContainer"></div>
 
                     <div class="tab-content-scroll">
                         <!-- Package Sub-tabs -->
@@ -336,7 +372,6 @@ $users = $userModel->getAll();
                         <h1>Site Settings</h1>
                         <div class="tab-actions">
                             <button id="saveSiteSettings" class="btn btn-primary">Save Changes</button>
-                            <button id="overwriteActiveTheme" class="btn btn-warning" style="display: none;">Overwrite Active Theme</button>
                             <button id="cancelSiteSettings" class="btn btn-secondary">Cancel</button>
                         </div>
                     </div>
@@ -820,7 +855,7 @@ $users = $userModel->getAll();
                                 <div class="color-section-header" onclick="toggleColorSection(this)">
                                     <h3>
                                         Main Theme Colors
-                                        <span class="color-section-badge">6</span>
+                                        <span class="color-section-badge">5</span>
                                     </h3>
                                     <span class="color-section-toggle collapsed">▼</span>
                                 </div>
@@ -867,13 +902,222 @@ $users = $userModel->getAll();
                                                 </div>
                                                 <small>Hub landing page background</small>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hub Tiles & Effects -->
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Hub Tiles & Effects
+                                        <span class="color-section-badge">23</span>
+                                    </h3>
+                                    <span class="color-section-toggle collapsed">▼</span>
+                                </div>
+                                <div class="color-section-body collapsed">
+                                    <div class="color-section-content">
+                                        <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+                                            Customize the visual effects for section tiles on the Hub landing page.
+                                        </p>
+                                        <div class="color-grid">
+                                            <!-- Base Hub Colors -->
                                             <div class="color-item">
                                                 <label>Hub Tile Background</label>
                                                 <div class="color-input-group">
                                                     <input type="color" id="hubTileBg" value="#FFFFFF">
                                                     <input type="text" id="hubTileBgHex" value="#FFFFFF" maxlength="7">
                                                 </div>
-                                                <small>Section tile cards on Hub</small>
+                                                <small>Section tile card background color</small>
+                                            </div>
+                                            
+                                            <!-- Hover Effects -->
+                                            <div class="color-item">
+                                                <label>Card Hover Shadow</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardHoverShadow" value="#C99700">
+                                                    <input type="text" id="hubCardHoverShadowHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Glow shadow on tile hover (with opacity)</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Hover Border</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardHoverBorder" value="#C99700">
+                                                    <input type="text" id="hubCardHoverBorderHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Border color on tile hover</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Hover Title</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardHoverTitle" value="#C99700">
+                                                    <input type="text" id="hubCardHoverTitleHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Title text color on hover</small>
+                                            </div>
+                                            
+                                            <!-- Particle/Background Effects -->
+                                            <div class="color-item">
+                                                <label>Particle Glow 1</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubParticleGlow1" value="#C99700">
+                                                    <input type="text" id="hubParticleGlow1Hex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>First animated background glow color</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Particle Glow 2</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubParticleGlow2" value="#FFD700">
+                                                    <input type="text" id="hubParticleGlow2Hex" value="#FFD700" maxlength="7">
+                                                </div>
+                                                <small>Second animated background glow color</small>
+                                            </div>
+                                            
+                                            <!-- Card Hover Overlay Effects -->
+                                            <div class="color-item">
+                                                <label>Card Hover Overlay Center</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardGlowCenter" value="#C99700">
+                                                    <input type="text" id="hubCardGlowCenterHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Center color of hover gradient overlay</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Hover Overlay Edge</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardGlowEdge" value="#000000">
+                                                    <input type="text" id="hubCardGlowEdgeHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Edge color of hover gradient (creates dark effect)</small>
+                                            </div>
+                                            
+                                            <!-- Icon Effects -->
+                                            <div class="color-item">
+                                                <label>Icon Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubIconColor" value="#C99700">
+                                                    <input type="text" id="hubIconColorHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Default tile icon color</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Icon Hover Color</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubIconHoverColor" value="#FFD700">
+                                                    <input type="text" id="hubIconHoverColorHex" value="#FFD700" maxlength="7">
+                                                </div>
+                                                <small>Icon color on tile hover</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Icon Shadow</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubIconShadow" value="#C99700">
+                                                    <input type="text" id="hubIconShadowHex" value="#C99700" maxlength="7">
+                                                </div>
+                                                <small>Glow shadow around tile icons</small>
+                                            </div>
+                                            
+                                            <!-- Card Content -->
+                                            <div class="color-item">
+                                                <label>Card Shadow</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardShadow" value="#000000">
+                                                    <input type="text" id="hubCardShadowHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Default card shadow (with opacity)</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Border</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardBorder" value="#E5E7EB">
+                                                    <input type="text" id="hubCardBorderHex" value="#E5E7EB" maxlength="7">
+                                                </div>
+                                                <small>Default card border color</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Description</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardDescription" value="#6B7280">
+                                                    <input type="text" id="hubCardDescriptionHex" value="#6B7280" maxlength="7">
+                                                </div>
+                                                <small>Description text color (normal state)</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Description Hover</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardHoverDescription" value="#374151">
+                                                    <input type="text" id="hubCardHoverDescriptionHex" value="#374151" maxlength="7">
+                                                </div>
+                                                <small>Description text color on hover</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>Card Description Shadow</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubCardHoverDescriptionShadow" value="#000000">
+                                                    <input type="text" id="hubCardHoverDescriptionShadowHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Text shadow on description hover</small>
+                                            </div>
+                                            
+                                            <!-- No Sections Message -->
+                                            <div class="color-item">
+                                                <label>No Sections Background</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubNoSectionsBg" value="#F9FAFB">
+                                                    <input type="text" id="hubNoSectionsBgHex" value="#F9FAFB" maxlength="7">
+                                                </div>
+                                                <small>"No sections available" message background</small>
+                                            </div>
+                                            <div class="color-item">
+                                                <label>No Sections Shadow</label>
+                                                <div class="color-input-group">
+                                                    <input type="color" id="hubNoSectionsShadow" value="#000000">
+                                                    <input type="text" id="hubNoSectionsShadowHex" value="#000000" maxlength="7">
+                                                </div>
+                                                <small>Shadow for "no sections" message</small>
+                                            </div>
+                                            
+                                            <!-- Particle Effect Controls Section -->
+                                            <div style="grid-column: 1 / -1;">
+                                                <h4 style="margin: 2rem 0 1rem; color: var(--text-secondary); font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                                                    🌟 Particle Effect Settings
+                                                </h4>
+                                            </div>
+                                            
+                            <!-- 5-column grid for particle controls -->
+                            <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;">
+                                <div class="form-group" style="margin: 0; text-align: center;">
+                                    <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; justify-content: center;">
+                                        <input type="checkbox" id="hubParticleEnabled" checked style="margin: 0;">
+                                        Enable Effect
+                                    </label>
+                                    <small style="display: block; margin-top: 0.5rem; text-align: center;">Turn glow on/off</small>
+                                </div>
+                                
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="hubParticleSize" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Size (px)</label>
+                                    <input type="number" id="hubParticleSize" value="600" min="200" max="1200" step="50" style="width: 100%;">
+                                    <small style="display: block; margin-top: 0.25rem;">200-1200</small>
+                                </div>                                                <div class="form-group" style="margin: 0;">
+                                                    <label for="hubParticleBlur" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Blur (px)</label>
+                                                    <input type="number" id="hubParticleBlur" value="150" min="50" max="400" step="10" style="width: 100%;">
+                                                    <small style="display: block; margin-top: 0.25rem;">50-400</small>
+                                                </div>
+                                                
+                                                <div class="form-group" style="margin: 0;">
+                                                    <label for="hubParticleOpacity" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Opacity</label>
+                                                    <input type="number" id="hubParticleOpacity" value="0.15" min="0.05" max="0.5" step="0.05" style="width: 100%;">
+                                                    <small style="display: block; margin-top: 0.25rem;">0.05-0.5</small>
+                                                </div>
+                                                
+                                                <div class="form-group" style="margin: 0;">
+                                                    <label for="hubParticleSpeed" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Speed (s)</label>
+                                                    <input type="number" id="hubParticleSpeed" value="20" min="5" max="60" step="5" style="width: 100%;">
+                                                    <small style="display: block; margin-top: 0.25rem;">5-60 sec</small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1990,9 +2234,63 @@ $users = $userModel->getAll();
         window.userRole = '<?php echo $user['role']; ?>';
         window.csrfToken = '<?php echo generateCsrfToken(); ?>';
         window.APP_DEBUG_MODE = <?php echo (($_ENV['DEBUG_MODE'] ?? 'false') === 'true') ? 'true' : 'false'; ?>;
+        
+        // Toggle collapsible menu groups with accordion behavior
+        function toggleMenuGroup(header) {
+            const menuGroup = header.parentElement;
+            const isCurrentlyCollapsed = menuGroup.classList.contains('collapsed');
+            
+            // Close all other menu groups (accordion behavior)
+            document.querySelectorAll('.menu-group').forEach(group => {
+                if (group !== menuGroup) {
+                    group.classList.add('collapsed');
+                }
+            });
+            
+            // Toggle current group
+            menuGroup.classList.toggle('collapsed');
+            
+            // Save state to localStorage
+            const groupName = header.textContent.trim();
+            const isCollapsed = menuGroup.classList.contains('collapsed');
+            localStorage.setItem('menuGroup_' + groupName, isCollapsed ? 'collapsed' : 'expanded');
+        }
+        
+        // Initialize menu groups - start all collapsed by default
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.menu-group').forEach(group => {
+                const header = group.querySelector('.menu-group-header');
+                const groupName = header.textContent.trim();
+                const savedState = localStorage.getItem('menuGroup_' + groupName);
+                
+                // Start collapsed by default, or use saved state
+                if (savedState === 'expanded') {
+                    group.classList.remove('collapsed');
+                } else {
+                    group.classList.add('collapsed');
+                }
+            });
+        });
+        
+        // Toggle user dropdown menu
+        function toggleUserDropdown(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.nav-user-dropdown');
+            const menu = document.getElementById('userDropdownMenu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu?.classList.remove('show');
+            }
+        });
     </script>
     <script src="/assets/js/admin.js"></script>
     <script src="/assets/js/site-settings.js"></script>
+    <script src="/assets/js/section-config.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/modern-ui-helpers.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/form-validation-animations.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/admin-animations.js?v=<?php echo time(); ?>"></script>

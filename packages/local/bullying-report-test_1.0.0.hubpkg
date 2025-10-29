@@ -1,0 +1,123 @@
+{
+  "package": {
+    "id": "bullying-report-test",
+    "name": "bullying-report-test",
+    "display_name": "Bullying Report System (Test)",
+    "description": "A comprehensive system for reporting and tracking bullying incidents in schools",
+    "author": "Test Author",
+    "author_email": "test@example.com",
+    "author_organization": "Test Organization",
+    "license": "MIT",
+    "version": "1.0.0",
+    "category": "student-services",
+    "tags": ["bullying", "incident-reporting", "student-safety"],
+    "hub_version_min": "1.0.0",
+    "php_version_min": "7.4",
+    "mysql_version_min": "5.7"
+  },
+  "section": {
+    "name": "bullying-report-test",
+    "display_name": "Bullying Report System (Test)",
+    "description": "Report and track bullying incidents",
+    "icon": "fas fa-exclamation-triangle",
+    "color": "#dc3545",
+    "permissions": {
+      "create": ["student", "teacher", "staff", "admin"],
+      "view": ["teacher", "staff", "admin"],
+      "edit": ["staff", "admin"],
+      "delete": ["admin"]
+    }
+  },
+  "fields": [
+    {
+      "name": "incident_date",
+      "type": "date",
+      "label": "Incident Date",
+      "is_required": true,
+      "is_searchable": true,
+      "is_exportable": true,
+      "show_in_list": true,
+      "show_in_detail": true,
+      "sort_order": 1,
+      "help_text": "When did the incident occur?"
+    },
+    {
+      "name": "reporter_name",
+      "type": "text",
+      "label": "Reporter Name",
+      "is_required": true,
+      "is_searchable": true,
+      "is_exportable": true,
+      "show_in_list": true,
+      "show_in_detail": true,
+      "sort_order": 2,
+      "help_text": "Name of the person reporting the incident"
+    },
+    {
+      "name": "incident_type",
+      "type": "select",
+      "label": "Type of Incident",
+      "is_required": true,
+      "is_searchable": true,
+      "is_exportable": true,
+      "show_in_list": true,
+      "show_in_detail": true,
+      "sort_order": 3,
+      "field_config": {
+        "options": [
+          {"value": "verbal", "label": "Verbal Bullying"},
+          {"value": "physical", "label": "Physical Bullying"},
+          {"value": "social", "label": "Social/Relational Bullying"},
+          {"value": "cyberbullying", "label": "Cyberbullying"},
+          {"value": "other", "label": "Other"}
+        ]
+      },
+      "help_text": "What type of bullying occurred?"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "label": "Incident Description",
+      "is_required": true,
+      "is_searchable": true,
+      "is_exportable": true,
+      "show_in_list": false,
+      "show_in_detail": true,
+      "sort_order": 4,
+      "help_text": "Detailed description of what happened"
+    },
+    {
+      "name": "witnesses",
+      "type": "textarea",
+      "label": "Witnesses",
+      "is_required": false,
+      "is_searchable": true,
+      "is_exportable": true,
+      "show_in_list": false,
+      "show_in_detail": true,
+      "sort_order": 5,
+      "help_text": "Names of any witnesses to the incident"
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "label": "Status",
+      "is_required": true,
+      "is_searchable": true,
+      "is_exportable": true,
+      "show_in_list": true,
+      "show_in_detail": true,
+      "sort_order": 6,
+      "field_config": {
+        "options": [
+          {"value": "reported", "label": "Reported"},
+          {"value": "investigating", "label": "Under Investigation"},
+          {"value": "resolved", "label": "Resolved"},
+          {"value": "closed", "label": "Closed"}
+        ]
+      },
+      "default_value": "reported",
+      "help_text": "Current status of the incident report"
+    }
+  ]
+}

@@ -214,7 +214,7 @@ class PackageManager
                 throw new Exception('Package already installed. Use upgrade instead.');
             }
             
-            // Create section record
+            // Create section record (inactive by default - admin must enable)
             $sectionId = $this->db->insert('sections', [
                 'name' => $pkg['name'],
                 'slug' => $pkg['name'],
@@ -223,7 +223,7 @@ class PackageManager
                 'icon' => $pkg['icon'] ?? 'bi-box',
                 'base_url' => $pkg['base_url'] ?? "/modules/sections/{$pkg['name']}/",
                 'order_position' => $this->getNextSectionOrder(),
-                'is_active' => 1,
+                'is_active' => 0,  // Start inactive - admin must enable in Manage Sections
                 'is_dynamic' => 1,
                 'created_at' => date('Y-m-d H:i:s')
             ]);
@@ -245,7 +245,7 @@ class PackageManager
             }
             
             // Install permissions (role access)
-            $this->installPermissions($sectionId, $permissions);
+            $this->installPermissions($sectionId, $permissions, $installedBy);
             
             // Install menu items
             foreach ($menuItems as $menuItem) {
@@ -257,7 +257,7 @@ class PackageManager
                 'package_id' => $pkg['id'],
                 'package_version' => $pkg['version'],
                 'status' => 'success',
-                'installation_type' => 'install',
+                'installation_type' => 'new',
                 'attempted_by' => $installedBy,
                 'attempted_at' => date('Y-m-d H:i:s'),
                 'completed_at' => date('Y-m-d H:i:s'),
@@ -362,7 +362,7 @@ class PackageManager
             $this->updateFields($installation['section_id'], $newPackageData['fields'] ?? []);
             
             // Update permissions
-            $this->installPermissions($installation['section_id'], $newPackageData['permissions'] ?? []);
+            $this->installPermissions($installation['section_id'], $newPackageData['permissions'] ?? [], $upgradedBy);
             
             // Update section metadata
             $this->db->update('sections', $installation['section_id'], [
@@ -533,7 +533,7 @@ class PackageManager
                 'package_id' => $packageId,
                 'package_version' => $installation['installed_version'],
                 'status' => 'success',
-                'installation_type' => 'uninstall',
+                'installation_type' => 'reinstall',
                 'attempted_by' => $uninstalledBy,
                 'attempted_at' => date('Y-m-d H:i:s'),
                 'completed_at' => date('Y-m-d H:i:s'),
@@ -637,21 +637,26 @@ class PackageManager
      */
     private function installField(int $sectionId, array $fieldDef): void
     {
+        // Support both old and new field name formats for backward compatibility
+        $sortOrder = $fieldDef['sort_order'] ?? $fieldDef['order'] ?? 0;
+        $isRequired = $fieldDef['is_required'] ?? $fieldDef['required'] ?? false;
+        $isSearchable = $fieldDef['is_searchable'] ?? $fieldDef['searchable'] ?? false;
+        $showInList = $fieldDef['show_in_list'] ?? $fieldDef['visible_in_list'] ?? true;
+        $fieldConfig = $fieldDef['field_config'] ?? $fieldDef['options'] ?? null;
+        
         $this->db->insert('section_field_definitions', [
             'section_id' => $sectionId,
             'field_name' => $fieldDef['name'],
             'field_type' => $fieldDef['type'],
             'field_label' => $fieldDef['label'] ?? ucfirst($fieldDef['name']),
-            'field_order' => $fieldDef['order'] ?? 0,
-            'is_required' => $fieldDef['required'] ?? 0,
-            'is_searchable' => $fieldDef['searchable'] ?? 0,
-            'is_visible_in_list' => $fieldDef['visible_in_list'] ?? 1,
+            'sort_order' => $sortOrder,
+            'is_required' => (int)$isRequired,
+            'is_searchable' => (int)$isSearchable,
+            'show_in_list' => (int)$showInList,
             'validation_rules' => isset($fieldDef['validation']) ? json_encode($fieldDef['validation']) : null,
-            'field_options' => isset($fieldDef['options']) ? json_encode($fieldDef['options']) : null,
-            'default_value' => $fieldDef['default'] ?? null,
-            'placeholder' => $fieldDef['placeholder'] ?? null,
-            'help_text' => $fieldDef['help_text'] ?? null,
-            'created_at' => date('Y-m-d H:i:s')
+            'field_config' => $fieldConfig ? json_encode($fieldConfig) : null,
+            'default_value' => $fieldDef['default_value'] ?? $fieldDef['default'] ?? null,
+            'help_text' => $fieldDef['help_text'] ?? null
         ]);
     }
 
@@ -674,10 +679,10 @@ class PackageManager
                     UPDATE section_field_definitions SET
                         field_type = ?,
                         field_label = ?,
-                        field_order = ?,
+                        sort_order = ?,
                         is_required = ?,
                         validation_rules = ?,
-                        field_options = ?,
+                        field_config = ?,
                         updated_at = ?
                     WHERE section_id = ? AND field_name = ?
                 ", [
@@ -701,7 +706,7 @@ class PackageManager
     /**
      * Install permissions
      */
-    private function installPermissions(int $sectionId, array $permissions): void
+    private function installPermissions(int $sectionId, array $permissions, int $installedBy): void
     {
         // Clear existing
         $this->db->execute("DELETE FROM section_role_access WHERE section_id = ?", [$sectionId]);
@@ -712,7 +717,8 @@ class PackageManager
                 $this->db->insert('section_role_access', [
                     'section_id' => $sectionId,
                     'role' => $role,
-                    'created_at' => date('Y-m-d H:i:s')
+                    'granted_by' => $installedBy,
+                    'granted_at' => date('Y-m-d H:i:s')
                 ]);
             }
         }
@@ -723,16 +729,21 @@ class PackageManager
      */
     private function installMenuItem(int $sectionId, array $menuItem): void
     {
+        // Truncate icon to fit varchar(10) column
+        $icon = $menuItem['icon'] ?? 'bi-circle';
+        if (strlen($icon) > 10) {
+            $icon = substr($icon, 0, 10);
+        }
+        
         $this->db->insert('section_menu_items', [
             'section_id' => $sectionId,
             'label' => $menuItem['label'],
-            'url' => $menuItem['url'],
-            'icon' => $menuItem['icon'] ?? 'bi-circle',
+            'route' => $menuItem['url'] ?? $menuItem['route'] ?? '',
+            'icon' => $icon,
             'parent_id' => $menuItem['parent_id'] ?? null,
-            'order_position' => $menuItem['order'] ?? 0,
-            'minimum_role' => $menuItem['minimum_role'] ?? 'user',
-            'is_active' => 1,
-            'created_at' => date('Y-m-d H:i:s')
+            'sort_order' => $menuItem['order'] ?? $menuItem['sort_order'] ?? 0,
+            'required_permission' => $menuItem['minimum_role'] ?? $menuItem['required_permission'] ?? null,
+            'is_active' => 1
         ]);
     }
 

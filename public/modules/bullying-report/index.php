@@ -7,10 +7,28 @@
 require_once __DIR__ . '/../../../src/bootstrap.php';
 
 use Hub\Auth;
+use Hub\SectionPermissions;
 
 // Optional: Check if user is logged in (but don't require it)
 $isLoggedIn = Auth::isLoggedIn();
 $currentUser = $isLoggedIn ? Auth::getCurrentUser() : null;
+
+// Check if user can submit (for logged-in users)
+$canSubmit = true;
+$allowAnonymous = true;
+if ($isLoggedIn) {
+    try {
+        $canSubmit = SectionPermissions::canSubmit($currentUser['id'], 'bullying-report', false);
+        $allowAnonymous = SectionPermissions::canSubmit($currentUser['id'], 'bullying-report', true);
+    } catch (Exception $e) {
+        // If permission check fails, fall back to allowing submission
+        error_log("Permission check failed: " . $e->getMessage());
+    }
+}
+
+// Get submission guidelines
+$guidelines = SectionPermissions::getGuidelines('bullying-report', 'submission');
+$generalGuidelines = SectionPermissions::getGuidelines('bullying-report', 'general');
 
 ?>
 <!DOCTYPE html>
@@ -54,6 +72,79 @@ $currentUser = $isLoggedIn ? Auth::getCurrentUser() : null;
         
         .confidential-notice strong {
             color: #d32f2f;
+        }
+        
+        .guidelines-section {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .guidelines-section h3 {
+            color: #2e7d32;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .guidelines-section .guideline-item {
+            margin-bottom: 15px;
+        }
+        
+        .guidelines-section .guideline-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .guidelines-section .guideline-title {
+            font-weight: 600;
+            color: #1b5e20;
+            margin-bottom: 5px;
+        }
+        
+        .guidelines-section .guideline-content {
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .collapsible-guidelines {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .collapsible-guidelines::after {
+            content: '▼';
+            font-size: 0.8rem;
+        }
+        
+        .collapsible-guidelines.collapsed::after {
+            content: '▶';
+        }
+        
+        .guidelines-content {
+            margin-top: 15px;
+        }
+        
+        .guidelines-content.hidden {
+            display: none;
+        }
+        
+        .access-denied {
+            background: #ffebee;
+            border: 2px solid #d32f2f;
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+            margin: 40px auto;
+            max-width: 600px;
+        }
+        
+        .access-denied h2 {
+            color: #d32f2f;
+            margin-bottom: 15px;
         }
         
         .form-section {
@@ -174,6 +265,17 @@ $currentUser = $isLoggedIn ? Auth::getCurrentUser() : null;
     </style>
 </head>
 <body>
+    <?php if ($isLoggedIn && !$canSubmit): ?>
+        <div class="bullying-form-container">
+            <div class="access-denied">
+                <h2>🚫 Access Denied</h2>
+                <p>You do not have permission to submit bullying reports.</p>
+                <p>Please contact your administrator if you believe this is an error.</p>
+                <br>
+                <a href="/" class="btn-submit" style="display: inline-block; width: auto; padding: 10px 30px; text-decoration: none;">Return to Hub</a>
+            </div>
+        </div>
+    <?php else: ?>
     <div class="bullying-form-container">
         <div class="form-header">
             <h1>🛡️ Report Bullying or Harassment</h1>
@@ -183,6 +285,33 @@ $currentUser = $isLoggedIn ? Auth::getCurrentUser() : null;
         <div class="confidential-notice">
             <strong>⚠️ This report is confidential.</strong> Only school counselors, administrators, and the principal will have access to this information. Your report will be taken seriously and handled with care.
         </div>
+        
+        <?php if (!empty($guidelines) || !empty($generalGuidelines)): ?>
+        <div class="guidelines-section">
+            <h3 class="collapsible-guidelines" onclick="toggleGuidelines()">
+                📋 How to Submit a Report
+            </h3>
+            <div class="guidelines-content" id="guidelinesContent">
+                <?php foreach ($guidelines as $guideline): ?>
+                <div class="guideline-item">
+                    <?php if (!empty($guideline['title'])): ?>
+                        <div class="guideline-title"><?php echo e($guideline['title']); ?></div>
+                    <?php endif; ?>
+                    <div class="guideline-content"><?php echo nl2br(e($guideline['content'])); ?></div>
+                </div>
+                <?php endforeach; ?>
+                
+                <?php foreach ($generalGuidelines as $guideline): ?>
+                <div class="guideline-item">
+                    <?php if (!empty($guideline['title'])): ?>
+                        <div class="guideline-title"><?php echo e($guideline['title']); ?></div>
+                    <?php endif; ?>
+                    <div class="guideline-content"><?php echo nl2br(e($guideline['content'])); ?></div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <form id="bullyingReportForm" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -338,8 +467,17 @@ $currentUser = $isLoggedIn ? Auth::getCurrentUser() : null;
             <button type="submit" class="btn-submit">Submit Confidential Report</button>
         </form>
     </div>
+    <?php endif; ?>
     
     <script>
+        // Toggle guidelines visibility
+        function toggleGuidelines() {
+            const content = document.getElementById('guidelinesContent');
+            const header = document.querySelector('.collapsible-guidelines');
+            content.classList.toggle('hidden');
+            header.classList.toggle('collapsed');
+        }
+        
         // Toggle anonymous fields
         document.getElementById('isAnonymous').addEventListener('change', function() {
             const reporterFields = document.querySelectorAll('#reporterFields input, #reporterFields select');

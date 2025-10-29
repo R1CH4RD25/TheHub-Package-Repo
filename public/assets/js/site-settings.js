@@ -157,6 +157,34 @@ async function loadSiteSettings() {
         setColorPicker('hubTitleColor', settings.hub_title_color || '#000000');
         setColorPicker('hubSubtitleColor', settings.hub_subtitle_color || '#666666');
         
+        // Hub Tiles & Effects
+        setColorPicker('hubCardHoverShadow', settings.hub_card_hover_shadow || '#C99700');
+        setColorPicker('hubCardHoverBorder', settings.hub_card_hover_border || '#C99700');
+        setColorPicker('hubCardHoverTitle', settings.hub_card_hover_title || '#C99700');
+        setColorPicker('hubParticleGlow1', settings.hub_particle_glow_1 || '#C99700');
+        setColorPicker('hubParticleGlow2', settings.hub_particle_glow_2 || '#FFD700');
+        
+        // Particle Effect Controls
+        document.getElementById('hubParticleSize').value = settings.hub_particle_size || 600;
+        document.getElementById('hubParticleBlur').value = settings.hub_particle_blur || 150;
+        document.getElementById('hubParticleOpacity').value = settings.hub_particle_opacity || 0.15;
+        document.getElementById('hubParticleSpeed').value = settings.hub_particle_speed || 20;
+        // Handle particle enabled as boolean - check for '1', 1, true, or 'true'
+        document.getElementById('hubParticleEnabled').checked = settings.hub_particle_enabled === '1' || settings.hub_particle_enabled === 1 || settings.hub_particle_enabled === true || settings.hub_particle_enabled === 'true';
+        
+        setColorPicker('hubCardGlowCenter', settings.hub_card_glow_center || '#C99700');
+        setColorPicker('hubCardGlowEdge', settings.hub_card_glow_edge || '#000000');
+        setColorPicker('hubIconColor', settings.hub_icon_color || '#C99700');
+        setColorPicker('hubIconHoverColor', settings.hub_icon_hover_color || '#FFD700');
+        setColorPicker('hubIconShadow', settings.hub_icon_shadow || '#C99700');
+        setColorPicker('hubCardShadow', settings.hub_card_shadow || '#000000');
+        setColorPicker('hubCardBorder', settings.hub_card_border || '#E5E7EB');
+        setColorPicker('hubCardDescription', settings.hub_card_description || '#6B7280');
+        setColorPicker('hubCardHoverDescription', settings.hub_card_hover_description || '#374151');
+        setColorPicker('hubCardHoverDescriptionShadow', settings.hub_card_hover_description_shadow || '#000000');
+        setColorPicker('hubNoSectionsBg', settings.hub_no_sections_bg || '#F9FAFB');
+        setColorPicker('hubNoSectionsShadow', settings.hub_no_sections_shadow || '#000000');
+        
         // Sidebar colors
         setColorPicker('sidebarBg', settings.sidebar_bg || '#FFFFFF');
         setColorPicker('sidebarTextColor', settings.sidebar_text_color || '#374151');
@@ -270,6 +298,28 @@ function storeOriginalValues() {
         hubTileText: document.getElementById('hubTileText').value,
         hubTitleColor: document.getElementById('hubTitleColor').value,
         hubSubtitleColor: document.getElementById('hubSubtitleColor').value,
+        hubCardHoverShadow: document.getElementById('hubCardHoverShadow').value,
+        hubCardHoverBorder: document.getElementById('hubCardHoverBorder').value,
+        hubCardHoverTitle: document.getElementById('hubCardHoverTitle').value,
+        hubParticleGlow1: document.getElementById('hubParticleGlow1').value,
+        hubParticleGlow2: document.getElementById('hubParticleGlow2').value,
+        hubParticleSize: document.getElementById('hubParticleSize').value,
+        hubParticleBlur: document.getElementById('hubParticleBlur').value,
+        hubParticleOpacity: document.getElementById('hubParticleOpacity').value,
+        hubParticleSpeed: document.getElementById('hubParticleSpeed').value,
+        hubParticleEnabled: document.getElementById('hubParticleEnabled').checked,
+        hubCardGlowCenter: document.getElementById('hubCardGlowCenter').value,
+        hubCardGlowEdge: document.getElementById('hubCardGlowEdge').value,
+        hubIconColor: document.getElementById('hubIconColor').value,
+        hubIconHoverColor: document.getElementById('hubIconHoverColor').value,
+        hubIconShadow: document.getElementById('hubIconShadow').value,
+        hubCardShadow: document.getElementById('hubCardShadow').value,
+        hubCardBorder: document.getElementById('hubCardBorder').value,
+        hubCardDescription: document.getElementById('hubCardDescription').value,
+        hubCardHoverDescription: document.getElementById('hubCardHoverDescription').value,
+        hubCardHoverDescriptionShadow: document.getElementById('hubCardHoverDescriptionShadow').value,
+        hubNoSectionsBg: document.getElementById('hubNoSectionsBg').value,
+        hubNoSectionsShadow: document.getElementById('hubNoSectionsShadow').value,
         headerBgColor: document.getElementById('headerBgColor').value,
         headerTextColor: document.getElementById('headerTextColor').value,
         headerSubtitleColor: document.getElementById('headerSubtitleColor').value,
@@ -414,6 +464,30 @@ async function saveSiteSettings() {
             hub_title_color: document.getElementById('hubTitleColor').value,
             hub_subtitle_color: document.getElementById('hubSubtitleColor').value,
             
+            // Hub Tiles & Effects
+            hub_card_hover_shadow: document.getElementById('hubCardHoverShadow').value,
+            hub_card_hover_border: document.getElementById('hubCardHoverBorder').value,
+            hub_card_hover_title: document.getElementById('hubCardHoverTitle').value,
+            hub_particle_glow_1: document.getElementById('hubParticleGlow1').value,
+            hub_particle_glow_2: document.getElementById('hubParticleGlow2').value,
+            hub_particle_size: parseInt(document.getElementById('hubParticleSize').value),
+            hub_particle_blur: parseInt(document.getElementById('hubParticleBlur').value),
+            hub_particle_opacity: parseFloat(document.getElementById('hubParticleOpacity').value),
+            hub_particle_speed: parseInt(document.getElementById('hubParticleSpeed').value),
+            hub_particle_enabled: document.getElementById('hubParticleEnabled').checked,
+            hub_card_glow_center: document.getElementById('hubCardGlowCenter').value,
+            hub_card_glow_edge: document.getElementById('hubCardGlowEdge').value,
+            hub_icon_color: document.getElementById('hubIconColor').value,
+            hub_icon_hover_color: document.getElementById('hubIconHoverColor').value,
+            hub_icon_shadow: document.getElementById('hubIconShadow').value,
+            hub_card_shadow: document.getElementById('hubCardShadow').value,
+            hub_card_border: document.getElementById('hubCardBorder').value,
+            hub_card_description: document.getElementById('hubCardDescription').value,
+            hub_card_hover_description: document.getElementById('hubCardHoverDescription').value,
+            hub_card_hover_description_shadow: document.getElementById('hubCardHoverDescriptionShadow').value,
+            hub_no_sections_bg: document.getElementById('hubNoSectionsBg').value,
+            hub_no_sections_shadow: document.getElementById('hubNoSectionsShadow').value,
+            
             sidebar_bg: document.getElementById('sidebarBg').value,
             sidebar_text_color: document.getElementById('sidebarTextColor').value,
             sidebar_active_highlight: document.getElementById('sidebarActiveHighlight').value,
@@ -473,6 +547,8 @@ async function saveSiteSettings() {
             setTimeout(() => window.location.reload(), 1500);
         } else {
             showMessage('Settings saved successfully!', 'success');
+            // Reload settings to sync checkbox states and other values from database
+            await loadSiteSettings();
         }
         
         // Apply changes dynamically without reload
@@ -505,6 +581,29 @@ function applyCSSChanges() {
     root.style.setProperty('--hub-tile-text', document.getElementById('hubTileText').value);
     root.style.setProperty('--hub-title-color', document.getElementById('hubTitleColor').value);
     root.style.setProperty('--hub-subtitle-color', document.getElementById('hubSubtitleColor').value);
+    
+    // Update hub particle effect variables
+    root.style.setProperty('--hub-particle-glow-1', document.getElementById('hubParticleGlow1').value);
+    root.style.setProperty('--hub-particle-glow-2', document.getElementById('hubParticleGlow2').value);
+    root.style.setProperty('--hub-particle-size', document.getElementById('hubParticleSize').value + 'px');
+    root.style.setProperty('--hub-particle-blur', document.getElementById('hubParticleBlur').value + 'px');
+    root.style.setProperty('--hub-particle-opacity', document.getElementById('hubParticleOpacity').value);
+    root.style.setProperty('--hub-particle-speed', document.getElementById('hubParticleSpeed').value + 's');
+    root.style.setProperty('--hub-particle-display', document.getElementById('hubParticleEnabled').checked ? 'block' : 'none');
+    
+    // Update hub card effects
+    root.style.setProperty('--hub-card-hover-shadow', document.getElementById('hubCardHoverShadow').value);
+    root.style.setProperty('--hub-card-hover-border', document.getElementById('hubCardHoverBorder').value);
+    root.style.setProperty('--hub-card-hover-title', document.getElementById('hubCardHoverTitle').value);
+    root.style.setProperty('--hub-card-glow-center', document.getElementById('hubCardGlowCenter').value);
+    root.style.setProperty('--hub-card-glow-edge', document.getElementById('hubCardGlowEdge').value);
+    root.style.setProperty('--hub-icon-color', document.getElementById('hubIconColor').value);
+    root.style.setProperty('--hub-icon-hover-color', document.getElementById('hubIconHoverColor').value);
+    root.style.setProperty('--hub-icon-shadow', document.getElementById('hubIconShadow').value);
+    root.style.setProperty('--hub-card-shadow', document.getElementById('hubCardShadow').value);
+    root.style.setProperty('--hub-card-border', document.getElementById('hubCardBorder').value);
+    root.style.setProperty('--hub-card-description', document.getElementById('hubCardDescription').value);
+    root.style.setProperty('--hub-card-hover-description', document.getElementById('hubCardHoverDescription').value);
     
     // Update header/footer colors
     root.style.setProperty('--header-bg-color', document.getElementById('headerBgColor').value);
@@ -763,9 +862,19 @@ function setupColorPickers() {
     const colorInputs = [
         'primaryColor', 'navbarColor', 'backgroundColor', 'accentColor',
         'hubPageBg', 'hubTileBg', 'hubTileText', 'hubTitleColor', 'hubSubtitleColor',
+        'hubCardHoverShadow', 'hubCardHoverBorder', 'hubCardHoverTitle',
+        'hubParticleGlow1', 'hubParticleGlow2',
+        'hubCardGlowCenter', 'hubCardGlowEdge', 'hubIconColor', 'hubIconHoverColor', 'hubIconShadow',
+        'hubCardShadow', 'hubCardBorder', 'hubCardDescription', 'hubCardHoverDescription',
+        'hubCardHoverDescriptionShadow', 'hubNoSectionsBg', 'hubNoSectionsShadow',
+        'textPrimary', 'textSecondary', 'textMuted', 'textDisabled', 'textInverse', 'linkColor',
         'sidebarBg', 'sidebarTextColor', 'sidebarActiveHighlight', 'sidebarActiveTextColor', 'sidebarHoverBg',
         'buttonPrimaryBg', 'buttonPrimaryText', 'buttonSecondaryBg', 'buttonSecondaryText',
-        'buttonDangerBg', 'buttonDangerText', 'buttonSuccessBg', 'buttonSuccessText'
+        'buttonDangerBg', 'buttonDangerText', 'buttonSuccessBg', 'buttonSuccessText',
+        'unsavedChangesGlowColor', 'logoGlowColor',
+        'headerBgColor', 'headerTextColor', 'headerSubtitleColor',
+        'footerBgColor', 'footerTextColor',
+        'roleStaffBg'
     ];
     
     colorInputs.forEach(id => {
@@ -820,6 +929,29 @@ function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
+    // Force positioning with inline styles to override any CSS conflicts
+    toast.style.cssText = `
+        position: fixed !important;
+        bottom: -100px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        background: var(--bg-code) !important;
+        color: white !important;
+        padding: 18px 24px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+        z-index: 100000 !important;
+        transition: bottom 0.3s ease !important;
+        min-width: 320px !important;
+        max-width: 500px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 14px !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        border: 2px solid rgba(255,255,255,0.2) !important;
+    `;
+    
     const icons = {
         success: '✅',
         error: '❌',
@@ -835,8 +967,11 @@ function showToast(message, type = 'success') {
     
     document.body.appendChild(toast);
     
-    // Trigger animation
-    setTimeout(() => toast.classList.add('show'), 10);
+    // Trigger animation with forced positioning
+    setTimeout(() => {
+        toast.classList.add('show');
+        toast.style.bottom = '2rem !important'; // Force bottom positioning
+    }, 10);
     
     // Auto remove after 5 seconds
     setTimeout(() => {

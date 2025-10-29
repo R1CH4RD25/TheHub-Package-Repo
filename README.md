@@ -2,6 +2,15 @@
 
 A modular, secure web application platform for managing school district operations including vehicle maintenance, fuel tracking, bullying reports, and more.
 
+## 📝 Recent Updates
+
+**Latest Development Log**: [October 29, 2025](DEVELOPMENT_LOG_2025-10-29.md)
+- Collapsible sidebar menu groups with accordion behavior
+- User profile dropdown with contact preferences
+- FontAwesome icon integration
+- Section configuration tab fixes
+- CSS and z-index cleanup
+
 ## ✨ Features
 
 - **🔐 Flexible Authentication**
@@ -252,6 +261,58 @@ thehub/
 - **Theme not loading?** Clear browser cache and check `public/assets/css/generated/`
 
 See **[REQUIREMENTS.md](REQUIREMENTS.md)** for detailed troubleshooting guide.
+
+## 🗺️ Roadmap
+
+### v1.0 (Current) - Core Platform ✅
+- Modular architecture with packages
+- Authentication (Google, Microsoft, Local)
+- Role-based access control
+- Theme system with 45+ settings
+- Admin dashboard with user management
+- Audit logging
+- Section-based access
+
+### v2.0 (Planned) - Add-ons & Component System
+**Goal**: Make package building easier for end users with pre-built, reusable components
+
+#### Add-ons System
+- **Component Marketplace**: Browse and install pre-built add-ons
+- **Core Add-ons** (hardcoded, maintained by core team):
+  - **To-Do Lists**: Task management with priorities and due dates
+  - **Checklists**: Simple checkbox lists with persistence
+  - **Form Builder**: Drag-drop form creation with validation
+  - **Data Tables**: Sortable, filterable, exportable tables
+  - **File Uploaders**: Drag-drop file handling with previews
+  - **Calendar/Scheduler**: Event management widgets
+  - **Charts & Graphs**: Data visualization components
+  - **Comment Systems**: Threaded discussions
+  - **Rich Text Editor**: WYSIWYG content editing
+  - **Image Galleries**: Photo management with lightbox
+  - **Search Filters**: Advanced filtering UI components
+  - **Notifications**: Toast/alert system
+  - **Progress Trackers**: Multi-step workflows
+  - **User Selectors**: Advanced user/group pickers
+
+#### Technical Architecture
+- Add-ons stored in `src/Addons/` or `public/addons/`
+- Simple API for package developers to integrate add-ons
+- Minimal configuration required
+- Compose complex packages from simple building blocks
+- Version control and dependency management
+
+#### Benefits
+- Faster package development
+- Consistent UX across packages
+- Reduced code duplication
+- Lower barrier to entry for new developers
+- Easier maintenance and updates
+
+### Future Considerations
+- Community add-on marketplace
+- Third-party add-on support
+- Add-on SDK and documentation
+- Visual package builder UI
 
 ## 🤝 Contributing
 
