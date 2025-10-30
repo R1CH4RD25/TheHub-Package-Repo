@@ -6,14 +6,14 @@ use Exception;
 
 /**
  * ModuleFactory - Create module instances from configuration
- * 
+ *
  * Factory pattern for instantiating the correct module renderer
  * based on module type from package manifest.
- * 
+ *
  * Usage:
  *   $module = ModuleFactory::create($moduleConfig);
  *   echo $module->render();
- * 
+ *
  * @author The Hub Team
  * @version 1.0.0
  */
@@ -21,7 +21,7 @@ class ModuleFactory
 {
     /**
      * Create module instance from configuration
-     * 
+     *
      * @param array $config Module configuration from manifest
      * @return ModuleInterface Module instance
      * @throws Exception If module type not supported
@@ -29,11 +29,11 @@ class ModuleFactory
     public static function create(array $config): ModuleInterface
     {
         $type = $config['type'] ?? null;
-        
+
         if (!$type) {
             throw new Exception('Module type not specified');
         }
-        
+
         // Map module types to renderer classes (12/12 = 100% coverage!)
         $renderers = [
             'Form' => FormRenderer::class,
@@ -50,24 +50,24 @@ class ModuleFactory
             'Kanban' => KanbanRenderer::class,
             'Report' => ReportRenderer::class,
         ];
-        
+
         if (!isset($renderers[$type])) {
             throw new Exception("Unsupported module type: {$type}");
         }
-        
+
         $rendererClass = $renderers[$type];
-        
+
         // Check if renderer class exists
         if (!class_exists($rendererClass)) {
             throw new Exception("Renderer not implemented: {$rendererClass}");
         }
-        
+
         return new $rendererClass($config);
     }
-    
+
     /**
      * Check if module type is supported
-     * 
+     *
      * @param string $type Module type
      * @return bool True if supported
      */
@@ -75,24 +75,24 @@ class ModuleFactory
     {
         $supported = [
             'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
-            'EmailNotification', 'PDFGenerator', 
+            'EmailNotification', 'PDFGenerator',
             'Action', 'Computation', 'FileManager', 'Calendar', 'Kanban', 'Report'
             // 12/12 module types fully supported! 🎉
         ];
-        
+
         return in_array($type, $supported);
     }
-    
+
     /**
      * Get list of all supported module types
-     * 
+     *
      * @return array Module types
      */
     public static function getSupportedTypes(): array
     {
         return [
             'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
-            'EmailNotification', 'PDFGenerator', 
+            'EmailNotification', 'PDFGenerator',
             'Action', 'Computation', 'FileManager', 'Calendar', 'Kanban', 'Report'
         ];
     }

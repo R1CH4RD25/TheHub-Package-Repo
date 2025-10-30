@@ -711,21 +711,21 @@ JS;
     }
     
     /**
-     * Handle file upload
+     * Handle file operations
      */
-    public function handle(): array
+    public function handle(array $data): array
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = $data['action'] ?? '';
         
         switch ($action) {
             case 'upload':
-                return $this->handleUpload();
+                return $this->handleUpload($data);
             case 'delete':
-                return $this->handleDelete();
+                return $this->handleDelete($data);
             case 'create_folder':
-                return $this->handleCreateFolder();
+                return $this->handleCreateFolder($data);
             case 'move':
-                return $this->handleMove();
+                return $this->handleMove($data);
             default:
                 return ['success' => false, 'message' => 'Invalid action'];
         }
@@ -734,18 +734,18 @@ JS;
     /**
      * Handle file upload
      */
-    private function handleUpload(): array
+    private function handleUpload(array $data): array
     {
-        // Implementation would handle $_FILES upload
+        // Implementation would handle file upload from $data
         return ['success' => true, 'message' => 'Files uploaded'];
     }
     
     /**
      * Handle file deletion
      */
-    private function handleDelete(): array
+    private function handleDelete(array $data): array
     {
-        $fileId = $_POST['id'] ?? 0;
+        $fileId = $data['id'] ?? 0;
         
         // Delete file from database and filesystem
         AuditLogger::log('file_delete', 'files', $fileId, [], ['id' => $fileId]);
@@ -756,9 +756,9 @@ JS;
     /**
      * Handle folder creation
      */
-    private function handleCreateFolder(): array
+    private function handleCreateFolder(array $data): array
     {
-        $folderName = $_POST['name'] ?? '';
+        $folderName = $data['name'] ?? '';
         
         // Create folder in database
         AuditLogger::log('folder_create', 'folders', null, [], ['name' => $folderName]);
@@ -769,10 +769,10 @@ JS;
     /**
      * Handle move operation
      */
-    private function handleMove(): array
+    private function handleMove(array $data): array
     {
-        $fileIds = $_POST['file_ids'] ?? [];
-        $targetFolder = $_POST['target_folder'] ?? '';
+        $fileIds = $data['file_ids'] ?? [];
+        $targetFolder = $data['target_folder'] ?? '';
         
         // Move files to target folder
         

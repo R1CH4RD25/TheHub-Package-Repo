@@ -12,17 +12,17 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * CalendarRenderer - Universal calendar and event management
- * 
+ *
  * Implements Calendar module type for scheduling events, appointments, meetings,
  * deadlines, and reminders. Generic design works for any organization.
- * 
+ *
  * Use cases:
  * - Business: Meeting scheduling, project deadlines, resource booking
  * - Education: Class schedules, exam dates, school events, parent-teacher conferences
  * - Healthcare: Appointment scheduling, shift planning, equipment reservations
  * - Personal: Task deadlines, birthdays, reminders, vacation planning
  * - Non-profit: Event planning, volunteer shifts, fundraiser schedules
- * 
+ *
  * Features:
  * - Multiple view modes (month, week, day, agenda)
  * - Color-coded categories
@@ -34,7 +34,7 @@ require_once __DIR__ . '/../bootstrap.php';
  * - Attendee management
  * - Conflict detection
  * - Drag-and-drop rescheduling
- * 
+ *
  * @author The Hub Team
  * @version 1.0.0
  */
@@ -42,7 +42,7 @@ class CalendarRenderer implements ModuleInterface
 {
     private array $config;
     private Database $db;
-    
+
     // Event categories with colors
     private array $defaultCategories = [
         'meeting' => ['label' => 'Meeting', 'color' => '#0d6efd'],
@@ -52,18 +52,18 @@ class CalendarRenderer implements ModuleInterface
         'reminder' => ['label' => 'Reminder', 'color' => '#6c757d'],
         'personal' => ['label' => 'Personal', 'color' => '#6f42c1'],
     ];
-    
+
     public function __construct(array $config)
     {
         $this->config = $config;
         $this->db = Database::getInstance();
-        
+
         // Merge custom categories from config
         if (isset($config['categories'])) {
             $this->defaultCategories = array_merge($this->defaultCategories, $config['categories']);
         }
     }
-    
+
     /**
      * Render calendar interface
      */
@@ -71,12 +71,12 @@ class CalendarRenderer implements ModuleInterface
     {
         $view = $_GET['view'] ?? 'month';
         $date = $_GET['date'] ?? date('Y-m-d');
-        
+
         $html = '<div class="calendar-container">';
-        
+
         // Header with navigation and controls
         $html .= $this->renderHeader($view, $date);
-        
+
         // Calendar views
         switch ($view) {
             case 'month':
@@ -94,20 +94,20 @@ class CalendarRenderer implements ModuleInterface
             default:
                 $html .= $this->renderMonthView($date);
         }
-        
+
         // Modals
         $html .= $this->renderEventModal();
         $html .= $this->renderEventDetailsModal();
-        
+
         // Scripts and styles
         $html .= $this->renderStyles();
         $html .= $this->renderScripts();
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render calendar header with controls
      */
@@ -116,12 +116,12 @@ class CalendarRenderer implements ModuleInterface
         $timestamp = strtotime($date);
         $prevDate = date('Y-m-d', strtotime('-1 ' . $view, $timestamp));
         $nextDate = date('Y-m-d', strtotime('+1 ' . $view, $timestamp));
-        
+
         $displayDate = $this->getDisplayDate($view, $date);
-        
+
         $html = '<div class="calendar-header mb-4">';
         $html .= '    <div class="d-flex justify-content-between align-items-center">';
-        
+
         // Navigation
         $html .= '        <div class="calendar-navigation">';
         $html .= '            <div class="btn-group">';
@@ -135,7 +135,7 @@ class CalendarRenderer implements ModuleInterface
         $html .= '            </div>';
         $html .= '            <h3 class="ms-3 mb-0 d-inline-block">' . $displayDate . '</h3>';
         $html .= '        </div>';
-        
+
         // Actions and view switcher
         $html .= '        <div class="calendar-actions">';
         $html .= '            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#eventModal">';
@@ -148,20 +148,20 @@ class CalendarRenderer implements ModuleInterface
         $html .= '                <a href="?view=agenda&date=' . $date . '" class="btn btn-outline-secondary ' . ($view === 'agenda' ? 'active' : '') . '">Agenda</a>';
         $html .= '            </div>';
         $html .= '        </div>';
-        
+
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Get display date for header
      */
     private function getDisplayDate(string $view, string $date): string
     {
         $timestamp = strtotime($date);
-        
+
         switch ($view) {
             case 'month':
                 return date('F Y', $timestamp);
@@ -177,7 +177,7 @@ class CalendarRenderer implements ModuleInterface
                 return date('F Y', $timestamp);
         }
     }
-    
+
     /**
      * Render month view
      */
@@ -188,22 +188,22 @@ class CalendarRenderer implements ModuleInterface
         $firstDay = mktime(0, 0, 0, $month, 1, $year);
         $daysInMonth = date('t', $firstDay);
         $dayOfWeek = date('w', $firstDay);
-        
+
         // Get events for this month
         $startDate = date('Y-m-01', strtotime($date));
         $endDate = date('Y-m-t', strtotime($date));
         $events = $this->getEvents($startDate, $endDate);
-        
+
         // Group events by date
         $eventsByDate = [];
         foreach ($events as $event) {
             $eventDate = date('Y-m-d', strtotime($event['start_date']));
             $eventsByDate[$eventDate][] = $event;
         }
-        
+
         $html = '<div class="calendar-month-view">';
         $html .= '    <table class="table table-bordered">';
-        
+
         // Day headers
         $html .= '        <thead>';
         $html .= '            <tr>';
@@ -213,16 +213,16 @@ class CalendarRenderer implements ModuleInterface
         }
         $html .= '            </tr>';
         $html .= '        </thead>';
-        
+
         // Calendar grid
         $html .= '        <tbody>';
-        
+
         $currentDay = 1;
         $row = 0;
-        
+
         while ($currentDay <= $daysInMonth) {
             $html .= '            <tr>';
-            
+
             for ($col = 0; $col < 7; $col++) {
                 if ($row === 0 && $col < $dayOfWeek) {
                     // Empty cells before month starts
@@ -235,10 +235,10 @@ class CalendarRenderer implements ModuleInterface
                     $cellDate = sprintf('%s-%02d-%02d', $year, $month, $currentDay);
                     $isToday = $cellDate === date('Y-m-d');
                     $dayEvents = $eventsByDate[$cellDate] ?? [];
-                    
+
                     $html .= '                <td class="calendar-day ' . ($isToday ? 'today' : '') . '" data-date="' . $cellDate . '">';
                     $html .= '                    <div class="day-number">' . $currentDay . '</div>';
-                    
+
                     // Show events
                     if (!empty($dayEvents)) {
                         $html .= '                    <div class="day-events">';
@@ -253,23 +253,23 @@ class CalendarRenderer implements ModuleInterface
                         }
                         $html .= '                    </div>';
                     }
-                    
+
                     $html .= '                </td>';
                     $currentDay++;
                 }
             }
-            
+
             $html .= '            </tr>';
             $row++;
         }
-        
+
         $html .= '        </tbody>';
         $html .= '    </table>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render week view
      */
@@ -277,43 +277,43 @@ class CalendarRenderer implements ModuleInterface
     {
         $timestamp = strtotime($date);
         $weekStart = strtotime('monday this week', $timestamp);
-        
+
         // Get events for this week
         $startDate = date('Y-m-d', $weekStart);
         $endDate = date('Y-m-d', strtotime('+6 days', $weekStart));
         $events = $this->getEvents($startDate, $endDate);
-        
+
         $html = '<div class="calendar-week-view">';
         $html .= '    <div class="table-responsive">';
         $html .= '        <table class="table table-bordered">';
-        
+
         // Day headers
         $html .= '            <thead>';
         $html .= '                <tr>';
         $html .= '                    <th width="80">Time</th>';
-        
+
         for ($i = 0; $i < 7; $i++) {
             $day = date('D, M d', strtotime("+$i days", $weekStart));
             $isToday = date('Y-m-d', strtotime("+$i days", $weekStart)) === date('Y-m-d');
             $html .= '                    <th class="' . ($isToday ? 'bg-light' : '') . '">' . $day . '</th>';
         }
-        
+
         $html .= '                </tr>';
         $html .= '            </thead>';
-        
+
         // Time slots (6am to 10pm)
         $html .= '            <tbody>';
-        
+
         for ($hour = 6; $hour <= 22; $hour++) {
             $html .= '                <tr>';
             $html .= '                    <td class="time-slot">' . date('g A', mktime($hour, 0, 0)) . '</td>';
-            
+
             for ($day = 0; $day < 7; $day++) {
                 $cellDate = date('Y-m-d', strtotime("+$day days", $weekStart));
                 $cellHour = sprintf('%02d:00:00', $hour);
-                
+
                 $html .= '                    <td class="calendar-cell" data-date="' . $cellDate . '" data-time="' . $cellHour . '">';
-                
+
                 // Show events for this time slot
                 foreach ($events as $event) {
                     if (date('Y-m-d', strtotime($event['start_date'])) === $cellDate) {
@@ -326,38 +326,38 @@ class CalendarRenderer implements ModuleInterface
                         }
                     }
                 }
-                
+
                 $html .= '                    </td>';
             }
-            
+
             $html .= '                </tr>';
         }
-        
+
         $html .= '            </tbody>';
         $html .= '        </table>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render day view
      */
     private function renderDayView(string $date): string
     {
         $events = $this->getEvents($date, $date);
-        
+
         $html = '<div class="calendar-day-view">';
         $html .= '    <div class="row">';
-        
+
         // All-day events
         if (!empty(array_filter($events, fn($e) => $e['all_day']))) {
             $html .= '        <div class="col-12 mb-3">';
             $html .= '            <div class="card">';
             $html .= '                <div class="card-header"><strong>All Day</strong></div>';
             $html .= '                <div class="list-group list-group-flush">';
-            
+
             foreach ($events as $event) {
                 if ($event['all_day']) {
                     $category = $this->defaultCategories[$event['category']] ?? $this->defaultCategories['event'];
@@ -369,22 +369,22 @@ class CalendarRenderer implements ModuleInterface
                     $html .= '                    </a>';
                 }
             }
-            
+
             $html .= '                </div>';
             $html .= '            </div>';
             $html .= '        </div>';
         }
-        
+
         // Timed events
         $html .= '        <div class="col-12">';
         $html .= '            <div class="timeline">';
-        
+
         for ($hour = 0; $hour < 24; $hour++) {
             $timeLabel = date('g:00 A', mktime($hour, 0, 0));
             $html .= '                <div class="timeline-hour">';
             $html .= '                    <div class="hour-label">' . $timeLabel . '</div>';
             $html .= '                    <div class="hour-events">';
-            
+
             // Show events for this hour
             foreach ($events as $event) {
                 if (!$event['all_day']) {
@@ -392,7 +392,7 @@ class CalendarRenderer implements ModuleInterface
                     if ($eventHour === $hour) {
                         $category = $this->defaultCategories[$event['category']] ?? $this->defaultCategories['event'];
                         $endTime = $event['end_time'] ? date('g:i A', strtotime($event['end_time'])) : '';
-                        
+
                         $html .= '                        <div class="timeline-event" style="background-color: ' . $category['color'] . ';" data-event-id="' . $event['id'] . '">';
                         $html .= '                            <strong>' . htmlspecialchars($event['title']) . '</strong><br>';
                         $html .= '                            <small>' . date('g:i A', strtotime($event['start_time'])) . ($endTime ? ' - ' . $endTime : '') . '</small>';
@@ -400,20 +400,20 @@ class CalendarRenderer implements ModuleInterface
                     }
                 }
             }
-            
+
             $html .= '                    </div>';
             $html .= '                </div>';
         }
-        
+
         $html .= '            </div>';
         $html .= '        </div>';
-        
+
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render agenda view (list of upcoming events)
      */
@@ -422,18 +422,18 @@ class CalendarRenderer implements ModuleInterface
         $startDate = date('Y-m-d');
         $endDate = date('Y-m-d', strtotime('+30 days'));
         $events = $this->getEvents($startDate, $endDate);
-        
+
         // Group by date
         $eventsByDate = [];
         foreach ($events as $event) {
             $eventDate = date('Y-m-d', strtotime($event['start_date']));
             $eventsByDate[$eventDate][] = $event;
         }
-        
+
         ksort($eventsByDate);
-        
+
         $html = '<div class="calendar-agenda-view">';
-        
+
         if (empty($events)) {
             $html .= '    <div class="alert alert-info">No upcoming events in the next 30 days</div>';
         } else {
@@ -441,43 +441,43 @@ class CalendarRenderer implements ModuleInterface
                 $html .= '    <div class="agenda-date-group mb-4">';
                 $html .= '        <h5 class="text-primary">' . date('l, F d, Y', strtotime($eventDate)) . '</h5>';
                 $html .= '        <div class="list-group">';
-                
+
                 foreach ($dayEvents as $event) {
                     $category = $this->defaultCategories[$event['category']] ?? $this->defaultCategories['event'];
-                    
+
                     $html .= '            <a href="#" class="list-group-item list-group-item-action event-item-link" data-event-id="' . $event['id'] . '" style="border-left: 4px solid ' . $category['color'] . ';">';
                     $html .= '                <div class="d-flex w-100 justify-content-between">';
                     $html .= '                    <h6 class="mb-1">' . htmlspecialchars($event['title']) . '</h6>';
-                    
+
                     if ($event['all_day']) {
                         $html .= '                    <small>All Day</small>';
                     } else {
                         $html .= '                    <small>' . date('g:i A', strtotime($event['start_time'])) . '</small>';
                     }
-                    
+
                     $html .= '                </div>';
-                    
+
                     if ($event['description']) {
                         $html .= '                <p class="mb-1 text-muted">' . htmlspecialchars(mb_substr($event['description'], 0, 150)) . '</p>';
                     }
-                    
+
                     if ($event['location']) {
                         $html .= '                <small class="text-muted"><i class="bi bi-geo-alt"></i> ' . htmlspecialchars($event['location']) . '</small>';
                     }
-                    
+
                     $html .= '            </a>';
                 }
-                
+
                 $html .= '        </div>';
                 $html .= '    </div>';
             }
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render event creation/edit modal
      */
@@ -492,13 +492,13 @@ class CalendarRenderer implements ModuleInterface
         $html .= '            </div>';
         $html .= '            <div class="modal-body">';
         $html .= '                <form id="eventForm">';
-        
+
         // Title
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="eventTitle" class="form-label">Title *</label>';
         $html .= '                        <input type="text" class="form-control" id="eventTitle" required>';
         $html .= '                    </div>';
-        
+
         // Date and time
         $html .= '                    <div class="row">';
         $html .= '                        <div class="col-md-6 mb-3">';
@@ -510,7 +510,7 @@ class CalendarRenderer implements ModuleInterface
         $html .= '                            <input type="time" class="form-control" id="eventStartTime">';
         $html .= '                        </div>';
         $html .= '                    </div>';
-        
+
         $html .= '                    <div class="row">';
         $html .= '                        <div class="col-md-6 mb-3">';
         $html .= '                            <label for="eventEndDate" class="form-label">End Date</label>';
@@ -521,13 +521,13 @@ class CalendarRenderer implements ModuleInterface
         $html .= '                            <input type="time" class="form-control" id="eventEndTime">';
         $html .= '                        </div>';
         $html .= '                    </div>';
-        
+
         // All day checkbox
         $html .= '                    <div class="mb-3 form-check">';
         $html .= '                        <input type="checkbox" class="form-check-input" id="eventAllDay">';
         $html .= '                        <label class="form-check-label" for="eventAllDay">All day event</label>';
         $html .= '                    </div>';
-        
+
         // Category
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="eventCategory" class="form-label">Category</label>';
@@ -537,19 +537,19 @@ class CalendarRenderer implements ModuleInterface
         }
         $html .= '                        </select>';
         $html .= '                    </div>';
-        
+
         // Description
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="eventDescription" class="form-label">Description</label>';
         $html .= '                        <textarea class="form-control" id="eventDescription" rows="3"></textarea>';
         $html .= '                    </div>';
-        
+
         // Location
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="eventLocation" class="form-label">Location</label>';
         $html .= '                        <input type="text" class="form-control" id="eventLocation">';
         $html .= '                    </div>';
-        
+
         // Recurring
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="eventRecurring" class="form-label">Repeat</label>';
@@ -561,7 +561,7 @@ class CalendarRenderer implements ModuleInterface
         $html .= '                            <option value="yearly">Yearly</option>';
         $html .= '                        </select>';
         $html .= '                    </div>';
-        
+
         $html .= '                </form>';
         $html .= '            </div>';
         $html .= '            <div class="modal-footer">';
@@ -571,10 +571,10 @@ class CalendarRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render event details modal
      */
@@ -597,10 +597,10 @@ class CalendarRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render CSS styles
      */
@@ -693,10 +693,10 @@ class CalendarRenderer implements ModuleInterface
 }
 CSS;
         $html .= '</style>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render JavaScript
      */
@@ -715,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Calendar day click - create event
     document.querySelectorAll('.calendar-day:not(.empty)').forEach(el => {
         el.addEventListener('dblclick', function() {
@@ -724,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
             new bootstrap.Modal(document.getElementById('eventModal')).show();
         });
     });
-    
+
     // All-day toggle
     document.getElementById('eventAllDay')?.addEventListener('change', function() {
         const disabled = this.checked;
@@ -735,7 +735,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('eventEndTime').value = '';
         }
     });
-    
+
     // Save event
     document.getElementById('saveEvent')?.addEventListener('click', function() {
         const formData = {
@@ -750,7 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
             location: document.getElementById('eventLocation').value,
             recurring: document.getElementById('eventRecurring').value
         };
-        
+
         fetch('api/calendar.php?action=save', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -765,10 +765,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     function showEventDetails(eventId) {
         const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
-        
+
         fetch('api/calendar.php?action=details&id=' + eventId)
             .then(r => r.json())
             .then(event => {
@@ -784,10 +784,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 JS;
         $html .= '</script>';
-        
+
         return $html;
     }
-    
+
     /**
      * Get events for date range
      */
@@ -799,80 +799,78 @@ JS;
         if ($cached !== null) {
             return $cached;
         }
-        
+
         // Query database for events
         // This is a placeholder - actual implementation would query events table
         $events = [];
-        
+
         // Cache for 5 minutes
         Cache::set($cacheKey, $events, 300);
-        
+
         return $events;
     }
-    
+
     /**
      * Handle event actions
      */
-    public function handle(): array
+    public function handle(array $data): array
     {
-        $action = $_REQUEST['action'] ?? '';
-        
+        $action = $data['action'] ?? '';
+
         switch ($action) {
             case 'save':
-                return $this->handleSave();
+                return $this->handleSave($data);
             case 'delete':
-                return $this->handleDelete();
+                return $this->handleDelete($data);
             case 'details':
-                return $this->handleDetails();
+                return $this->handleDetails($data);
             default:
                 return ['success' => false, 'message' => 'Invalid action'];
         }
     }
-    
+
     /**
      * Handle save event
      */
-    private function handleSave(): array
+    private function handleSave(array $data): array
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         // Validate and save event
         AuditLogger::log('calendar_event_create', 'calendar_events', null, [], $data);
-        
+
         // Clear cache
         Cache::delete('events:*');
-        
+
         return ['success' => true, 'message' => 'Event saved'];
     }
-    
+
     /**
      * Handle delete event
      */
-    private function handleDelete(): array
+    private function handleDelete(array $data): array
     {
-        $eventId = $_POST['id'] ?? 0;
-        
+        $eventId = $data['id'] ?? 0;
+
         // Delete event
         AuditLogger::log('calendar_event_delete', 'calendar_events', $eventId, [], ['id' => $eventId]);
-        
+
         // Clear cache
         Cache::delete('events:*');
-        
+
         return ['success' => true, 'message' => 'Event deleted'];
     }
-    
+
     /**
      * Handle get event details
      */
-    private function handleDetails(): array
+    private function handleDetails(array $data): array
     {
-        $eventId = $_GET['id'] ?? 0;
-        
+        $eventId = $data['id'] ?? 0;
+
         // Fetch event details
         // Placeholder
         return ['success' => true, 'event' => []];
     }
-    
+
     /**
      * Validate configuration
      */
@@ -881,7 +879,7 @@ JS;
         // Calendar doesn't require specific config
         return true;
     }
-    
+
     /**
      * Get configuration
      */

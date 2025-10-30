@@ -835,19 +835,19 @@ JS;
     /**
      * Handle Kanban actions
      */
-    public function handle(): array
+    public function handle(array $data): array
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = $data['action'] ?? '';
         
         switch ($action) {
             case 'save':
-                return $this->handleSave();
+                return $this->handleSave($data);
             case 'move':
-                return $this->handleMove();
+                return $this->handleMove($data);
             case 'delete':
-                return $this->handleDelete();
+                return $this->handleDelete($data);
             case 'details':
-                return $this->handleDetails();
+                return $this->handleDetails($data);
             default:
                 return ['success' => false, 'message' => 'Invalid action'];
         }
@@ -856,10 +856,8 @@ JS;
     /**
      * Handle save card
      */
-    private function handleSave(): array
+    private function handleSave(array $data): array
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         // Validate and save card
         AuditLogger::log('kanban_card_create', 'kanban_cards', null, [], $data);
         
@@ -872,10 +870,8 @@ JS;
     /**
      * Handle move card
      */
-    private function handleMove(): array
+    private function handleMove(array $data): array
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         // Move card to new column
         AuditLogger::log('kanban_card_move', 'kanban_cards', $data['card_id'], [], $data);
         
@@ -888,9 +884,9 @@ JS;
     /**
      * Handle delete card
      */
-    private function handleDelete(): array
+    private function handleDelete(array $data): array
     {
-        $cardId = $_POST['id'] ?? 0;
+        $cardId = $data['id'] ?? 0;
         
         // Delete card
         AuditLogger::log('kanban_card_delete', 'kanban_cards', $cardId, [], ['id' => $cardId]);
@@ -904,9 +900,9 @@ JS;
     /**
      * Handle get card details
      */
-    private function handleDetails(): array
+    private function handleDetails(array $data): array
     {
-        $cardId = $_GET['id'] ?? 0;
+        $cardId = $data['id'] ?? 0;
         
         // Fetch card details
         // Placeholder
