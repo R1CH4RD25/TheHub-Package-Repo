@@ -61,8 +61,13 @@ class PackageLinter {
         'file', 'image', 'file_upload', 'currency', 'percentage'
     ];
     
-    // Supported module types
-    const MODULE_TYPES = ['Form', 'TableView', 'Workflow', 'Analytics'];
+    // Supported module types (from MODULE_CATALOG_V2.md)
+    const MODULE_TYPES = [
+        'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
+        'EmailNotification', 'PDFGenerator', 
+        'StudentEvaluation', 'EmployeeEvaluation',
+        'Action', 'FileManager', 'Computation'
+    ];
     
     public function __construct($manifestPath) {
         $this->manifestPath = $manifestPath;
@@ -347,57 +352,413 @@ class PackageLinter {
                 case 'Workflow':
                     $this->validateWorkflowModule($module, $slug);
                     break;
+                case 'Analytics':
+                    $this->validateAnalyticsModule($module, $slug);
+                    break;
+                case 'EmailNotification':
+                    $this->validateEmailNotificationModule($module, $slug);
+                    break;
+                case 'PDFGenerator':
+                    $this->validatePDFGeneratorModule($module, $slug);
+                    break;
+                case 'EmployeeEvaluation':
+                    $this->validateEmployeeEvaluationModule($module, $slug);
+                    break;
+                case 'StudentEvaluation':
+                    $this->validateStudentEvaluationModule($module, $slug);
+                    break;
+                case 'Action':
+                    $this->validateActionModule($module, $slug);
+                    break;
+                case 'FileManager':
+                    $this->validateFileManagerModule($module, $slug);
+                    break;
+                case 'Computation':
+                    $this->validateComputationModule($module, $slug);
+                    break;
+                case 'Dashboard':
+                    $this->validateDashboardModule($module, $slug);
+                    break;
             }
             
             $this->info('Modules', "Module '$slug' ($type) validated");
         }
     }
     
+    /**
+     * Validate Form Module (MODULE_CATALOG_V2.md § 1)
+     * Rules: [FRM-R01] through [FRM-R08]
+     */
     private function validateFormModule($module, $slug) {
         if (empty($module['fields'])) {
-            $this->error('Modules', "Form module '$slug' has no fields");
+            $this->error('Form Module', "[FRM-R04] Form '$slug' has no fields");
             return;
         }
         
+        // [FRM-R01]: Each field.key must map to DB column (check against entity)
         foreach ($module['fields'] as $field) {
             if (empty($field['key'])) {
-                $this->error('Modules', "Form '$slug' has field without 'key'");
+                $this->error('Form Module', "[FRM-R01] Form '$slug' has field without 'key'");
                 continue;
             }
             
             $fieldType = $field['fieldType'] ?? '';
             if (!in_array($fieldType, self::FIELD_TYPES)) {
-                $this->warning('Modules', "Form '$slug' field '{$field['key']}' has unsupported type: $fieldType");
+                $this->warning('Form Module', "Form '$slug' field '{$field['key']}' has unsupported type: $fieldType");
+            }
+            
+            // [FRM-R04]: Validation must define required, maxLength
+            if (!isset($field['required'])) {
+                $this->warning('Form Module', "[FRM-R04] Field '{$field['key']}' should define 'required'");
+            }
+            
+            if (in_array($fieldType, ['text', 'textarea', 'email', 'url']) && empty($field['validation']['maxLength'])) {
+                $this->warning('Form Module', "[FRM-R04] Field '{$field['key']}' should define 'maxLength'");
             }
         }
         
-        // Check for rate limiting
+        // [FRM-R03]: Must include anti-spam measure
+        if (empty($module['captcha']) && empty($module['validation']['honeypot'])) {
+            $this->warning('Form Module', "[FRM-R03] Form '$slug' should include anti-spam measure (captcha or honeypot)");
+        }
+        
+        // [FRM-R08]: Check for rate limiting
         if (empty($module['validation']['rateLimit'])) {
-            $this->warning('Modules', "Form '$slug' should define rate limiting");
+            $this->warning('Form Module', "[FRM-R08] Form '$slug' should define rate limiting");
+        }
+        
+        // [FRM-R05]: onSubmit.redirect must be within /pkg/ namespace
+        if (!empty($module['onSubmit']['redirect'])) {
+            $redirect = $module['onSubmit']['redirect'];
+            if (!str_starts_with($redirect, '/pkg/')) {
+                $this->error('Form Module', "[FRM-R05] Redirect '$redirect' must be within /pkg/ namespace");
+            }
+        }
+        
+        // [FRM-R02]: Anonymous forms must handle PII appropriately
+        if (!empty($module['allowAnonymous'])) {
+            $hasPII = false;
+            foreach ($module['fields'] as $field) {
+                if (!empty($field['pii'])) {
+                    $hasPII = true;
+                    break;
+                }
+            }
+            if ($hasPII) {
+                $this->info('Form Module', "[FRM-R02] Anonymous form '$slug' contains PII fields - ensure consent is obtained");
+            }
+        }
+    }
+    
+    /**
+     * Validate TableView Module (MODULE_CATALOG_V2.md § 2)
+     * Rules: [TBL-R01] through [TBL-R07]
+     */
+    private function validateTableModule($module, $slug) {
+        // [TBL-R01]: At least one column must be sortable
+        if (empty($module['columns'])) {
+            $this->error('TableView Module', "TableView '$slug' has no columns");
+            return;
+        }
+        
+        $hasSortable = false;
+        foreach ($module['columns'] as $col) {
+            if (!empty($col['sortable'])) {
+                $hasSortable = true;
+                break;
+            }
+        }
+        
+        if (!$hasSortable) {
+            $this->error('TableView Module', "[TBL-R01] TableView '$slug' must have at least one sortable column");
+        }
+        
+        // [TBL-R02]: Actions must declare permission key
+        if (!empty($module['actions'])) {
+            foreach ($module['actions'] as $action) {
+                if (empty($action['permission'])) {
+                    $this->warning('TableView Module', "[TBL-R02] Action '{$action['key']}' should declare 'permission'");
+                }
+            }
+        }
+        
+        // [TBL-R03]: Export formats respect PII flags
+        if (!empty($module['export'])) {
+            if (!isset($module['export']['excludePII'])) {
+                $this->info('TableView Module', "[TBL-R03] Export should define 'excludePII' setting");
+            }
+        }
+        
+        // [TBL-R04]: Pagination defaults
+        if (!isset($module['pagination'])) {
+            $this->warning('TableView Module', "[TBL-R04] TableView '$slug' should define pagination");
+        }
+    }
+    
+    /**
+     * Validate Workflow Module (MODULE_CATALOG_V2.md § 3)
+     * Rules: [WF-R01] through [WF-R08]
+     */
+    private function validateWorkflowModule($module, $slug) {
+        if (empty($module['steps'])) {
+            $this->error('Workflow Module', "Workflow '$slug' has no steps");
+            return;
+        }
+        
+        // [WF-R01]: Each step must have unique ID
+        $stepIds = array_column($module['steps'], 'id');
+        if (count($stepIds) !== count(array_unique($stepIds))) {
+            $this->error('Workflow Module', "[WF-R01] Workflow '$slug' has duplicate step IDs");
+        }
+        
+        // [WF-R02]: Must define at least one transition path
+        $hasTransitions = false;
+        foreach ($module['steps'] as $step) {
+            if (!empty($step['nextSteps']) && count($step['nextSteps']) > 0) {
+                $hasTransitions = true;
+                break;
+            }
+        }
+        
+        if (!$hasTransitions) {
+            $this->error('Workflow Module', "[WF-R02] Workflow '$slug' must define at least one transition path");
+        }
+        
+        // [WF-R03]: Each step must include requiredRole or null
+        foreach ($module['steps'] as $step) {
+            if (!array_key_exists('requiredRole', $step)) {
+                $this->warning('Workflow Module', "[WF-R03] Step '{$step['id']}' should define 'requiredRole' (or null)");
+            }
+        }
+        
+        // [WF-R07]: Status field must be ENUM or VARCHAR
+        if (empty($module['statusField'])) {
+            $this->error('Workflow Module', "[WF-R07] Workflow '$slug' must define 'statusField'");
+        }
+    }
+    
+    /**
+     * Validate Analytics Module (MODULE_CATALOG_V2.md § 4)
+     * Rules: [ANL-R01] through [ANL-R07]
+     */
+    private function validateAnalyticsModule($module, $slug) {
+        // [ANL-R04]: Must include at least one visualization
+        if (empty($module['charts'])) {
+            $this->error('Analytics Module', "[ANL-R04] Analytics '$slug' must include at least one chart");
+            return;
+        }
+        
+        // [ANL-R01]: Must use host chart components (Chart.js)
+        foreach ($module['charts'] as $chart) {
+            $validTypes = ['line', 'bar', 'pie', 'doughnut', 'radar', 'polarArea'];
+            if (!empty($chart['type']) && !in_array($chart['type'], $validTypes)) {
+                $this->warning('Analytics Module', "[ANL-R01] Chart type '{$chart['type']}' may not be supported by Chart.js");
+            }
+        }
+        
+        $this->info('Analytics Module', "[ANL-R02] Ensure queries pass through Hub Data API (no raw SQL)");
+    }
+    
+    /**
+     * Validate EmailNotification Module (MODULE_CATALOG_V2.md § 5)
+     * Rules: [NTF-R01] through [NTF-R07]
+     */
+    private function validateEmailNotificationModule($module, $slug) {
+        // [NTF-R01]: Each trigger must map to valid audit event
+        if (empty($module['triggers'])) {
+            $this->error('Email Notification', "[NTF-R01] EmailNotification '$slug' must define triggers");
+            return;
+        }
+        
+        foreach ($module['triggers'] as $trigger) {
+            if (empty($trigger['event'])) {
+                $this->error('Email Notification', "[NTF-R01] Trigger missing 'event'");
+            }
+        }
+        
+        // Check recipients
+        if (empty($module['recipients'])) {
+            $this->error('Email Notification', "EmailNotification '$slug' must define recipients");
+        }
+        
+        // [NTF-R03]: Template validation
+        if (empty($module['template'])) {
+            $this->error('Email Notification', "[NTF-R03] EmailNotification '$slug' must define template");
+        }
+        
+        $this->info('Email Notification', "[NTF-R05] Ensure SMTP settings configured in .env");
+    }
+    
+    /**
+     * Validate PDFGenerator Module (MODULE_CATALOG_V2.md § 6)
+     * Rules: [PDF-R01] through [PDF-R07]
+     */
+    private function validatePDFGeneratorModule($module, $slug) {
+        // [PDF-R02]: Templates must be HTML-based
+        if (empty($module['template'])) {
+            $this->error('PDF Generator', "[PDF-R02] PDFGenerator '$slug' must define HTML template");
+        }
+        
+        // Check filename pattern
+        if (empty($module['filename'])) {
+            $this->warning('PDF Generator', "PDFGenerator '$slug' should define filename pattern");
+        }
+        
+        // [PDF-R04]: Respect PII flags
+        $this->info('PDF Generator', "[PDF-R04] Ensure template respects 'pii: true' field flags");
+    }
+    
+    /**
+     * Validate EmployeeEvaluation Module (MODULE_CATALOG_V2.md § 8)
+     * This is a composite module with workflow, scoring, and email features
+     */
+    private function validateEmployeeEvaluationModule($module, $slug) {
+        // Check evaluation sections
+        if (empty($module['sections'])) {
+            $this->error('Employee Evaluation', "EmployeeEvaluation '$slug' must define evaluation sections");
+        }
+        
+        // Check workflow integration
+        if (empty($module['workflow'])) {
+            $this->warning('Employee Evaluation', "EmployeeEvaluation '$slug' should include workflow for approval process");
+        }
+        
+        // Check scoring method
+        if (empty($module['scoring'])) {
+            $this->warning('Employee Evaluation', "EmployeeEvaluation '$slug' should define scoring method");
+        }
+        
+        // Check email settings (key feature)
+        if (!empty($module['emailSettings'])) {
+            if (empty($module['emailSettings']['selectableFields'])) {
+                $this->warning('Employee Evaluation', "EmailSettings should define 'selectableFields' for admin choice");
+            }
+            
+            if (!isset($module['emailSettings']['adminCanChoose'])) {
+                $this->info('Employee Evaluation', "Consider setting 'adminCanChoose' to allow field selection");
+            }
+        }
+        
+        // Check PDF generation
+        if (empty($module['pdf'])) {
+            $this->warning('Employee Evaluation', "EmployeeEvaluation '$slug' should include PDF generation");
+        }
+    }
+    
+    /**
+     * Validate StudentEvaluation Module (MODULE_CATALOG_V2.md § 7)
+     */
+    private function validateStudentEvaluationModule($module, $slug) {
+        if (empty($module['gradingScale'])) {
+            $this->error('Student Evaluation', "StudentEvaluation '$slug' must define gradingScale");
+        }
+        
+        if (empty($module['categories'])) {
+            $this->warning('Student Evaluation', "StudentEvaluation '$slug' should define evaluation categories");
+        }
+    }
+    
+    /**
+     * Validate Action Module (MODULE_CATALOG_V2.md § 9)
+     * Rules: [ACT-R01] through [ACT-R07]
+     */
+    private function validateActionModule($module, $slug) {
+        // [ACT-R01]: Must declare permission required
+        if (empty($module['permission'])) {
+            $this->error('Action Module', "[ACT-R01] Action '$slug' must declare 'permission'");
+        }
+        
+        // Check operation type
+        if (empty($module['operation'])) {
+            $this->error('Action Module', "Action '$slug' must define 'operation' (update, delete, etc.)");
+        }
+        
+        // [ACT-R04]: Destructive actions require confirmation
+        if (in_array($module['operation'] ?? '', ['delete', 'archive']) && empty($module['confirmation'])) {
+            $this->warning('Action Module', "[ACT-R04] Destructive action '$slug' should require confirmation");
+        }
+    }
+    
+    /**
+     * Validate FileManager Module (MODULE_CATALOG_V2.md § 10)
+     * Rules: [FIL-R01] through [FIL-R07]
+     */
+    private function validateFileManagerModule($module, $slug) {
+        // [FIL-R01]: Must define storage provider
+        if (empty($module['storage']['provider'])) {
+            $this->error('File Manager', "[FIL-R01] FileManager '$slug' must define storage.provider");
+        }
+        
+        // [FIL-R02]: Must enforce maxFileSize
+        if (empty($module['storage']['maxFileSize'])) {
+            $this->warning('File Manager', "[FIL-R02] FileManager '$slug' should define storage.maxFileSize");
+        }
+        
+        // Check allowed extensions
+        if (empty($module['storage']['allowedExtensions'])) {
+            $this->warning('File Manager', "FileManager '$slug' should define allowedExtensions");
+        }
+        
+        // [FIL-R04]: Files stored with tenant isolation
+        if (!empty($module['storage']['path']) && !str_contains($module['storage']['path'], '{tenant_id}')) {
+            $this->error('File Manager', "[FIL-R04] Storage path must include {tenant_id} for multi-tenancy");
+        }
+    }
+    
+    /**
+     * Validate Computation Module (MODULE_CATALOG_V2.md § 11)
+     * Rules: [CAL-R01] through [CAL-R07]
+     */
+    private function validateComputationModule($module, $slug) {
+        // [CAL-R01]: Must define formula
+        if (empty($module['formula']['expression'])) {
+            $this->error('Computation Module', "[CAL-R01] Computation '$slug' must define formula.expression");
+        }
+        
+        // [CAL-R02]: All dependencies declared
+        if (empty($module['formula']['dependsOn'])) {
+            $this->warning('Computation Module', "[CAL-R02] Computation '$slug' should declare 'dependsOn' fields");
+        }
+        
+        // [CAL-R03]: Result field must be read-only (check in field definitions)
+        if (empty($module['resultField'])) {
+            $this->error('Computation Module', "Computation '$slug' must define 'resultField'");
+        }
+        
+        // [CAL-R05]: Validate expression syntax (basic check for dangerous functions)
+        $expression = $module['formula']['expression'] ?? '';
+        if (preg_match('/eval|exec|system|passthru|shell_exec/i', $expression)) {
+            $this->error('Computation Module', "[CAL-R05] Formula contains dangerous functions");
+        }
+    }
+    
+    /**
+     * Validate Dashboard Module (MODULE_CATALOG_V2.md § 12)
+     * Rules: [DSH-R01] through [DSH-R06]
+     */
+    private function validateDashboardModule($module, $slug) {
+        // [DSH-R01]: Must reference existing modules
+        if (empty($module['widgets'])) {
+            $this->error('Dashboard Module', "[DSH-R01] Dashboard '$slug' must define widgets");
+            return;
+        }
+        
+        // [DSH-R03]: Limit to 8 widgets
+        if (count($module['widgets']) > 8) {
+            $this->warning('Dashboard Module', "[DSH-R03] Dashboard '$slug' has more than 8 widgets (performance concern)");
+        }
+        
+        // Check widget references
+        foreach ($module['widgets'] as $widget) {
+            if (empty($widget['module'])) {
+                $this->error('Dashboard Module', "[DSH-R01] Widget missing 'module' reference");
+            }
         }
     }
     
     private function validateTableModule($module, $slug) {
-        if (empty($module['columns'])) {
-            $this->error('Modules', "TableView module '$slug' has no columns");
-        }
-        
-        if (!isset($module['pagination'])) {
-            $this->warning('Modules', "TableView '$slug' should define pagination");
-        }
-    }
-    
-    private function validateWorkflowModule($module, $slug) {
-        if (empty($module['steps'])) {
-            $this->error('Modules', "Workflow module '$slug' has no steps");
-            return;
-        }
-        
-        // Check step IDs are unique
-        $stepIds = array_column($module['steps'], 'id');
-        if (count($stepIds) !== count(array_unique($stepIds))) {
-            $this->error('Modules', "Workflow '$slug' has duplicate step IDs");
-        }
+        // Deprecated: Use validateTableModule instead
+        $this->validateTableModule($module, $slug);
     }
     
     private function validateFields() {

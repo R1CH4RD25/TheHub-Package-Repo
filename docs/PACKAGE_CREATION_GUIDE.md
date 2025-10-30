@@ -2,6 +2,10 @@
 
 **Welcome to The Hub Package Development!** This guide will get you creating packages in minutes.
 
+> **📘 Documentation Reference:**
+> - [PACKAGE_SPECIFICATION_V2.md](./PACKAGE_SPECIFICATION_V2.md) - Complete technical specification
+> - [MODULE_CATALOG_V2.md](./MODULE_CATALOG_V2.md) - **All 12+ module types with rules**
+
 ---
 
 ## 📋 Prerequisites
@@ -13,6 +17,7 @@ Before you begin, ensure you have:
 - ✅ Basic understanding of JSON
 - ✅ Familiarity with database concepts (tables, fields, relationships)
 - ✅ Text editor or IDE (VS Code recommended)
+- ✅ Read the [MODULE_CATALOG_V2.md](./MODULE_CATALOG_V2.md) for module types
 
 ---
 
@@ -39,11 +44,30 @@ packages/local/my-package/
 ├── LICENSE               # MIT license
 ├── screenshots/          # UI screenshots
 ├── migrations/           # Database upgrades
-├── modules/              # Module definitions
+├── modules/              # Module definitions (see MODULE_CATALOG_V2.md)
+├── templates/            # Email/PDF templates
 └── seeds/                # Test data
 ```
 
-### Step 2: Customize the Manifest
+### Step 2: Choose Your Module Types
+
+**Consult [MODULE_CATALOG_V2.md](./MODULE_CATALOG_V2.md) to select the right module types for your use case:**
+
+| Use Case | Recommended Module Type | Catalog Reference |
+|----------|------------------------|-------------------|
+| Data entry form | `Form` | [§ 1. Form Module](./MODULE_CATALOG_V2.md#-1-form-module-type-form) |
+| Display records | `TableView` | [§ 2. TableView Module](./MODULE_CATALOG_V2.md#-2-tableview-module-type-tableview) |
+| Approval workflow | `Workflow` | [§ 3. Workflow Module](./MODULE_CATALOG_V2.md#-3-workflow-module-type-workflow) |
+| Charts/graphs | `Analytics` | [§ 4. Analytics Module](./MODULE_CATALOG_V2.md#-4-analytics-module-type-analytics) |
+| Automated emails | `EmailNotification` | [§ 5. Email Notification](./MODULE_CATALOG_V2.md#-5-email-notification-module-type-emailnotification) |
+| Generate PDFs | `PDFGenerator` | [§ 6. PDF Generator](./MODULE_CATALOG_V2.md#-6-pdf-generation-module-type-pdfgenerator) |
+| Employee reviews | `EmployeeEvaluation` | [§ 8. Employee Evaluation](./MODULE_CATALOG_V2.md#-8-hr-specific-employee-evaluation-module-type-employeeevaluation) |
+| Bulk operations | `Action` | [§ 9. Action Module](./MODULE_CATALOG_V2.md#-9-action-module-type-action) |
+| File uploads | `FileManager` | [§ 10. File Manager](./MODULE_CATALOG_V2.md#-10-file-manager-module-type-filemanager) |
+| Calculated fields | `Computation` | [§ 11. Calculation Module](./MODULE_CATALOG_V2.md#-11-calculation-module-type-computation) |
+| Admin dashboard | `Dashboard` | [§ 12. Dashboard Module](./MODULE_CATALOG_V2.md#-12-dashboard-module-type-dashboard) |
+
+### Step 3: Customize the Manifest
 
 Open `packages/local/my-package/manifest.json` and edit:
 

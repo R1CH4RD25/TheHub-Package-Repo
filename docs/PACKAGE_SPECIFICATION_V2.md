@@ -684,109 +684,102 @@ FOREIGN KEY (report_id) REFERENCES br_report(id) ON DELETE RESTRICT
 
 ## 7. Module Types
 
-### 7.1 Form Module
+> **📘 For complete module specifications, see [MODULE_CATALOG_V2.md](./MODULE_CATALOG_V2.md)**
+>
+> The Module Catalog provides comprehensive definitions for all 12+ module types, including:
+> - Detailed field requirements and optional properties
+> - Hub infrastructure integration points
+> - Validation rules with rule IDs (e.g., `[FRM-R01]`, `[TBL-R03]`)
+> - Security requirements and best practices
+> - Complete examples with Hub integration code
+>
+> **Available Module Types**:
+> - **Core**: `Form`, `TableView`, `Workflow`, `Analytics`, `Dashboard`
+> - **Communication**: `EmailNotification`, `PDFGenerator`
+> - **Operations**: `Action`, `FileManager`, `Computation`
+> - **Education**: `StudentEvaluation`, `EmployeeEvaluation`
 
-**Purpose**: Data entry and submission
+### 7.1 Module Structure Overview
 
-```json
-{
-  "type": "Form",
-  "slug": "my-form",
-  "displayName": "Submit Entry",
-  "entity": "namespace_entity",
-  "allowAnonymous": false,
-  "fields": [
-    {
-      "key": "field_name",
-      "fieldType": "text|textarea|select|...",
-      "label": "Field Label",
-      "required": true,
-      "validation": { ... }
-    }
-  ],
-  "validation": {
-    "rateLimit": {
-      "perUser": 10,
-      "perMinute": 5
-    }
-  },
-  "onSubmit": {
-    "notify": ["role1", "role2"],
-    "redirect": "/success-page"
-  }
-}
-```
-
-**Supported Field Types**:
-- `text`, `email`, `url`, `tel`, `number`
-- `textarea`
-- `date`, `time`, `datetime`
-- `checkbox`, `radio`, `select`, `multi_select`
-- `file`, `image`
-- `user_select`, `vehicle_select` (references to other entities)
-
-### 7.2 TableView Module
-
-**Purpose**: Display records with sorting, filtering, pagination
+All modules in a package manifest follow this base structure:
 
 ```json
 {
-  "type": "TableView",
-  "slug": "my-table",
-  "displayName": "View Records",
-  "entity": "namespace_entity",
-  "columns": [
-    {
-      "key": "field_name",
-      "label": "Column Header",
-      "sortable": true,
-      "filterable": true,
-      "format": "text|date|datetime|currency|badge"
-    }
-  ],
-  "filters": [
-    {"key": "status", "type": "select"},
-    {"key": "date_range", "type": "dateRange"}
-  ],
-  "actions": [
-    {"key": "view", "label": "View", "icon": "bi-eye"},
-    {"key": "edit", "label": "Edit", "icon": "bi-pencil", "permission": "namespace_edit"}
-  ],
-  "defaultSort": {"field": "created_at", "direction": "DESC"},
-  "pagination": {
-    "enabled": true,
-    "perPage": 25
-  }
+  "type": "Form|TableView|Workflow|Analytics|...",
+  "slug": "kebab-case-slug",
+  "displayName": "Human Readable Name",
+  "entity": "namespace_entity_name",
+  "route": "/pkg/namespace/slug",
+  "icon": "bi-icon-name",
+  "access": ["permission_key_1", "permission_key_2"],
+  "...additionalTypeSpecificFields": "..."
 }
 ```
 
-### 7.3 Workflow Module
+### 7.2 Base Module Rules
 
-**Purpose**: Multi-step approval or review processes
+These rules apply to **all module types** ([MOD-R01] through [MOD-R11]):
 
-```json
-{
-  "type": "Workflow",
-  "slug": "review-workflow",
-  "displayName": "Review Process",
-  "entity": "namespace_entity",
-  "steps": [
-    {
-      "id": "submitted",
-      "label": "Submitted",
-      "nextSteps": ["approved", "rejected"],
-      "requiredRole": "namespace_reviewer",
-      "requiredFields": ["reviewer_notes"]
-    },
-    {
-      "id": "approved",
-      "label": "Approved",
-      "nextSteps": [],
-      "requiredRole": "namespace_admin"
-    }
-  ]
-}
-```
+| Rule ID | Rule | Description |
+|---------|------|-------------|
+| **[MOD-R01]** | `type` required | Must match approved type from Module Catalog |
+| **[MOD-R02]** | `slug` required | Unique within package, kebab-case only |
+| **[MOD-R03]** | `displayName` required | Human-readable title (max 80 chars) |
+| **[MOD-R04]** | `entity` optional | Database entity reference (required for data-bound modules) |
+| **[MOD-R05]** | `route` required | Must follow `/pkg/<namespace>/<slug>` pattern |
+| **[MOD-R06]** | `icon` optional | Bootstrap Icons or FontAwesome class name |
+| **[MOD-R07]** | `access` optional | Array of permission keys from manifest |
+| **[MOD-R08]** | `layout` optional | Grid configuration for responsive display |
+| **[MOD-R09]** | `a11y` optional | Accessibility metadata (ARIA labels, shortcuts) |
+| **[MOD-R10]** | `validation` optional | Module-level validation rules |
+| **[MOD-R11]** | `audit` optional | Custom audit event types |
+
+### 7.3 Quick Reference by Module Type
+
+#### Form Module (`type: "Form"`)
+- **Purpose**: Data entry, validation, submission
+- **Hub Integration**: Database writes, CSRF protection, email notifications, audit logging
+- **Key Rules**: [FRM-R01] through [FRM-R08]
+- **See**: [MODULE_CATALOG_V2.md § 1. Form Module](./MODULE_CATALOG_V2.md#-1-form-module-type-form)
+
+#### TableView Module (`type: "TableView"`)
+- **Purpose**: Display, sort, filter, export records
+- **Hub Integration**: Database reads, permissions, export (CSV/XLSX/PDF), pagination
+- **Key Rules**: [TBL-R01] through [TBL-R07]
+- **See**: [MODULE_CATALOG_V2.md § 2. TableView Module](./MODULE_CATALOG_V2.md#-2-tableview-module-type-tableview)
+
+#### Workflow Module (`type: "Workflow"`)
+- **Purpose**: Multi-step state machines with role-based transitions
+- **Hub Integration**: Auth roles, audit trail, email notifications, state validation
+- **Key Rules**: [WF-R01] through [WF-R08]
+- **See**: [MODULE_CATALOG_V2.md § 3. Workflow Module](./MODULE_CATALOG_V2.md#-3-workflow-module-type-workflow)
+
+#### Analytics Module (`type: "Analytics"`)
+- **Purpose**: Data visualization, charts, metrics
+- **Hub Integration**: Chart.js, data aggregation, caching, PII handling
+- **Key Rules**: [ANL-R01] through [ANL-R07]
+- **See**: [MODULE_CATALOG_V2.md § 4. Analytics Module](./MODULE_CATALOG_V2.md#-4-analytics-module-type-analytics)
+
+#### EmailNotification Module (`type: "EmailNotification"`)
+- **Purpose**: Event-driven automated emails
+- **Hub Integration**: PHPMailer, SMTP config, template engine, audit logging
+- **Key Rules**: [NTF-R01] through [NTF-R07]
+- **See**: [MODULE_CATALOG_V2.md § 5. Email Notification Module](./MODULE_CATALOG_V2.md#-5-email-notification-module-type-emailnotification)
+
+#### PDFGenerator Module (`type: "PDFGenerator"`)
+- **Purpose**: Generate formatted PDF documents
+- **Hub Integration**: mPDF library, file storage, signed URLs, branding
+- **Key Rules**: [PDF-R01] through [PDF-R07]
+- **See**: [MODULE_CATALOG_V2.md § 6. PDF Generation Module](./MODULE_CATALOG_V2.md#-6-pdf-generation-module-type-pdfgenerator)
+
+#### EmployeeEvaluation Module (`type: "EmployeeEvaluation"`)
+- **Purpose**: Staff performance reviews with workflow and email
+- **Hub Integration**: Workflow engine, weighted scoring, PDF generation, digital signatures, customizable email fields
+- **Key Features**: Admin-selected email fields, multi-step approval, audit trail
+- **See**: [MODULE_CATALOG_V2.md § 8. Employee Evaluation Module](./MODULE_CATALOG_V2.md#-8-hr-specific-employee-evaluation-module-type-employeeevaluation)
+
+#### Other Module Types
+For complete specifications of all 12+ module types, consult the **[Module Catalog v2.1](./MODULE_CATALOG_V2.md)**.
 
 ---
 
