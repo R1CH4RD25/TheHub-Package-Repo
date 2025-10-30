@@ -43,11 +43,9 @@ class ModuleFactory
             'Dashboard' => DashboardRenderer::class,
             'EmailNotification' => EmailNotificationRenderer::class,
             'PDFGenerator' => PDFGeneratorRenderer::class,
-            'EmployeeEvaluation' => EmployeeEvaluationRenderer::class,
-            'StudentEvaluation' => StudentEvaluationRenderer::class,
             'Action' => ActionRenderer::class,
-            'FileManager' => FileManagerRenderer::class,
             'Computation' => ComputationRenderer::class,
+            // Note: EmployeeEvaluation, StudentEvaluation, FileManager are pending
         ];
         
         if (!isset($renderers[$type])) {
@@ -75,8 +73,8 @@ class ModuleFactory
         $supported = [
             'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
             'EmailNotification', 'PDFGenerator', 
-            'EmployeeEvaluation', 'StudentEvaluation',
-            'Action', 'FileManager', 'Computation'
+            'Action', 'Computation'
+            // Note: EmployeeEvaluation, StudentEvaluation, FileManager pending
         ];
         
         return in_array($type, $supported);
@@ -92,8 +90,7 @@ class ModuleFactory
         return [
             'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
             'EmailNotification', 'PDFGenerator', 
-            'EmployeeEvaluation', 'StudentEvaluation',
-            'Action', 'FileManager', 'Computation'
+            'Action', 'Computation'
         ];
     }
 }
