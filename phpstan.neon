@@ -1,0 +1,75 @@
+parameters:
+    level: 6
+    paths:
+        - src
+        - public/api
+
+    # Exclude directories
+    excludePaths:
+        - vendor
+        - node_modules
+        - tests
+        - temp
+        - uploads
+        - logs
+        - sessions
+        - backups
+
+    # Bootstrap file for constants and functions
+    bootstrapFiles:
+        - src/bootstrap.php
+
+    # Memory limit for analysis
+    memoryLimit: 1G
+
+    # Check for missing types
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+
+    # Strictness
+    checkAlwaysTrueCheckTypeFunctionCall: true
+    checkAlwaysTrueInstanceof: true
+    checkAlwaysTrueStrictComparison: true
+    checkExplicitMixedMissingReturn: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    checkMissingCallableSignature: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    checkUninitializedProperties: true
+
+    # Security-focused rules
+    reportMaybesInMethodSignatures: true
+    reportStaticMethodSignatures: true
+
+    # Allow dynamic properties (PHP 8.2+)
+    reportUnmatchedIgnoredErrors: false
+
+    # Ignore specific errors
+    ignoreErrors:
+        # OAuth flow uses external APIs
+        - '#Call to an undefined method Google\\.*#'
+        # Session superglobal usage is intentional
+        - '#Variable \$_SESSION.*might not be defined#'
+        # Allow exit/die in Auth redirect methods
+        - '#.*exit\(\).*#'
+        - '#.*die\(\).*#'
+        # Database dynamic queries (validated elsewhere)
+        - '#.*PDO.*prepare.*#'
+
+    # Custom rules for security patterns
+    universalObjectCratesClasses:
+        - stdClass
+
+    # Treat PHP errors as PHPStan errors
+    reportUnmatchedIgnoredErrors: false
+
+    # Parallel processing
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 4
+        minimumNumberOfJobsPerProcess: 2
+
+    # Custom extensions (install if needed)
+    # - phpstan/extension-installer
+    # - phpstan/phpstan-strict-rules
+    # - phpstan/phpstan-deprecation-rules
