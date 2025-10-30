@@ -4,6 +4,8 @@ node_modules/
 
 # Environment & Config
 .env
+.env.*
+!.env.example
 config/*.json
 !config/.gitkeep
 
@@ -17,8 +19,16 @@ uploads/*
 temp/*
 !temp/.gitkeep
 
+# Packages
+packages/local/*.hubpkg
+packages/imported/*.hubpkg
+packages/temp/*
+!packages/temp/.gitkeep
+
 # Backups
 backups/
+.cleanup-backup*/
+*.backup
 
 # IDE
 .vscode/
@@ -29,3 +39,8 @@ backups/
 # OS
 .DS_Store
 Thumbs.db
+
+# Test files
+test-*.php
+test-*.sh
+test-*.html
