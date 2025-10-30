@@ -1,0 +1,22 @@
+# Python Requirements for TheHub CLI Tools
+#
+# TheHub is primarily a PHP application, but includes optional Python CLI tools
+# for code analysis and maintenance tasks.
+#
+# All dependencies use Python 3 standard library - no external packages required!
+#
+# Installation: Not needed - all tools use built-in Python 3 modules
+# Usage: python3 cli/cleanup-analyzer.py
+
+# Standard library modules used:
+# - os, sys, re (text processing)
+# - pathlib (file system navigation)
+# - collections (data structures)
+# - json (configuration parsing)
+# - argparse (CLI argument parsing)
+
+# To verify Python 3 is installed:
+# python3 --version
+
+# Minimum Python version: 3.6+
+# Tested with: Python 3.8, 3.9, 3.10, 3.11
