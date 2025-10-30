@@ -46,7 +46,8 @@ class ModuleFactory
             'Action' => ActionRenderer::class,
             'Computation' => ComputationRenderer::class,
             'FileManager' => FileManagerRenderer::class,
-            // Note: EmployeeEvaluation, StudentEvaluation, Calendar, Report, Kanban are pending
+            'Calendar' => CalendarRenderer::class,
+            // Note: Report and Kanban renderers pending (target: 12/12 = 100%)
         ];
         
         if (!isset($renderers[$type])) {
@@ -74,8 +75,8 @@ class ModuleFactory
         $supported = [
             'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
             'EmailNotification', 'PDFGenerator', 
-            'Action', 'Computation', 'FileManager'
-            // Note: EmployeeEvaluation, StudentEvaluation, Calendar, Report, Kanban pending
+            'Action', 'Computation', 'FileManager', 'Calendar'
+            // Note: Report and Kanban pending
         ];
         
         return in_array($type, $supported);
@@ -91,7 +92,7 @@ class ModuleFactory
         return [
             'Form', 'TableView', 'Workflow', 'Analytics', 'Dashboard',
             'EmailNotification', 'PDFGenerator', 
-            'Action', 'Computation', 'FileManager'
+            'Action', 'Computation', 'FileManager', 'Calendar'
         ];
     }
 }
