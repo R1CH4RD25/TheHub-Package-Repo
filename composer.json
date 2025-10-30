@@ -37,7 +37,8 @@
         "doctrine/dbal": "^4.0",
         "respect/validation": "^2.3",
         "league/commonmark": "^2.4",
-        "mobiledetect/mobiledetectlib": "^4.8"
+        "mobiledetect/mobiledetectlib": "^4.8",
+        "predis/predis": "^3.2"
     },
     "config": {
         "process-timeout": 0,

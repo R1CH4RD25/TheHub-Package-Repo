@@ -5,6 +5,7 @@ namespace Hub\Modules;
 use Hub\Database;
 use Hub\Auth;
 use Hub\AuditLogger;
+use Hub\Cache;
 use Exception;
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -305,17 +306,7 @@ class AnalyticsRenderer implements ModuleInterface
      */
     private function getCache(string $key): ?array
     {
-        // Simple file-based cache (TODO: use Redis)
-        $cacheFile = sys_get_temp_dir() . '/analytics_' . md5($key) . '.json';
-        
-        if (file_exists($cacheFile)) {
-            $data = json_decode(file_get_contents($cacheFile), true);
-            if ($data && $data['expires'] > time()) {
-                return $data['value'];
-            }
-        }
-        
-        return null;
+        return Cache::get("analytics:$key");
     }
     
     /**
@@ -323,11 +314,7 @@ class AnalyticsRenderer implements ModuleInterface
      */
     private function setCache(string $key, array $value, int $ttl): void
     {
-        $cacheFile = sys_get_temp_dir() . '/analytics_' . md5($key) . '.json';
-        file_put_contents($cacheFile, json_encode([
-            'expires' => time() + $ttl,
-            'value' => $value
-        ]));
+        Cache::set("analytics:$key", $value, $ttl);
     }
     
     /**

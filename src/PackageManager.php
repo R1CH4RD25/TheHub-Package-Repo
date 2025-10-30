@@ -5,6 +5,7 @@ namespace Hub;
 use Exception;
 use PDO;
 use ZipArchive;
+use Hub\Cache;
 
 /**
  * PackageManager - Complete section package lifecycle management
@@ -592,7 +593,13 @@ class PackageManager
      */
     public function getInstalledPackages(): array
     {
-        return $this->db->fetchAll("
+        // Try cache first (5 minute TTL)
+        $cached = Cache::get('packages:installed');
+        if ($cached !== null) {
+            return $cached;
+        }
+        
+        $packages = $this->db->fetchAll("
             SELECT si.*, s.slug, s.display_name, s.icon, s.is_active, sp.version as latest_available_version
             FROM section_installations si
             JOIN sections s ON si.section_id = s.id
@@ -602,6 +609,11 @@ class PackageManager
             WHERE si.status = 'installed'
             ORDER BY si.installed_at DESC
         ");
+        
+        // Cache for 5 minutes
+        Cache::set('packages:installed', $packages, 300);
+        
+        return $packages;
     }
 
     /**
