@@ -4,10 +4,13 @@ namespace Tests\Integration;
 
 use Hub\Modules\FormRenderer;
 use PHPUnit\Framework\TestCase;
+use Tests\Helpers\TestDatabase;
 
 /**
  * Integration tests for FormRenderer  
  * Tests form rendering, validation, and configuration
+ * 
+ * NOTE: Uses database transactions - all changes are rolled back after each test
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\Hub\Modules\FormRenderer::class)]
 class FormRendererIntegrationTest extends TestCase
@@ -15,6 +18,10 @@ class FormRendererIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Start transaction for test isolation - will be rolled back in tearDown
+        TestDatabase::beginTransaction();
+        
         $_POST = [];
         $_GET = [];
         $_SESSION['csrf_token'] = 'test-csrf-token';
@@ -23,32 +30,24 @@ class FormRendererIntegrationTest extends TestCase
     
     protected function tearDown(): void
     {
+        // Roll back all database changes made during test
+        TestDatabase::rollBack();
+        
         $_POST = [];
         $_GET = [];
         parent::tearDown();
     }
     
-    /**
-     * Test basic form rendering
-     */
     public function testBasicFormRendering(): void
     {
         $config = [
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
             'fields' => [
-                [
-                    'name' => 'name',
-                    'label' => 'Full Name',
-                    'type' => 'text',
-                    'required' => true
-                ],
-                [
-                    'name' => 'email',
-                    'label' => 'Email Address',
-                    'type' => 'email',
-                    'required' => true
-                ]
+                ['name' => 'name', 'label' => 'Full Name', 'type' => 'text', 'required' => true],
+                ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'required' => true]
             ],
-            'submit' => 'Create User'
+            'submitText' => 'Create User'
         ];
         
         $form = new FormRenderer($config);
@@ -60,12 +59,11 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertStringContainsString('Create User', $html);
     }
     
-    /**
-     * Test form with all field types
-     */
     public function testFormWithMultipleFieldTypes(): void
     {
         $config = [
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
             'fields' => [
                 ['name' => 'name', 'label' => 'Name', 'type' => 'text'],
                 ['name' => 'email', 'label' => 'Email', 'type' => 'email'],
@@ -74,7 +72,7 @@ class FormRendererIntegrationTest extends TestCase
                 ['name' => 'status', 'label' => 'Status', 'type' => 'select', 'options' => ['active' => 'Active', 'inactive' => 'Inactive']],
                 ['name' => 'agree', 'label' => 'Agree to terms', 'type' => 'checkbox'],
                 ['name' => 'birthdate', 'label' => 'Birth Date', 'type' => 'date'],
-                ['name' => 'user_id', 'type' => 'hidden', 'value' => '123']
+                ['name' => 'user_id', 'type' => 'hidden', 'default' => '123']
             ]
         ];
         
@@ -91,49 +89,40 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertStringContainsString('type="hidden"', $html);
     }
     
-    /**
-     * Test form validation
-     */
     public function testFormValidation(): void
     {
         // Valid config
         $validConfig = [
-            'fields' => [
-                ['name' => 'name', 'label' => 'Name', 'type' => 'text']
-            ]
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
+            'fields' => [['name' => 'name', 'label' => 'Name', 'type' => 'text']]
         ];
         $form = new FormRenderer($validConfig);
         $this->assertTrue($form->validate());
         
-        // Missing fields
-        $invalidConfig = [];
+        // Missing dataSource and onSubmit
+        $invalidConfig = ['fields' => [['name' => 'name', 'label' => 'Name', 'type' => 'text']]];
         $form = new FormRenderer($invalidConfig);
         $this->assertFalse($form->validate());
         
-        // Empty fields array
-        $invalidConfig = ['fields' => []];
+        // Missing fields (has onSubmit but no fields)
+        $invalidConfig = ['dataSource' => 'users', 'onSubmit' => ['insertInto' => 'users']];
         $form = new FormRenderer($invalidConfig);
         $this->assertFalse($form->validate());
         
-        // Fields not array
-        $invalidConfig = ['fields' => 'not an array'];
+        // Empty fields array (has onSubmit but empty fields)
+        $invalidConfig = ['dataSource' => 'users', 'onSubmit' => ['insertInto' => 'users'], 'fields' => []];
         $form = new FormRenderer($invalidConfig);
         $this->assertFalse($form->validate());
     }
     
-    /**
-     * Test form with default values
-     */
     public function testFormWithDefaultValues(): void
     {
         $config = [
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
             'fields' => [
-                [
-                    'name' => 'status',
-                    'label' => 'Status',
-                    'type' => 'text',
-                    'value' => 'active'
-                ]
+                ['name' => 'status', 'label' => 'Status', 'type' => 'text', 'default' => 'active']
             ]
         ];
         
@@ -143,19 +132,13 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertStringContainsString('value="active"', $html);
     }
     
-    /**
-     * Test form with placeholders
-     */
     public function testFormWithPlaceholders(): void
     {
         $config = [
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
             'fields' => [
-                [
-                    'name' => 'email',
-                    'label' => 'Email',
-                    'type' => 'email',
-                    'placeholder' => 'Enter your email'
-                ]
+                ['name' => 'email', 'label' => 'Email', 'type' => 'email', 'placeholder' => 'Enter your email']
             ]
         ];
         
@@ -165,19 +148,13 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertStringContainsString('placeholder="Enter your email"', $html);
     }
     
-    /**
-     * Test form with help text
-     */
     public function testFormWithHelpText(): void
     {
         $config = [
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
             'fields' => [
-                [
-                    'name' => 'password',
-                    'label' => 'Password',
-                    'type' => 'password',
-                    'help' => 'Must be at least 8 characters'
-                ]
+                ['name' => 'password', 'label' => 'Password', 'type' => 'password', 'helpText' => 'Must be at least 8 characters']
             ]
         ];
         
@@ -187,15 +164,12 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertStringContainsString('Must be at least 8 characters', $html);
     }
     
-    /**
-     * Test form configuration retrieval
-     */
     public function testGetConfig(): void
     {
         $config = [
-            'fields' => [
-                ['name' => 'test', 'label' => 'Test', 'type' => 'text']
-            ]
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
+            'fields' => [['name' => 'test', 'label' => 'Test', 'type' => 'text']]
         ];
         
         $form = new FormRenderer($config);
@@ -206,19 +180,13 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertCount(1, $retrievedConfig['fields']);
     }
     
-    /**
-     * Test form with required fields
-     */
     public function testFormWithRequiredFields(): void
     {
         $config = [
+            'dataSource' => 'users',
+            'onSubmit' => ['insertInto' => 'users'],
             'fields' => [
-                [
-                    'name' => 'email',
-                    'label' => 'Email',
-                    'type' => 'email',
-                    'required' => true
-                ]
+                ['name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true]
             ]
         ];
         

@@ -4,10 +4,13 @@ namespace Tests\Integration;
 
 use Hub\Modules\AnalyticsRenderer;
 use PHPUnit\Framework\TestCase;
+use Tests\Helpers\TestDatabase;
 
 /**
  * Integration tests for AnalyticsRenderer
- * Tests analytics chart configuration, validation, and rendering
+ * Tests validation, chart types, and configuration
+ * 
+ * NOTE: Uses database transactions - all changes are rolled back after each test
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\Hub\Modules\AnalyticsRenderer::class)]
 class AnalyticsRendererIntegrationTest extends TestCase
@@ -15,169 +18,148 @@ class AnalyticsRendererIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Start transaction for test isolation - will be rolled back in tearDown
+        TestDatabase::beginTransaction();
+        
         $_GET = [];
     }
     
     protected function tearDown(): void
     {
+        // Roll back all database changes made during test
+        TestDatabase::rollBack();
+        
         $_GET = [];
         parent::tearDown();
     }
     
-    /**
-     * Test analytics validation - valid config
-     */
     public function testAnalyticsValidationValid(): void
     {
-        $validConfig = [
-            'chartType' => 'bar',
-            'dataSource' => 'test_data',
-            'labelField' => 'category',
-            'valueField' => 'amount'
+        $config = [
+            'entity' => 'users',
+            'charts' => [
+                ['type' => 'bar', 'title' => 'User Count']
+            ]
         ];
-        $renderer = new AnalyticsRenderer($validConfig);
-        $this->assertTrue($renderer->validate());
+        
+        $analytics = new AnalyticsRenderer($config);
+        $this->assertTrue($analytics->validate());
     }
     
-    /**
-     * Test analytics validation - missing chartType
-     */
-    public function testAnalyticsValidationMissingChartType(): void
+    public function testAnalyticsValidationMissingCharts(): void
     {
-        $invalidConfig = [
-            'dataSource' => 'test_data',
-            'labelField' => 'category',
-            'valueField' => 'amount'
-        ];
-        $renderer = new AnalyticsRenderer($invalidConfig);
-        $this->assertFalse($renderer->validate());
+        $config = ['entity' => 'users'];
+        
+        $analytics = new AnalyticsRenderer($config);
+        $this->assertFalse($analytics->validate());
     }
     
-    /**
-     * Test analytics validation - missing dataSource
-     */
-    public function testAnalyticsValidationMissingDataSource(): void
+    public function testAnalyticsValidationMissingEntity(): void
     {
-        $invalidConfig = [
-            'chartType' => 'bar',
-            'labelField' => 'category',
-            'valueField' => 'amount'
+        $config = [
+            'charts' => [
+                ['type' => 'bar', 'title' => 'Test Chart']
+            ]
         ];
-        $renderer = new AnalyticsRenderer($invalidConfig);
-        $this->assertFalse($renderer->validate());
+        
+        $analytics = new AnalyticsRenderer($config);
+        $this->assertFalse($analytics->validate());
     }
     
-    /**
-     * Test analytics validation - missing labelField
-     */
-    public function testAnalyticsValidationMissingLabelField(): void
+    public function testAnalyticsValidationEmptyCharts(): void
     {
-        $invalidConfig = [
-            'chartType' => 'bar',
-            'dataSource' => 'test_data',
-            'valueField' => 'amount'
+        $config = [
+            'entity' => 'users',
+            'charts' => []
         ];
-        $renderer = new AnalyticsRenderer($invalidConfig);
-        $this->assertFalse($renderer->validate());
+        
+        $analytics = new AnalyticsRenderer($config);
+        $this->assertFalse($analytics->validate());
     }
     
-    /**
-     * Test analytics validation - missing valueField
-     */
-    public function testAnalyticsValidationMissingValueField(): void
+    public function testAnalyticsValidationMissingChartTitle(): void
     {
-        $invalidConfig = [
-            'chartType' => 'bar',
-            'dataSource' => 'test_data',
-            'labelField' => 'category'
+        $config = [
+            'entity' => 'users',
+            'charts' => [
+                ['type' => 'bar']  // Missing title
+            ]
         ];
-        $renderer = new AnalyticsRenderer($invalidConfig);
-        $this->assertFalse($renderer->validate());
+        
+        $analytics = new AnalyticsRenderer($config);
+        $this->assertFalse($analytics->validate());
     }
     
-    /**
-     * Test analytics configuration retrieval
-     */
     public function testGetConfig(): void
     {
         $config = [
-            'chartType' => 'line',
-            'dataSource' => 'test_data',
-            'labelField' => 'date',
-            'valueField' => 'value',
-            'title' => 'Test Chart'
+            'entity' => 'users',
+            'charts' => [
+                ['type' => 'line', 'title' => 'User Growth']
+            ]
         ];
         
-        $renderer = new AnalyticsRenderer($config);
-        $retrievedConfig = $renderer->getConfig();
+        $analytics = new AnalyticsRenderer($config);
+        $retrievedConfig = $analytics->getConfig();
         
         $this->assertIsArray($retrievedConfig);
-        $this->assertEquals('line', $retrievedConfig['chartType']);
-        $this->assertEquals('test_data', $retrievedConfig['dataSource']);
-        $this->assertEquals('Test Chart', $retrievedConfig['title']);
+        $this->assertEquals('users', $retrievedConfig['entity']);
+        $this->assertCount(1, $retrievedConfig['charts']);
     }
     
-    /**
-     * Test handle method returns empty (read-only module)
-     */
-    public function testHandleMethodReadOnly(): void
+    public function testRenderMethodReturnsHtml(): void
     {
         $config = [
-            'chartType' => 'bar',
-            'dataSource' => 'test_data',
-            'labelField' => 'category',
-            'valueField' => 'amount'
+            'entity' => 'users',
+            'charts' => [
+                ['type' => 'bar', 'title' => 'User Statistics']
+            ]
         ];
         
-        $renderer = new AnalyticsRenderer($config);
-        $result = $renderer->handle();
+        $analytics = new AnalyticsRenderer($config);
+        $html = $analytics->render();
         
-        $this->assertEmpty($result);
+        $this->assertIsString($html);
+        $this->assertStringContainsString('chart', strtolower($html));
     }
     
-    /**
-     * Test different chart types are valid
-     */
     public function testDifferentChartTypes(): void
     {
-        $chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar'];
+        $chartTypes = ['bar', 'line', 'pie', 'doughnut'];
         
         foreach ($chartTypes as $type) {
             $config = [
-                'chartType' => $type,
-                'dataSource' => 'test_data',
-                'labelField' => 'label',
-                'valueField' => 'value'
+                'entity' => 'users',
+                'charts' => [
+                    ['type' => $type, 'title' => ucfirst($type) . ' Chart']
+                ]
             ];
             
-            $renderer = new AnalyticsRenderer($config);
-            $this->assertTrue($renderer->validate(), "Chart type $type should be valid");
+            $analytics = new AnalyticsRenderer($config);
+            $this->assertTrue($analytics->validate());
+            $html = $analytics->render();
+            
+            $this->assertIsString($html);
+            $this->assertNotEmpty($html);
         }
     }
     
-    /**
-     * Test configuration with optional fields
-     */
-    public function testConfigurationWithOptionalFields(): void
+    public function testConfigurationWithMultipleCharts(): void
     {
         $config = [
-            'chartType' => 'bar',
-            'dataSource' => 'test_data',
-            'labelField' => 'category',
-            'valueField' => 'amount',
-            'title' => 'Sales Report',
-            'aggregate' => 'SUM',
-            'groupBy' => 'category',
-            'height' => 400,
-            'width' => 800
+            'entity' => 'users',
+            'charts' => [
+                ['type' => 'bar', 'title' => 'User Count'],
+                ['type' => 'line', 'title' => 'Growth Trend'],
+                ['type' => 'pie', 'title' => 'Distribution']
+            ]
         ];
         
-        $renderer = new AnalyticsRenderer($config);
-        $this->assertTrue($renderer->validate());
+        $analytics = new AnalyticsRenderer($config);
+        $this->assertTrue($analytics->validate());
         
-        $retrievedConfig = $renderer->getConfig();
-        $this->assertEquals('Sales Report', $retrievedConfig['title']);
-        $this->assertEquals('SUM', $retrievedConfig['aggregate']);
-        $this->assertEquals(400, $retrievedConfig['height']);
+        $retrievedConfig = $analytics->getConfig();
+        $this->assertCount(3, $retrievedConfig['charts']);
     }
 }
