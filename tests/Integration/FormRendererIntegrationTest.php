@@ -1184,4 +1184,34 @@ class FormRendererIntegrationTest extends TestCase
         $this->assertStringContainsString('field_code.value.length >= 5', $html);
     }
 
+
+    public function testValidateFieldRulesPatternWithCustomMessage(): void
+    {
+        $config = [
+            'fields' => [
+                [
+                    'name' => 'postal_code',
+                    'type' => 'text',
+                    'label' => 'Postal Code',
+                    'validation' => [
+                        'pattern' => '^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$',
+                        'message' => 'Please enter a valid Canadian postal code (e.g., K1A 0B1)'
+                    ]
+                ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_pattern']
+        ];
+
+        $renderer = new FormRenderer($config);
+        $result = $renderer->handle([
+            'postal_code' => 'INVALID',
+            'csrf_token' => 'test-csrf-token'
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('errors', $result);
+        $this->assertArrayHasKey('postal_code', $result['errors']);
+        $this->assertStringContainsString('valid Canadian postal code', $result['errors']['postal_code']);
+    }
+
 }
