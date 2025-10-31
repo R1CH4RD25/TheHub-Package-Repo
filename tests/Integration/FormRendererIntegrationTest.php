@@ -1110,4 +1110,78 @@ class FormRendererIntegrationTest extends TestCase
 
         $this->assertStringContainsString('<option value="">Select a country</option>', $html);
     }
+
+    public function testValidateFieldRulesMinNumber(): void
+    {
+        $config = [
+            'fields' => [
+                [
+                    'name' => 'age',
+                    'type' => 'number',
+                    'label' => 'Age',
+                    'validation' => ['min' => 18]
+                ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_min_number']
+        ];
+
+        $renderer = new FormRenderer($config);
+        $result = $renderer->handle([
+            'age' => '15',
+            'csrf_token' => 'test-csrf-token'
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('errors', $result);
+        $this->assertArrayHasKey('age', $result['errors']);
+        $this->assertStringContainsString('must be at least 18', $result['errors']['age']);
+    }
+
+    public function testValidateFieldRulesMaxNumber(): void
+    {
+        $config = [
+            'fields' => [
+                [
+                    'name' => 'score',
+                    'type' => 'number',
+                    'label' => 'Score',
+                    'validation' => ['max' => 100]
+                ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_max_number']
+        ];
+
+        $renderer = new FormRenderer($config);
+        $result = $renderer->handle([
+            'score' => '150',
+            'csrf_token' => 'test-csrf-token'
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('errors', $result);
+        $this->assertArrayHasKey('score', $result['errors']);
+        $this->assertStringContainsString('must not exceed 100', $result['errors']['score']);
+    }
+
+    public function testRenderValidationScriptWithCustomValidation(): void
+    {
+        $config = [
+            'fields' => [
+                [
+                    'name' => 'code',
+                    'type' => 'text',
+                    'label' => 'Code',
+                    'validation' => ['custom' => 'field_code.value.length >= 5']
+                ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_custom_validation']
+        ];
+
+        $renderer = new FormRenderer($config);
+        $html = $renderer->render();
+
+        $this->assertStringContainsString('<script>', $html);
+        $this->assertStringContainsString('field_code.value.length >= 5', $html);
+    }
+
 }
