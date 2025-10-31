@@ -25,3 +25,6 @@ if (session_status() === PHP_SESSION_NONE) {
 date_default_timezone_set('America/Chicago');
 
 echo "PHPUnit Bootstrap - Testing environment loaded\n";
+
+// Manually load test helper
+require_once __DIR__ . '/Helpers/TestDatabase.php';

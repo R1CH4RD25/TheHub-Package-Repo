@@ -21,12 +21,12 @@ class Auth
     {
         $allowedDomains = $_ENV['ALLOWED_DOMAINS'] ?? '';
         $primaryDomain = '';
-        
+
         if (!empty($allowedDomains)) {
             $domains = array_map('trim', explode(',', $allowedDomains));
             $primaryDomain = $domains[0] ?? '';
         }
-        
+
         $params = [
             'client_id' => $this->clientId,
             'redirect_uri' => $this->redirectUri,
@@ -35,12 +35,12 @@ class Auth
             'access_type' => 'online', // Use online for better UX - no refresh token needed
             // Removed 'prompt' => 'consent' to allow device caching
         ];
-        
+
         // Only add hd param if domain is configured
         if (!empty($primaryDomain)) {
             $params['hd'] = $primaryDomain;
         }
-        
+
         return 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);
     }
 
@@ -49,14 +49,14 @@ class Auth
         try {
             // Exchange authorization code for access token
             $tokenData = $this->getAccessToken($code);
-            
+
             if (isset($tokenData['error'])) {
                 throw new \Exception($tokenData['error_description'] ?? 'Authentication failed');
             }
 
             // Get user info from Google
             $userInfo = $this->getUserInfo($tokenData['access_token']);
-            
+
             $email = $userInfo['email'];
             $googleId = $userInfo['sub'];
             $name = $userInfo['name'];
@@ -69,7 +69,7 @@ class Auth
                 if (!empty($allowedDomains)) {
                     $domains = array_map('trim', explode(',', $allowedDomains));
                     $emailDomain = substr(strrchr($email, "@"), 1);
-                    
+
                     if (!in_array($emailDomain, $domains)) {
                         throw new \Exception('Email domain not allowed. Please use an authorized domain.');
                     }
@@ -78,7 +78,7 @@ class Auth
 
             // Get or create user (pass access token for group checking)
             $user = $this->getOrCreateUser($googleId, $email, $name, $tokenData['access_token'], $picture);
-            
+
             // Check if user is inactive
             if (!$user['is_active']) {
                 // Show different message for pending vs deactivated
@@ -114,7 +114,7 @@ class Auth
     private function getAccessToken($code)
     {
         $tokenUrl = 'https://oauth2.googleapis.com/token';
-        
+
         $postData = [
             'code' => $code,
             'client_id' => $this->clientId,
@@ -128,7 +128,7 @@ class Auth
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -144,13 +144,13 @@ class Auth
     private function getUserInfo($accessToken)
     {
         $userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo';
-        
+
         $ch = curl_init($userInfoUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $accessToken
         ]);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -173,13 +173,13 @@ class Auth
         if (strpos($pattern, '*') === false) {
             return strtolower($userGroup) === strtolower($pattern);
         }
-        
+
         // Convert wildcard pattern to regex
         // Escape special regex chars except *
         $regexPattern = preg_quote($pattern, '/');
         // Replace escaped \* with .* (match any characters)
         $regexPattern = str_replace('\*', '.*', $regexPattern);
-        
+
         return preg_match('/^' . $regexPattern . '$/i', $userGroup) === 1;
     }
 
@@ -192,7 +192,7 @@ class Auth
         try {
             $serviceAccountPath = $_ENV['GOOGLE_SERVICE_ACCOUNT_JSON'] ?? null;
             $adminEmail = $_ENV['GOOGLE_ADMIN_EMAIL'] ?? null;
-            
+
             if (!$serviceAccountPath || !$adminEmail) {
                 error_log("Google Groups config missing: GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_ADMIN_EMAIL");
                 return [];
@@ -215,7 +215,7 @@ class Auth
             // Get all groups the user is a member of
             $groups = $service->groups->listGroups(['userKey' => $userEmail]);
             $groupEmails = [];
-            
+
             foreach ($groups->getGroups() as $group) {
                 $groupEmails[] = $group->getEmail();
             }
@@ -248,7 +248,7 @@ class Auth
 
             // Get user's groups
             $userGroups = $this->getUserGoogleGroups($userEmail);
-            
+
             if (empty($userGroups)) {
                 error_log("User {$userEmail} is not in any Google Groups");
                 return [];
@@ -262,20 +262,20 @@ class Auth
             }
 
             $assignedRoles = [];
-            
+
             // Parse pipe-separated list: group@domain.com:role1,role2|group2@domain.com:role3
             $mappings = explode('|', $associations);
-            
+
             foreach ($mappings as $mapping) {
                 $mapping = trim($mapping);
                 if (empty($mapping) || !strpos($mapping, ':')) {
                     continue;
                 }
-                
+
                 [$groupPattern, $rolesStr] = explode(':', $mapping, 2);
                 $groupPattern = trim($groupPattern);
                 $roles = array_map('trim', explode(',', $rolesStr));
-                
+
                 // Check if user is in any group matching this pattern
                 foreach ($userGroups as $userGroup) {
                     if ($this->matchesGroupPattern($userGroup, $groupPattern)) {
@@ -289,7 +289,7 @@ class Auth
             // Remove duplicates and return
             $assignedRoles = array_unique($assignedRoles);
             error_log("Final assigned roles for {$userEmail}: " . implode(', ', $assignedRoles));
-            
+
             return $assignedRoles;
 
         } catch (\Exception $e) {
@@ -307,7 +307,7 @@ class Auth
 
         if (!$user) {
             $googleGroupRoles = []; // Initialize for all paths
-            
+
             // Check if this is the super admin
             if ($email === $_ENV['SUPER_ADMIN_EMAIL']) {
                 $role = 'super_admin';
@@ -318,18 +318,18 @@ class Auth
                     "SELECT * FROM invitations WHERE email = ? AND expires_at > NOW() AND used_at IS NULL",
                     [$email]
                 );
-                
+
                 if ($invitation) {
                     // Invited user - use invited role and activate
                     $role = $invitation['role'];
                     $isActive = true;
-                    
+
                     // Mark invitation as used
                     $this->db->execute(
                         "UPDATE invitations SET used_at = NOW() WHERE id = ?",
                         [$invitation['id']]
                     );
-                    
+
                     $invitedBy = $invitation['invited_by'];
                     $invitedAt = $invitation['created_at'];
                 } else {
@@ -338,7 +338,7 @@ class Auth
                     if ($accessToken) {
                         $assignedRoles = $this->checkGoogleGroupMembership($accessToken, $email);
                     }
-                    
+
                     if (!empty($assignedRoles)) {
                         // User has Google Groups roles - auto-approve with highest role
                         // Use Roles class to determine hierarchy
@@ -347,7 +347,7 @@ class Auth
                         $invitedBy = null;
                         $invitedAt = null;
                         error_log("Auto-approved {$email} as {$role} (Google Groups: " . implode(', ', $assignedRoles) . ")");
-                        
+
                         // Store all assigned roles for later
                         $googleGroupRoles = $assignedRoles;
                     } else {
@@ -361,7 +361,7 @@ class Auth
                     }
                 }
             }
-            
+
             $this->db->execute(
                 "INSERT INTO users (google_id, email, name, role, is_active, invited_by, invited_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [$googleId, $email, $name, $role, $isActive ? 1 : 0, $invitedBy ?? null, $invitedAt ?? null]
@@ -371,7 +371,7 @@ class Auth
                 "SELECT * FROM users WHERE google_id = ?",
                 [$googleId]
             );
-            
+
             // Add all Google Group roles to user_global_roles table
             if (!empty($googleGroupRoles) && $user) {
                 foreach ($googleGroupRoles as $groupRole) {
@@ -380,7 +380,7 @@ class Auth
                         "SELECT * FROM user_global_roles WHERE user_id = ? AND role = ?",
                         [$user['id'], $groupRole]
                     );
-                    
+
                     if (!$existingRole) {
                         $this->db->execute(
                             "INSERT INTO user_global_roles (user_id, role, granted_by, granted_at) VALUES (?, ?, NULL, NOW())",
@@ -394,7 +394,7 @@ class Auth
 
         return $user;
     }
-    
+
     /**
      * Auto-grant section access based on Google Groups membership
      */
@@ -403,17 +403,17 @@ class Auth
         // LEGACY: Staff members in configured staff group get Substitute Request section
         $sectionSlug = 'substitute-request';
         $role = 'staff';
-        
+
         // Check if section access already exists
         $existing = $this->db->fetchOne(
             "SELECT * FROM section_access WHERE user_id = ? AND section_id = (SELECT id FROM sections WHERE slug = ?)",
             [$userId, $sectionSlug]
         );
-        
+
         if (!$existing) {
             // Grant access
             $this->db->execute(
-                "INSERT INTO section_access (user_id, section_id, role, granted_by) 
+                "INSERT INTO section_access (user_id, section_id, role, granted_by)
                  SELECT ?, id, ?, NULL FROM sections WHERE slug = ?",
                 [$userId, $role, $sectionSlug]
             );
@@ -435,16 +435,17 @@ class Auth
             session_start();
         }
 
+        // Security Fix #3: Regenerate session ID BEFORE setting auth data
+        // Prevents session fixation attacks
+        session_regenerate_id(true);
+
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['email'] = $user['email'];
         $_SESSION['name'] = $user['name'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['picture'] = $user['picture'] ?? null;
         $_SESSION['logged_in'] = true;
-        
-        // Regenerate session ID for security
-        session_regenerate_id(true);
-        
+
         // Audit log - successful login
         try {
             $logger = new AuditLogger();
@@ -486,11 +487,36 @@ class Auth
             return null;
         }
 
+        // Security Fix #2: Validate user exists in database before trusting session
+        // Prevents session hijacking with fake user IDs
+        if (!isset($_SESSION['user_id'])) {
+            return null;
+        }
+
+        $db = Database::getInstance();
+        $dbUser = $db->fetchOne(
+            "SELECT id, email, name, role, is_active, picture FROM users WHERE id = ?",
+            [$_SESSION['user_id']]
+        );
+
+        // If user doesn't exist or is inactive, clear session and return null
+        if (!$dbUser || !$dbUser['is_active']) {
+            session_unset();
+            session_destroy();
+            return null;
+        }
+
+        // Update session with fresh DB data (role changes, etc.)
+        $_SESSION['email'] = $dbUser['email'];
+        $_SESSION['name'] = $dbUser['name'];
+        $_SESSION['role'] = $dbUser['role'];
+        $_SESSION['picture'] = $dbUser['picture'];
+
         return [
             'id' => $_SESSION['user_id'],
             'email' => $_SESSION['email'],
             'name' => $_SESSION['name'],
-            'role' => $_SESSION['role'],
+            'role' => isset($_SESSION['view_as_role']) ? $_SESSION['view_as_role'] : $_SESSION['role'],
             'actual_role' => $_SESSION['role'],
             'picture' => $_SESSION['picture'] ?? null
         ];
@@ -532,7 +558,7 @@ class Auth
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
+
         unset($_SESSION['view_as_role']);
     }
 
@@ -579,29 +605,29 @@ class Auth
         if (!$user || $user['role'] !== 'super_admin') {
             return false;
         }
-        
+
         // Super admin cannot delete themselves
         if ($user['id'] == $targetUserId) {
             return false;
         }
-        
+
         return true;
     }
 
     /**
      * Require user to have access to a specific section with minimum role
      * Redirects to sections.php if no access
-     * 
+     *
      * @param string $sectionSlug Section slug (e.g., 'announcements')
      * @param string $minimumRole Minimum required role (default: 'staff')
      */
     public static function requireSectionAccess($sectionSlug, $minimumRole = 'staff')
     {
         self::requireLogin();
-        
+
         $user = self::getCurrentUser();
         $sectionAccess = new SectionAccess();
-        
+
         if (!$sectionAccess->hasAccess($user['id'], $sectionSlug, $minimumRole)) {
             // No access - redirect back to section selector
             $_SESSION['error'] = "You don't have permission to access this section.";
@@ -612,7 +638,7 @@ class Auth
 
     /**
      * Get user's role in a specific section
-     * 
+     *
      * @param string $sectionSlug Section slug
      * @return string|null User's role in the section, or null if no access
      */
@@ -622,7 +648,7 @@ class Auth
         if (!$user) {
             return null;
         }
-        
+
         $sectionAccess = new SectionAccess();
         return $sectionAccess->getUserRole($user['id'], $sectionSlug);
     }
@@ -645,7 +671,7 @@ class Auth
 
         session_unset();
         session_destroy();
-        
+
         header('Location: /login.php');
         exit;
     }

@@ -47,6 +47,11 @@ class Database
         return $this->pdo;
     }
 
+    public function prepare($sql)
+    {
+        return $this->pdo->prepare($sql);
+    }
+
     public function query($sql, $params = [])
     {
         $stmt = $this->pdo->prepare($sql);
@@ -91,7 +96,7 @@ class Database
 
     /**
      * Helper method to insert a record
-     * 
+     *
      * @param string $table Table name
      * @param array $data Associative array of column => value
      * @return int Last insert ID
@@ -100,21 +105,21 @@ class Database
     {
         $columns = array_keys($data);
         $placeholders = array_fill(0, count($columns), '?');
-        
+
         $sql = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
             $table,
             implode(', ', $columns),
             implode(', ', $placeholders)
         );
-        
+
         $this->execute($sql, array_values($data));
         return $this->lastInsertId();
     }
 
     /**
      * Helper method to update a record
-     * 
+     *
      * @param string $table Table name
      * @param int $id Record ID
      * @param array $data Associative array of column => value
@@ -126,16 +131,16 @@ class Database
         foreach (array_keys($data) as $column) {
             $setParts[] = "$column = ?";
         }
-        
+
         $sql = sprintf(
             "UPDATE %s SET %s WHERE id = ?",
             $table,
             implode(', ', $setParts)
         );
-        
+
         $values = array_values($data);
         $values[] = $id;
-        
+
         $this->execute($sql, $values);
         return true;
     }

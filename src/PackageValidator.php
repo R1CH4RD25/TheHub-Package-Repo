@@ -6,14 +6,14 @@ use Exception;
 
 /**
  * PackageValidator - Comprehensive package compatibility and validation
- * 
+ *
  * This class performs deep validation of section packages including:
  * - System requirements (Hub, PHP, MySQL versions)
  * - Dependency checking and resolution
  * - Conflict detection
  * - Security scanning
  * - Data migration validation
- * 
+ *
  * @author The Hub Team
  * @version 1.0.0
  */
@@ -24,13 +24,13 @@ class PackageValidator
     private $warnings = [];
     private $errors = [];
     private $critical = [];
-    
+
     // Severity levels
     const SEVERITY_CRITICAL = 'critical';
     const SEVERITY_ERROR = 'error';
     const SEVERITY_WARNING = 'warning';
     const SEVERITY_INFO = 'info';
-    
+
     // Check statuses
     const STATUS_PASS = 'pass';
     const STATUS_FAIL = 'fail';
@@ -43,7 +43,7 @@ class PackageValidator
 
     /**
      * Validate a complete package
-     * 
+     *
      * @param array $packageData Decoded package JSON
      * @param string $installType 'new', 'upgrade', 'downgrade', 'reinstall'
      * @return array Validation results with status and details
@@ -51,40 +51,40 @@ class PackageValidator
     public function validate(array $packageData, string $installType = 'new'): array
     {
         $this->resetChecks();
-        
+
         try {
             // 1. Validate package structure
             $this->validateStructure($packageData);
-            
+
             // 2. Check system requirements
             $this->checkSystemRequirements($packageData);
-            
+
             // 3. Check dependencies
             $this->checkDependencies($packageData);
-            
+
             // 4. Check for conflicts
             $this->checkConflicts($packageData);
-            
+
             // 5. Validate fields and schema
             $this->validateFields($packageData);
-            
+
             // 6. Check migrations (if upgrade)
             if ($installType === 'upgrade' || $installType === 'downgrade') {
                 $this->validateMigrations($packageData, $installType);
             }
-            
+
             // 7. Security scan
             $this->securityScan($packageData);
-            
+
             // 8. Resource check (disk space, etc.)
             $this->checkResources($packageData);
-            
+
         } catch (Exception $e) {
-            $this->addCheck('exception', 'Exception During Validation', null, null, 
-                self::STATUS_FAIL, self::SEVERITY_CRITICAL, 
+            $this->addCheck('exception', 'Exception During Validation', null, null,
+                self::STATUS_FAIL, self::SEVERITY_CRITICAL,
                 'Validation failed: ' . $e->getMessage());
         }
-        
+
         return $this->getResults();
     }
 
@@ -94,7 +94,7 @@ class PackageValidator
     private function validateStructure(array $packageData): void
     {
         $required = ['format_version', 'package', 'fields', 'permissions'];
-        
+
         foreach ($required as $field) {
             if (!isset($packageData[$field])) {
                 $this->addCheck('structure', "Required Field: $field", $field, 'missing',
@@ -103,13 +103,18 @@ class PackageValidator
                     "Ensure package contains all required fields");
             }
         }
-        
+
         // Check format version compatibility
         if (isset($packageData['format_version'])) {
             $formatVersion = $packageData['format_version'];
             $supportedVersion = $this->getSystemRequirement('format_version');
-            
-            if (!$this->isVersionCompatible($formatVersion, $supportedVersion)) {
+
+            // Ensure version is a string
+            if (!is_string($formatVersion)) {
+                $this->addCheck('structure', 'Package Format Version', 'string', gettype($formatVersion),
+                    self::STATUS_FAIL, self::SEVERITY_CRITICAL,
+                    "Package format version must be a string, got " . gettype($formatVersion));
+            } elseif (!$this->isVersionCompatible($formatVersion, $supportedVersion)) {
                 $this->addCheck('structure', 'Package Format Version', $supportedVersion, $formatVersion,
                     self::STATUS_FAIL, self::SEVERITY_CRITICAL,
                     "Package format $formatVersion is not compatible with supported format $supportedVersion",
@@ -120,12 +125,12 @@ class PackageValidator
                     "Package format is compatible");
             }
         }
-        
+
         // Validate package metadata
         if (isset($packageData['package'])) {
             $pkg = $packageData['package'];
             $requiredPkgFields = ['id', 'name', 'display_name', 'version'];
-            
+
             foreach ($requiredPkgFields as $field) {
                 if (empty($pkg[$field])) {
                     $this->addCheck('structure', "Package Metadata: $field", $field, 'missing',
@@ -133,18 +138,22 @@ class PackageValidator
                         "Package metadata is missing: $field");
                 }
             }
-            
+
             // Validate semantic version
-            if (!empty($pkg['version']) && !$this->isValidSemver($pkg['version'])) {
-                $this->addCheck('structure', 'Package Version Format', 'valid semver', $pkg['version'],
-                    self::STATUS_FAIL, self::SEVERITY_ERROR,
-                    "Package version must follow semantic versioning (e.g., 1.0.0)",
-                    "Use format: MAJOR.MINOR.PATCH");
+            if (!empty($pkg['version'])) {
+                if (!is_string($pkg['version'])) {
+                    $this->addCheck('structure', 'Package Version Format', 'string', gettype($pkg['version']),
+                        self::STATUS_FAIL, self::SEVERITY_ERROR,
+                        "Package version must be a string, got " . gettype($pkg['version']));
+                } elseif (!$this->isValidSemver($pkg['version'])) {
+                    $this->addCheck('structure', 'Package Version Format', 'valid semver', $pkg['version'],
+                        self::STATUS_FAIL, self::SEVERITY_ERROR,
+                        "Package version must follow semantic versioning (e.g., 1.0.0)",
+                        "Use format: MAJOR.MINOR.PATCH");
+                }
             }
         }
-    }
-
-    /**
+    }    /**
      * Check system requirements (Hub, PHP, MySQL versions)
      */
     private function checkSystemRequirements(array $packageData): void
@@ -153,7 +162,7 @@ class PackageValidator
         if (isset($packageData['compatibility']['hub_version'])) {
             $required = $packageData['compatibility']['hub_version'];
             $current = $this->getSystemRequirement('hub_version');
-            
+
             if (!$this->meetsVersionConstraint($current, $required)) {
                 $this->addCheck('system', 'Hub Version', $required, $current,
                     self::STATUS_FAIL, self::SEVERITY_CRITICAL,
@@ -165,12 +174,12 @@ class PackageValidator
                     "Hub version is compatible");
             }
         }
-        
+
         // PHP version
         if (isset($packageData['compatibility']['php_version'])) {
             $required = $packageData['compatibility']['php_version'];
             $current = PHP_VERSION;
-            
+
             if (!$this->meetsVersionConstraint($current, $required)) {
                 $this->addCheck('system', 'PHP Version', $required, $current,
                     self::STATUS_FAIL, self::SEVERITY_CRITICAL,
@@ -182,12 +191,12 @@ class PackageValidator
                     "PHP version is compatible");
             }
         }
-        
+
         // MySQL version
         if (isset($packageData['compatibility']['mysql_version'])) {
             $required = $packageData['compatibility']['mysql_version'];
             $current = $this->getMySQLVersion();
-            
+
             if (!$this->meetsVersionConstraint($current, $required)) {
                 $this->addCheck('system', 'MySQL Version', $required, $current,
                     self::STATUS_FAIL, self::SEVERITY_CRITICAL,
@@ -199,7 +208,7 @@ class PackageValidator
                     "MySQL version is compatible");
             }
         }
-        
+
         // PHP Extensions
         if (isset($packageData['requirements']['php_extensions'])) {
             foreach ($packageData['requirements']['php_extensions'] as $extension) {
@@ -227,20 +236,20 @@ class PackageValidator
             foreach ($packageData['requirements']['packages'] as $pkgId => $constraint) {
                 $isOptional = false;
                 $versionConstraint = '*';
-                
+
                 if (is_array($constraint)) {
                     $isOptional = $constraint['optional'] ?? false;
                     $versionConstraint = $constraint['version'] ?? '*';
                 } else {
                     $versionConstraint = $constraint;
                 }
-                
+
                 $installed = $this->isPackageInstalled($pkgId);
-                
+
                 if (!$installed) {
                     $severity = $isOptional ? self::SEVERITY_WARNING : self::SEVERITY_ERROR;
                     $status = $isOptional ? self::STATUS_WARNING : self::STATUS_FAIL;
-                    
+
                     $this->addCheck('dependencies', "Package: $pkgId", 'installed', 'not installed',
                         $status, $severity,
                         ($isOptional ? 'Optional' : 'Required') . " package '$pkgId' is not installed",
@@ -248,7 +257,7 @@ class PackageValidator
                 } else {
                     // Check version compatibility
                     $installedVersion = $this->getInstalledPackageVersion($pkgId);
-                    
+
                     if (!$this->meetsVersionConstraint($installedVersion, $versionConstraint)) {
                         $this->addCheck('dependencies', "Package: $pkgId Version", $versionConstraint, $installedVersion,
                             self::STATUS_FAIL, self::SEVERITY_ERROR,
@@ -262,7 +271,7 @@ class PackageValidator
                 }
             }
         }
-        
+
         // Check required modules
         if (isset($packageData['requirements']['core_modules'])) {
             foreach ($packageData['requirements']['core_modules'] as $module) {
@@ -278,7 +287,7 @@ class PackageValidator
                 }
             }
         }
-        
+
         // Check database tables
         if (isset($packageData['requirements']['database_tables'])) {
             foreach ($packageData['requirements']['database_tables'] as $table) {
@@ -303,11 +312,11 @@ class PackageValidator
     {
         $packageId = $packageData['package']['id'] ?? 'unknown';
         $packageSlug = $packageData['package']['name'] ?? '';
-        
+
         // Check for slug conflicts
         if ($packageSlug) {
             $existing = $this->db->fetchOne("SELECT id, display_name FROM sections WHERE slug = ?", [$packageSlug]);
-            
+
             if ($existing) {
                 $this->addCheck('conflicts', 'Section Slug Conflict', 'unique', 'duplicate',
                     self::STATUS_FAIL, self::SEVERITY_CRITICAL,
@@ -315,13 +324,13 @@ class PackageValidator
                     "Uninstall existing section or rename this package");
             }
         }
-        
+
         // Check declared conflicts
         if (isset($packageData['conflicts'])) {
             foreach ($packageData['conflicts'] as $conflictPkg => $versionConstraint) {
                 if ($this->isPackageInstalled($conflictPkg)) {
                     $installedVersion = $this->getInstalledPackageVersion($conflictPkg);
-                    
+
                     if ($versionConstraint === '*' || $this->meetsVersionConstraint($installedVersion, $versionConstraint)) {
                         $this->addCheck('conflicts', "Conflicting Package: $conflictPkg", 'not installed', "installed ($installedVersion)",
                             self::STATUS_FAIL, self::SEVERITY_CRITICAL,
@@ -344,10 +353,10 @@ class PackageValidator
                 "Package must include field definitions");
             return;
         }
-        
+
         $fieldNames = [];
         $supportedTypes = $this->getSupportedFieldTypes();
-        
+
         foreach ($packageData['fields'] as $index => $field) {
             // Required field properties
             if (empty($field['name'])) {
@@ -356,9 +365,9 @@ class PackageValidator
                     "Field at index $index is missing 'name' property");
                 continue;
             }
-            
+
             $fieldName = $field['name'];
-            
+
             // Check for duplicate field names
             if (in_array($fieldName, $fieldNames)) {
                 $this->addCheck('fields', "Field: $fieldName", 'unique', 'duplicate',
@@ -366,7 +375,7 @@ class PackageValidator
                     "Duplicate field name: $fieldName");
             }
             $fieldNames[] = $fieldName;
-            
+
             // Validate field type
             if (empty($field['type'])) {
                 $this->addCheck('fields', "Field: $fieldName", 'type', 'missing',
@@ -378,7 +387,7 @@ class PackageValidator
                     "Field type '{$field['type']}' is not supported",
                     "Supported types: " . implode(', ', $supportedTypes));
             }
-            
+
             // Validate field name format (alphanumeric + underscores)
             if (!preg_match('/^[a-z][a-z0-9_]*$/', $fieldName)) {
                 $this->addCheck('fields', "Field: $fieldName Format", 'valid format', 'invalid',
@@ -386,7 +395,7 @@ class PackageValidator
                     "Field name must start with letter and contain only lowercase letters, numbers, and underscores");
             }
         }
-        
+
         // Check for at least one field
         if (empty($fieldNames)) {
             $this->addCheck('fields', 'Field Count', '>=1', '0',
@@ -416,7 +425,7 @@ class PackageValidator
     private function securityScan(array $packageData): void
     {
         $jsonString = json_encode($packageData);
-        
+
         // Check for SQL injection patterns
         $sqlPatterns = [
             '/DROP\s+TABLE/i',
@@ -424,7 +433,7 @@ class PackageValidator
             '/DELETE\s+FROM.*WHERE.*1\s*=\s*1/i',
             '/;\s*DROP/i',
         ];
-        
+
         foreach ($sqlPatterns as $pattern) {
             if (preg_match($pattern, $jsonString)) {
                 $this->addCheck('security', 'SQL Injection Pattern', 'none', 'detected',
@@ -434,7 +443,7 @@ class PackageValidator
                 break;
             }
         }
-        
+
         // Check for PHP code execution patterns
         $phpPatterns = [
             '/eval\s*\(/i',
@@ -444,7 +453,7 @@ class PackageValidator
             '/passthru/i',
             '/`[^`]+`/i',  // Backtick execution
         ];
-        
+
         foreach ($phpPatterns as $pattern) {
             if (preg_match($pattern, $jsonString)) {
                 $this->addCheck('security', 'Code Execution Pattern', 'none', 'detected',
@@ -454,7 +463,7 @@ class PackageValidator
                 break;
             }
         }
-        
+
         // Check for suspicious URLs
         if (preg_match('/https?:\/\/[^"\']+/i', $jsonString, $matches)) {
             foreach ($matches as $url) {
@@ -467,7 +476,7 @@ class PackageValidator
                 }
             }
         }
-        
+
         $this->addCheck('security', 'Security Scan', 'clean', 'scanned',
             self::STATUS_PASS, self::SEVERITY_INFO,
             "Basic security scan completed");
@@ -481,7 +490,7 @@ class PackageValidator
         // Check disk space (at least 100MB free)
         $freeSpace = disk_free_space('/');
         $requiredSpace = 100 * 1024 * 1024; // 100MB
-        
+
         if ($freeSpace < $requiredSpace) {
             $this->addCheck('resources', 'Disk Space', '>= 100MB', $this->formatBytes($freeSpace),
                 self::STATUS_FAIL, self::SEVERITY_ERROR,
@@ -505,44 +514,44 @@ class PackageValidator
     {
         // Handle simple constraints
         if ($constraint === '*') return true;
-        
+
         // >= operator
         if (preg_match('/^>=\s*(.+)$/', $constraint, $matches)) {
             return version_compare($version, $matches[1], '>=');
         }
-        
+
         // > operator
         if (preg_match('/^>\s*(.+)$/', $constraint, $matches)) {
             return version_compare($version, $matches[1], '>');
         }
-        
+
         // <= operator
         if (preg_match('/^<=\s*(.+)$/', $constraint, $matches)) {
             return version_compare($version, $matches[1], '<=');
         }
-        
+
         // < operator
         if (preg_match('/^<\s*(.+)$/', $constraint, $matches)) {
             return version_compare($version, $matches[1], '<');
         }
-        
+
         // Range: >=1.0.0 <2.0.0
         if (preg_match('/^>=\s*([^\s]+)\s+<\s*([^\s]+)$/', $constraint, $matches)) {
-            return version_compare($version, $matches[1], '>=') && 
+            return version_compare($version, $matches[1], '>=') &&
                    version_compare($version, $matches[2], '<');
         }
-        
+
         // Caret ^1.0.0 (>=1.0.0 <2.0.0)
         if (preg_match('/^\^(.+)$/', $constraint, $matches)) {
             $minVersion = $matches[1];
             $parts = explode('.', $minVersion);
             $major = $parts[0];
             $nextMajor = ((int)$major + 1) . '.0.0';
-            
-            return version_compare($version, $minVersion, '>=') && 
+
+            return version_compare($version, $minVersion, '>=') &&
                    version_compare($version, $nextMajor, '<');
         }
-        
+
         // Tilde ~1.2.0 (>=1.2.0 <1.3.0)
         if (preg_match('/^~(.+)$/', $constraint, $matches)) {
             $minVersion = $matches[1];
@@ -550,11 +559,11 @@ class PackageValidator
             $major = $parts[0];
             $minor = $parts[1] ?? '0';
             $nextMinor = "$major." . ((int)$minor + 1) . ".0";
-            
-            return version_compare($version, $minVersion, '>=') && 
+
+            return version_compare($version, $minVersion, '>=') &&
                    version_compare($version, $nextMinor, '<');
         }
-        
+
         // Exact version
         return version_compare($version, $constraint, '==');
     }
@@ -584,7 +593,7 @@ class PackageValidator
             "SELECT requirement_value FROM system_requirements WHERE requirement_key = ?",
             [$key]
         );
-        
+
         return $result['requirement_value'] ?? '0.0.0';
     }
 
@@ -606,7 +615,7 @@ class PackageValidator
             "SELECT id FROM section_installations WHERE package_id = ?",
             [$packageId]
         );
-        
+
         return $result !== null;
     }
 
@@ -619,7 +628,7 @@ class PackageValidator
             "SELECT installed_version FROM section_installations WHERE package_id = ?",
             [$packageId]
         );
-        
+
         return $result['installed_version'] ?? '0.0.0';
     }
 
@@ -668,12 +677,12 @@ class PackageValidator
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $i = 0;
-        
+
         while ($bytes >= 1024 && $i < count($units) - 1) {
             $bytes /= 1024;
             $i++;
         }
-        
+
         return round($bytes, 2) . ' ' . $units[$i];
     }
 
@@ -701,9 +710,9 @@ class PackageValidator
             'resolution' => $resolution,
             'checked_at' => date('Y-m-d H:i:s')
         ];
-        
+
         $this->checks[] = $check;
-        
+
         // Categorize
         if ($status === self::STATUS_FAIL) {
             if ($severity === self::SEVERITY_CRITICAL) {
@@ -736,17 +745,17 @@ class PackageValidator
         $passed = count(array_filter($this->checks, fn($c) => $c['status'] === self::STATUS_PASS));
         $failed = count($this->errors) + count($this->critical);
         $warnings = count($this->warnings);
-        
+
         // Determine overall status
         $canInstall = count($this->critical) === 0 && count($this->errors) === 0;
         $overallStatus = 'fail';
-        
+
         if ($canInstall && $warnings === 0) {
             $overallStatus = 'pass';
         } elseif ($canInstall && $warnings > 0) {
             $overallStatus = 'warning';
         }
-        
+
         return [
             'can_install' => $canInstall,
             'overall_status' => $overallStatus,
@@ -772,17 +781,17 @@ class PackageValidator
     {
         $report = "PACKAGE COMPATIBILITY REPORT\n";
         $report .= str_repeat('=', 80) . "\n\n";
-        
+
         $summary = $validationResults['summary'];
         $report .= "Total Checks: {$summary['total_checks']}\n";
         $report .= "✅ Passed: {$summary['passed']}\n";
         $report .= "❌ Failed: {$summary['failed']}\n";
         $report .= "⚠️  Warnings: {$summary['warnings']}\n";
         $report .= "🔴 Critical: {$summary['critical']}\n\n";
-        
+
         $report .= "Overall Status: " . strtoupper($validationResults['overall_status']) . "\n";
         $report .= "Can Install: " . ($validationResults['can_install'] ? 'YES' : 'NO') . "\n\n";
-        
+
         // Critical issues
         if (!empty($validationResults['critical_issues'])) {
             $report .= "CRITICAL FAILURES\n";
@@ -796,7 +805,7 @@ class PackageValidator
                 $report .= "\n";
             }
         }
-        
+
         // Errors
         if (!empty($validationResults['errors'])) {
             $report .= "ERRORS\n";
@@ -810,7 +819,7 @@ class PackageValidator
                 $report .= "\n";
             }
         }
-        
+
         // Warnings
         if (!empty($validationResults['warnings'])) {
             $report .= "WARNINGS\n";
@@ -824,10 +833,10 @@ class PackageValidator
                 $report .= "\n";
             }
         }
-        
+
         $report .= str_repeat('=', 80) . "\n";
         $report .= "Generated: " . $validationResults['timestamp'] . "\n";
-        
+
         return $report;
     }
 }
