@@ -32,9 +32,9 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="DB_HOST" value="localhost"/>
-        <env name="DB_NAME" value="hub_test"/>
-        <env name="DB_USER" value="hub"/>
-        <env name="DB_PASSWORD" value=""/>
+        <env name="DB_NAME" value="woodson_hub"/>
+        <env name="DB_USER" value="WISDAdmin"/>
+        <env name="DB_PASS" value="$DB_PASSWORD"/>
     </php>
 
     <coverage>

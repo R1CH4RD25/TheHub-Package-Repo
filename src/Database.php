@@ -12,10 +12,11 @@ class Database
 
     private function __construct()
     {
-        $host = $_ENV['DB_HOST'];
-        $dbname = $_ENV['DB_NAME'];
-        $user = $_ENV['DB_USER'];
-        $pass = $_ENV['DB_PASS'];
+        // Support both DB_PASS and DB_PASSWORD for compatibility
+        $host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
+        $dbname = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'woodson_hub';
+        $user = $_ENV['DB_USER'] ?? getenv('DB_USER') ?: 'root';
+        $pass = $_ENV['DB_PASS'] ?? $_ENV['DB_PASSWORD'] ?? getenv('DB_PASS') ?: getenv('DB_PASSWORD') ?: '';
 
         try {
             $this->pdo = new PDO(
@@ -40,6 +41,14 @@ class Database
             self::$instance = new self();
         }
         return self::$instance;
+    }
+    
+    /**
+     * Reset the singleton instance (for testing purposes only)
+     */
+    public static function resetInstance(): void
+    {
+        self::$instance = null;
     }
 
     public function getConnection(): PDO
@@ -92,6 +101,11 @@ class Database
     public function rollBack()
     {
         return $this->pdo->rollBack();
+    }
+    
+    public function inTransaction(): bool
+    {
+        return $this->pdo->inTransaction();
     }
 
     /**
