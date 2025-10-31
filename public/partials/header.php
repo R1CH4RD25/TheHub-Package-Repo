@@ -11,9 +11,6 @@ if ($isAdminPage) {
     if (isset($canSeeUserManagement) && $canSeeUserManagement) {
         $mobileMenuItems[] = ['tab' => 'users', 'label' => 'User Management', 'active' => true];
     }
-    if (isset($canSeeVehicles) && $canSeeVehicles) {
-        $mobileMenuItems[] = ['tab' => 'vehicles', 'label' => 'Vehicles & Fuel', 'active' => false];
-    }
     if ((isset($canSeeSectionAccess) && $canSeeSectionAccess) || (isset($canSeeManageSections) && $canSeeManageSections)) {
         $mobileMenuItems[] = ['tab' => 'sections', 'label' => 'Sections', 'active' => false];
     }
