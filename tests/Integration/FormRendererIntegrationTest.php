@@ -1058,7 +1058,8 @@ class FormRendererIntegrationTest extends TestCase
                     'label' => 'Age',
                     'validation' => ['min' => 18, 'max' => 65]
                 ]
-            ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_minmax']
         ];
 
         $renderer = new FormRenderer($config);
@@ -1078,7 +1079,8 @@ class FormRendererIntegrationTest extends TestCase
                     'label' => 'Username',
                     'validation' => ['minLength' => 3, 'maxLength' => 20]
                 ]
-            ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_length']
         ];
 
         $renderer = new FormRenderer($config);
@@ -1099,7 +1101,8 @@ class FormRendererIntegrationTest extends TestCase
                     'placeholder' => 'Select a country',
                     'options' => ['US' => 'United States', 'CA' => 'Canada']
                 ]
-            ]
+            ],
+            'onSubmit' => ['insertInto' => 'test_select']
         ];
 
         $renderer = new FormRenderer($config);
