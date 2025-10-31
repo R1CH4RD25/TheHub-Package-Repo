@@ -675,4 +675,36 @@ class Auth
         header('Location: /login.php');
         exit;
     }
+
+    /**
+     * Check if user has a specific role
+     * 
+     * @param string $role Role to check
+     * @return bool True if user has the role
+     */
+    public static function hasRole(string $role): bool
+    {
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+        
+        // Check global role
+        $userRole = $_SESSION['role'] ?? 'user';
+        if ($userRole === $role || $userRole === 'super_admin') {
+            return true;
+        }
+        
+        // Check additional roles in user_global_roles table
+        $db = \Hub\Database::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as count 
+            FROM user_global_roles 
+            WHERE user_id = ? AND role = ? AND is_active = 1
+        ");
+        $stmt->execute([$_SESSION['user_id'], $role]);
+        $result = $stmt->fetch();
+        
+        return ($result['count'] ?? 0) > 0;
+    }
+
 }
