@@ -589,13 +589,15 @@ class WorkflowRenderer implements ModuleInterface
         $stmt = $this->db->prepare("
             SELECT
                 action,
-                details,
+                table_name,
+                record_id,
+                old_values,
+                new_values,
                 user_id,
                 created_at
-            FROM audit_logs
-            WHERE action = 'workflow_transition'
-            AND target_type = ?
-            AND target_id = ?
+            FROM audit_log
+            WHERE table_name = ?
+            AND record_id = ?
             ORDER BY created_at DESC
         ");
 
