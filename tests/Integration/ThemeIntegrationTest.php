@@ -19,10 +19,12 @@ class ThemeIntegrationTest extends TestCase
 {
     private Theme $theme;
     private SiteSettings $settings;
+    private string $uniqueId;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->uniqueId = uniqid('test_', true);
         $this->theme = new Theme();
         $this->settings = new SiteSettings();
         TestDatabase::beginTransaction();
@@ -264,7 +266,7 @@ class ThemeIntegrationTest extends TestCase
             INSERT INTO themes (name, slug, description, settings, is_active, is_system, created_by)
             VALUES (?, ?, ?, ?, FALSE, TRUE, NULL)
         ");
-        $stmt->execute(['System Theme', 'system-theme', 'Built-in', json_encode(['color' => '#000000'])]);
+        $stmt->execute(['System Theme ' . $this->uniqueId, 'system-theme-' . $this->uniqueId, 'Built-in', json_encode(['color' => '#000000'])]);
         $themeId = $db->lastInsertId();
 
         // Try to delete system theme - should throw exception
