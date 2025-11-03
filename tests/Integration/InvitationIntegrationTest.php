@@ -21,13 +21,23 @@ class InvitationIntegrationTest extends TestCase
 {
     private Invitation $invitation;
     private User $user;
+    private string $uniqueId;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->uniqueId = uniqid('test_', true);
         $this->invitation = new Invitation();
         $this->user = new User();
         TestDatabase::beginTransaction();
+    }
+
+    /**
+     * Helper: Generate unique email for testing
+     */
+    private function uniqueEmail(string $prefix = 'test'): string
+    {
+        return $prefix . '-' . $this->uniqueId . '@woodsonisd.net';
     }
 
     protected function tearDown(): void
@@ -41,7 +51,7 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testCompleteInvitationCreationFlow(): void
     {
-        $email = 'newinvite@woodsonisd.net';
+        $email = $this->uniqueEmail('newinvite');
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         // Create invitation (returns invitation ID, generates token internally)
@@ -70,7 +80,7 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testTokenValidation(): void
     {
-        $email = 'validtoken@woodsonisd.net';
+        $email = $this->uniqueEmail('validtoken');
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         $invitationId = $this->invitation->create($email, 'staff', $inviterUserId);
@@ -94,9 +104,9 @@ class InvitationIntegrationTest extends TestCase
     /**
      * Test invitation acceptance workflow
      */
-    public function testInvitationAcceptanceFlow(): void
+    public function testInvitationAcceptanceCreatesUser(): void
     {
-        $email = 'accept@woodsonisd.net';
+        $email = $this->uniqueEmail('accept');
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         $invitationId = $this->invitation->create($email, 'manager', $inviterUserId);
@@ -125,9 +135,9 @@ class InvitationIntegrationTest extends TestCase
     /**
      * Test invitation expiration handling
      */
-    public function testInvitationExpiration(): void
+    public function testExpiredInvitationIsInvalid(): void
     {
-        $email = 'expired@woodsonisd.net';
+        $email = $this->uniqueEmail('expired');
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         // Create invitation with past expiration directly in database
@@ -149,7 +159,7 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testDuplicateInvitationPrevention(): void
     {
-        $email = 'duplicate@woodsonisd.net';
+        $email = $this->uniqueEmail('duplicate');
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         // First invitation should succeed
@@ -167,7 +177,7 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testExistingUserInvitationPrevention(): void
     {
-        $email = 'existing@woodsonisd.net';
+        $email = $this->uniqueEmail('existing');
 
         // Create existing user
         TestDatabase::createTestUser(['email' => $email, 'role' => 'staff']);
@@ -186,9 +196,9 @@ class InvitationIntegrationTest extends TestCase
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         // Create multiple invitations
-        $this->invitation->create('user1@woodsonisd.net', 'staff', $inviterUserId);
-        $this->invitation->create('user2@woodsonisd.net', 'admin', $inviterUserId);
-        $this->invitation->create('user3@woodsonisd.net', 'manager', $inviterUserId);
+        $this->invitation->create($this->uniqueEmail('user1'), 'staff', $inviterUserId);
+        $this->invitation->create($this->uniqueEmail('user2'), 'admin', $inviterUserId);
+        $this->invitation->create($this->uniqueEmail('user3'), 'manager', $inviterUserId);
 
         // Get all invitations
         $invitations = $this->invitation->getAll();
@@ -213,7 +223,7 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testUserRegistrationViaInvitation(): void
     {
-        $email = 'register@woodsonisd.net';
+        $email = $this->uniqueEmail('register');
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         // Create invitation
@@ -248,7 +258,7 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testPendingUserApprovalFlow(): void
     {
-        $email = 'pending@woodsonisd.net';
+        $email = $this->uniqueEmail('pending');
 
         // Create pending user (is_active = 0)
         $db = TestDatabase::getConnection();
@@ -316,7 +326,7 @@ class InvitationIntegrationTest extends TestCase
         $inviterUserId = TestDatabase::createTestUser(['role' => 'super_admin']);
 
         // Valid domain (woodsonisd.net) - create() checks REQUIRE_DOMAIN_MATCH env var
-        $validEmail = 'valid@woodsonisd.net';
+        $validEmail = $this->uniqueEmail('valid');
         $invitationId = $this->invitation->create($validEmail, 'staff', $inviterUserId);
         $this->assertGreaterThan(0, $invitationId);
 
@@ -330,9 +340,9 @@ class InvitationIntegrationTest extends TestCase
      */
     public function testInvitationMetadataPersistence(): void
     {
-        $email = 'metadata@woodsonisd.net';
+        $email = $this->uniqueEmail('metadata');
         $inviterUserId = TestDatabase::createTestUser([
-            'email' => 'inviter@woodsonisd.net',
+            'email' => $this->uniqueEmail('inviter'),
             'name' => 'Super Admin User',
             'role' => 'super_admin'
         ]);
