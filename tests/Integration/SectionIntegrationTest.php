@@ -23,10 +23,14 @@ class SectionIntegrationTest extends TestCase
     private int $adminUserId;
     private int $staffUserId;
     private int $testSectionId;
+    private string $uniqueId;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Generate unique identifier for this test run
+        $this->uniqueId = uniqid('test_', true);
 
         // Initialize database and section access
         $this->db = Database::getInstance();
@@ -41,9 +45,9 @@ class SectionIntegrationTest extends TestCase
         }
 
         // Create test users with different roles
-        $this->superAdminUserId = $this->createTestUser('google_super_sec', 'super@test-section.com', 'Super Admin', 'super_admin');
-        $this->adminUserId = $this->createTestUser('google_admin_sec', 'admin@test-section.com', 'Admin User', 'admin');
-        $this->staffUserId = $this->createTestUser('google_staff_sec', 'staff@test-section.com', 'Staff User', 'staff');
+        $this->superAdminUserId = $this->createTestUser('google_super_' . $this->uniqueId, 'super@test-section-' . $this->uniqueId . '.com', 'Super Admin', 'super_admin');
+        $this->adminUserId = $this->createTestUser('google_admin_' . $this->uniqueId, 'admin@test-section-' . $this->uniqueId . '.com', 'Admin User', 'admin');
+        $this->staffUserId = $this->createTestUser('google_staff_' . $this->uniqueId, 'staff@test-section-' . $this->uniqueId . '.com', 'Staff User', 'staff');
 
         // Create test section
         $this->testSectionId = $this->createTestSection('Test Section', 'test-section', 'Test section for integration tests');
@@ -75,14 +79,18 @@ class SectionIntegrationTest extends TestCase
     }
 
     /**
-     * Helper: Create a test section
+     * Helper: Create a test section with automatic unique naming
      */
     private function createTestSection(string $name, string $slug, string $description, int $sortOrder = 100): int
     {
+        // Append unique ID to ensure no collisions across test runs
+        $uniqueName = $name . ' ' . $this->uniqueId;
+        $uniqueSlug = $slug . '-' . $this->uniqueId;
+
         $this->db->execute(
             "INSERT INTO sections (name, display_name, slug, description, icon, base_url, is_active, sort_order, created_at)
              VALUES (?, ?, ?, ?, '📋', ?, 1, ?, NOW())",
-            [$name, $name, $slug, $description, "{$slug}.php", $sortOrder]
+            [$uniqueName, $uniqueName, $uniqueSlug, $description, "{$uniqueSlug}.php", $sortOrder]
         );
 
         return $this->db->lastInsertId();
