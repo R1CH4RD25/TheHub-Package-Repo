@@ -95,6 +95,23 @@ class WorkflowRenderer implements ModuleInterface
     }
 
     /**
+     * Check if table has tenant_id column for multi-tenancy support
+     *
+     * @param string $table Table name
+     * @return bool True if tenant_id column exists
+     */
+    private function hasTenantColumn(string $table): bool
+    {
+        try {
+            $stmt = $this->db->prepare("SHOW COLUMNS FROM {$table} LIKE 'tenant_id'");
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
      * Load workflow record from database
      */
     private function loadRecord(): void
@@ -106,9 +123,18 @@ class WorkflowRenderer implements ModuleInterface
             return;
         }
 
-        $sql = "SELECT * FROM {$table} WHERE id = ? AND tenant_id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$this->recordId, $_SESSION['tenant_id'] ?? 'default']);
+        // Check if multi-tenancy is supported
+        $hasTenant = $this->hasTenantColumn($table);
+
+        if ($hasTenant && isset($_SESSION['tenant_id'])) {
+            $sql = "SELECT * FROM {$table} WHERE id = ? AND tenant_id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$this->recordId, $_SESSION['tenant_id']]);
+        } else {
+            $sql = "SELECT * FROM {$table} WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$this->recordId]);
+        }
 
         $this->record = $stmt->fetch() ?: null;
     }
@@ -774,9 +800,18 @@ class WorkflowRenderer implements ModuleInterface
         $table = $this->config['table'] ?? '';
         $stateField = $this->config['stateField'] ?? 'status';
 
-        $sql = "UPDATE {$table} SET {$stateField} = ?, updated_at = NOW() WHERE id = ? AND tenant_id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$newState, $this->recordId, $_SESSION['tenant_id'] ?? 'default']);
+        // Support multi-tenancy if table has tenant_id column
+        $hasTenant = $this->hasTenantColumn($table);
+
+        if ($hasTenant && isset($_SESSION['tenant_id'])) {
+            $sql = "UPDATE {$table} SET {$stateField} = ?, updated_at = NOW() WHERE id = ? AND tenant_id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$newState, $this->recordId, $_SESSION['tenant_id']]);
+        } else {
+            $sql = "UPDATE {$table} SET {$stateField} = ?, updated_at = NOW() WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$newState, $this->recordId]);
+        }
     }
 
     /**
@@ -833,9 +868,18 @@ class WorkflowRenderer implements ModuleInterface
     {
         $table = $this->config['table'] ?? '';
 
-        $sql = "UPDATE {$table} SET {$field} = ? WHERE id = ? AND tenant_id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$value, $this->recordId, $_SESSION['tenant_id'] ?? 'default']);
+        // Support multi-tenancy if table has tenant_id column
+        $hasTenant = $this->hasTenantColumn($table);
+
+        if ($hasTenant && isset($_SESSION['tenant_id'])) {
+            $sql = "UPDATE {$table} SET {$field} = ? WHERE id = ? AND tenant_id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$value, $this->recordId, $_SESSION['tenant_id']]);
+        } else {
+            $sql = "UPDATE {$table} SET {$field} = ? WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$value, $this->recordId]);
+        }
     }
 
     /**
