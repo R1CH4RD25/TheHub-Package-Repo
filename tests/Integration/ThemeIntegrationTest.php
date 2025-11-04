@@ -329,9 +329,8 @@ class ThemeIntegrationTest extends TestCase
         $stmt->execute();
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($result) {
-            $this->assertEquals($theme['id'], (int)$result['setting_value']);
-        }
+        $this->assertNotFalse($result, 'active_theme_id setting should exist');
+        $this->assertEquals($theme['id'], (int)$result['setting_value']);
 
         // Cleanup
         $db->exec("UPDATE themes SET is_active = FALSE WHERE id = {$theme['id']}");
@@ -397,5 +396,230 @@ class ThemeIntegrationTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Theme not found');
         $this->theme->delete(999999);
+    }
+
+    /**
+     * Test saveFromCurrentSettings creates theme from session/config
+     */
+    public function testSaveFromCurrentSettings(): void
+    {
+        $db = Database::getInstance();
+
+        // Set up current settings in config
+        $db->execute("INSERT INTO site_settings (setting_key, setting_value) VALUES
+            ('primary_color', '#007bff'),
+            ('secondary_color', '#6c757d'),
+            ('font_family', 'Arial'),
+            ('enable_dark_mode', '1')
+        ");
+
+        $userId = 1; // Test user created in setup
+
+        $result = $this->theme->saveFromCurrentSettings('Current Settings Theme', 'Saved from active config', $userId);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Current Settings Theme', $result['name']);
+        $this->assertEquals('current-settings-theme', $result['slug']);
+
+        // Verify theme was created in database
+        $stmt = $db->prepare("SELECT * FROM themes WHERE id = ?");
+        $stmt->execute([$result['id']]);
+        $savedTheme = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        $this->assertNotNull($savedTheme);
+        $this->assertEquals($userId, $savedTheme['created_by']);
+        $this->assertNotEmpty($savedTheme['settings']);
+
+        // Parse settings and verify they contain current colors
+        $settings = json_decode($savedTheme['settings'], true);
+        $this->assertIsArray($settings);
+    }    /**
+     * Test updateFromCurrentSettings updates existing theme
+     */
+    public function testUpdateFromCurrentSettings(): void
+    {
+        $db = Database::getInstance();
+
+        // Create a theme first
+        $result = $this->theme->create('Test Theme for Update', [
+            'colors' => ['primary' => '#000000'],
+            'fonts' => ['family' => 'Times']
+        ], 'Original description', 1);
+
+        $themeId = $result['id'];
+
+        // Update current settings
+        $db->execute("INSERT INTO site_settings (setting_key, setting_value) VALUES
+            ('primary_color', '#ff0000'),
+            ('secondary_color', '#00ff00')
+            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+        ");
+
+        // Update the theme from current settings
+        $success = $this->theme->updateFromCurrentSettings($themeId, 'Updated Theme Name', 'Updated description');
+
+        $this->assertTrue($success);
+
+        // Verify update
+        $stmt = $db->prepare("SELECT * FROM themes WHERE id = ?");
+        $stmt->execute([$themeId]);
+        $updated = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        $this->assertEquals('Updated Theme Name', $updated['name']);
+        $this->assertEquals('Updated description', $updated['description']);
+        $this->assertNotEmpty($updated['settings']);
+    }
+
+    /**
+     * Test import creates theme from exported data
+     */
+    public function testImportCreatesThemeFromExportData(): void
+    {
+        // Create and export a theme
+        $original = $this->theme->create('Original Theme', [
+            'colors' => [
+                'primary' => '#0066cc',
+                'secondary' => '#ff6600'
+            ],
+            'fonts' => [
+                'family' => 'Helvetica',
+                'size' => '16px'
+            ],
+            'layout' => [
+                'sidebar_width' => '250px'
+            ]
+        ], 'Original theme for import test', 1);
+
+        $exportData = $this->theme->export($original['id']);
+
+        // Modify export data slightly
+        $exportData['name'] = 'Imported Theme Copy';
+        $exportData['description'] = 'Imported from export';
+
+        // Import as new theme
+        $imported = $this->theme->import($exportData, 1);
+
+        $this->assertIsArray($imported);
+        $this->assertArrayHasKey('id', $imported);
+        $this->assertNotEquals($original['id'], $imported['id']);
+        $this->assertEquals('Imported Theme Copy', $imported['name']);
+        $this->assertEquals('imported-theme-copy', $imported['slug']);
+
+        // Verify settings were imported
+        $this->assertArrayHasKey('settings', $imported);
+        $this->assertIsArray($imported['settings']);
+        $this->assertEquals('#0066cc', $imported['settings']['colors']['primary']);
+        $this->assertEquals('Helvetica', $imported['settings']['fonts']['family']);
+    }
+
+    /**
+     * Test generatePreview creates HTML preview of theme
+     */
+    public function testGeneratePreviewCreatesHtmlPreview(): void
+    {
+        $settings = [
+            'primary_color' => '#007bff',
+            'navbar_color' => '#6c757d',
+            'accent_color' => '#28a745',
+            'header_bg_color' => '#dc3545',
+            'button_primary_bg' => '#17a2b8'
+        ];
+
+        $preview = $this->theme->generatePreview($settings);
+
+        $this->assertIsString($preview);
+        $this->assertStringContainsString('<div', $preview);
+        $this->assertStringContainsString('style=', $preview);
+
+        // Should contain the primary color
+        $this->assertStringContainsString('#007bff', $preview);
+
+        // Should contain navbar color
+        $this->assertStringContainsString('#6c757d', $preview);
+
+        // Should have some preview elements (buttons, text, etc.)
+        $this->assertGreaterThan(100, strlen($preview));
+    }    /**
+     * Test import validates theme data structure
+     */
+    public function testImportValidatesThemeData(): void
+    {
+        // Try to import invalid data (missing required fields)
+        $this->expectException(\InvalidArgumentException::class);
+
+        $invalidData = [
+            'name' => 'Invalid Theme'
+            // Missing 'settings' key
+        ];
+
+        $this->theme->import($invalidData, 1);
+    }
+
+    /**
+     * Test saveFromCurrentSettings with duplicate name generates unique slug
+     */
+    public function testSaveFromCurrentSettingsHandlesDuplicateNames(): void
+    {
+        $db = Database::getInstance();
+
+        // Insert minimal settings
+        $db->execute("INSERT INTO site_settings (setting_key, setting_value) VALUES
+            ('primary_color', '#000000')
+            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+        ");
+
+        // Create first theme
+        $first = $this->theme->saveFromCurrentSettings('Duplicate Name', 'First', 1);
+
+        // Create second with same name
+        $second = $this->theme->saveFromCurrentSettings('Duplicate Name', 'Second', 1);
+
+        $this->assertNotEquals($first['slug'], $second['slug']);
+        $this->assertStringStartsWith('duplicate-name', $first['slug']);
+        $this->assertStringStartsWith('duplicate-name', $second['slug']);
+    }
+
+    /**
+     * Test generatePreview handles empty settings gracefully
+     */
+    public function testGeneratePreviewHandlesEmptySettings(): void
+    {
+        $preview = $this->theme->generatePreview([]);
+
+        $this->assertIsString($preview);
+        $this->assertNotEmpty($preview);
+        // Should still generate something even with no settings
+    }
+
+    /**
+     * Test updateFromCurrentSettings with null parameters
+     */
+    public function testUpdateFromCurrentSettingsPreservesValuesWhenNull(): void
+    {
+        $db = Database::getInstance();
+
+        // Create initial theme
+        $result = $this->theme->create('Preserve Test', ['color' => 'blue'], 'Original desc', 1);
+        $themeId = $result['id'];
+
+        // Add settings for update
+        $db->execute("INSERT INTO site_settings (setting_key, setting_value) VALUES
+            ('primary_color', '#123456')
+            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+        ");
+
+        // Update with null name and description (should preserve originals)
+        $success = $this->theme->updateFromCurrentSettings($themeId, null, null);
+
+        $this->assertTrue($success);
+
+        // Verify name and description were preserved
+        $stmt = $db->prepare("SELECT name, description FROM themes WHERE id = ?");
+        $stmt->execute([$themeId]);
+        $updated = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        $this->assertEquals('Preserve Test', $updated['name']);
+        $this->assertEquals('Original desc', $updated['description']);
     }
 }

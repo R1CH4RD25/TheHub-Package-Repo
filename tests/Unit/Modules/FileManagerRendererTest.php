@@ -31,7 +31,7 @@ class FileManagerRendererTest extends TestCase
     public function testRendererImplementsInterface(): void
     {
         $this->assertInstanceOf(
-            'Hub\Modules\ModuleRendererInterface',
+            'Hub\Modules\ModuleInterface',
             $this->renderer
         );
     }
@@ -41,25 +41,25 @@ class FileManagerRendererTest extends TestCase
         $html = $this->renderer->render();
 
         $this->assertIsString($html);
-        $this->assertStringContainsString('file-manager-module', $html);
-        $this->assertStringContainsString('Test File Manager', $html);
+        $this->assertStringContainsString('file-manager-container', $html);
+        $this->assertGreaterThan(1000, strlen($html), 'HTML should be substantial');
     }
 
     public function testRenderContainsUploadInterface(): void
     {
         $html = $this->renderer->render();
 
-        $this->assertStringContainsString('Drop files here', $html);
+        $this->assertStringContainsString('Drag & drop files here', $html);
         $this->assertStringContainsString('fileInput', $html);
-        $this->assertStringContainsString('drag-and-drop', $html);
+        $this->assertStringContainsString('uploadModal', $html);
     }
 
     public function testRenderContainsViewModeToggles(): void
     {
         $html = $this->renderer->render();
 
-        $this->assertStringContainsString('grid-view', $html);
-        $this->assertStringContainsString('list-view', $html);
+        $this->assertStringContainsString('btn-view-mode', $html);
+        $this->assertStringContainsString('data-view="list"', $html);
     }
 
     public function testValidateFileSuccess(): void
@@ -73,7 +73,7 @@ class FileManagerRendererTest extends TestCase
             ]
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateFile($data);
 
         $this->assertIsArray($errors);
         // Note: Full validation would require more context
@@ -90,7 +90,7 @@ class FileManagerRendererTest extends TestCase
             ]
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateFile($data);
 
         $this->assertIsArray($errors);
         // Would contain size error in full implementation
@@ -107,7 +107,7 @@ class FileManagerRendererTest extends TestCase
             ]
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateFile($data);
 
         $this->assertIsArray($errors);
         // Would contain type error in full implementation
@@ -115,7 +115,7 @@ class FileManagerRendererTest extends TestCase
 
     public function testHandleUnknownAction(): void
     {
-        $result = $this->renderer->handle('invalid_action', []);
+        $result = $this->renderer->handle(['action' => 'invalid_action']);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);

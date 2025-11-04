@@ -249,10 +249,10 @@ class WorkflowRenderer implements ModuleInterface
 
         switch ($format) {
             case 'date':
-                return htmlspecialchars(date('m/d/Y', strtotime($value)));
+                return htmlspecialchars(date('Y-m-d', strtotime($value)));
 
             case 'datetime':
-                return htmlspecialchars(date('m/d/Y g:i A', strtotime($value)));
+                return htmlspecialchars(date('Y-m-d H:i', strtotime($value)));
 
             case 'currency':
                 return '$' . number_format((float)$value, 2);
@@ -261,7 +261,15 @@ class WorkflowRenderer implements ModuleInterface
                 return '<a href="mailto:' . htmlspecialchars($value) . '">' . htmlspecialchars($value) . '</a>';
 
             case 'user':
-                // TODO: Look up user name from users table
+                // Look up user name from users table
+                if (is_numeric($value)) {
+                    $stmt = $this->db->prepare("SELECT name FROM users WHERE id = ?");
+                    $stmt->execute([$value]);
+                    $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    if ($result && !empty($result['name'])) {
+                        return htmlspecialchars($result['name']);
+                    }
+                }
                 return htmlspecialchars($value);
 
             default:
@@ -741,15 +749,35 @@ class WorkflowRenderer implements ModuleInterface
             // Update record state
             $this->updateState($toState);
 
+            // Update comment field if specified
+            if (!empty($transition['commentField']) && !empty($comment)) {
+                $table = $this->config['table'] ?? '';
+                $commentField = $transition['commentField'];
+                $hasTenant = $this->hasTenantColumn($table);
+
+                if ($hasTenant && isset($_SESSION['tenant_id'])) {
+                    $sql = "UPDATE {$table} SET {$commentField} = ? WHERE id = ? AND tenant_id = ?";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([$comment, $this->recordId, $_SESSION['tenant_id']]);
+                } else {
+                    $sql = "UPDATE {$table} SET {$commentField} = ? WHERE id = ?";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([$comment, $this->recordId]);
+                }
+            }
+
+            // Execute transition actions
+            if (!empty($transition['actions'])) {
+                $this->executeTransitionActions($transition['actions']);
+            }
+
             // Log transition
             AuditLogger::log('workflow_transition', $this->config['table'] ?? 'unknown', $this->recordId, [
                 'from' => $fromState,
                 'to' => $toState,
                 'comment' => $comment,
                 'transition_label' => $transition['label'] ?? null
-            ]);
-
-            // Send notifications
+            ]);            // Send notifications
             if (!empty($transition['notify'])) {
                 $this->sendNotifications($transition, $fromState, $toState, $comment);
             }
@@ -771,6 +799,36 @@ class WorkflowRenderer implements ModuleInterface
                 'success' => false,
                 'error' => 'An error occurred while processing the transition'
             ];
+        }
+    }
+
+    /**
+     * Execute transition actions
+     *
+     * @param array $actions Array of actions to execute
+     */
+    private function executeTransitionActions(array $actions): void
+    {
+        $table = $this->config['table'] ?? '';
+        $hasTenant = $this->hasTenantColumn($table);
+
+        foreach ($actions as $action) {
+            $type = $action['type'] ?? '';
+
+            if ($type === 'updateField' && isset($action['field'], $action['value'])) {
+                $field = $action['field'];
+                $value = $action['value'];
+
+                if ($hasTenant && isset($_SESSION['tenant_id'])) {
+                    $sql = "UPDATE {$table} SET {$field} = ? WHERE id = ? AND tenant_id = ?";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([$value, $this->recordId, $_SESSION['tenant_id']]);
+                } else {
+                    $sql = "UPDATE {$table} SET {$field} = ? WHERE id = ?";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([$value, $this->recordId]);
+                }
+            }
         }
     }
 

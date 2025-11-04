@@ -60,15 +60,24 @@ echo -e "\n/* ========== BASE STYLES ========== */\n" >> "$OUTPUT_FILE"
 cat "$CSS_DIR/style.css" >> "$OUTPUT_FILE"
 
 echo -e "\n/* ========== HEADER STYLES ========== */\n" >> "$OUTPUT_FILE"
+echo -e "\n/* ========== HEADER STYLES (MODERN UNIFIED) ========== */\n" >> "$OUTPUT_FILE"
+cat "$CSS_DIR/header-modern.css" >> "$OUTPUT_FILE"
+
 cat "$CSS_DIR/header.css" >> "$OUTPUT_FILE"
 
 echo -e "\n/* ========== FOOTER STYLES ========== */\n" >> "$OUTPUT_FILE"
 cat "$CSS_DIR/footer.css" >> "$OUTPUT_FILE"
 
 echo -e "\n/* ========== HUB PAGE STYLES ========== */\n" >> "$OUTPUT_FILE"
+echo -e "\n/* ========== HUB MODERN ENHANCEMENTS ========== */\n" >> "$OUTPUT_FILE"
+cat "$CSS_DIR/hub-modern.css" >> "$OUTPUT_FILE"
+
 cat "$CSS_DIR/hub.css" >> "$OUTPUT_FILE"
 
 echo -e "\n/* ========== DASHBOARD LAYOUT ========== */\n" >> "$OUTPUT_FILE"
+echo -e "\n/* ========== DASHBOARD MODERN ENHANCEMENTS ========== */\n" >> "$OUTPUT_FILE"
+cat "$CSS_DIR/admin-modern.css" >> "$OUTPUT_FILE"
+
 cat "$CSS_DIR/admin.css" >> "$OUTPUT_FILE"
 
 echo -e "\n/* ========== DASHBOARD THEME ========== */\n" >> "$OUTPUT_FILE"

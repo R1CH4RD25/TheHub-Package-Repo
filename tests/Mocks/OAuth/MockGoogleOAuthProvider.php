@@ -72,7 +72,7 @@ class MockGoogleOAuthProvider implements OAuthProviderInterface
         $user = $this->users[$userId] ?? $this->users['default'];
 
         return [
-            'id' => $user['id'],
+            'sub' => $user['id'],  // Google OAuth uses 'sub' for user ID
             'email' => $user['email'],
             'verified_email' => true,
             'name' => $user['name'],

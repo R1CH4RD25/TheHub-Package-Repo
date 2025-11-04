@@ -12,10 +12,10 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * KanbanRenderer - Visual project management board
- * 
+ *
  * Implements Kanban board module type for agile project management,
  * task tracking, and workflow visualization. Generic design works for any organization.
- * 
+ *
  * Use cases:
  * - Software Development: Sprint planning, bug tracking, feature development
  * - Manufacturing: Production workflow, quality control stages
@@ -23,7 +23,7 @@ require_once __DIR__ . '/../bootstrap.php';
  * - Marketing: Campaign planning, content calendar, approval workflows
  * - HR: Recruitment pipeline, onboarding process, training tracking
  * - Personal: To-do lists, goal tracking, habit formation
- * 
+ *
  * Features:
  * - Drag-and-drop cards between columns
  * - Customizable board columns/stages
@@ -36,7 +36,7 @@ require_once __DIR__ . '/../bootstrap.php';
  * - Board templates
  * - Filtering and search
  * - Archive completed cards
- * 
+ *
  * @author The Hub Team
  * @version 1.0.0
  */
@@ -44,7 +44,7 @@ class KanbanRenderer implements ModuleInterface
 {
     private array $config;
     private Database $db;
-    
+
     // Default column structure
     private array $defaultColumns = [
         ['name' => 'Backlog', 'color' => '#6c757d', 'wip_limit' => null],
@@ -53,7 +53,7 @@ class KanbanRenderer implements ModuleInterface
         ['name' => 'Review', 'color' => '#17a2b8', 'wip_limit' => 3],
         ['name' => 'Done', 'color' => '#28a745', 'wip_limit' => null],
     ];
-    
+
     // Card priority levels
     private array $priorities = [
         'critical' => ['label' => 'Critical', 'color' => '#dc3545', 'icon' => 'exclamation-triangle-fill'],
@@ -61,18 +61,18 @@ class KanbanRenderer implements ModuleInterface
         'medium' => ['label' => 'Medium', 'color' => '#ffc107', 'icon' => 'dash-circle'],
         'low' => ['label' => 'Low', 'color' => '#6c757d', 'icon' => 'arrow-down-circle'],
     ];
-    
+
     public function __construct(array $config)
     {
         $this->config = $config;
         $this->db = Database::getInstance();
-        
+
         // Override columns from config
         if (isset($config['columns'])) {
             $this->defaultColumns = $config['columns'];
         }
     }
-    
+
     /**
      * Render Kanban board
      */
@@ -80,37 +80,37 @@ class KanbanRenderer implements ModuleInterface
     {
         $boardId = $_GET['board_id'] ?? $this->getDefaultBoard();
         $swimlaneBy = $_GET['swimlane'] ?? 'none'; // none, assignee, priority, label
-        
+
         $html = '<div class="kanban-container">';
-        
+
         // Header with controls
         $html .= $this->renderHeader($boardId, $swimlaneBy);
-        
+
         // Board
         $html .= '<div class="kanban-board-wrapper">';
-        
+
         if ($swimlaneBy !== 'none') {
             $html .= $this->renderBoardWithSwimlanes($boardId, $swimlaneBy);
         } else {
             $html .= $this->renderBoard($boardId);
         }
-        
+
         $html .= '</div>';
-        
+
         // Modals
         $html .= $this->renderCardModal();
         $html .= $this->renderCardDetailsModal();
         $html .= $this->renderBoardSettingsModal();
-        
+
         // Styles and scripts
         $html .= $this->renderStyles();
         $html .= $this->renderScripts();
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render board header with controls
      */
@@ -118,7 +118,7 @@ class KanbanRenderer implements ModuleInterface
     {
         $html = '<div class="kanban-header mb-4">';
         $html .= '    <div class="d-flex justify-content-between align-items-center">';
-        
+
         // Board selector and title
         $html .= '        <div class="d-flex align-items-center">';
         $html .= '            <h3 class="mb-0 me-3">Project Board</h3>';
@@ -126,10 +126,10 @@ class KanbanRenderer implements ModuleInterface
         $html .= '                <i class="bi bi-gear"></i> Settings';
         $html .= '            </button>';
         $html .= '        </div>';
-        
+
         // Actions and filters
         $html .= '        <div class="d-flex gap-2">';
-        
+
         // Swimlane selector
         $html .= '            <div class="btn-group">';
         $html .= '                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">';
@@ -142,22 +142,22 @@ class KanbanRenderer implements ModuleInterface
         $html .= '                    <li><a class="dropdown-item" href="?swimlane=label">By Label</a></li>';
         $html .= '                </ul>';
         $html .= '            </div>';
-        
+
         // Search
         $html .= '            <input type="search" class="form-control" id="cardSearch" placeholder="Search cards..." style="width: 250px;">';
-        
+
         // New card button
         $html .= '            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cardModal">';
         $html .= '                <i class="bi bi-plus-lg"></i> New Card';
         $html .= '            </button>';
-        
+
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render standard board (no swimlanes)
      */
@@ -165,22 +165,22 @@ class KanbanRenderer implements ModuleInterface
     {
         $columns = $this->getColumns($boardId);
         $cards = $this->getCards($boardId);
-        
+
         $html = '<div class="kanban-board" id="kanbanBoard">';
-        
+
         foreach ($columns as $column) {
             $columnCards = array_filter($cards, fn($c) => $c['column_id'] == $column['id']);
             $cardCount = count($columnCards);
             $wipLimit = $column['wip_limit'];
             $overLimit = $wipLimit && $cardCount > $wipLimit;
-            
+
             $html .= '    <div class="kanban-column" data-column-id="' . $column['id'] . '">';
-            
+
             // Column header
             $html .= '        <div class="column-header" style="border-top: 4px solid ' . $column['color'] . ';">';
             $html .= '            <div class="d-flex justify-content-between align-items-center">';
             $html .= '                <h5 class="mb-0">' . htmlspecialchars($column['name']) . '</h5>';
-            
+
             // Card count and WIP limit
             $html .= '                <span class="badge ' . ($overLimit ? 'bg-danger' : 'bg-secondary') . '">';
             $html .= $cardCount;
@@ -189,34 +189,34 @@ class KanbanRenderer implements ModuleInterface
             }
             $html .= '                </span>';
             $html .= '            </div>';
-            
+
             if ($overLimit) {
                 $html .= '            <small class="text-danger"><i class="bi bi-exclamation-triangle"></i> WIP limit exceeded</small>';
             }
-            
+
             $html .= '        </div>';
-            
+
             // Cards
             $html .= '        <div class="column-cards" data-column-id="' . $column['id'] . '">';
-            
+
             foreach ($columnCards as $card) {
                 $html .= $this->renderCard($card);
             }
-            
+
             // Add card button
             $html .= '            <button class="btn btn-sm btn-outline-secondary w-100 mt-2 add-card-btn" data-column-id="' . $column['id'] . '">';
             $html .= '                <i class="bi bi-plus"></i> Add Card';
             $html .= '            </button>';
-            
+
             $html .= '        </div>';
             $html .= '    </div>';
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render board with swimlanes
      */
@@ -225,84 +225,84 @@ class KanbanRenderer implements ModuleInterface
         $columns = $this->getColumns($boardId);
         $cards = $this->getCards($boardId);
         $swimlanes = $this->getSwimlanes($boardId, $swimlaneBy);
-        
+
         $html = '<div class="kanban-board-swimlanes">';
-        
+
         // Column headers
         $html .= '    <div class="swimlane-headers sticky-top bg-white">';
         $html .= '        <div class="swimlane-label"></div>';
-        
+
         foreach ($columns as $column) {
             $html .= '        <div class="column-header-swimlane">';
             $html .= '            <h6 class="mb-0">' . htmlspecialchars($column['name']) . '</h6>';
             $html .= '        </div>';
         }
-        
+
         $html .= '    </div>';
-        
+
         // Swimlanes
         foreach ($swimlanes as $swimlane) {
             $html .= '    <div class="swimlane">';
-            
+
             // Swimlane label
             $html .= '        <div class="swimlane-label">';
             $html .= '            <strong>' . htmlspecialchars($swimlane['label']) . '</strong>';
             $html .= '            <br><small class="text-muted">' . $swimlane['count'] . ' cards</small>';
             $html .= '        </div>';
-            
+
             // Columns in swimlane
             foreach ($columns as $column) {
                 $swimlaneCards = array_filter($cards, function($c) use ($column, $swimlane, $swimlaneBy) {
                     return $c['column_id'] == $column['id'] && $c[$swimlaneBy] == $swimlane['value'];
                 });
-                
+
                 $html .= '        <div class="swimlane-column" data-column-id="' . $column['id'] . '" data-swimlane="' . $swimlane['value'] . '">';
-                
+
                 foreach ($swimlaneCards as $card) {
                     $html .= $this->renderCard($card, true);
                 }
-                
+
                 $html .= '        </div>';
             }
-            
+
             $html .= '    </div>';
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render individual card
      */
     private function renderCard(array $card, bool $compact = false): string
     {
         $priority = $this->priorities[$card['priority']] ?? $this->priorities['medium'];
-        
+
         $html = '<div class="kanban-card" data-card-id="' . $card['id'] . '" draggable="true">';
-        
+
         // Card header with priority and labels
         $html .= '    <div class="card-header-row">';
-        
+
         if (!$compact) {
             $html .= '        <i class="bi bi-' . $priority['icon'] . ' text-' . $this->getBootstrapColor($priority['color']) . '" title="' . $priority['label'] . '"></i>';
         }
-        
+
         if (!empty($card['labels'])) {
             $labels = json_decode($card['labels'], true);
             foreach ($labels as $label) {
                 $html .= '        <span class="badge" style="background-color: ' . $label['color'] . ';">' . htmlspecialchars($label['name']) . '</span>';
             }
         }
-        
+
         $html .= '    </div>';
-        
+
         // Card title
         $html .= '    <div class="card-title">';
         $html .= '        <strong>' . htmlspecialchars($card['title']) . '</strong>';
         $html .= '    </div>';
-        
+
         if (!$compact) {
             // Card description preview
             if ($card['description']) {
@@ -310,10 +310,10 @@ class KanbanRenderer implements ModuleInterface
                 $html .= htmlspecialchars(mb_substr($card['description'], 0, 100));
                 $html .= '    </div>';
             }
-            
+
             // Card footer
             $html .= '    <div class="card-footer-row">';
-            
+
             // Due date
             if ($card['due_date']) {
                 $dueDate = strtotime($card['due_date']);
@@ -322,36 +322,36 @@ class KanbanRenderer implements ModuleInterface
                 $html .= '            <i class="bi bi-calendar"></i> ' . date('M d', $dueDate);
                 $html .= '        </span>';
             }
-            
+
             // Assignee
             if ($card['assignee_name']) {
                 $html .= '        <span class="card-assignee" title="' . htmlspecialchars($card['assignee_name']) . '">';
                 $html .= '            <i class="bi bi-person-circle"></i> ' . htmlspecialchars(mb_substr($card['assignee_name'], 0, 15));
                 $html .= '        </span>';
             }
-            
+
             // Comments count
             if ($card['comment_count'] > 0) {
                 $html .= '        <span class="card-comments">';
                 $html .= '            <i class="bi bi-chat"></i> ' . $card['comment_count'];
                 $html .= '        </span>';
             }
-            
+
             // Attachments count
             if ($card['attachment_count'] > 0) {
                 $html .= '        <span class="card-attachments">';
                 $html .= '            <i class="bi bi-paperclip"></i> ' . $card['attachment_count'];
                 $html .= '        </span>';
             }
-            
+
             $html .= '    </div>';
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render card creation/edit modal
      */
@@ -366,19 +366,19 @@ class KanbanRenderer implements ModuleInterface
         $html .= '            </div>';
         $html .= '            <div class="modal-body">';
         $html .= '                <form id="cardForm">';
-        
+
         // Title
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="cardTitle" class="form-label">Title *</label>';
         $html .= '                        <input type="text" class="form-control" id="cardTitle" required>';
         $html .= '                    </div>';
-        
+
         // Description
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label for="cardDescription" class="form-label">Description</label>';
         $html .= '                        <textarea class="form-control" id="cardDescription" rows="4"></textarea>';
         $html .= '                    </div>';
-        
+
         // Row: Column and Priority
         $html .= '                    <div class="row">';
         $html .= '                        <div class="col-md-6 mb-3">';
@@ -399,7 +399,7 @@ class KanbanRenderer implements ModuleInterface
         $html .= '                            </select>';
         $html .= '                        </div>';
         $html .= '                    </div>';
-        
+
         // Row: Assignee and Due Date
         $html .= '                    <div class="row">';
         $html .= '                        <div class="col-md-6 mb-3">';
@@ -414,7 +414,7 @@ class KanbanRenderer implements ModuleInterface
         $html .= '                            <input type="date" class="form-control" id="cardDueDate">';
         $html .= '                        </div>';
         $html .= '                    </div>';
-        
+
         // Labels
         $html .= '                    <div class="mb-3">';
         $html .= '                        <label class="form-label">Labels</label>';
@@ -425,7 +425,7 @@ class KanbanRenderer implements ModuleInterface
         $html .= '                            <span class="badge bg-warning me-1">Enhancement</span>';
         $html .= '                        </div>';
         $html .= '                    </div>';
-        
+
         $html .= '                </form>';
         $html .= '            </div>';
         $html .= '            <div class="modal-footer">';
@@ -435,10 +435,10 @@ class KanbanRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render card details modal
      */
@@ -457,10 +457,10 @@ class KanbanRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render board settings modal
      */
@@ -477,7 +477,7 @@ class KanbanRenderer implements ModuleInterface
         $html .= '                <h6>Columns</h6>';
         $html .= '                <p class="text-muted">Customize board columns and WIP limits</p>';
         $html .= '                <div id="columnsList" class="mb-3">';
-        
+
         foreach ($this->defaultColumns as $i => $column) {
             $html .= '                    <div class="input-group mb-2">';
             $html .= '                        <input type="text" class="form-control" value="' . htmlspecialchars($column['name']) . '" placeholder="Column name">';
@@ -486,7 +486,7 @@ class KanbanRenderer implements ModuleInterface
             $html .= '                        <button class="btn btn-outline-danger" type="button"><i class="bi bi-trash"></i></button>';
             $html .= '                    </div>';
         }
-        
+
         $html .= '                </div>';
         $html .= '                <button class="btn btn-sm btn-outline-primary" id="addColumn"><i class="bi bi-plus"></i> Add Column</button>';
         $html .= '            </div>';
@@ -497,10 +497,10 @@ class KanbanRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render CSS styles
      */
@@ -606,10 +606,10 @@ class KanbanRenderer implements ModuleInterface
 }
 CSS;
         $html .= '</style>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render JavaScript
      */
@@ -620,46 +620,46 @@ CSS;
 document.addEventListener('DOMContentLoaded', function() {
     // Drag and drop
     let draggedCard = null;
-    
+
     document.querySelectorAll('.kanban-card').forEach(card => {
         card.addEventListener('dragstart', function(e) {
             draggedCard = this;
             this.style.opacity = '0.5';
         });
-        
+
         card.addEventListener('dragend', function() {
             this.style.opacity = '1';
             draggedCard = null;
         });
-        
+
         // Click to view details
         card.addEventListener('click', function() {
             const cardId = this.dataset.cardId;
             showCardDetails(cardId);
         });
     });
-    
+
     document.querySelectorAll('.column-cards, .swimlane-column').forEach(column => {
         column.addEventListener('dragover', function(e) {
             e.preventDefault();
             this.style.backgroundColor = '#e7f3ff';
         });
-        
+
         column.addEventListener('dragleave', function() {
             this.style.backgroundColor = '';
         });
-        
+
         column.addEventListener('drop', function(e) {
             e.preventDefault();
             this.style.backgroundColor = '';
-            
+
             if (draggedCard) {
                 const columnId = this.dataset.columnId;
                 const cardId = draggedCard.dataset.cardId;
-                
+
                 // Move card visually
                 this.insertBefore(draggedCard, this.querySelector('.add-card-btn'));
-                
+
                 // Update server
                 fetch('api/kanban.php?action=move', {
                     method: 'POST',
@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Search cards
     document.getElementById('cardSearch')?.addEventListener('input', function() {
         const query = this.value.toLowerCase();
@@ -685,7 +685,7 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.display = text.includes(query) ? '' : 'none';
         });
     });
-    
+
     // Add card button
     document.querySelectorAll('.add-card-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -694,7 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
             new bootstrap.Modal(document.getElementById('cardModal')).show();
         });
     });
-    
+
     // Save card
     document.getElementById('saveCard')?.addEventListener('click', function() {
         const formData = {
@@ -705,7 +705,7 @@ document.addEventListener('DOMContentLoaded', function() {
             assignee: document.getElementById('cardAssignee').value,
             due_date: document.getElementById('cardDueDate').value
         };
-        
+
         fetch('api/kanban.php?action=save', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -720,10 +720,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     function showCardDetails(cardId) {
         const modal = new bootstrap.Modal(document.getElementById('cardDetailsModal'));
-        
+
         fetch('api/kanban.php?action=details&id=' + cardId)
             .then(r => r.json())
             .then(card => {
@@ -753,10 +753,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 JS;
         $html .= '</script>';
-        
+
         return $html;
     }
-    
+
     /**
      * Get board columns
      */
@@ -767,17 +767,17 @@ JS;
         if ($cached !== null) {
             return $cached;
         }
-        
+
         // Placeholder - would query database
         $columns = [];
         foreach ($this->defaultColumns as $i => $col) {
             $columns[] = array_merge($col, ['id' => $i + 1]);
         }
-        
+
         Cache::set("kanban:columns:$boardId", $columns, 600);
         return $columns;
     }
-    
+
     /**
      * Get board cards
      */
@@ -788,14 +788,14 @@ JS;
         if ($cached !== null) {
             return $cached;
         }
-        
+
         // Placeholder - would query database
         $cards = [];
-        
+
         Cache::set("kanban:cards:$boardId", $cards, 300);
         return $cards;
     }
-    
+
     /**
      * Get swimlanes
      */
@@ -805,7 +805,7 @@ JS;
         // Placeholder implementation
         return [];
     }
-    
+
     /**
      * Get default board ID
      */
@@ -813,7 +813,7 @@ JS;
     {
         return 1; // Placeholder
     }
-    
+
     /**
      * Convert hex color to Bootstrap color class
      */
@@ -828,17 +828,17 @@ JS;
             '#0d6efd' => 'primary',
             '#6c757d' => 'secondary',
         ];
-        
+
         return $map[$hex] ?? 'secondary';
     }
-    
+
     /**
      * Handle Kanban actions
      */
     public function handle(array $data): array
     {
         $action = $data['action'] ?? '';
-        
+
         switch ($action) {
             case 'save':
                 return $this->handleSave($data);
@@ -849,10 +849,10 @@ JS;
             case 'details':
                 return $this->handleDetails($data);
             default:
-                return ['success' => false, 'message' => 'Invalid action'];
+                return ['success' => false, 'error' => 'Invalid action'];
         }
     }
-    
+
     /**
      * Handle save card
      */
@@ -860,13 +860,13 @@ JS;
     {
         // Validate and save card
         AuditLogger::log('kanban_card_create', 'kanban_cards', null, [], $data);
-        
+
         // Clear cache
         Cache::delete('kanban:cards:*');
-        
+
         return ['success' => true, 'message' => 'Card created'];
     }
-    
+
     /**
      * Handle move card
      */
@@ -874,41 +874,41 @@ JS;
     {
         // Move card to new column
         AuditLogger::log('kanban_card_move', 'kanban_cards', $data['card_id'], [], $data);
-        
+
         // Clear cache
         Cache::delete('kanban:cards:*');
-        
+
         return ['success' => true, 'message' => 'Card moved'];
     }
-    
+
     /**
      * Handle delete card
      */
     private function handleDelete(array $data): array
     {
         $cardId = $data['id'] ?? 0;
-        
+
         // Delete card
         AuditLogger::log('kanban_card_delete', 'kanban_cards', $cardId, [], ['id' => $cardId]);
-        
+
         // Clear cache
         Cache::delete('kanban:cards:*');
-        
+
         return ['success' => true, 'message' => 'Card deleted'];
     }
-    
+
     /**
      * Handle get card details
      */
     private function handleDetails(array $data): array
     {
         $cardId = $data['id'] ?? 0;
-        
+
         // Fetch card details
         // Placeholder
         return ['success' => true, 'card' => []];
     }
-    
+
     /**
      * Validate configuration
      */
@@ -917,8 +917,38 @@ JS;
         // Kanban doesn't require specific config
         return true;
     }
-    
+
     /**
+     * Validate card data
+     *
+     * @param array $data Card data to validate
+     * @return array Array of error messages (empty if valid)
+     */
+    public function validateCard(array $data): array
+    {
+        $errors = [];
+
+        if (empty($data['title'])) {
+            $errors[] = 'Card title is required';
+        }
+
+        if (empty($data['column_id'])) {
+            $errors[] = 'Column ID is required';
+        }
+
+        if (!empty($data['priority']) && !in_array($data['priority'], ['low', 'medium', 'high', 'urgent'])) {
+            $errors[] = 'Invalid priority level';
+        }
+
+        if (!empty($data['due_date'])) {
+            $date = \DateTime::createFromFormat('Y-m-d', $data['due_date']);
+            if (!$date || $date->format('Y-m-d') !== $data['due_date']) {
+                $errors[] = 'Invalid due date format';
+            }
+        }
+
+        return $errors;
+    }    /**
      * Get configuration
      */
     public function getConfig(): array

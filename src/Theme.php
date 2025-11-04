@@ -29,14 +29,14 @@ class Theme
             ORDER BY t.is_active DESC, t.is_system DESC, t.name ASC
         ");
         $themes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         // Parse JSON settings for each theme
         foreach ($themes as &$theme) {
             if (isset($theme['settings'])) {
                 $theme['settings'] = json_decode($theme['settings'], true);
             }
         }
-        
+
         return $themes;
     }
 
@@ -53,11 +53,11 @@ class Theme
         ");
         $stmt->execute([$id]);
         $theme = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($theme && isset($theme['settings'])) {
             $theme['settings'] = json_decode($theme['settings'], true);
         }
-        
+
         return $theme ?: null;
     }
 
@@ -74,11 +74,11 @@ class Theme
         ");
         $stmt->execute([$slug]);
         $theme = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($theme && isset($theme['settings'])) {
             $theme['settings'] = json_decode($theme['settings'], true);
         }
-        
+
         return $theme ?: null;
     }
 
@@ -95,11 +95,11 @@ class Theme
             LIMIT 1
         ");
         $theme = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($theme && isset($theme['settings'])) {
             $theme['settings'] = json_decode($theme['settings'], true);
         }
-        
+
         return $theme ?: null;
     }
 
@@ -108,22 +108,31 @@ class Theme
      */
     public function saveFromCurrentSettings(string $name, ?string $description, int $createdBy): array
     {
-        // Create slug from name
+        // Check if name already exists and append number if needed
+        $originalName = $name;
+        $counter = 1;
+
+        while ($this->getBySlug($this->createSlug($name))) {
+            $counter++;
+            $name = "{$originalName} ({$counter})";
+        }
+
+        // Create slug from (possibly modified) name
         $slug = $this->createSlug($name);
-        
+
         // Gather current site settings that are theme-related
         $settings = new SiteSettings();
         $currentSettings = $settings->getAll();
-        
+
         // Filter to only theme-related settings
         $themeSettings = $this->filterThemeSettings($currentSettings);
-        
+
         // Insert new theme
         $stmt = $this->db->prepare("
             INSERT INTO themes (name, slug, description, settings, is_active, is_system, created_by)
             VALUES (?, ?, ?, ?, FALSE, FALSE, ?)
         ");
-        
+
         $stmt->execute([
             $name,
             $slug,
@@ -131,9 +140,9 @@ class Theme
             json_encode($themeSettings),
             $createdBy
         ]);
-        
+
         $themeId = (int)$this->db->lastInsertId();
-        
+
         return [
             'id' => $themeId,
             'name' => $name,
@@ -152,40 +161,40 @@ class Theme
         if (!$theme) {
             throw new \Exception('Theme not found');
         }
-        
+
         if ($theme['is_system']) {
             throw new \Exception('Cannot modify system themes');
         }
-        
+
         // Gather current settings
         $settings = new SiteSettings();
         $currentSettings = $settings->getAll();
         $themeSettings = $this->filterThemeSettings($currentSettings);
-        
+
         // Build update query
         $updates = ['settings = ?'];
         $params = [json_encode($themeSettings)];
-        
+
         if ($name !== null) {
             $updates[] = 'name = ?';
             $params[] = $name;
             $updates[] = 'slug = ?';
             $params[] = $this->createSlug($name);
         }
-        
+
         if ($description !== null) {
             $updates[] = 'description = ?';
             $params[] = $description;
         }
-        
+
         $params[] = $id;
-        
+
         $stmt = $this->db->prepare("
-            UPDATE themes 
+            UPDATE themes
             SET " . implode(', ', $updates) . "
             WHERE id = ?
         ");
-        
+
         return $stmt->execute($params);
     }
 
@@ -195,12 +204,12 @@ class Theme
     public function create(string $name, array $settings, ?string $description = null, ?int $createdBy = null): array
     {
         $slug = $this->createSlug($name);
-        
+
         $stmt = $this->db->prepare("
             INSERT INTO themes (name, slug, description, settings, is_active, is_system, created_by)
             VALUES (?, ?, ?, ?, FALSE, FALSE, ?)
         ");
-        
+
         $stmt->execute([
             $name,
             $slug,
@@ -208,9 +217,9 @@ class Theme
             json_encode($settings),
             $createdBy
         ]);
-        
+
         $themeId = (int)$this->db->lastInsertId();
-        
+
         return [
             'id' => $themeId,
             'name' => $name,
@@ -229,31 +238,31 @@ class Theme
         if (!$theme) {
             throw new \Exception('Theme not found');
         }
-        
+
         $this->db->beginTransaction();
-        
+
         try {
             // Deactivate all themes
             $this->db->exec("UPDATE themes SET is_active = FALSE");
-            
+
             // Activate selected theme
             $stmt = $this->db->prepare("UPDATE themes SET is_active = TRUE WHERE id = ?");
             $stmt->execute([$id]);
-            
+
             // Apply theme settings to site_settings table
             $this->applyThemeSettings($theme['settings']);
-            
-            // Update active_theme_id
+
+            // Update or insert active_theme_id
             $stmt = $this->db->prepare("
-                UPDATE site_settings 
-                SET setting_value = ? 
-                WHERE setting_key = 'active_theme_id'
+                INSERT INTO site_settings (setting_key, setting_value, setting_type)
+                VALUES ('active_theme_id', ?, 'string')
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
             ");
             $stmt->execute([(string)$id]);
-            
+
             $this->db->commit();
             return true;
-            
+
         } catch (\Exception $e) {
             $this->db->rollBack();
             throw $e;
@@ -269,15 +278,15 @@ class Theme
         if (!$theme) {
             throw new \Exception('Theme not found');
         }
-        
+
         if ($theme['is_system']) {
             throw new \Exception('Cannot delete system themes');
         }
-        
+
         if ($theme['is_active']) {
             throw new \Exception('Cannot delete the active theme');
         }
-        
+
         $stmt = $this->db->prepare("DELETE FROM themes WHERE id = ?");
         return $stmt->execute([$id]);
     }
@@ -291,7 +300,7 @@ class Theme
         if (!$theme) {
             throw new \Exception('Theme not found');
         }
-        
+
         return [
             'name' => $theme['name'],
             'description' => $theme['description'],
@@ -307,19 +316,19 @@ class Theme
     public function import(array $themeData, int $createdBy): array
     {
         if (!isset($themeData['name']) || !isset($themeData['settings'])) {
-            throw new \Exception('Invalid theme data');
+            throw new \InvalidArgumentException('Invalid theme data');
         }
-        
+
         // Check if name already exists and append number if needed
         $name = $themeData['name'];
         $originalName = $name;
         $counter = 1;
-        
+
         while ($this->getBySlug($this->createSlug($name))) {
             $counter++;
             $name = "{$originalName} ({$counter})";
         }
-        
+
         return $this->create(
             $name,
             $themeData['settings'],
@@ -334,11 +343,11 @@ class Theme
     private function applyThemeSettings(array $settings): void
     {
         $stmt = $this->db->prepare("
-            UPDATE site_settings 
-            SET setting_value = ? 
+            UPDATE site_settings
+            SET setting_value = ?
             WHERE setting_key = ?
         ");
-        
+
         foreach ($settings as $key => $value) {
             $stmt->execute([$value, $key]);
         }
@@ -385,7 +394,7 @@ class Theme
             'button_success_bg',
             'button_success_text',
             'unsaved_changes_glow_color',
-            
+
             // Role badge colors
             'role_staff_bg',
             'role_staff_text',
@@ -399,7 +408,7 @@ class Theme
             'role_admin_text',
             'role_super_admin_bg',
             'role_super_admin_text',
-            
+
             // Additional school district role badge colors
             'role_teacher_bg',
             'role_teacher_text',
@@ -415,13 +424,13 @@ class Theme
             'role_librarian_text',
             'role_it_support_bg',
             'role_it_support_text',
-            
+
             // Badge colors
             'badge_success_bg',
             'badge_success_text',
             'badge_system_bg',
             'badge_system_text',
-            
+
             // Text colors
             'text_primary',
             'text_secondary',
@@ -429,37 +438,37 @@ class Theme
             'text_disabled',
             'text_inverse',
             'link_color',
-            
+
             // Border colors
             'border_primary',
             'border_secondary',
             'border_focus',
-            
+
             // Input colors
             'input_bg',
             'input_border',
             'input_focus_border',
             'input_disabled_bg',
-            
+
             // Table colors
             'table_header_bg',
             'table_header_text',
             'table_row_hover',
             'table_border',
-            
+
             // Card colors
             'card_bg',
             'card_border',
             'card_shadow',
-            
+
             // Modal colors
             'modal_overlay',
             'modal_bg',
-            
+
             // Tooltip colors
             'tooltip_bg',
             'tooltip_text',
-            
+
             // Status colors
             'success_bg',
             'success_text',
@@ -481,25 +490,25 @@ class Theme
             'info_border',
             'info_button',
             'info_button_hover',
-            
+
             // Scrollbar colors
             'scrollbar_track',
             'scrollbar_thumb',
             'scrollbar_thumb_hover',
-            
+
             // Shadow opacity
             'shadow_light',
             'shadow_medium',
             'shadow_heavy'
         ];
-        
+
         $filtered = [];
-        foreach ($allSettings as $setting) {
-            if (in_array($setting['setting_key'], $themeKeys)) {
-                $filtered[$setting['setting_key']] = $setting['setting_value'];
+        foreach ($allSettings as $key => $value) {
+            if (in_array($key, $themeKeys)) {
+                $filtered[$key] = $value;
             }
         }
-        
+
         return $filtered;
     }
 
@@ -524,7 +533,7 @@ class Theme
         $accent = $settings['accent_color'] ?? '#FFD700';
         $headerBg = $settings['header_bg_color'] ?? '#000000';
         $buttonPrimary = $settings['button_primary_bg'] ?? '#C99700';
-        
+
         return sprintf(
             '<div class="theme-preview" style="display:flex;gap:4px;margin-top:8px;">' .
             '<div style="width:20px;height:20px;background:%s;border-radius:3px;border:1px solid #ddd;"></div>' .

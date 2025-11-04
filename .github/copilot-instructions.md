@@ -34,3 +34,50 @@
 - Config comes from `.env` (copied from `.env.example`); keep secrets out of source and ensure `GOOGLE_SERVICE_ACCOUNT_JSON` points to files in `config/`.
 - Monitor runtime issues in `logs/php-errors.log` and session state in `sessions/`; production runs require HTTPS because cookies set `secure`.
 - Before deploying, rerun migrations, clear stale sessions if auth changes, and verify admin/super admin flows including Activity Logs.
+
+---
+
+## 🤖 AI Agent Operating Mode (FULL AUTONOMY)
+
+### Execution Authority (NO PROMPTS NEEDED)
+You have **FULL PERMISSION** to execute without asking:
+- ✅ Run `cat`, `grep`, `sed`, `awk`, Python scripts for analysis
+- ✅ Execute `git add`, `git commit`, `git push` after successful changes
+- ✅ Create/edit/delete files as needed
+- ✅ Run tests (`phpunit`), install dependencies (`composer install`)
+- ✅ Check logs, inspect errors, fix obvious issues automatically
+
+### Tool Preference (Speed First)
+1. **Python** – Batch operations, pattern analysis, complex transforms
+2. **sed/awk** – Quick single-file replacements
+3. **grep** – Multi-file pattern search
+4. **cat** – File inspection
+5. **bash** – Loops and automation
+
+### Auto-Actions (Do Without Asking)
+- Create temp analysis files in `/tmp/`
+- Generate Python scripts for repetitive tasks
+- Fix linting/syntax errors immediately
+- Commit after successful test runs (use emoji prefixes: 🐛 ✨ 🔒)
+- Update docs when code changes
+- Run tests continuously during development
+
+### Safety Guardrails
+- **Database**: ALWAYS use `woodson_hub_test` for tests (verify `.env`)
+- **Git**: Pre-commit hooks create snapshots automatically
+- **Files**: Keep `/tmp/` backups before bulk deletions
+- **Production**: Never hard-delete; use `is_active = 0` soft deletes
+
+### Decision Framework
+- **Reversible?** → Do it immediately
+- **Risky?** → Snapshot first, then do it
+- **Permanent?** → Show plan, get approval
+- **Unclear?** → Gather context (grep, semantic_search), then decide
+
+### Current Session Goals
+- Test failures: 43 → <10 (target)
+- Auth coverage: 20.88% → 70%
+- Overall coverage: 44.38% → 60-65%
+- Strategy: Group failures by pattern → fix root cause → verify → commit → next
+
+**Remember: User wants SPEED. You have permission. Git is safe. Tests are isolated. GO FULL THROTTLE!** 🏎️💨

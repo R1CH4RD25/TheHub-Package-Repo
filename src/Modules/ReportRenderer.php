@@ -32,7 +32,7 @@ use PDO;
  * - Role-based access control
  * - Report sharing and subscriptions
  */
-class ReportRenderer implements ModuleRendererInterface
+class ReportRenderer implements ModuleInterface
 {
     private PDO $db;
     private array $config;
@@ -85,6 +85,16 @@ class ReportRenderer implements ModuleRendererInterface
         $this->db = Database::getInstance()->getConnection();
         $this->config = $config;
         $this->userId = $userId;
+    }
+
+    /**
+     * Get module configuration (implements ModuleInterface)
+     *
+     * @return array Module configuration
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 
     public function render(): string
@@ -904,7 +914,33 @@ class ReportRenderer implements ModuleRendererInterface
         }
     }
 
-    public function validate(array $data): array
+    /**
+     * Validate module configuration (implements ModuleInterface)
+     *
+     * @return bool True if configuration is valid
+     */
+    public function validate(): bool
+    {
+        // Check required configuration keys
+        if (empty($this->config['slug']) || empty($this->config['name'])) {
+            return false;
+        }
+
+        // Check type is correct
+        if (empty($this->config['type']) || $this->config['type'] !== 'Report') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate report data for creation/update
+     *
+     * @param array $data Report data to validate
+     * @return array Array of error messages (empty if valid)
+     */
+    public function validateReportData(array $data): array
     {
         $errors = [];
 

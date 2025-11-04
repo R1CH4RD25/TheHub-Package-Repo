@@ -303,9 +303,13 @@ class DashboardRendererIntegrationTest extends TestCase
      */
     public function testListWidgetRendering(): void
     {
+        // Clean up any existing test data
+        $db = TestDatabase::getConnection();
+        $db->exec("DELETE FROM users WHERE name LIKE 'Item %'");
+
         // Create test data
-        TestDatabase::createTestUser(['name' => 'Item 1']);
-        TestDatabase::createTestUser(['name' => 'Item 2']);
+        TestDatabase::createTestUser(['name' => 'Item 1', 'email' => 'item1@test.com']);
+        TestDatabase::createTestUser(['name' => 'Item 2', 'email' => 'item2@test.com']);
 
         $config = [
             'displayName' => 'List Dashboard',
@@ -313,7 +317,7 @@ class DashboardRendererIntegrationTest extends TestCase
                 [
                     'type' => 'list',
                     'title' => 'User List',
-                    'query' => 'SELECT name FROM users ORDER BY name LIMIT 5',
+                    'query' => "SELECT name FROM users WHERE name LIKE 'Item %' ORDER BY name LIMIT 5",
                     'width' => 'col-md-4'
                 ]
             ]

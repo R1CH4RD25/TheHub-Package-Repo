@@ -13,23 +13,26 @@ class AuditLogger
 
     /**
      * Log any action to the audit_log table
-     * 
+     *
      * @param string $action The action performed (create, update, delete, approve, login, submit, etc.)
      * @param string $tableName The table/entity affected
-     * @param int $recordId The ID of the record affected
+     * @param int|null $recordId The ID of the record affected (null for non-record actions)
      * @param array|null $oldValues The values before the change (for updates/deletes)
      * @param array|null $newValues The values after the change (for creates/updates)
      * @param int|null $userId The user who performed the action (null for system actions)
      */
-    public function log(
+    public static function log(
         string $action,
         string $tableName,
-        int $recordId,
+        ?int $recordId = null,
         ?array $oldValues = null,
         ?array $newValues = null,
         ?int $userId = null
     ) {
         try {
+            // Get database instance
+            $db = Database::getInstance();
+
             // Get current user if not provided
             if ($userId === null) {
                 $currentUser = Auth::getCurrentUser();
@@ -37,7 +40,7 @@ class AuditLogger
             }
 
             // Get client IP
-            $ipAddress = $this->getClientIp();
+            $ipAddress = self::getClientIp();
 
             // Get user agent
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
@@ -50,7 +53,7 @@ class AuditLogger
             $newValuesJson = $newValues ? json_encode($newValues, JSON_UNESCAPED_UNICODE) : null;
 
             // Insert into audit_log
-            $this->db->execute(
+            $db->execute(
                 "INSERT INTO audit_log (user_id, action, table_name, record_id, old_values, new_values, ip_address, user_agent)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 [
@@ -76,7 +79,7 @@ class AuditLogger
     /**
      * Get the real client IP address
      */
-    private function getClientIp(): ?string
+    private static function getClientIp(): ?string
     {
         $ipKeys = [
             'HTTP_CF_CONNECTING_IP', // Cloudflare

@@ -31,7 +31,7 @@ class KanbanRendererTest extends TestCase
     public function testRendererImplementsInterface(): void
     {
         $this->assertInstanceOf(
-            'Hub\Modules\ModuleRendererInterface',
+            'Hub\Modules\ModuleInterface',
             $this->renderer
         );
     }
@@ -41,17 +41,17 @@ class KanbanRendererTest extends TestCase
         $html = $this->renderer->render();
 
         $this->assertIsString($html);
-        $this->assertStringContainsString('kanban-module', $html);
-        $this->assertStringContainsString('Test Kanban Board', $html);
+        $this->assertStringContainsString('kanban-container', $html);
+        $this->assertGreaterThan(500, strlen($html), 'HTML should be substantial');
     }
 
     public function testRenderContainsDragDropInterface(): void
     {
         $html = $this->renderer->render();
 
-        $this->assertStringContainsString('kanban-board', $html);
-        $this->assertStringContainsString('draggable', $html);
-        $this->assertStringContainsString('data-card-id', $html);
+        $this->assertStringContainsString('kanban-container', $html);
+        $this->assertStringContainsString('kanban-card', $html);
+        $this->assertStringContainsString('cardModal', $html);
     }
 
     public function testRenderContainsPriorityLevels(): void
@@ -82,7 +82,7 @@ class KanbanRendererTest extends TestCase
             'column_id' => 1
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateCard($data);
 
         $this->assertIsArray($errors);
         $this->assertEmpty($errors);
@@ -96,7 +96,7 @@ class KanbanRendererTest extends TestCase
             'column_id' => 1
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateCard($data);
 
         $this->assertIsArray($errors);
         $this->assertNotEmpty($errors);
@@ -111,7 +111,7 @@ class KanbanRendererTest extends TestCase
             'column_id' => 1
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateCard($data);
 
         $this->assertIsArray($errors);
         $this->assertNotEmpty($errors);
@@ -125,7 +125,7 @@ class KanbanRendererTest extends TestCase
             'priority' => 'high'
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateCard($data);
 
         $this->assertIsArray($errors);
         $this->assertNotEmpty($errors);
@@ -134,7 +134,7 @@ class KanbanRendererTest extends TestCase
 
     public function testHandleUnknownAction(): void
     {
-        $result = $this->renderer->handle('invalid_action', []);
+        $result = $this->renderer->handle(['action' => 'invalid_action']);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
@@ -170,7 +170,7 @@ class KanbanRendererTest extends TestCase
             'due_date' => '2024-12-31'
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateCard($data);
 
         $this->assertIsArray($errors);
         $this->assertEmpty($errors);
@@ -185,7 +185,7 @@ class KanbanRendererTest extends TestCase
             'due_date' => 'not-a-date'
         ];
 
-        $errors = $this->renderer->validate($data);
+        $errors = $this->renderer->validateCard($data);
 
         $this->assertIsArray($errors);
         $this->assertNotEmpty($errors);

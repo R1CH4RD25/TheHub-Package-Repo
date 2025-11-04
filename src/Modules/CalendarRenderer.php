@@ -825,7 +825,7 @@ JS;
             case 'details':
                 return $this->handleDetails($data);
             default:
-                return ['success' => false, 'message' => 'Invalid action'];
+                return ['success' => false, 'error' => 'Invalid action'];
         }
     }
 
@@ -881,6 +881,38 @@ JS;
     }
 
     /**
+     * Validate event data
+     *
+     * @param array $data Event data to validate
+     * @return array Array of error messages (empty if valid)
+     */
+    public function validateEvent(array $data): array
+    {
+        $errors = [];
+
+        if (empty($data['title'])) {
+            $errors[] = 'Event title is required';
+        }
+
+        if (empty($data['date'])) {
+            $errors[] = 'Event date is required';
+        }
+
+        if (!empty($data['category']) && !in_array($data['category'], ['meeting', 'deadline', 'appointment', 'event', 'reminder', 'personal'])) {
+            $errors[] = 'Invalid event category';
+        }
+
+        // Check if event is marked as recurring but missing frequency
+        if (!empty($data['is_recurring']) && empty($data['recurrence_frequency'])) {
+            $errors[] = 'Recurrence frequency is required for recurring events';
+        }
+
+        if (!empty($data['all_day']) && !empty($data['start_time'])) {
+            $errors[] = 'All-day events cannot have start time';
+        }
+
+        return $errors;
+    }    /**
      * Get configuration
      */
     public function getConfig(): array

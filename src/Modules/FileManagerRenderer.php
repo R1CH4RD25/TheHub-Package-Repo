@@ -11,17 +11,17 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * FileManagerRenderer - Universal file/document management system
- * 
+ *
  * Implements File Manager module type for organizing, uploading, and managing files.
  * Generic design works for any organization (schools, businesses, personal projects).
- * 
+ *
  * Use cases:
  * - Document library (policies, procedures, forms)
  * - Media gallery (photos, videos)
  * - Asset repository (logos, templates, resources)
  * - Project files (contracts, proposals, deliverables)
  * - Personal files (resumes, certificates, receipts)
- * 
+ *
  * Features:
  * - Drag-and-drop file upload
  * - Folder/tag organization
@@ -32,7 +32,7 @@ require_once __DIR__ . '/../bootstrap.php';
  * - Role-based access control
  * - File size and type restrictions
  * - Preview for common formats
- * 
+ *
  * @author The Hub Team
  * @version 1.0.0
  */
@@ -40,7 +40,7 @@ class FileManagerRenderer implements ModuleInterface
 {
     private array $config;
     private Database $db;
-    
+
     // Allowed file types (can be overridden in config)
     private array $allowedTypes = [
         'documents' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'odt'],
@@ -50,24 +50,24 @@ class FileManagerRenderer implements ModuleInterface
         'archives' => ['zip', 'tar', 'gz', 'rar', '7z'],
         'code' => ['php', 'js', 'css', 'html', 'json', 'xml', 'sql', 'sh']
     ];
-    
+
     private int $maxFileSize = 52428800; // 50MB default
-    
+
     public function __construct(array $config)
     {
         $this->config = $config;
         $this->db = Database::getInstance();
-        
+
         // Override defaults from config
         if (isset($config['max_file_size'])) {
             $this->maxFileSize = (int)$config['max_file_size'];
         }
-        
+
         if (isset($config['allowed_types'])) {
             $this->allowedTypes = array_merge($this->allowedTypes, $config['allowed_types']);
         }
     }
-    
+
     /**
      * Render file manager interface
      */
@@ -75,45 +75,45 @@ class FileManagerRenderer implements ModuleInterface
     {
         $currentFolder = $_GET['folder'] ?? '';
         $viewMode = $_GET['view'] ?? 'grid'; // grid or list
-        
+
         $html = '<div class="file-manager-container">';
-        
+
         // Toolbar
         $html .= $this->renderToolbar($currentFolder);
-        
+
         // Breadcrumb navigation
         $html .= $this->renderBreadcrumb($currentFolder);
-        
+
         // Main content area
         $html .= '<div class="file-manager-content">';
         $html .= '    <div class="row">';
-        
+
         // Sidebar (folders and filters)
         $html .= '        <div class="col-md-3">';
         $html .= $this->renderSidebar($currentFolder);
         $html .= '        </div>';
-        
+
         // File listing
         $html .= '        <div class="col-md-9">';
         $html .= $this->renderFileList($currentFolder, $viewMode);
         $html .= '        </div>';
-        
+
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         // Modals
         $html .= $this->renderUploadModal();
         $html .= $this->renderNewFolderModal();
         $html .= $this->renderFileDetailsModal();
-        
+
         // Scripts
         $html .= $this->renderScripts();
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render toolbar with actions
      */
@@ -121,7 +121,7 @@ class FileManagerRenderer implements ModuleInterface
     {
         $html = '<div class="file-manager-toolbar mb-3">';
         $html .= '    <div class="btn-toolbar" role="toolbar">';
-        
+
         // Upload button
         $html .= '        <div class="btn-group me-2">';
         $html .= '            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">';
@@ -131,7 +131,7 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '                <i class="bi bi-folder-plus"></i> New Folder';
         $html .= '            </button>';
         $html .= '        </div>';
-        
+
         // View mode switcher
         $html .= '        <div class="btn-group me-2">';
         $html .= '            <button type="button" class="btn btn-outline-secondary btn-view-mode" data-view="grid">';
@@ -141,12 +141,12 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '                <i class="bi bi-list-ul"></i> List';
         $html .= '            </button>';
         $html .= '        </div>';
-        
+
         // Search
         $html .= '        <div class="flex-grow-1">';
         $html .= '            <input type="search" class="form-control" id="fileSearch" placeholder="Search files...">';
         $html .= '        </div>';
-        
+
         // Selected actions (hidden by default)
         $html .= '        <div class="btn-group ms-2 d-none" id="selectedActions">';
         $html .= '            <button type="button" class="btn btn-outline-danger" id="deleteSelected">';
@@ -156,13 +156,13 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '                <i class="bi bi-folder"></i> Move';
         $html .= '            </button>';
         $html .= '        </div>';
-        
+
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render breadcrumb navigation
      */
@@ -171,30 +171,30 @@ class FileManagerRenderer implements ModuleInterface
         $html = '<nav aria-label="breadcrumb" class="mb-3">';
         $html .= '    <ol class="breadcrumb">';
         $html .= '        <li class="breadcrumb-item"><a href="?folder="><i class="bi bi-house"></i> Root</a></li>';
-        
+
         if ($currentFolder) {
             $parts = explode('/', trim($currentFolder, '/'));
             $path = '';
-            
+
             foreach ($parts as $part) {
                 $path .= $part . '/';
                 $html .= '        <li class="breadcrumb-item"><a href="?folder=' . urlencode($path) . '">' . htmlspecialchars($part) . '</a></li>';
             }
         }
-        
+
         $html .= '    </ol>';
         $html .= '</nav>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render sidebar with folders and filters
      */
     private function renderSidebar(string $currentFolder): string
     {
         $html = '<div class="file-manager-sidebar">';
-        
+
         // Folder tree
         $html .= '    <div class="card mb-3">';
         $html .= '        <div class="card-header"><strong>Folders</strong></div>';
@@ -202,7 +202,7 @@ class FileManagerRenderer implements ModuleInterface
         $html .= $this->renderFolderTree();
         $html .= '        </div>';
         $html .= '    </div>';
-        
+
         // Filters
         $html .= '    <div class="card mb-3">';
         $html .= '        <div class="card-header"><strong>Filter by Type</strong></div>';
@@ -214,11 +214,11 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '            <a href="#" class="list-group-item list-group-item-action filter-type" data-type="archives"><i class="bi bi-file-zip"></i> Archives</a>';
         $html .= '        </div>';
         $html .= '    </div>';
-        
+
         // Storage info
         $storageInfo = $this->getStorageInfo();
         $usedPercent = ($storageInfo['used'] / $storageInfo['total']) * 100;
-        
+
         $html .= '    <div class="card">';
         $html .= '        <div class="card-header"><strong>Storage</strong></div>';
         $html .= '        <div class="card-body">';
@@ -230,25 +230,25 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '            <small>' . $this->formatBytes($storageInfo['used']) . ' of ' . $this->formatBytes($storageInfo['total']) . ' used</small>';
         $html .= '        </div>';
         $html .= '    </div>';
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render folder tree
      */
     private function renderFolderTree(): string
     {
         $folders = $this->getFolders();
-        
+
         if (empty($folders)) {
             return '<div class="p-3 text-muted">No folders yet</div>';
         }
-        
+
         $html = '<ul class="list-unstyled folder-tree mb-0">';
-        
+
         foreach ($folders as $folder) {
             $html .= '    <li>';
             $html .= '        <a href="?folder=' . urlencode($folder['path']) . '">';
@@ -257,21 +257,21 @@ class FileManagerRenderer implements ModuleInterface
             $html .= '        </a>';
             $html .= '    </li>';
         }
-        
+
         $html .= '</ul>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render file listing
      */
     private function renderFileList(string $currentFolder, string $viewMode): string
     {
         $files = $this->getFiles($currentFolder);
-        
+
         $html = '<div class="file-list-container" data-view-mode="' . $viewMode . '">';
-        
+
         if (empty($files)) {
             $html .= '<div class="text-center py-5">';
             $html .= '    <i class="bi bi-folder2-open" style="font-size: 4rem; color: #ccc;"></i>';
@@ -285,19 +285,19 @@ class FileManagerRenderer implements ModuleInterface
                 $html .= $this->renderListView($files);
             }
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render grid view
      */
     private function renderGridView(array $files): string
     {
         $html = '<div class="row g-3">';
-        
+
         foreach ($files as $file) {
             $html .= '    <div class="col-md-3 col-sm-4 col-6">';
             $html .= '        <div class="card file-card h-100" data-file-id="' . $file['id'] . '">';
@@ -325,12 +325,12 @@ class FileManagerRenderer implements ModuleInterface
             $html .= '        </div>';
             $html .= '    </div>';
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render list view
      */
@@ -349,7 +349,7 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '            </tr>';
         $html .= '        </thead>';
         $html .= '        <tbody>';
-        
+
         foreach ($files as $file) {
             $html .= '            <tr>';
             $html .= '                <td><input type="checkbox" class="file-checkbox" value="' . $file['id'] . '"></td>';
@@ -364,31 +364,31 @@ class FileManagerRenderer implements ModuleInterface
             $html .= '                </td>';
             $html .= '            </tr>';
         }
-        
+
         $html .= '        </tbody>';
         $html .= '    </table>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render file thumbnail
      */
     private function renderThumbnail(array $file): string
     {
         $ext = strtolower($file['extension']);
-        
+
         // If image and thumbnail exists
         if (in_array($ext, $this->allowedTypes['images']) && !empty($file['thumbnail_path'])) {
             return '<img src="' . htmlspecialchars($file['thumbnail_path']) . '" alt="' . htmlspecialchars($file['filename']) . '" class="img-fluid">';
         }
-        
+
         // Otherwise show icon
         $icon = $this->getFileIcon($ext);
         return '<div class="text-center py-4"><i class="' . $icon . '" style="font-size: 3rem;"></i></div>';
     }
-    
+
     /**
      * Get file icon based on extension
      */
@@ -416,17 +416,17 @@ class FileManagerRenderer implements ModuleInterface
             'css' => 'bi bi-file-code text-primary',
             'html' => 'bi bi-file-code text-danger',
         ];
-        
+
         return $icons[$extension] ?? 'bi bi-file-earmark text-secondary';
     }
-    
+
     /**
      * Render upload modal
      */
     private function renderUploadModal(): string
     {
         $maxSizeMB = $this->maxFileSize / 1048576;
-        
+
         $html = '<div class="modal fade" id="uploadModal" tabindex="-1">';
         $html .= '    <div class="modal-dialog modal-lg">';
         $html .= '        <div class="modal-content">';
@@ -450,10 +450,10 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render new folder modal
      */
@@ -479,10 +479,10 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render file details modal
      */
@@ -501,10 +501,10 @@ class FileManagerRenderer implements ModuleInterface
         $html .= '        </div>';
         $html .= '    </div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render JavaScript
      */
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '?view=' + view + '&folder=' + (new URLSearchParams(window.location.search).get('folder') || '');
         });
     });
-    
+
     // File search
     const searchInput = document.getElementById('fileSearch');
     if (searchInput) {
@@ -532,57 +532,57 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
+
     // File selection
     document.querySelectorAll('.file-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', updateSelectedActions);
     });
-    
+
     document.getElementById('selectAllFiles')?.addEventListener('change', function() {
         document.querySelectorAll('.file-checkbox').forEach(cb => cb.checked = this.checked);
         updateSelectedActions();
     });
-    
+
     function updateSelectedActions() {
         const selected = document.querySelectorAll('.file-checkbox:checked').length;
         document.getElementById('selectedActions').classList.toggle('d-none', selected === 0);
     }
-    
+
     // Upload area drag & drop
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
-    
+
     if (uploadArea && fileInput) {
         uploadArea.addEventListener('click', () => fileInput.click());
-        
+
         ['dragenter', 'dragover'].forEach(event => {
             uploadArea.addEventListener(event, (e) => {
                 e.preventDefault();
                 uploadArea.classList.add('border-primary', 'bg-light');
             });
         });
-        
+
         ['dragleave', 'drop'].forEach(event => {
             uploadArea.addEventListener(event, (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('border-primary', 'bg-light');
             });
         });
-        
+
         uploadArea.addEventListener('drop', (e) => {
             const files = e.dataTransfer.files;
             handleFiles(files);
         });
-        
+
         fileInput.addEventListener('change', (e) => {
             handleFiles(e.target.files);
         });
     }
-    
+
     function handleFiles(files) {
         const queue = document.getElementById('uploadQueue');
         queue.innerHTML = '';
-        
+
         Array.from(files).forEach(file => {
             const item = document.createElement('div');
             item.className = 'list-group-item';
@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
             queue.appendChild(item);
         });
     }
-    
+
     function formatBytes(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -603,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
-    
+
     // File download
     document.querySelectorAll('.btn-download').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -611,13 +611,13 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'api/files.php?action=download&id=' + fileId;
         });
     });
-    
+
     // File details
     document.querySelectorAll('.btn-details').forEach(btn => {
         btn.addEventListener('click', function() {
             const fileId = this.dataset.fileId;
             const modal = new bootstrap.Modal(document.getElementById('fileDetailsModal'));
-            
+
             fetch('api/files.php?action=details&id=' + fileId)
                 .then(r => r.json())
                 .then(data => {
@@ -631,16 +631,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         </table>
                     `;
                 });
-            
+
             modal.show();
         });
     });
-    
+
     // Delete file
     document.querySelectorAll('.btn-delete-file').forEach(btn => {
         btn.addEventListener('click', function() {
             if (!confirm('Delete this file?')) return;
-            
+
             const fileId = this.dataset.fileId;
             fetch('api/files.php?action=delete', {
                 method: 'POST',
@@ -660,10 +660,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 JS;
         $html .= '</script>';
-        
+
         return $html;
     }
-    
+
     /**
      * Get files in folder
      */
@@ -673,7 +673,7 @@ JS;
         // Placeholder implementation
         return [];
     }
-    
+
     /**
      * Get folders
      */
@@ -683,7 +683,7 @@ JS;
         // Placeholder implementation
         return [];
     }
-    
+
     /**
      * Get storage info
      */
@@ -695,28 +695,28 @@ JS;
             'total' => 10737418240  // 10GB
         ];
     }
-    
+
     /**
      * Format bytes to human readable
      */
     private function formatBytes(int $bytes): string
     {
         if ($bytes === 0) return '0 Bytes';
-        
+
         $k = 1024;
         $sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         $i = floor(log($bytes) / log($k));
-        
+
         return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
     }
-    
+
     /**
      * Handle file operations
      */
     public function handle(array $data): array
     {
         $action = $data['action'] ?? '';
-        
+
         switch ($action) {
             case 'upload':
                 return $this->handleUpload($data);
@@ -727,10 +727,10 @@ JS;
             case 'move':
                 return $this->handleMove($data);
             default:
-                return ['success' => false, 'message' => 'Invalid action'];
+                return ['success' => false, 'error' => 'Invalid action'];
         }
     }
-    
+
     /**
      * Handle file upload
      */
@@ -739,33 +739,33 @@ JS;
         // Implementation would handle file upload from $data
         return ['success' => true, 'message' => 'Files uploaded'];
     }
-    
+
     /**
      * Handle file deletion
      */
     private function handleDelete(array $data): array
     {
         $fileId = $data['id'] ?? 0;
-        
+
         // Delete file from database and filesystem
         AuditLogger::log('file_delete', 'files', $fileId, [], ['id' => $fileId]);
-        
+
         return ['success' => true, 'message' => 'File deleted'];
     }
-    
+
     /**
      * Handle folder creation
      */
     private function handleCreateFolder(array $data): array
     {
         $folderName = $data['name'] ?? '';
-        
+
         // Create folder in database
         AuditLogger::log('folder_create', 'folders', null, [], ['name' => $folderName]);
-        
+
         return ['success' => true, 'message' => 'Folder created'];
     }
-    
+
     /**
      * Handle move operation
      */
@@ -773,12 +773,12 @@ JS;
     {
         $fileIds = $data['file_ids'] ?? [];
         $targetFolder = $data['target_folder'] ?? '';
-        
+
         // Move files to target folder
-        
+
         return ['success' => true, 'message' => 'Files moved'];
     }
-    
+
     /**
      * Validate configuration
      */
@@ -787,8 +787,38 @@ JS;
         // File manager doesn't require specific config
         return true;
     }
-    
+
     /**
+     * Validate file data
+     *
+     * @param array $data File data to validate
+     * @return array Array of error messages (empty if valid)
+     */
+    public function validateFile(array $data): array
+    {
+        $errors = [];
+
+        if (empty($data['name'])) {
+            $errors[] = 'File name is required';
+        }
+
+        if (!empty($data['size'])) {
+            $maxSize = $this->config['maxFileSize'] ?? 10485760; // 10MB default
+            if ($data['size'] > $maxSize) {
+                $errors[] = 'File size exceeds maximum allowed';
+            }
+        }
+
+        if (!empty($data['type'])) {
+            $allowedTypes = $this->config['allowedTypes'] ?? ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'png', 'gif'];
+            $extension = strtolower(pathinfo($data['name'] ?? '', PATHINFO_EXTENSION));
+            if (!in_array($extension, $allowedTypes) && !in_array($data['type'], ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'])) {
+                $errors[] = 'File type not allowed';
+            }
+        }
+
+        return $errors;
+    }    /**
      * Get configuration
      */
     public function getConfig(): array

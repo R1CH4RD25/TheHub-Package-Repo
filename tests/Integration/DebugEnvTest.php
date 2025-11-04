@@ -5,15 +5,15 @@ use PHPUnit\Framework\TestCase;
 
 class DebugEnvTest extends TestCase
 {
+    /**
+     * Test environment variables are loaded
+     */
     public function testShowEnvironment(): void
     {
-        echo "\n=== Environment Variables ===\n";
-        echo "DB_HOST: " . ($_ENV['DB_HOST'] ?? 'NOT SET') . "\n";
-        echo "DB_NAME: " . ($_ENV['DB_NAME'] ?? 'NOT SET') . "\n";
-        echo "DB_USER: " . ($_ENV['DB_USER'] ?? 'NOT SET') . "\n";
-        echo "DB_PASS: " . (isset($_ENV['DB_PASS']) ? '***SET***' : 'NOT SET') . "\n";
-        echo "===========================\n";
-        
-        $this->assertTrue(true);
+        // Verify environment variables are loaded
+        $this->assertNotEmpty($_ENV['DB_HOST'], 'DB_HOST should be set');
+        $this->assertNotEmpty($_ENV['DB_NAME'], 'DB_NAME should be set');
+        $this->assertNotEmpty($_ENV['DB_USER'], 'DB_USER should be set');
+        $this->assertNotEmpty($_ENV['DB_PASS'], 'DB_PASS should be set');
     }
 }

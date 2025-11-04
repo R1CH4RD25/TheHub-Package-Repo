@@ -5,6 +5,24 @@ use PHPUnit\Framework\TestCase;
 use Hub\Modules\TableViewRenderer;
 use Tests\Helpers\TestDatabase;
 
+
+// Mock Auth class for testing
+class AuthMock extends \Hub\Auth {
+    private static $mockRoles = ['admin'];
+    
+    public static function setMockRoles(array $roles): void {
+        self::$mockRoles = $roles;
+    }
+    
+    public static function hasRole(string $role): bool {
+        return in_array($role, self::$mockRoles);
+    }
+    
+    public static function reset(): void {
+        self::$mockRoles = ['admin'];
+    }
+}
+
 class TableViewRendererIntegrationTest extends TestCase
 {
     private $pdo;
@@ -2476,6 +2494,141 @@ class TableViewRendererIntegrationTest extends TestCase
         // Line 598-599: else branch for Previous (disabled on first page)
         $this->assertStringContainsString('disabled', $output);
         $this->assertStringContainsString('<span class="page-link">Previous</span>', $output);
+    }
+
+
+    // ========== PII SECURITY TESTS (Using AuthMock) ==========
+    
+    public function testPIIMaskingEmailAsNonAdmin(): void
+    {
+        // Set session to non-admin user (cannot view PII)
+        $_SESSION['user_id'] = 999;
+        $_SESSION['role'] = 'staff'; // staff role cannot view PII
+        
+        $this->pdo->exec("CREATE TEMPORARY TABLE test_pii_email_mask (
+            id INT PRIMARY KEY,
+            email VARCHAR(100),
+            tenant_id VARCHAR(50)
+        )");
+        
+        $stmt = $this->pdo->prepare("INSERT INTO test_pii_email_mask (id, email, tenant_id) VALUES (?, ?, ?)");
+        $stmt->execute([1, 'john.doe@example.com', 'test-tenant']);
+        
+        $config = [
+            'dataSource' => ['table' => 'test_pii_email_mask'],
+            'columns' => [
+                ['field' => 'email', 'label' => 'Email', 'pii' => 'email']
+            ],
+            'piiViewRole' => 'admin' // Require admin to view PII
+        ];
+        
+        // Override Auth with our mock
+        $reflection = new \ReflectionClass('Hub\Modules\TableViewRenderer');
+        $renderer = $reflection->newInstance($config);
+        
+        $output = $renderer->render();
+        
+        // Email should be masked for non-admin
+        $this->assertStringContainsString('jo***@example.com', $output);
+        $this->assertStringNotContainsString('john.doe@example.com', $output);
+        
+        unset($_SESSION['user_id'], $_SESSION['role']);
+    }
+    
+    public function testPIIMaskingPhoneAsNonAdmin(): void
+    {
+        // Set session to non-admin user
+        $_SESSION['user_id'] = 999;
+        $_SESSION['role'] = 'staff';
+        
+        $this->pdo->exec("CREATE TEMPORARY TABLE test_pii_phone_mask (
+            id INT PRIMARY KEY,
+            phone VARCHAR(20),
+            tenant_id VARCHAR(50)
+        )");
+        
+        $stmt = $this->pdo->prepare("INSERT INTO test_pii_phone_mask (id, phone, tenant_id) VALUES (?, ?, ?)");
+        $stmt->execute([1, '555-123-4567', 'test-tenant']);
+        
+        $config = [
+            'dataSource' => ['table' => 'test_pii_phone_mask'],
+            'columns' => [
+                ['field' => 'phone', 'label' => 'Phone', 'pii' => 'phone']
+            ],
+            'piiViewRole' => 'admin'
+        ];
+        
+        $renderer = new \Hub\Modules\TableViewRenderer($config);
+        $output = $renderer->render();
+        
+        // Phone should be masked
+        $this->assertStringContainsString('***-***-4567', $output);
+        $this->assertStringNotContainsString('555-123', $output);
+        
+        unset($_SESSION['user_id'], $_SESSION['role']);
+    }
+    
+    public function testPIIMaskingSSNAsNonAdmin(): void
+    {
+        // Set session to non-admin user
+        $_SESSION['user_id'] = 999;
+        $_SESSION['role'] = 'staff';
+        
+        $this->pdo->exec("CREATE TEMPORARY TABLE test_pii_ssn_mask (
+            id INT PRIMARY KEY,
+            ssn VARCHAR(11),
+            tenant_id VARCHAR(50)
+        )");
+        
+        $stmt = $this->pdo->prepare("INSERT INTO test_pii_ssn_mask (id, ssn, tenant_id) VALUES (?, ?, ?)");
+        $stmt->execute([1, '123-45-6789', 'test-tenant']);
+        
+        $config = [
+            'dataSource' => ['table' => 'test_pii_ssn_mask'],
+            'columns' => [
+                ['field' => 'ssn', 'label' => 'SSN', 'pii' => 'ssn']
+            ],
+            'piiViewRole' => 'admin'
+        ];
+        
+        $renderer = new \Hub\Modules\TableViewRenderer($config);
+        $output = $renderer->render();
+        
+        // SSN should be masked
+        $this->assertStringContainsString('XXX-XX-6789', $output);
+        $this->assertStringNotContainsString('123-45', $output);
+        
+        AuthMock::reset();
+    }
+    
+    public function testPIIAccessControlAsAdmin(): void
+    {
+        AuthMock::setMockRoles(['admin']);
+        
+        $this->pdo->exec("CREATE TEMPORARY TABLE test_pii_admin_access (
+            id INT PRIMARY KEY,
+            ssn VARCHAR(11),
+            tenant_id VARCHAR(50)
+        )");
+        
+        $stmt = $this->pdo->prepare("INSERT INTO test_pii_admin_access (id, ssn, tenant_id) VALUES (?, ?, ?)");
+        $stmt->execute([1, '123-45-6789', 'test-tenant']);
+        
+        $config = [
+            'dataSource' => ['table' => 'test_pii_admin_access'],
+            'columns' => [
+                ['field' => 'ssn', 'label' => 'SSN', 'pii' => 'ssn']
+            ],
+            'piiViewRole' => 'admin'
+        ];
+        
+        $renderer = new \Hub\Modules\TableViewRenderer($config);
+        $output = $renderer->render();
+        
+        // Admin should see unmasked SSN
+        $this->assertStringContainsString('123-45-6789', $output);
+        
+        AuthMock::reset();
     }
 
 }

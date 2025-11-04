@@ -23,6 +23,7 @@ class SectionIntegrationTest extends TestCase
     private int $adminUserId;
     private int $staffUserId;
     private int $testSectionId;
+    private string $testSectionSlug;
     private string $uniqueId;
 
     protected function setUp(): void
@@ -50,7 +51,9 @@ class SectionIntegrationTest extends TestCase
         $this->staffUserId = $this->createTestUser('google_staff_' . $this->uniqueId, 'staff@test-section-' . $this->uniqueId . '.com', 'Staff User', 'staff');
 
         // Create test section
-        $this->testSectionId = $this->createTestSection('Test Section', 'test-section', 'Test section for integration tests');
+        $section = $this->createTestSection('Test Section', 'test-section', 'Test section for integration tests');
+        $this->testSectionId = $section['id'];
+        $this->testSectionSlug = $section['slug'];
     }
 
     protected function tearDown(): void
@@ -75,13 +78,13 @@ class SectionIntegrationTest extends TestCase
             [$googleId, $email, $name, $role]
         );
 
-        return $this->db->lastInsertId();
+        return (int)$this->db->lastInsertId();
     }
 
     /**
      * Helper: Create a test section with automatic unique naming
      */
-    private function createTestSection(string $name, string $slug, string $description, int $sortOrder = 100): int
+    private function createTestSection(string $name, string $slug, string $description, int $sortOrder = 100): array
     {
         // Append unique ID to ensure no collisions across test runs
         $uniqueName = $name . ' ' . $this->uniqueId;
@@ -93,7 +96,10 @@ class SectionIntegrationTest extends TestCase
             [$uniqueName, $uniqueName, $uniqueSlug, $description, "{$uniqueSlug}.php", $sortOrder]
         );
 
-        return $this->db->lastInsertId();
+        return [
+            'id' => (int)$this->db->lastInsertId(),
+            'slug' => $uniqueSlug
+        ];
     }
 
     /**
@@ -103,10 +109,12 @@ class SectionIntegrationTest extends TestCase
     public function testSuperAdminHasAccessToAllSections(): void
     {
         // Arrange: Create section (no explicit role access needed)
-        $sectionId = $this->createTestSection('Admin Section', 'admin-section', 'Section for admins');
+        $section = $this->createTestSection('Admin Section', 'admin-section', 'Section for admins');
+        $sectionId = $section['id'];
+        $sectionSlug = $section['slug'];
 
         // Act: Check super admin access
-        $hasAccess = $this->sectionAccess->hasAccess($this->superAdminUserId, 'admin-section');
+        $hasAccess = $this->sectionAccess->hasAccess($this->superAdminUserId, $sectionSlug);
 
         // Assert: Super admin has access
         $this->assertTrue($hasAccess, 'Super admin should have access to all sections');
@@ -125,7 +133,7 @@ class SectionIntegrationTest extends TestCase
         );
 
         // Act: Check staff user access
-        $hasAccess = $this->sectionAccess->hasAccess($this->staffUserId, 'test-section');
+        $hasAccess = $this->sectionAccess->hasAccess($this->staffUserId, $this->testSectionSlug);
 
         // Assert: Staff user has access
         $this->assertTrue($hasAccess, 'User with granted role access should have access');
@@ -138,14 +146,16 @@ class SectionIntegrationTest extends TestCase
     public function testUserWithoutRoleAccessCannotAccessSection(): void
     {
         // Arrange: Section with no staff access (only admin)
-        $restrictedId = $this->createTestSection('Restricted', 'restricted', 'Admin only');
+        $restricted = $this->createTestSection('Restricted', 'restricted', 'Admin only');
+        $restrictedId = $restricted['id'];
+        $restrictedSlug = $restricted['slug'];
         $this->db->execute(
             "INSERT INTO section_role_access (section_id, role, granted_by) VALUES (?, 'admin', ?)",
             [$restrictedId, $this->superAdminUserId]
         );
 
         // Act: Check staff user access
-        $hasAccess = $this->sectionAccess->hasAccess($this->staffUserId, 'restricted');
+        $hasAccess = $this->sectionAccess->hasAccess($this->staffUserId, $restrictedSlug);
 
         // Assert: Staff user has no access
         $this->assertFalse($hasAccess, 'User without granted role access should not have access');
@@ -158,8 +168,12 @@ class SectionIntegrationTest extends TestCase
     public function testGetUserSectionsReturnsAccessibleSections(): void
     {
         // Arrange: Create sections with different role access
-        $staffSectionId = $this->createTestSection('Staff Section', 'staff-section', 'For staff');
-        $adminSectionId = $this->createTestSection('Admin Section', 'admin-section', 'For admins');
+        $staffSection = $this->createTestSection('Staff Section', 'staff-section', 'For staff');
+        $staffSectionId = $staffSection['id'];
+        $staffSectionSlug = $staffSection['slug'];
+        $adminSection = $this->createTestSection('Admin Section', 'admin-section', 'For admins');
+        $adminSectionId = $adminSection['id'];
+        $adminSectionSlug = $adminSection['slug'];
 
         // Grant access
         $this->db->execute(
@@ -174,7 +188,7 @@ class SectionIntegrationTest extends TestCase
         // Act: Get sections for staff user
         $staffSections = $this->sectionAccess->getUserSections($this->staffUserId);
 
-        // Assert: Staff user sees only staff section
+        // Assert: Staff user sees only staff section (filter to test sections)
         $sectionIds = array_column($staffSections, 'id');
         $this->assertContains($staffSectionId, $sectionIds, 'Staff should see staff section');
         $this->assertNotContains($adminSectionId, $sectionIds, 'Staff should not see admin-only section');
@@ -187,16 +201,21 @@ class SectionIntegrationTest extends TestCase
     public function testSuperAdminGetUserSectionsReturnsAllSections(): void
     {
         // Arrange: Create multiple sections
-        $section1Id = $this->createTestSection('Section 1', 'section-1', 'First section');
-        $section2Id = $this->createTestSection('Section 2', 'section-2', 'Second section');
+        $section1 = $this->createTestSection('Section 1', 'section-1', 'First section');
+        $section1Id = $section1['id'];
+        $section1Slug = $section1['slug'];
+        $section2 = $this->createTestSection('Section 2', 'section-2', 'Second section');
+        $section2Id = $section2['id'];
+        $section2Slug = $section2['slug'];
 
         // Act: Get sections for super admin (no role access needed)
         $sections = $this->sectionAccess->getUserSections($this->superAdminUserId);
 
-        // Assert: Super admin sees all active sections
+        // Assert: Super admin sees all active sections (filter to test sections)
         $sectionIds = array_column($sections, 'id');
-        $this->assertContains($section1Id, $sectionIds, 'Super admin should see section 1');
-        $this->assertContains($section2Id, $sectionIds, 'Super admin should see section 2');
+        $testSectionIds = [$this->testSectionId, $section1Id, $section2Id];
+        $foundTestSections = array_intersect($sectionIds, $testSectionIds);
+        $this->assertCount(3, $foundTestSections, 'Super admin should see all test sections');
     }
 
     /**
@@ -231,7 +250,9 @@ class SectionIntegrationTest extends TestCase
     public function testGrantAccessCreatesRoleRecords(): void
     {
         // Arrange: Section with no access
-        $newSectionId = $this->createTestSection('New Section', 'new-section', 'Fresh section');
+        $newSection = $this->createTestSection('New Section', 'new-section', 'Fresh section');
+        $newSectionId = $newSection['id'];
+        $newSectionSlug = $newSection['slug'];
 
         // Need to commit current transaction first since grantAccess starts its own
         $this->db->commit();
@@ -258,7 +279,9 @@ class SectionIntegrationTest extends TestCase
     public function testGrantAccessReplacesExistingAccess(): void
     {
         // Arrange: Section with initial access
-        $sectionId = $this->createTestSection('Update Section', 'update-section', 'Test update');
+        $section = $this->createTestSection('Update Section', 'update-section', 'Test update');
+        $sectionId = $section['id'];
+        $sectionSlug = $section['slug'];
         $this->db->execute(
             "INSERT INTO section_role_access (section_id, role, granted_by) VALUES (?, 'staff', ?)",
             [$sectionId, $this->superAdminUserId]
@@ -307,8 +330,12 @@ class SectionIntegrationTest extends TestCase
     public function testInactiveSectionsAreFiltered(): void
     {
         // Arrange: Create active and inactive sections
-        $activeSectionId = $this->createTestSection('Active', 'active-sec', 'Active section');
-        $inactiveSectionId = $this->createTestSection('Inactive', 'inactive-sec', 'Inactive section');
+        $activeSection = $this->createTestSection('Active', 'active-sec', 'Active section');
+        $activeSectionId = $activeSection['id'];
+        $activeSectionSlug = $activeSection['slug'];
+        $inactiveSection = $this->createTestSection('Inactive', 'inactive-sec', 'Inactive section');
+        $inactiveSectionId = $inactiveSection['id'];
+        $inactiveSectionSlug = $inactiveSection['slug'];
 
         // Deactivate second section
         $this->db->execute("UPDATE sections SET is_active = 0 WHERE id = ?", [$inactiveSectionId]);
@@ -332,7 +359,7 @@ class SectionIntegrationTest extends TestCase
         $this->assertNotContains($inactiveSectionId, $sectionIds, 'Inactive section should be filtered');
 
         // Assert: hasAccess respects is_active flag
-        $hasAccess = $this->sectionAccess->hasAccess($this->staffUserId, 'inactive-sec');
+        $hasAccess = $this->sectionAccess->hasAccess($this->staffUserId, $inactiveSectionSlug);
         $this->assertFalse($hasAccess, 'hasAccess should return false for inactive section');
 
         // Note: sectionExists has fetchOne !== null bug, skipping that assertion
@@ -345,17 +372,23 @@ class SectionIntegrationTest extends TestCase
     public function testSectionSortOrder(): void
     {
         // Arrange: Create sections with different sort orders
-        $this->createTestSection('Third Section', 'third-sec', 'Third', 30);
-        $this->createTestSection('First Section', 'first-sec', 'First', 10);
-        $this->createTestSection('Second Section', 'second-sec', 'Second', 20);
+        $third = $this->createTestSection('Third Section', 'third-sec', 'Third', 30);
+        $thirdSectionId = $third['id'];
+        $thirdSectionSlug = $third['slug'];
+        $first = $this->createTestSection('First Section', 'first-sec', 'First', 10);
+        $firstSectionId = $first['id'];
+        $firstSectionSlug = $first['slug'];
+        $second = $this->createTestSection('Second Section', 'second-sec', 'Second', 20);
+        $secondSectionId = $second['id'];
+        $secondSectionSlug = $second['slug'];
 
         // Grant super admin access (will see all)
         // Act: Get sections for super admin
         $sections = $this->sectionAccess->getUserSections($this->superAdminUserId);
 
         // Assert: Sections ordered by sort_order
-        $testSections = array_filter($sections, function($s) {
-            return in_array($s['slug'], ['first-sec', 'second-sec', 'third-sec']);
+        $testSections = array_filter($sections, function($s) use ($firstSectionSlug, $secondSectionSlug, $thirdSectionSlug) {
+            return in_array($s['slug'], [$firstSectionSlug, $secondSectionSlug, $thirdSectionSlug]);
         });
         $testSections = array_values($testSections);
 
@@ -363,9 +396,9 @@ class SectionIntegrationTest extends TestCase
 
         // Verify sort order
         $slugs = array_column($testSections, 'slug');
-        $firstIndex = array_search('first-sec', $slugs);
-        $secondIndex = array_search('second-sec', $slugs);
-        $thirdIndex = array_search('third-sec', $slugs);
+        $firstIndex = array_search($firstSectionSlug, $slugs);
+        $secondIndex = array_search($secondSectionSlug, $slugs);
+        $thirdIndex = array_search($thirdSectionSlug, $slugs);
 
         $this->assertLessThan($secondIndex, $firstIndex, 'First should come before Second');
         $this->assertLessThan($thirdIndex, $secondIndex, 'Second should come before Third');
@@ -378,8 +411,12 @@ class SectionIntegrationTest extends TestCase
     public function testUserWithGlobalRolesGetsCombinedAccess(): void
     {
         // Arrange: Create sections for different roles
-        $staffSectionId = $this->createTestSection('Staff Only', 'staff-only-sec', 'Staff section');
-        $adminSectionId = $this->createTestSection('Admin Only', 'admin-only-sec', 'Admin section');
+        $staffSection = $this->createTestSection('Staff Only', 'staff-only-sec', 'Staff section');
+        $staffSectionId = $staffSection['id'];
+        $staffSectionSlug = $staffSection['slug'];
+        $adminSection = $this->createTestSection('Admin Only', 'admin-only-sec', 'Admin section');
+        $adminSectionId = $adminSection['id'];
+        $adminSectionSlug = $adminSection['slug'];
 
         // Grant role access
         $this->db->execute(
@@ -398,8 +435,8 @@ class SectionIntegrationTest extends TestCase
         );
 
         // Act: Check access to both sections
-        $hasStaffAccess = $this->sectionAccess->hasAccess($this->staffUserId, 'staff-only-sec');
-        $hasAdminAccess = $this->sectionAccess->hasAccess($this->staffUserId, 'admin-only-sec');
+        $hasStaffAccess = $this->sectionAccess->hasAccess($this->staffUserId, $staffSectionSlug);
+        $hasAdminAccess = $this->sectionAccess->hasAccess($this->staffUserId, $adminSectionSlug);
 
         // Assert: User has access to both via combined roles
         $this->assertTrue($hasStaffAccess, 'User should have access via primary staff role');
@@ -413,7 +450,9 @@ class SectionIntegrationTest extends TestCase
     public function testGetUserSectionsReturnsDistinctSections(): void
     {
         // Arrange: Create section with access via multiple roles
-        $multiRoleSectionId = $this->createTestSection('Multi Role', 'multi-role-sec', 'Multiple access');
+        $multiRoleSection = $this->createTestSection('Multi Role', 'multi-role-sec', 'Multiple access');
+        $multiRoleSectionId = $multiRoleSection['id'];
+        $multiRoleSectionSlug = $multiRoleSection['slug'];
 
         // Grant both staff and admin access
         $this->db->execute(
@@ -436,7 +475,7 @@ class SectionIntegrationTest extends TestCase
 
         // Assert: Section appears only once
         $sectionSlugs = array_column($sections, 'slug');
-        $multiRoleSections = array_filter($sectionSlugs, fn($slug) => $slug === 'multi-role-sec');
+        $multiRoleSections = array_filter($sectionSlugs, fn($slug) => $slug === $multiRoleSectionSlug);
         $this->assertCount(1, $multiRoleSections, 'Section should appear only once despite multiple role access');
     }
 }

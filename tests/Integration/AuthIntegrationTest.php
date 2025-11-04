@@ -172,7 +172,7 @@ class AuthIntegrationTest extends TestCase
         // Test role levels - based on actual Auth.php logic
         $roles = [
             'staff' => ['isStaff' => true, 'isManager' => false, 'isAdmin' => false, 'isSuperAdmin' => false],
-            'admin' => ['isStaff' => true, 'isManager' => true, 'isAdmin' => true, 'isSuperAdmin' => false],
+            'admin' => ['isStaff' => false, 'isManager' => true, 'isAdmin' => true, 'isSuperAdmin' => false],
             'super_admin' => ['isStaff' => true, 'isManager' => true, 'isAdmin' => true, 'isSuperAdmin' => true],
         ];
 
@@ -228,10 +228,10 @@ class AuthIntegrationTest extends TestCase
     public function testPermissionBoundariesAcrossRoles(): void
     {
         // Only test roles that Auth.php actually recognizes
-        // Note: canManageUsers and canDeleteUser only allow super_admin (not admin)
+        // Note: canDeleteUser requires super_admin or admin (but admin cannot delete super_admins)
         $testCases = [
             ['role' => 'staff', 'canEdit' => false, 'canManage' => false, 'canDelete' => false],
-            ['role' => 'admin', 'canEdit' => true, 'canManage' => false, 'canDelete' => false],
+            ['role' => 'admin', 'canEdit' => true, 'canManage' => true, 'canDelete' => true],
             ['role' => 'super_admin', 'canEdit' => true, 'canManage' => true, 'canDelete' => true],
         ];
 

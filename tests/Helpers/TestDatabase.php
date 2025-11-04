@@ -50,9 +50,18 @@ class TestDatabase
         // Disable foreign key checks temporarily
         $conn->exec('SET FOREIGN_KEY_CHECKS = 0');
 
-        // Truncate tables in safe order (children first)
-        $conn->exec('TRUNCATE TABLE audit_logs');
-        $conn->exec('TRUNCATE TABLE user_sessions');
+        // Truncate tables in safe order (children first) - skip if not exists
+        try {
+            $conn->exec('TRUNCATE TABLE audit_log');
+        } catch (\PDOException $e) {
+            // Table doesn't exist, skip
+        }
+
+        try {
+            $conn->exec('TRUNCATE TABLE user_sessions');
+        } catch (\PDOException $e) {
+            // Table doesn't exist, skip
+        }
 
         // Re-enable foreign key checks
         $conn->exec('SET FOREIGN_KEY_CHECKS = 1');

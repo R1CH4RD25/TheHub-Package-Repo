@@ -15,9 +15,12 @@ class SectionPermissionsTest extends TestCase
     protected function setUp(): void
     {
         TestDatabase::beginTransaction();
-    }
 
-    protected function tearDown(): void
+        // Clean up any test users from previous tests to ensure isolation
+        $db = \Hub\Database::getInstance();
+        $db->execute("DELETE FROM users WHERE email LIKE '%@example.com' OR email LIKE '%@test%'");
+        $db->execute("UPDATE users SET is_active = 0 WHERE email NOT LIKE '%@example.com' AND email NOT LIKE '%@test%'");
+    }    protected function tearDown(): void
     {
         TestDatabase::rollback();
     }
@@ -199,9 +202,9 @@ class SectionPermissionsTest extends TestCase
      */
     public function testGetReviewPermissionsReturnsAllPermissions()
     {
-        $userId = $this->createTestUser('manager@example.com', 'manager');
+        $userId = $this->createTestUser('admin@example.com', 'admin');
         $sectionId = $this->createTestSection('full-perm-section');
-        $this->createReviewPermission($sectionId, 'manager', true, true, true, true, true, true, true);
+        $this->createReviewPermission($sectionId, 'admin', true, true, true, true, true, true, true);
 
         $permissions = SectionPermissions::getReviewPermissions($userId, 'full-perm-section');
 
@@ -222,11 +225,11 @@ class SectionPermissionsTest extends TestCase
         $userId = $this->createTestUser('multi@example.com', 'staff');
         $db = \Hub\Database::getInstance();
         // Add global role
-        $db->execute("INSERT INTO user_global_roles (user_id, role) VALUES (?, ?)", [$userId, 'manager']);
+        $db->execute("INSERT INTO user_global_roles (user_id, role) VALUES (?, ?)", [$userId, 'admin']);
 
         $sectionId = $this->createTestSection('multi-role-section');
         $this->createReviewPermission($sectionId, 'staff', true, false, false, false, false, false, false);
-        $this->createReviewPermission($sectionId, 'manager', true, true, true, false, false, false, false);
+        $this->createReviewPermission($sectionId, 'admin', true, true, true, false, false, false, false);
 
         $permissions = SectionPermissions::getReviewPermissions($userId, 'multi-role-section');
 
@@ -282,7 +285,7 @@ class SectionPermissionsTest extends TestCase
         $sectionId = $this->createTestSection('config-section');
         $db = \Hub\Database::getInstance();
         $db->execute(
-            "INSERT INTO section_configuration (section_id, max_file_size, allowed_file_types, form_config)
+            "INSERT INTO section_configuration (section_id, max_attachments, allowed_file_types, form_config)
              VALUES (?, ?, ?, ?)",
             [$sectionId, 10, json_encode(['pdf', 'doc']), json_encode(['field1' => 'value1'])]
         );
@@ -290,7 +293,7 @@ class SectionPermissionsTest extends TestCase
         $config = SectionPermissions::getSectionConfig('config-section');
 
         $this->assertNotNull($config);
-        $this->assertEquals(10, $config['max_file_size']);
+        $this->assertEquals(10, $config['max_attachments']);
         $this->assertIsArray($config['allowed_file_types']);
         $this->assertEquals(['pdf', 'doc'], $config['allowed_file_types']);
         $this->assertIsArray($config['form_config']);
@@ -418,9 +421,7 @@ class SectionPermissionsTest extends TestCase
 
         $this->assertCount(2, $recipients);
         $this->assertEquals('admin', $recipients[0]['role_name']);
-    }
-
-    public function testGetNotificationRecipientsFiltersInactiveRules()
+    }    public function testGetNotificationRecipientsFiltersInactiveRules()
     {
         $this->createTestUser('admin@example.com', 'admin');
         $sectionId = $this->createTestSection('inactive-notify-section');
