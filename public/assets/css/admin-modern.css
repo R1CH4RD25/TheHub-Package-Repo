@@ -178,6 +178,7 @@ select:focus {
 }
 
 /* Modals - Enhanced Premium Animations */
+/* DISABLED: Conflicts with admin.css modal display logic
 .modal {
     opacity: 0;
     transform: scale(0.9) translateY(20px);
@@ -188,6 +189,7 @@ select:focus {
 .modal[style*="display: block"] {
     animation: modalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+*/
 
 .modal-overlay {
     opacity: 0;
@@ -199,12 +201,14 @@ select:focus {
     animation: modalOverlayFadeIn 0.3s ease-out forwards;
 }
 
+/* DISABLED: Conflicts with admin.css modal-content styles
 .modal-content {
     transform: scale(0.9) translateY(30px);
     opacity: 0;
     animation: modalContentEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     animation-delay: 0.1s;
 }
+*/
 
 /* Modal Animations */
 @keyframes modalEnter {
@@ -1300,15 +1304,15 @@ input[type="checkbox"]:checked + label::before {
     .nav-user-info {
         display: none;
     }
-    
+
     .nav-user-arrow {
         display: none;
     }
-    
+
     .nav-user-menu {
         right: -10px;
     }
-    
+
     .menu-group-header {
         font-size: 0.9em;
         padding: 10px 15px;
@@ -1386,7 +1390,7 @@ input[type="checkbox"]:checked + label::before {
     z-index: 999998;
 }
 
-/* 
+/*
    Z-INDEX HIERARCHY FIX
    Proper stacking order for dropdowns above header content
 */
