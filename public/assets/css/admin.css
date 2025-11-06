@@ -499,7 +499,6 @@
     margin: 0;
     cursor: pointer;
     display: flex;
-    align-items: center;
     justify-content: center;
     border-radius: 6px;
     font-size: 1.75rem;
