@@ -13,7 +13,7 @@
     top: 0;
     z-index: 10000;
     grid-row: 1;
-    overflow: hidden;
+    overflow: visible; /* Allow dropdown menu to show */
     min-height: var(--header-height, 80px);
     max-height: var(--header-height, 80px);
     height: var(--header-height, 80px);
@@ -235,24 +235,24 @@
     .nav-content {
         padding: 0 1rem;
     }
-    
+
     .nav-brand-subtitle {
         display: none;
     }
-    
+
     .nav-user-info {
         display: none;
     }
-    
+
     .nav-links > a {
         padding: 0.5rem 10px;
         font-size: 0.9rem;
     }
-    
+
     .nav-toggle {
         display: block;
     }
-    
+
     .mobile-menu {
         display: block;
     }
@@ -262,11 +262,11 @@
     .nav-brand-title {
         font-size: 1.1rem;
     }
-    
+
     .nav-brand img {
         height: calc(var(--logo-height, 50px) * 0.8) !important;
     }
-    
+
     .nav-links > a span {
         display: none;
     }
