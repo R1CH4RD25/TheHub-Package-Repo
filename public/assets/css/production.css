@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  * 
- * Generated: Thu Nov  6 09:41:49 PM UTC 2025
+ * Generated: Thu Nov  6 09:42:47 PM UTC 2025
  * ============================================================================
  */
 
@@ -3982,6 +3982,11 @@ input[type="checkbox"]:checked + label::before {
     color: inherit;
     transform-origin: center center;
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .modal-close:hover {
