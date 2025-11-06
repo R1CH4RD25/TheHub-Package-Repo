@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  * 
- * Generated: Thu Nov  6 09:23:50 PM UTC 2025
+ * Generated: Thu Nov  6 09:27:51 PM UTC 2025
  * ============================================================================
  */
 
@@ -3948,7 +3948,7 @@ input[type="checkbox"]:checked + label::before {
     color: #6c757d;
     cursor: pointer;
     line-height: 1;
-    background: transparent;
+    background: transparent !important;
     border: none;
     padding: 0;
     margin: 0;
@@ -3959,21 +3959,22 @@ input[type="checkbox"]:checked + label::before {
     justify-content: center;
     border-radius: 50%;
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
 }
 
 .modal-close::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
     background: rgba(211, 47, 47, 0.2);
     border-radius: 50%;
-    transform: scale(0);
+    transform: translate(-50%, -50%) scale(0);
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 0;
+    z-index: -1;
 }
 
 .modal-close svg,
@@ -3988,8 +3989,8 @@ input[type="checkbox"]:checked + label::before {
 }
 
 .modal-close:hover::before {
-    transform: scale(1.5);
-    background: rgba(211, 47, 47, 0.9);
+    transform: translate(-50%, -50%) scale(1.5);
+    background: rgba(211, 47, 47, 0.85);
 }
 
 .modal-close:active {
