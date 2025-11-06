@@ -202,7 +202,7 @@ class SectionTypeTest extends TestCase
     public function testGetLabelReturnsFallbackForUnknownType(): void
     {
         $label = SectionType::getLabel('unknown_type');
-        
+
         $this->assertEquals('Unknown type', $label);
     }
 
@@ -212,7 +212,7 @@ class SectionTypeTest extends TestCase
     public function testGetLabelFallbackHandlesUnderscores(): void
     {
         $label = SectionType::getLabel('custom_section_type');
-        
+
         $this->assertEquals('Custom section type', $label);
     }
 
@@ -234,7 +234,7 @@ class SectionTypeTest extends TestCase
     public function testGetIconReturnsFallbackForUnknownType(): void
     {
         $icon = SectionType::getIcon('unknown_type');
-        
+
         $this->assertEquals('📁', $icon);
     }
 
@@ -256,7 +256,7 @@ class SectionTypeTest extends TestCase
     public function testGetColorReturnsFallbackForUnknownType(): void
     {
         $color = SectionType::getColor('unknown_type');
-        
+
         $this->assertEquals('#666666', $color);
     }
 
@@ -302,7 +302,7 @@ class SectionTypeTest extends TestCase
     public function testHasFeatureReturnsFalseForUnknownFeature(): void
     {
         $result = SectionType::hasFeature('recording', 'unknown_feature');
-        
+
         $this->assertFalse($result);
     }
 
@@ -312,7 +312,7 @@ class SectionTypeTest extends TestCase
     public function testHasFeatureReturnsFalseForUnknownType(): void
     {
         $result = SectionType::hasFeature('unknown_type', 'has_export');
-        
+
         $this->assertFalse($result);
     }
 
@@ -348,7 +348,7 @@ class SectionTypeTest extends TestCase
         $this->assertIsString($enum);
         $this->assertStringStartsWith('ENUM(', $enum);
         $this->assertStringEndsWith(')', $enum);
-        
+
         // Verify all types are included
         $this->assertStringContainsString("'recording'", $enum);
         $this->assertStringContainsString("'request_form'", $enum);
@@ -380,7 +380,7 @@ class SectionTypeTest extends TestCase
         $json = SectionType::getForJavaScript();
 
         $this->assertIsString($json);
-        
+
         // Should be valid JSON
         $decoded = json_decode($json, true);
         $this->assertIsArray($decoded);

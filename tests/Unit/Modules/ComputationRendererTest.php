@@ -39,11 +39,11 @@ class ComputationRendererTest extends TestCase
                 INDEX idx_tenant (tenant_id),
                 INDEX idx_status (status)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-            
+
             // Create test user for audit logging (outside transaction)
-            self::$db->execute("INSERT IGNORE INTO users (id, email, name, role, is_active) 
+            self::$db->execute("INSERT IGNORE INTO users (id, email, name, role, is_active)
                 VALUES (999, 'test@test.com', 'Test User', 'admin', 1)");
-            
+
             self::$computationTableCreated = true;
         }
 
@@ -232,8 +232,8 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithSumAggregation(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
-            VALUES ('test_tenant', 100), 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
+            VALUES ('test_tenant', 100),
                    ('test_tenant', 200),
                    ('test_tenant', 300)");
 
@@ -251,8 +251,8 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithAvgAggregation(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, score) 
-            VALUES ('test_tenant', 85), 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, score)
+            VALUES ('test_tenant', 85),
                    ('test_tenant', 90),
                    ('test_tenant', 95)");
 
@@ -270,8 +270,8 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithCountAggregation(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, status) 
-            VALUES ('test_tenant', 'active'), 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, status)
+            VALUES ('test_tenant', 'active'),
                    ('test_tenant', 'active'),
                    ('test_tenant', 'inactive')");
 
@@ -289,8 +289,8 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithMinAggregation(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
-            VALUES ('test_tenant', 500), 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
+            VALUES ('test_tenant', 500),
                    ('test_tenant', 200),
                    ('test_tenant', 800)");
 
@@ -308,8 +308,8 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithMaxAggregation(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
-            VALUES ('test_tenant', 500), 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
+            VALUES ('test_tenant', 500),
                    ('test_tenant', 200),
                    ('test_tenant', 800)");
 
@@ -327,7 +327,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithFilters(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, status, amount) 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, status, amount)
             VALUES ('test_tenant', 'active', 100),
                    ('test_tenant', 'active', 200),
                    ('test_tenant', 'inactive', 999)");
@@ -351,7 +351,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithRecordIdSimpleArithmetic(): void
     {
-        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, grade1, grade2, grade3) 
+        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, grade1, grade2, grade3)
             VALUES ('test_tenant', 85, 90, 88)");
         $recordId = self::$db->getConnection()->lastInsertId();
 
@@ -374,7 +374,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithRecordIdMultiplication(): void
     {
-        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, quantity, amount) 
+        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, quantity, amount)
             VALUES ('test_tenant', 5, 25.50)");
         $recordId = self::$db->getConnection()->lastInsertId();
 
@@ -416,7 +416,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithCurrencyFormat(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
             VALUES ('test_tenant', 1234.56)");
 
         $config = [
@@ -434,7 +434,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithNumberFormat(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
             VALUES ('test_tenant', 9876543.21)");
 
         $config = [
@@ -452,7 +452,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithPercentFormat(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, score) 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, score)
             VALUES ('test_tenant', 87.654)");
 
         $config = [
@@ -470,7 +470,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithDecimalFormat(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
             VALUES ('test_tenant', 123.456789)");
 
         $config = [
@@ -490,7 +490,7 @@ class ComputationRendererTest extends TestCase
 
     public function testTenantIsolation(): void
     {
-        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount) 
+        self::$db->execute("INSERT INTO computation_test_data (tenant_id, amount)
             VALUES ('test_tenant', 100),
                    ('test_tenant', 200),
                    ('other_tenant', 9999)");
@@ -511,7 +511,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleWithComplexArithmetic(): void
     {
-        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, grade1, grade2, credits) 
+        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, grade1, grade2, credits)
             VALUES ('test_tenant', 85, 90, 3)");
         $recordId = self::$db->getConnection()->lastInsertId();
 
@@ -536,7 +536,7 @@ class ComputationRendererTest extends TestCase
 
     public function testHandleSavesResultToField(): void
     {
-        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, grade1, grade2, grade3) 
+        $stmt = self::$db->execute("INSERT INTO computation_test_data (tenant_id, grade1, grade2, grade3)
             VALUES ('test_tenant', 80, 85, 90)");
         $recordId = self::$db->getConnection()->lastInsertId();
 
@@ -574,7 +574,7 @@ class ComputationRendererTest extends TestCase
         ];
 
         $renderer = new ComputationRenderer($config);
-        
+
         // Use non-existent record to trigger error
         $_GET['record_id'] = 99999;
         $html = $renderer->render();

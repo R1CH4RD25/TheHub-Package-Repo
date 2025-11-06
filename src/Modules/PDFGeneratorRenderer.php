@@ -13,16 +13,16 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * PDFGeneratorRenderer - Generate PDF documents from templates
- * 
+ *
  * Implements PDFGenerator module type from MODULE_CATALOG_V2.md
- * 
+ *
  * Use cases:
  * - Employee evaluation reports
  * - Purchase order documents
  * - Certificates and awards
  * - Invoices and receipts
  * - Custom reports with data
- * 
+ *
  * Features:
  * - HTML template rendering with mPDF
  * - Variable substitution {firstName}, {date}, etc.
@@ -33,7 +33,7 @@ require_once __DIR__ . '/../bootstrap.php';
  * - File storage with signed URLs
  * - Direct download or save to disk
  * - Multi-tenant file isolation
- * 
+ *
  * @author The Hub Team
  * @version 1.0.0
  */
@@ -42,19 +42,19 @@ class PDFGeneratorRenderer implements ModuleInterface
     private array $config;
     private Database $db;
     private ?array $data = null;
-    
+
     public function __construct(array $config)
     {
         $this->config = $config;
         $this->db = Database::getInstance();
     }
-    
+
     /**
      * Render PDF configuration interface
-     * 
+     *
      * PDFGenerator modules don't have a visual UI,
      * but we can show configuration and generate button.
-     * 
+     *
      * @return string HTML output
      */
     public function render(): string
@@ -62,34 +62,34 @@ class PDFGeneratorRenderer implements ModuleInterface
         if (!$this->validate()) {
             return '<div class="alert alert-danger">Invalid PDF generator configuration</div>';
         }
-        
+
         $html = '<div class="pdf-generator-info">';
         $html .= '<div class="alert alert-info">';
         $html .= '<h5><i class="bi bi-file-pdf me-2"></i>PDF Generator Module</h5>';
         $html .= '<p class="mb-0">This module generates PDF documents programmatically. ';
         $html .= 'It is typically triggered by other modules or actions.</p>';
         $html .= '</div>';
-        
+
         // Show configuration (for admins)
         if (Auth::hasRole('admin') || Auth::hasRole('super_admin')) {
             $html .= '<div class="card">';
             $html .= '<div class="card-header"><h6 class="mb-0">Configuration</h6></div>';
             $html .= '<div class="card-body">';
             $html .= '<dl class="row mb-0">';
-            
+
             $html .= '<dt class="col-sm-3">Filename</dt>';
             $html .= '<dd class="col-sm-9">' . htmlspecialchars($this->config['filename'] ?? 'document.pdf') . '</dd>';
-            
+
             $html .= '<dt class="col-sm-3">Orientation</dt>';
             $html .= '<dd class="col-sm-9">' . htmlspecialchars($this->config['orientation'] ?? 'portrait') . '</dd>';
-            
+
             $html .= '<dt class="col-sm-3">Template</dt>';
             $html .= '<dd class="col-sm-9">' . htmlspecialchars($this->config['template'] ?? 'inline') . '</dd>';
-            
+
             $html .= '</dl>';
             $html .= '</div>';
             $html .= '</div>';
-            
+
             // Test generation button
             $html .= '<div class="mt-3">';
             $html .= '<form method="POST">';
@@ -101,15 +101,15 @@ class PDFGeneratorRenderer implements ModuleInterface
             $html .= '</form>';
             $html .= '</div>';
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Handle PDF generation
-     * 
+     *
      * @param array $data Data for template substitution
      * @return array Result
      */
@@ -121,39 +121,39 @@ class PDFGeneratorRenderer implements ModuleInterface
                 'error' => 'Invalid PDF configuration'
             ];
         }
-        
+
         $this->data = $data;
-        
+
         try {
             // Generate PDF
             $result = $this->generatePDF($data);
-            
+
             // Log generation
-            AuditLogger::log('pdf_generated', 'pdf_generator', $this->config['id'] ?? 'unknown', [
+            AuditLogger::log('pdf_generated', 'pdf_generator', $this->config['id'] ?? null, [
                 'filename' => $result['filename'] ?? 'unknown',
                 'size' => $result['size'] ?? 0
             ]);
-            
+
             return $result;
-            
+
         } catch (Exception $e) {
             error_log("PDF generation error: " . $e->getMessage());
-            
+
             // Log failure
-            AuditLogger::log('pdf_failed', 'pdf_generator', $this->config['id'] ?? 'unknown', [
+            AuditLogger::log('pdf_failed', 'pdf_generator', $this->config['id'] ?? null, [
                 'error' => $e->getMessage()
             ]);
-            
+
             return [
                 'success' => false,
                 'error' => 'Failed to generate PDF'
             ];
         }
     }
-    
+
     /**
      * Generate PDF document
-     * 
+     *
      * @param array $data Template data
      * @return array Result with file path
      */
@@ -161,42 +161,42 @@ class PDFGeneratorRenderer implements ModuleInterface
     {
         // Render HTML content
         $html = $this->renderTemplate($data);
-        
+
         // Configure mPDF
         $config = $this->getMpdfConfig();
         $mpdf = new Mpdf($config);
-        
+
         // Set metadata
         $this->setMetadata($mpdf, $data);
-        
+
         // Add header/footer
         $this->addHeaderFooter($mpdf, $data);
-        
+
         // Add watermark if configured
         $this->addWatermark($mpdf, $data);
-        
+
         // Write HTML
         $mpdf->WriteHTML($html);
-        
+
         // Determine output mode
         $outputMode = $this->config['output'] ?? 'save';
-        
+
         switch ($outputMode) {
             case 'download':
                 return $this->outputDownload($mpdf, $data);
-            
+
             case 'inline':
                 return $this->outputInline($mpdf, $data);
-            
+
             case 'save':
             default:
                 return $this->outputSave($mpdf, $data);
         }
     }
-    
+
     /**
      * Get mPDF configuration
-     * 
+     *
      * @return array mPDF config
      */
     private function getMpdfConfig(): array
@@ -205,7 +205,7 @@ class PDFGeneratorRenderer implements ModuleInterface
         if (!in_array($orientation, ['P', 'L'])) {
             $orientation = 'P';
         }
-        
+
         return [
             'mode' => 'utf-8',
             'format' => $this->config['format'] ?? 'Letter',
@@ -219,10 +219,10 @@ class PDFGeneratorRenderer implements ModuleInterface
             'tempDir' => sys_get_temp_dir()
         ];
     }
-    
+
     /**
      * Set PDF metadata
-     * 
+     *
      * @param Mpdf $mpdf mPDF instance
      * @param array $data Template data
      */
@@ -231,16 +231,16 @@ class PDFGeneratorRenderer implements ModuleInterface
         $title = $this->substituteVariables($this->config['title'] ?? 'Document', $data);
         $author = $this->config['author'] ?? $_ENV['APP_NAME'] ?? 'The Hub';
         $subject = $this->substituteVariables($this->config['subject'] ?? '', $data);
-        
+
         $mpdf->SetTitle($title);
         $mpdf->SetAuthor($author);
         $mpdf->SetSubject($subject);
         $mpdf->SetCreator($author);
     }
-    
+
     /**
      * Add header and footer
-     * 
+     *
      * @param Mpdf $mpdf mPDF instance
      * @param array $data Template data
      */
@@ -251,13 +251,13 @@ class PDFGeneratorRenderer implements ModuleInterface
             $header = $this->substituteVariables($this->config['header'], $data);
             $mpdf->SetHTMLHeader($header);
         }
-        
+
         // Footer
         if (!empty($this->config['footer'])) {
             $footer = $this->substituteVariables($this->config['footer'], $data);
             $mpdf->SetHTMLFooter($footer);
         }
-        
+
         // Default footer with page numbers
         if (empty($this->config['footer']) && ($this->config['showPageNumbers'] ?? true)) {
             $footerHtml = '<div style="text-align: center; font-size: 10px; color: #666;">';
@@ -266,10 +266,10 @@ class PDFGeneratorRenderer implements ModuleInterface
             $mpdf->SetHTMLFooter($footerHtml);
         }
     }
-    
+
     /**
      * Add watermark
-     * 
+     *
      * @param Mpdf $mpdf mPDF instance
      * @param array $data Template data
      */
@@ -278,9 +278,9 @@ class PDFGeneratorRenderer implements ModuleInterface
         if (empty($this->config['watermark'])) {
             return;
         }
-        
+
         $watermark = $this->config['watermark'];
-        
+
         if (is_string($watermark)) {
             // Text watermark
             $text = $this->substituteVariables($watermark, $data);
@@ -300,10 +300,10 @@ class PDFGeneratorRenderer implements ModuleInterface
             }
         }
     }
-    
+
     /**
      * Output as download
-     * 
+     *
      * @param Mpdf $mpdf mPDF instance
      * @param array $data Template data
      * @return array Result
@@ -311,20 +311,20 @@ class PDFGeneratorRenderer implements ModuleInterface
     private function outputDownload(Mpdf $mpdf, array $data): array
     {
         $filename = $this->getFilename($data);
-        
+
         // This will trigger browser download and exit
         $mpdf->Output($filename, \Mpdf\Output\Destination::DOWNLOAD);
-        
+
         return [
             'success' => true,
             'filename' => $filename,
             'mode' => 'download'
         ];
     }
-    
+
     /**
      * Output inline (display in browser)
-     * 
+     *
      * @param Mpdf $mpdf mPDF instance
      * @param array $data Template data
      * @return array Result
@@ -332,20 +332,20 @@ class PDFGeneratorRenderer implements ModuleInterface
     private function outputInline(Mpdf $mpdf, array $data): array
     {
         $filename = $this->getFilename($data);
-        
+
         // This will display in browser and exit
         $mpdf->Output($filename, \Mpdf\Output\Destination::INLINE);
-        
+
         return [
             'success' => true,
             'filename' => $filename,
             'mode' => 'inline'
         ];
     }
-    
+
     /**
      * Save to file system
-     * 
+     *
      * @param Mpdf $mpdf mPDF instance
      * @param array $data Template data
      * @return array Result with file path
@@ -353,22 +353,22 @@ class PDFGeneratorRenderer implements ModuleInterface
     private function outputSave(Mpdf $mpdf, array $data): array
     {
         $filename = $this->getFilename($data);
-        
+
         // Determine storage path
         $storagePath = $this->getStoragePath($data);
-        
+
         // Ensure directory exists
         $dir = dirname($storagePath);
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
-        
+
         // Save file
         $mpdf->Output($storagePath, \Mpdf\Output\Destination::FILE);
-        
+
         // Get file size
         $size = filesize($storagePath);
-        
+
         // Generate signed URL if configured
         $url = null;
         if ($this->config['signedUrl'] ?? false) {
@@ -378,7 +378,7 @@ class PDFGeneratorRenderer implements ModuleInterface
             $publicPath = str_replace($_SERVER['DOCUMENT_ROOT'] ?? '', '', $storagePath);
             $url = $publicPath;
         }
-        
+
         return [
             'success' => true,
             'filename' => $filename,
@@ -388,10 +388,10 @@ class PDFGeneratorRenderer implements ModuleInterface
             'mode' => 'save'
         ];
     }
-    
+
     /**
      * Get filename for PDF
-     * 
+     *
      * @param array $data Template data
      * @return string Filename
      */
@@ -401,21 +401,21 @@ class PDFGeneratorRenderer implements ModuleInterface
             $this->config['filename'] ?? 'document.pdf',
             $data
         );
-        
+
         // Ensure .pdf extension
         if (!str_ends_with(strtolower($filename), '.pdf')) {
             $filename .= '.pdf';
         }
-        
+
         // Sanitize filename
         $filename = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $filename);
-        
+
         return $filename;
     }
-    
+
     /**
      * Get storage path for PDF
-     * 
+     *
      * @param array $data Template data
      * @return string File path
      */
@@ -424,21 +424,21 @@ class PDFGeneratorRenderer implements ModuleInterface
         $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/../uploads/pdfs';
         $tenantId = $_SESSION['tenant_id'] ?? 'default';
         $yearMonth = date('Y/m');
-        
+
         // Custom storage path from config
         if (!empty($this->config['storagePath'])) {
             $customPath = $this->substituteVariables($this->config['storagePath'], $data);
             return $customPath;
         }
-        
+
         // Default: uploads/pdfs/{tenant}/{year}/{month}/{filename}
         $filename = $this->getFilename($data);
         return "{$uploadDir}/{$tenantId}/{$yearMonth}/{$filename}";
     }
-    
+
     /**
      * Generate signed URL for file access
-     * 
+     *
      * @param string $filePath File path
      * @param array $data Template data
      * @return string Signed URL
@@ -448,48 +448,48 @@ class PDFGeneratorRenderer implements ModuleInterface
         // Generate token
         $token = bin2hex(random_bytes(32));
         $expiry = time() + ($this->config['urlExpiry'] ?? 3600); // Default 1 hour
-        
+
         // Store token in database
         $stmt = $this->db->prepare("
             INSERT INTO file_access_tokens (token, file_path, expires_at, created_at)
             VALUES (?, ?, ?, NOW())
         ");
-        
+
         $stmt->execute([$token, $filePath, date('Y-m-d H:i:s', $expiry)]);
-        
+
         // Build URL
         $baseUrl = $_ENV['APP_URL'] ?? 'http://localhost';
         return "{$baseUrl}/download.php?token={$token}";
     }
-    
+
     /**
      * Render HTML template with data
-     * 
+     *
      * @param array $data Template data
      * @return string HTML content
      */
     private function renderTemplate(array $data): string
     {
         $template = $this->config['template'] ?? null;
-        
+
         // Inline HTML template
         if (!empty($this->config['html'])) {
             return $this->substituteVariables($this->config['html'], $data);
         }
-        
+
         // External template file
         if ($template && file_exists($template)) {
             $templateContent = file_get_contents($template);
             return $this->substituteVariables($templateContent, $data);
         }
-        
+
         // Default template
         return $this->renderDefaultTemplate($data);
     }
-    
+
     /**
      * Render default PDF template
-     * 
+     *
      * @param array $data Template data
      * @return string HTML
      */
@@ -497,7 +497,7 @@ class PDFGeneratorRenderer implements ModuleInterface
     {
         $title = $this->substituteVariables($this->config['title'] ?? 'Document', $data);
         $content = $data['content'] ?? 'No content provided.';
-        
+
         $html = '<!DOCTYPE html>';
         $html .= '<html>';
         $html .= '<head>';
@@ -514,13 +514,13 @@ class PDFGeneratorRenderer implements ModuleInterface
         $html .= $content;
         $html .= '</body>';
         $html .= '</html>';
-        
+
         return $html;
     }
-    
+
     /**
      * Substitute variables in template
-     * 
+     *
      * @param string $template Template string
      * @param array $data Data for substitution
      * @return string Processed template
@@ -533,20 +533,20 @@ class PDFGeneratorRenderer implements ModuleInterface
         $data['currentTime'] = date('g:i A');
         $data['pageNumber'] = '{PAGENO}';
         $data['pageCount'] = '{nbpg}';
-        
+
         // Replace {variable} patterns
         foreach ($data as $key => $value) {
             if (is_scalar($value)) {
                 $template = str_replace('{' . $key . '}', (string)$value, $template);
             }
         }
-        
+
         return $template;
     }
-    
+
     /**
      * Static helper: Generate PDF from other modules
-     * 
+     *
      * @param array $config PDF configuration
      * @param array $data Template data
      * @return array Result
@@ -556,27 +556,27 @@ class PDFGeneratorRenderer implements ModuleInterface
         $renderer = new self($config);
         return $renderer->handle($data);
     }
-    
+
     /**
      * Get module configuration
-     * 
+     *
      * @return array Configuration
      */
     public function getConfig(): array
     {
         return $this->config;
     }
-    
+
     /**
      * Validate module configuration
-     * 
+     *
      * @return bool True if valid
      */
     public function validate(): bool
     {
         // Must have content (html, template, or default will be used)
         // Filename is optional (will use 'document.pdf' as default)
-        
+
         return true;
     }
 }

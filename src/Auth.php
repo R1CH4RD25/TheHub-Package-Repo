@@ -463,7 +463,7 @@ class Auth
 
         $db = Database::getInstance();
         $dbUser = $db->fetchOne(
-            "SELECT id, email, name, role, is_active, picture FROM users WHERE id = ?",
+            "SELECT id, email, name, role, is_active FROM users WHERE id = ?",
             [$_SESSION['user_id']]
         );
 

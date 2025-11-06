@@ -10,17 +10,17 @@ class PackageValidatorTest extends TestCase
 {
     private PackageValidator $validator;
     private static Database $db;
-    
+
     public static function setUpBeforeClass(): void
     {
         self::$db = Database::getInstance();
     }
-    
+
     protected function setUp(): void
     {
         $this->validator = new PackageValidator();
     }
-    
+
     /**
      * Test validate with minimal valid package
      */
@@ -38,14 +38,14 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('overall_status', $result);
         $this->assertArrayHasKey('checks', $result);
     }
-    
+
     /**
      * Test validate with missing required field
      */
@@ -61,13 +61,13 @@ class PackageValidatorTest extends TestCase
             ]
             // Missing 'fields' and 'permissions'
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertArrayHasKey('overall_status', $result);
         $this->assertEquals('fail', $result['overall_status']);
     }
-    
+
     /**
      * Test validate with invalid format version
      */
@@ -84,12 +84,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertEquals('fail', $result['overall_status']);
     }
-    
+
     /**
      * Test validate with invalid semver
      */
@@ -106,19 +106,19 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertEquals('fail', $result['overall_status']);
     }
-    
+
     /**
      * Test validate with valid semver variations
      */
     public function testValidateWithValidSemverVariations(): void
     {
         $versions = ['1.0.0', '2.5.3', '10.20.30', '0.0.1'];
-        
+
         foreach ($versions as $version) {
             $package = [
                 'format_version' => '1.0',
@@ -131,14 +131,14 @@ class PackageValidatorTest extends TestCase
                 'fields' => [],
                 'permissions' => []
             ];
-            
+
             $result = $this->validator->validate($package, 'new');
-            
+
             // Should not fail on version format
             $this->assertIsArray($result);
         }
     }
-    
+
     /**
      * Test validate with system requirements
      */
@@ -159,12 +159,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertArrayHasKey('checks', $result);
     }
-    
+
     /**
      * Test validate with fields
      */
@@ -188,12 +188,12 @@ class PackageValidatorTest extends TestCase
             ],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertIsArray($result);
     }
-    
+
     /**
      * Test validate for upgrade
      */
@@ -210,13 +210,13 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'upgrade');
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('overall_status', $result);
     }
-    
+
     /**
      * Test validate for downgrade
      */
@@ -233,12 +233,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'downgrade');
-        
+
         $this->assertIsArray($result);
     }
-    
+
     /**
      * Test validate with dependencies
      */
@@ -260,12 +260,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertArrayHasKey('checks', $result);
     }
-    
+
     /**
      * Test validate with conflicts
      */
@@ -285,12 +285,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertIsArray($result);
     }
-    
+
     /**
      * Test validate with exception handling
      */
@@ -298,12 +298,12 @@ class PackageValidatorTest extends TestCase
     {
         // Invalid package structure that will cause exception
         $package = [];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertEquals('fail', $result['overall_status']);
     }
-    
+
     /**
      * Test result structure includes all required keys
      */
@@ -320,9 +320,9 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertArrayHasKey('overall_status', $result);
         $this->assertArrayHasKey('checks', $result);
         $this->assertArrayHasKey('warnings', $result);
@@ -331,7 +331,7 @@ class PackageValidatorTest extends TestCase
         $this->assertArrayHasKey('can_install', $result);
         $this->assertArrayHasKey('summary', $result);
     }
-    
+
     /**
      * Test validate with missing package metadata
      */
@@ -345,12 +345,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertEquals('fail', $result['overall_status']);
     }
-    
+
     /**
      * Test validate with empty fields array
      */
@@ -367,12 +367,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertArrayHasKey('overall_status', $result);
     }
-    
+
     /**
      * Test validate with multiple field types
      */
@@ -394,12 +394,12 @@ class PackageValidatorTest extends TestCase
             ],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertIsArray($result);
     }
-    
+
     /**
      * Test checks array contains check objects
      */
@@ -416,11 +416,11 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertIsArray($result['checks']);
-        
+
         if (!empty($result['checks'])) {
             $firstCheck = $result['checks'][0];
             $this->assertArrayHasKey('check_type', $firstCheck);
@@ -428,7 +428,7 @@ class PackageValidatorTest extends TestCase
             $this->assertArrayHasKey('severity', $firstCheck);
         }
     }
-    
+
     /**
      * Test status is pass when no critical errors
      */
@@ -449,13 +449,13 @@ class PackageValidatorTest extends TestCase
                 'php_version' => '>=7.4'
             ]
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         // Status should be pass or warning, not fail
         $this->assertContains($result['overall_status'], ['pass', 'warning', 'fail']);
     }
-    
+
     /**
      * Test validate with version as non-string
      */
@@ -472,12 +472,12 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertEquals('fail', $result['overall_status']);
     }
-    
+
     /**
      * Test validate with complex permissions
      */
@@ -499,12 +499,12 @@ class PackageValidatorTest extends TestCase
                 'delete' => ['super_admin']
             ]
         ];
-        
+
         $result = $this->validator->validate($package, 'new');
-        
+
         $this->assertIsArray($result);
     }
-    
+
     /**
      * Test severity levels are constants
      */
@@ -515,7 +515,7 @@ class PackageValidatorTest extends TestCase
         $this->assertEquals('warning', PackageValidator::SEVERITY_WARNING);
         $this->assertEquals('info', PackageValidator::SEVERITY_INFO);
     }
-    
+
     /**
      * Test status constants
      */
@@ -525,7 +525,7 @@ class PackageValidatorTest extends TestCase
         $this->assertEquals('fail', PackageValidator::STATUS_FAIL);
         $this->assertEquals('warning', PackageValidator::STATUS_WARNING);
     }
-    
+
     /**
      * Test validate with reinstall type
      */
@@ -542,13 +542,13 @@ class PackageValidatorTest extends TestCase
             'fields' => [],
             'permissions' => []
         ];
-        
+
         $result = $this->validator->validate($package, 'reinstall');
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('overall_status', $result);
     }
-    
+
     /**
      * Test generateReport method
      */
@@ -570,15 +570,15 @@ class PackageValidatorTest extends TestCase
             'warnings' => [],
             'timestamp' => '2025-11-05 10:00:00'
         ];
-        
+
         $report = $this->validator->generateReport($validationResults);
-        
+
         $this->assertIsString($report);
         $this->assertStringContainsString('PACKAGE COMPATIBILITY REPORT', $report);
         $this->assertStringContainsString('Total Checks: 5', $report);
         $this->assertStringContainsString('Can Install: YES', $report);
     }
-    
+
     /**
      * Test generateReport with failures
      */
@@ -606,9 +606,9 @@ class PackageValidatorTest extends TestCase
             'warnings' => [],
             'timestamp' => '2025-11-05 10:00:00'
         ];
-        
+
         $report = $this->validator->generateReport($validationResults);
-        
+
         $this->assertStringContainsString('CRITICAL FAILURES', $report);
         $this->assertStringContainsString('Test Check', $report);
         $this->assertStringContainsString('Can Install: NO', $report);

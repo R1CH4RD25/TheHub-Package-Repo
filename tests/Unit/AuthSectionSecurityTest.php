@@ -129,8 +129,14 @@ class AuthSectionSecurityTest extends TestCase {
     }
 
     public function testCanDeleteUserForManagerRole() {
+        // Create a manager user (not user_id 1 which is super_admin)
+        $db = Database::getInstance();
+        $db->execute("DELETE FROM users WHERE id = 50");
+        $db->execute("INSERT INTO users (id, email, name, role, is_active) 
+                     VALUES (50, 'manager@test.com', 'Manager', 'manager', 1)");
+        
         $_SESSION['logged_in'] = true;
-        $_SESSION['user_id'] = 1;
+        $_SESSION['user_id'] = 50;
         $_SESSION['role'] = 'manager';
 
         $result = Auth::canDeleteUser(999);

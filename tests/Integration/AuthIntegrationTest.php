@@ -18,13 +18,76 @@ use Hub\AuditLogger;
 #[\PHPUnit\Framework\Attributes\CoversClass(Database::class)]
 class AuthIntegrationTest extends TestCase
 {
-    private Database $db;
+    private static Database $db;
     private array $testUsers = [];
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        self::$db = Database::getInstance();
+
+        // Create tables for integration tests
+        self::$db->execute("
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                google_id VARCHAR(255) UNIQUE NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                username VARCHAR(100) UNIQUE NULL,
+                password VARCHAR(255) NULL,
+                name VARCHAR(255) NOT NULL,
+                role ENUM('staff', 'manager', 'admin', 'super_admin') DEFAULT 'staff',
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                last_login TIMESTAMP NULL,
+                invited_by INT NULL,
+                invited_at DATETIME NULL,
+                approved_by INT NULL,
+                approved_at DATETIME NULL,
+                INDEX idx_email (email),
+                INDEX idx_google_id (google_id),
+                INDEX idx_username (username),
+                INDEX idx_role (role),
+                FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        self::$db->execute("
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                action VARCHAR(50) NOT NULL,
+                table_name VARCHAR(50) NOT NULL,
+                record_id INT NOT NULL,
+                old_values TEXT,
+                new_values TEXT,
+                ip_address VARCHAR(45),
+                user_agent VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_user_id (user_id),
+                INDEX idx_table_record (table_name, record_id),
+                INDEX idx_created_at (created_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        // Clean up tables
+        self::$db->execute("SET FOREIGN_KEY_CHECKS = 0");
+        self::$db->execute("DROP TABLE IF EXISTS audit_log");
+        self::$db->execute("DROP TABLE IF EXISTS users");
+        self::$db->execute("SET FOREIGN_KEY_CHECKS = 1");
+
+        parent::tearDownAfterClass();
+    }
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->db = Database::getInstance();
+        $this->db = self::$db;
         $this->db->beginTransaction();
 
         // Clean up any existing test data

@@ -8,13 +8,93 @@ class TestDatabase
 {
     private static $instance = null;
     private static $inTransaction = false;
+    private static $tablesCreated = false;
 
     public static function getInstance(): Database
     {
         if (self::$instance === null) {
             self::$instance = Database::getInstance();
+            self::ensureTablesExist();
         }
         return self::$instance;
+    }
+
+    /**
+     * Ensure all required tables exist for testing
+     */
+    private static function ensureTablesExist(): void
+    {
+        if (self::$tablesCreated) {
+            return;
+        }
+
+        $db = self::$instance;
+
+        // Create users table
+        $db->execute("
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                google_id VARCHAR(255) UNIQUE NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                username VARCHAR(100) UNIQUE NULL,
+                password VARCHAR(255) NULL,
+                name VARCHAR(255) NOT NULL,
+                role ENUM('staff', 'manager', 'admin', 'super_admin') DEFAULT 'staff',
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                last_login TIMESTAMP NULL,
+                invited_by INT NULL,
+                invited_at DATETIME NULL,
+                approved_by INT NULL,
+                approved_at DATETIME NULL,
+                INDEX idx_email (email),
+                INDEX idx_google_id (google_id),
+                INDEX idx_username (username),
+                INDEX idx_role (role),
+                FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        // Create audit_log table
+        $db->execute("
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                action VARCHAR(50) NOT NULL,
+                table_name VARCHAR(50) NOT NULL,
+                record_id INT NOT NULL,
+                old_values TEXT,
+                new_values TEXT,
+                ip_address VARCHAR(45),
+                user_agent VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_user_id (user_id),
+                INDEX idx_table_record (table_name, record_id),
+                INDEX idx_created_at (created_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        // Create themes table
+        $db->execute("
+            CREATE TABLE IF NOT EXISTS themes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                settings JSON NOT NULL,
+                is_active BOOLEAN DEFAULT FALSE,
+                is_system BOOLEAN DEFAULT FALSE,
+                created_by INT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_is_active (is_active),
+                INDEX idx_is_system (is_system),
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        self::$tablesCreated = true;
     }
 
     public static function beginTransaction(): void
@@ -94,7 +174,6 @@ class TestDatabase
             'email' => $email,
             'name' => $name,
             'role' => $role,
-            'picture' => '/assets/images/default-avatar.svg',
             'is_active' => 1,
             'created_at' => date('Y-m-d H:i:s')
         ]);
