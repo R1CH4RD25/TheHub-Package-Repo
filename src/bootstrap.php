@@ -38,6 +38,10 @@ if ($isProduction && !$debugMode) {
     ini_set('error_log', __DIR__ . '/../logs/php-errors.log');
 }
 
+// CSS Production Mode - Use minified production.css instead of individual files
+// Enable in production for performance, disable in dev for easier debugging
+define('CSS_PRODUCTION_MODE', $isProduction && !$debugMode);
+
 // Maintenance mode check (before Auth is loaded)
 $maintenanceMode = ($_ENV['MAINTENANCE_MODE'] ?? 'false') === 'true';
 if ($maintenanceMode) {
@@ -45,14 +49,14 @@ if ($maintenanceMode) {
     $allowedPaths = ['/login.php', '/logout.php', '/google_login.php', '/auth/', '/api/'];
     $currentPath = $_SERVER['PHP_SELF'] ?? '';
     $isAllowedPath = false;
-    
+
     foreach ($allowedPaths as $path) {
         if (strpos($currentPath, $path) !== false) {
             $isAllowedPath = true;
             break;
         }
     }
-    
+
     // If not an allowed path and not logged in as admin, show maintenance page
     if (!$isAllowedPath) {
         // Check if user is admin (after session is started)
@@ -62,7 +66,7 @@ if ($maintenanceMode) {
             (isset($_SESSION['role']) && in_array($_SESSION['role'], ['super_admin', 'admin'])) ||
             (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['super_admin', 'admin']))
         );
-        
+
         if (!$isAdmin) {
             http_response_code(503);
             header('Content-Type: text/html; charset=utf-8');
