@@ -623,7 +623,8 @@ class WorkflowRenderer implements ModuleInterface
      */
     private function renderHistoryEntry(array $entry): string
     {
-        $details = json_decode($entry['details'], true) ?? [];
+        // Workflow details are stored in new_values by AuditLogger
+        $details = json_decode($entry['new_values'] ?? '{}', true) ?? [];
         $fromState = $details['from'] ?? '';
         $toState = $details['to'] ?? '';
         $comment = $details['comment'] ?? '';
