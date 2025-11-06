@@ -489,10 +489,10 @@
 
 .modal-close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 32px;
-    height: 32px;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 36px;
+    height: 36px;
     background: transparent;
     border: none;
     padding: 0;
@@ -502,11 +502,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     line-height: 1;
     color: #6c757d;
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    position: relative;
+    transform-origin: center center;
     overflow: hidden;
 }
 
