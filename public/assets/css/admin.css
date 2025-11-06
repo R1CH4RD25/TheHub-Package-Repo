@@ -489,8 +489,8 @@
 
 .modal-close {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 1rem;
+    right: 1rem;
     width: 32px;
     height: 32px;
     background: transparent;
@@ -502,9 +502,10 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+    line-height: 1;
     color: #6c757d;
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     position: relative;
     overflow: hidden;
 }
@@ -516,7 +517,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(211, 47, 47, 0.2);
+    background: rgba(220, 53, 69, 0.15);
     border-radius: 6px;
     transform: scale(0);
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -527,16 +528,17 @@
 .modal-close i {
     position: relative;
     z-index: 1;
+    color: inherit;
 }
 
 .modal-close:hover {
-    color: #ffffff;
+    color: #dc3545;
     transform: rotate(180deg) scale(1.2);
 }
 
 .modal-close:hover::before {
     transform: scale(1);
-    background: rgba(211, 47, 47, 0.9);
+    background: rgba(220, 53, 69, 0.1);
 }
 
 .modal-close:active {
