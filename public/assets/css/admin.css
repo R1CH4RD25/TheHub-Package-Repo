@@ -491,8 +491,8 @@
     position: absolute;
     top: 16px;
     right: 16px;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     background: transparent;
     border: 0;
     padding: 0;
@@ -501,36 +501,33 @@
     align-items: center;
     justify-content: center;
     border-radius: 4px;
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1;
+    color: #666;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
     position: relative;
 }
 
 .modal-close::before {
     content: '';
     position: absolute;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     background: rgba(211, 47, 47, 0.2);
     border-radius: 4px;
     transform: scale(0);
     transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.modal-close svg {
-    position: relative;
-    z-index: 1;
-    width: 20px;
-    height: 20px;
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 0;
 }
 
 .modal-close:hover {
     transform: rotate(180deg) scale(1.2);
+    color: #dc3545;
 }
 
 .modal-close:hover::before {
     transform: scale(1);
-    background: rgba(211, 47, 47, 0.2);
 }
 
 .modal h2 {
