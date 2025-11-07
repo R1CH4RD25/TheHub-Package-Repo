@@ -42,11 +42,10 @@ if (!empty($allowedDomains)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - <?php echo e($siteName); ?></title>
     <link rel="icon" type="image/png" href="<?php echo e(SiteSettings::get('favicon_path', '/assets/images/Cowboy_SM_favicon.png')); ?>">
-    <?php 
+    <?php
     use Hub\Layout;
-    Layout::renderHead('Login - ' . $siteName, 'login'); 
+    Layout::renderHead('Login - ' . $siteName, 'login');
     ?>
-    <link rel="stylesheet" href="/assets/css/login-modern.css?v=<?php echo time(); ?>">
 </head>
 <body class="login-page">
     <div class="login-container">
@@ -56,7 +55,7 @@ if (!empty($allowedDomains)) {
                 <h1><?php echo e($orgName); ?></h1>
                 <h2><?php echo e($siteName); ?></h2>
             </div>
-            
+
             <div class="login-content">
                 <?php if ($googleEnabled && $googleLoginUrl): ?>
                 <a href="<?php echo e($googleLoginUrl); ?>" class="google-login-btn">
@@ -72,7 +71,7 @@ if (!empty($allowedDomains)) {
                     Sign in with Google
                 </a>
                 <?php endif; ?>
-                
+
                 <?php if ($microsoftEnabled && $microsoftLoginUrl): ?>
                 <a href="<?php echo e($microsoftLoginUrl); ?>" class="microsoft-login-btn" style="margin-top: 1rem;">
                     <span class="microsoft-icon">
@@ -86,11 +85,11 @@ if (!empty($allowedDomains)) {
                     Sign in with Microsoft
                 </a>
                 <?php endif; ?>
-                
+
                 <?php if (!$googleEnabled && !$microsoftEnabled): ?>
                 <p class="error-message">No authentication providers are enabled. Please contact your administrator.</p>
                 <?php endif; ?>
-                
+
                 <p class="login-note"><?php echo e($loginHint); ?></p>
             </div>
         </div>
@@ -108,34 +107,34 @@ if (!empty($allowedDomains)) {
             particlesDiv.style.left = '0';
             particlesDiv.style.zIndex = '0';
             document.querySelector('.login-page').prepend(particlesDiv);
-            
+
             particlesJS('particles-js', {
                 particles: {
                     number: { value: 40, density: { enable: true, value_area: 800 } },
-                    color: { value: '#C99700' },
+                    color: { value: '#8B6F00' },  // Darker gold for subtler effect
                     shape: { type: 'circle' },
-                    opacity: { 
-                        value: 0.3, 
+                    opacity: {
+                        value: 0.2,  // Reduced from 0.3 for darker appearance
                         random: false,
                         anim: { enable: false }
                     },
-                    size: { 
-                        value: 3, 
+                    size: {
+                        value: 3,
                         random: true,
                         anim: { enable: false }
                     },
-                    line_linked: { 
-                        enable: true, 
-                        distance: 150, 
-                        color: '#C99700', 
-                        opacity: 0.2, 
-                        width: 1 
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: '#8B6F00',  // Darker gold for lines too
+                        opacity: 0.15,  // Reduced from 0.2 for darker appearance
+                        width: 1
                     },
-                    move: { 
-                        enable: true, 
+                    move: {
+                        enable: true,
                         speed: 0.5,
-                        direction: 'none', 
-                        random: false, 
+                        direction: 'none',
+                        random: false,
                         straight: false,
                         out_mode: 'out',
                         bounce: false
@@ -148,9 +147,9 @@ if (!empty($allowedDomains)) {
                         onclick: { enable: false }
                     },
                     modes: {
-                        grab: { 
-                            distance: 140, 
-                            line_linked: { opacity: 0.4 } 
+                        grab: {
+                            distance: 140,
+                            line_linked: { opacity: 0.3 }  // Slightly darker hover effect
                         }
                     }
                 },
@@ -165,7 +164,7 @@ if (!empty($allowedDomains)) {
                 const originalText = h2.textContent;
                 h2.textContent = '';
                 h2.style.minHeight = '1.5em'; // Prevent layout shift
-                
+
                 // Start typing after card float animation completes (1.5s)
                 setTimeout(() => {
                     new Typed('.logo h2', {
@@ -183,40 +182,13 @@ if (!empty($allowedDomains)) {
             btn.addEventListener('click', function(e) {
                 const card = document.querySelector('.login-card');
                 card.classList.add('loading');
-                
+
                 // Show loading message
                 if (typeof TheHub !== 'undefined' && TheHub.showLoading) {
                     TheHub.showLoading('Redirecting to login...');
                 }
-                
-                // Add ripple effect
-                const ripple = document.createElement('span');
-                ripple.style.position = 'absolute';
-                ripple.style.width = ripple.style.height = '10px';
-                ripple.style.background = 'rgba(201, 151, 0, 0.3)';
-                ripple.style.borderRadius = '50%';
-                ripple.style.left = e.offsetX + 'px';
-                ripple.style.top = e.offsetY + 'px';
-                ripple.style.transform = 'translate(-50%, -50%)';
-                ripple.style.animation = 'ripple 0.6s ease-out';
-                this.appendChild(ripple);
-                
-                setTimeout(() => ripple.remove(), 600);
             });
         });
-
-        // Add custom ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                to {
-                    width: 500px;
-                    height: 500px;
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
 
         // Keyboard shortcut: Press Enter to trigger first login button
         document.addEventListener('keydown', (e) => {
