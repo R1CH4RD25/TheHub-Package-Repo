@@ -122,7 +122,7 @@
     white-space: normal;
     min-width: 250px;
     max-width: 400px;
-    z-index: 9999999;
+    z-index: 10002;  /* Reduced from 9999999 - tooltips should be on top */
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
     line-height: 1.6;
     border: 1px solid rgba(255,255,255,0.15);
@@ -160,12 +160,12 @@
     .hub-header h1 {
         font-size: 2rem;
     }
-    
+
     .sections-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .section-description {
         display: none;
     }
