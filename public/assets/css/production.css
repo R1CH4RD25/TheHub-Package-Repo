@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  * 
- * Generated: Fri Nov  7 01:32:49 PM UTC 2025
+ * Generated: Fri Nov  7 01:38:54 PM UTC 2025
  * ============================================================================
  */
 
@@ -4794,6 +4794,10 @@ input[type="checkbox"]:checked + label::before {
 .btn i {
     margin-right: 6px;
     vertical-align: middle;
+}
+
+.btn i:first-child {
+    margin-left: 0;
 }
 
 .btn i:last-child {

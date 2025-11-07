@@ -1340,6 +1340,10 @@
     vertical-align: middle;
 }
 
+.btn i:first-child {
+    margin-left: 0;
+}
+
 .btn i:last-child {
     margin-right: 0;
     margin-left: 6px;
