@@ -1036,28 +1036,8 @@
     padding-bottom: 0;
 }
 
-.subtab-btn {
-    background: none;
-    border: none;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-}
-
-.subtab-btn:hover {
-    color: var(--primary-color);
-}
-
-.subtab-btn.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-    font-weight: 600;
-}
+/* REMOVED DUPLICATE .subtab-btn - primary definition at line 159 */
+/* Responsive version at line 1021 inside @media query */
 
 .user-subtab {
     display: none;
@@ -1872,17 +1852,7 @@
     backdrop-filter: blur(4px);
 }
 
-.modal-content {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    animation: modalSlideIn 0.3s ease-out;
-}
+/* REMOVED DUPLICATE .modal-content - primary definition at line 461 */
 
 @keyframes modalSlideIn {
     from {
