@@ -49,13 +49,13 @@
 /* Section Cards */
 .section-card {
     background: var(--hub-tile-bg, white);
-    border-radius: 12px;
-    padding: 30px;
+    border-radius: 20px;
+    padding: 30px 20px;
     text-align: center;
     text-decoration: none;
     color: var(--hub-tile-text, #333);
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -75,7 +75,7 @@
 
 .section-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 .section-card:hover::before {
@@ -122,10 +122,11 @@
     white-space: normal;
     min-width: 250px;
     max-width: 400px;
-    z-index: 10002;  /* Reduced from 9999999 - tooltips should be on top */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 10002;
+    /* Reduced from 9999999 - tooltips should be on top */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     line-height: 1.6;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     pointer-events: none;
     backdrop-filter: blur(10px);
 }
@@ -134,9 +135,10 @@
 .no-sections {
     text-align: center;
     padding: 60px 20px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 12px;
-    color: #666;
+    background: var(--hub-no-sections-bg, #F9FAFB);
+    border-radius: 20px;
+    color: var(--hub-subtitle-color, #666);
+    box-shadow: 0 4px 12px var(--hub-no-sections-shadow, rgba(0, 0, 0, 0.08));
 }
 
 .no-sections h3 {
@@ -169,4 +171,76 @@
     .section-description {
         display: none;
     }
+}
+
+/* ==========================================================================
+   MODERN HUB STYLES - Enhanced with animations and effects
+   ========================================================================== */
+
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+    position: relative;
+}
+
+}
+
+/* Animated particle background - fully customizable via Site Settings */
+.hub-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: var(--hub-particle-display, block);
+    /* Use color-mix to add opacity to hex colors from settings */
+    background:
+        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
+            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%),
+        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
+            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%);
+    filter: blur(var(--hub-particle-blur, 150px));
+    z-index: 0;
+    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
+}
+
+}
+
+/* Hub Container */
+.hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hub Header - Enhanced with animations */
+.hub-header {
+    text-align: center;
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+}
+
+.hub-header-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    line-height: 1;
+    animation: bounceIn 1s ease-out;
+}
+
+}
+
+.hub-header h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--hub-title-color, #000);
+    font-weight: 800;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
 }
