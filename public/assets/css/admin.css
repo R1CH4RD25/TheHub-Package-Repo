@@ -1340,8 +1340,10 @@
     vertical-align: middle;
 }
 
+/* Specific overrides for first/last icons */
 .btn i:first-child {
     margin-left: 0;
+    margin-right: 6px;
 }
 
 .btn i:last-child {
