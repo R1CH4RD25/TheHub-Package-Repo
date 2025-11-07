@@ -272,3 +272,124 @@
         display: none;
     }
 }
+
+
+/* ========== MODERN HEADER ENHANCEMENTS ========== */
+
+/* ==========================================================================
+   HEADER / NAVBAR - MODERN UNIFIED STYLES
+   Used by both Hub and Dashboard pages
+   ========================================================================== */
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 10002 !important; /* Above nav-content (10001) */
+}
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+.nav-user-arrow {
+    display: none !important;
+}
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show ~ .nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu - Base Styles */
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: -10px;
+    margin-top: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 10002;
+    overflow: hidden;
+}
+
+/* Dropdown Menu - Visible State */
+.nav-user-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    z-index: 10002 !important;
+}
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+.user-menu-icon i {
+    width: 16px;
+    text-align: center;
+}
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+/* User Info Display */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+/* ==========================================================================
+   NAVBAR OVERFLOW FIX
+   Fix navbar overflow clipping dropdown - allow visible overflow
+   ========================================================================== */
+
+.navbar {
+    overflow: visible !important;
+}
+/* ==========================================================================
+   MOBILE RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+}

@@ -4,7 +4,7 @@
  * ============================================================================
  * Auto-generated bundle - DO NOT EDIT DIRECTLY
  * Edit source files in public/assets/css/ and run build-css.sh
- * 
+ *
  * Build Order:
  * 1. style.css       - Base styles (buttons, forms, cards)
  * 2. header.css      - Header/navbar (shared)
@@ -14,8 +14,8 @@
  * 6. admin-theme.css - Dashboard theming
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
- * 
- * Generated: Fri Nov  7 01:56:31 PM UTC 2025
+ *
+ * Generated: Fri Nov  7 05:44:25 PM UTC 2025
  * ============================================================================
  */
 
@@ -598,161 +598,8 @@ body {
 }
 /* Version: 1760996007 */
 
-/* ========== HEADER STYLES ========== */
+/* ========== HEADER STYLES (CONSOLIDATED) ========== */
 
-
-/* ========== HEADER STYLES (MODERN UNIFIED) ========== */
-
-/* ==========================================================================
-   HEADER / NAVBAR - MODERN UNIFIED STYLES
-   Used by both Hub and Dashboard pages
-   ========================================================================== */
-
-/* ==========================================================================
-   USER PROFILE DROPDOWN
-   ========================================================================== */
-
-.nav-user-dropdown {
-    position: relative;
-    display: inline-block;
-    z-index: 10002 !important; /* Above nav-content (10001) */
-}
-
-.nav-user-trigger {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 8px;
-    transition: background 0.3s ease;
-}
-
-.nav-user-trigger:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.nav-user-arrow {
-    font-size: 0.7em;
-    transition: transform 0.3s ease;
-    color: var(--primary-text, #333);
-    display: none !important; /* Hidden by default */
-}
-
-.nav-user-dropdown.active .nav-user-arrow,
-.nav-user-menu.show ~ .nav-user-trigger .nav-user-arrow {
-    transform: rotate(180deg);
-}
-
-.nav-user-menu {
-    position: absolute !important;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 220px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 10002 !important; /* Same as parent, positioned correctly */
-}
-
-.nav-user-menu.show {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateY(0) !important;
-    z-index: 10002 !important;
-}
-
-.user-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: var(--primary-text, #333);
-    text-decoration: none;
-    transition: background 0.2s ease;
-}
-
-.user-menu-item:hover {
-    background: var(--hover-bg, #f5f5f5);
-}
-
-.user-menu-item:first-child {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-}
-
-.user-menu-item:last-child {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-.user-menu-icon {
-    font-size: 1.2em;
-    width: 24px;
-    text-align: center;
-}
-
-.user-menu-icon i {
-    width: 16px;
-    text-align: center;
-}
-
-.user-menu-divider {
-    height: 1px;
-    background: var(--border-color, #e0e0e0);
-    margin: 5px 0;
-}
-
-/* User Info Display */
-.nav-user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.nav-user-name {
-    font-weight: 600;
-    color: var(--header-subtitle-color, var(--primary-color, #007bff));
-}
-
-.nav-user-role {
-    font-size: 0.85em;
-    color: var(--secondary-text, #666);
-}
-
-/* ==========================================================================
-   NAVBAR OVERFLOW FIX
-   Fix navbar overflow clipping dropdown - allow visible overflow
-   ========================================================================== */
-
-.navbar {
-    overflow: visible !important;
-}
-
-/* ==========================================================================
-   MOBILE RESPONSIVE
-   ========================================================================== */
-
-@media (max-width: 768px) {
-    .nav-user-info {
-        display: none;
-    }
-    
-    .nav-user-arrow {
-        display: none !important;
-    }
-    
-    .nav-user-menu {
-        right: -10px;
-    }
-}
 /* ==========================================================================
    HEADER / NAVBAR STYLES
    Shared across Hub and Dashboard pages
@@ -1028,6 +875,127 @@ body {
     }
 }
 
+
+/* ========== MODERN HEADER ENHANCEMENTS ========== */
+
+/* ==========================================================================
+   HEADER / NAVBAR - MODERN UNIFIED STYLES
+   Used by both Hub and Dashboard pages
+   ========================================================================== */
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 10002 !important; /* Above nav-content (10001) */
+}
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+.nav-user-arrow {
+    display: none !important;
+}
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show ~ .nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu - Base Styles */
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: -10px;
+    margin-top: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 10002;
+    overflow: hidden;
+}
+
+/* Dropdown Menu - Visible State */
+.nav-user-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    z-index: 10002 !important;
+}
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+.user-menu-icon i {
+    width: 16px;
+    text-align: center;
+}
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+/* User Info Display */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+/* ==========================================================================
+   NAVBAR OVERFLOW FIX
+   Fix navbar overflow clipping dropdown - allow visible overflow
+   ========================================================================== */
+
+.navbar {
+    overflow: visible !important;
+}
+/* ==========================================================================
+   MOBILE RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+}
+
 /* ========== FOOTER STYLES ========== */
 
 /* ==========================================================================
@@ -1135,189 +1103,141 @@ body {
     }
 }
 
-/* ========== HUB PAGE STYLES ========== */
+/* ========== LOGIN PAGE STYLES ========== */
 
-
-/* ========== HUB MODERN ENHANCEMENTS ========== */
+/**
+ * ============================================================================
+ * LOGIN PAGE STYLES
+ * ============================================================================
+ * All styles specific to the login page (public/login.php)
+ * Includes: login container, auth cards, OAuth buttons, animations
+ * ============================================================================
+ */
 
 /* ==========================================================================
-   MODERN HUB STYLES - Enhanced with animations and effects
+   MODERN LOGIN PAGE - Theme-aware with animations
    ========================================================================== */
 
-/* Full-width hub background on main-content */
-.main-content.hub-page {
-    background: var(--hub-page-bg, #FFFFFF);
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--secondary-color, #000000);
     position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-/* Header first-load animation - only on initial page load */
-.navbar {
-    transform-origin: top;
-}
-
-/* Animate only if not already shown in this session */
-html:not(.animations-played) .navbar {
-    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    opacity: 0;
-}
-
-html.animations-played .navbar {
-    opacity: 1;
-}
-
-@keyframes slideDownFade {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Footer first-load animation */
-html:not(.animations-played) .admin-footer,
-html:not(.animations-played) footer {
-    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 0.2s;
-    opacity: 0;
-}
-
-html.animations-played .admin-footer,
-html.animations-played footer {
-    opacity: 1;
-}
-
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Animated particle background - fully customizable via Site Settings */
-.hub-page::before {
+/* Subtle static background pattern */
+.login-page::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: var(--hub-particle-display, block);
-    /* Use color-mix to add opacity to hex colors from settings */
-    background:
-        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
-            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
-            transparent 50%),
-        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
-            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
-            transparent 50%);
-    filter: blur(var(--hub-particle-blur, 150px));
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(201, 151, 0, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(201, 151, 0, 0.08) 0%, transparent 30%);
     z-index: 0;
-    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
 }
 
-@keyframes backgroundPulse {
-
-    0%,
-    100% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
-    }
+/* Remove floating animation - too distracting */
+.login-page::after {
+    display: none;
 }
 
-/* Hub Container */
-.hub-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
     position: relative;
     z-index: 1;
+    animation: slideInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Hub Header - Enhanced with animations */
-.hub-header {
+}
+
+/* Login Card - Glassmorphism */
+.login-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(201, 151, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Remove pulsing animation */
+.login-card::before {
+    display: none;
+}
+
+}
+
+/* Login Content */
+.login-content {
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 1s ease-out 0.6s both;
+}
+
+/* Login Note */
+.login-note {
     text-align: center;
-    margin-bottom: 50px;
-    opacity: 0;
-    animation: fadeInDown 0.8s ease-out forwards;
+    margin-top: 1.5rem;
+    color: #666;
+    font-size: 0.95rem;
+    animation: fadeIn 1s ease-out 0.8s both;
 }
 
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
-.hub-header-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    line-height: 1;
-    animation: bounceIn 1s ease-out;
+/* Loading State */
+.login-card.loading {
+    pointer-events: none;
+    opacity: 0.7;
 }
 
-@keyframes bounceIn {
-    0% {
-        opacity: 0;
-        transform: scale(0.3);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-
-    70% {
-        transform: scale(0.9);
-    }
-
-    100% {
-        transform: scale(1);
-    }
+.login-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color, #C99700);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-.hub-header h1 {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: var(--hub-title-color, #000);
-    font-weight: 800;
-    animation: slideInLeft 0.8s ease-out 0.2s both;
+.login-card {
+    padding: 2rem 1.5rem;
+        border-radius: 20px;
 }
 
-.hub-header p {
-    font-size: 1.2rem;
-    color: var(--hub-subtitle-color, #666);
-    animation: slideInLeft 0.8s ease-out 0.4s both;
+.login-note {
+    color: #aaa;
 }
 
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
 
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+/* ========== SECTIONS PAGE STYLES ========== */
+
+/**
+ * ============================================================================
+ * SECTIONS SELECTION PAGE STYLES
+ * ============================================================================
+ * All styles for section selection page (public/sections.php)
+ * Includes: section cards, grid layout, icons, hover effects
+ * ============================================================================
+ */
+
 }
 
 /* Sections Grid - Staggered animation */
@@ -1383,11 +1303,6 @@ html.animations-played footer {
     animation-delay: 0.8s;
 }
 
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* Gradient border on top */
@@ -1435,14 +1350,6 @@ html.animations-played footer {
     animation: gradientSlide 2s linear infinite;
 }
 
-@keyframes gradientSlide {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    100% {
-        background-position: 200% 50%;
-    }
 }
 
 .section-card:hover::after {
@@ -1467,16 +1374,6 @@ html.animations-played footer {
     animation: iconBounce 0.6s ease;
 }
 
-@keyframes iconBounce {
-
-    0%,
-    100% {
-        transform: scale(1.1) rotateZ(-5deg);
-    }
-
-    50% {
-        transform: scale(1.2) rotateZ(5deg);
-    }
 }
 
 /* Section Title - Enhanced typography */
@@ -1495,16 +1392,6 @@ html.animations-played footer {
     animation: titlePulse 0.6s ease;
 }
 
-@keyframes titlePulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
 }
 
 /* Section Description */
@@ -1545,73 +1432,27 @@ html.animations-played footer {
     font-size: 1.1rem;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .hub-header h1 {
-        font-size: 2rem;
-    }
-
-    .hub-header p {
-        font-size: 1rem;
-    }
-
-    .sections-grid {
-        grid-template-columns: 1fr;
+.sections-grid {
+    grid-template-columns: 1fr;
         gap: 20px;
-    }
-
-    .section-card {
-        padding: 25px;
-    }
-
-    .section-icon {
-        font-size: 3.5rem;
-    }
 }
 
-/* Dark mode support */
-/* Dark mode support - respects Site Settings theme variables */
-@media (prefers-color-scheme: dark) {
-    .section-card {
-        /* Use the theme variable, fallback to dark if not set */
-        background: var(--hub-tile-bg, rgba(30, 30, 30, 0.95));
-        color: var(--hub-tile-text, #fff);
-    }
-
-    .section-title {
-        color: var(--hub-tile-text, #fff);
-    }
-
-    .section-description {
-        color: var(--hub-card-description, #aaa);
-    }
+.section-card {
+    padding: 25px;
 }
 
-/* Loading animation (can be triggered via JS) */
-.hub-loading {
-    opacity: 0;
-    animation: fadeIn 0.6s ease-out forwards;
+.section-icon {
+    font-size: 3.5rem;
 }
 
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
+.section-title {
+    color: var(--hub-tile-text, #fff);
 }
 
-/* Add pulse effect to cards on page load */
-@keyframes cardPulse {
-    0% {
-        transform: scale(1);
-    }
+.section-description {
+    color: var(--hub-card-description, #aaa);
+}
 
-    50% {
-        transform: scale(1.05);
-    }
-
-    100% {
-        transform: scale(1);
-    }
 }
 
 /* Success state animation */
@@ -1619,216 +1460,23 @@ html.animations-played footer {
     animation: cardClick 0.3s ease;
 }
 
-@keyframes cardClick {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(0.95);
-    }
-}
-
-.menu-group.collapsed .menu-group-arrow {
-    transform: rotate(-90deg);
-}
-
-.menu-group-items {
-    list-style: none;
-    padding-left: 15px;
-    margin: 0;
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
-    opacity: 1;
-}
-
-.menu-group.collapsed .menu-group-items {
-    max-height: 0;
+/* Cards - Flip and Zoom In */
+.admin-card,
+.section-card,
+.package-card {
     opacity: 0;
+    transform: perspective(1000px) rotateX(-15deg) scale(0.9);
 }
 
-.menu-group-items li {
-    margin: 0;
-}
-
-.menu-group-items li a {
-    padding: 10px 20px;
-    font-size: 0.95em;
-}
-
-/* Menu spacer to push items to bottom */
-.menu-spacer {
-    flex: 1;
-    min-height: 20px;
-}
-
-/* Make sidebar flex column to support spacer */
-.admin-sidebar .admin-menu {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-/* ==========================================================================
-   USER PROFILE DROPDOWN
-   ========================================================================== */
-
-.nav-user-dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.nav-user-trigger {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 8px;
-    transition: background 0.3s ease;
-}
-
-.nav-user-trigger:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.nav-user-arrow {
-    font-size: 0.7em;
-    transition: transform 0.3s ease;
-    color: var(--primary-text, #333);
-}
-
-.nav-user-dropdown.active .nav-user-arrow,
-.nav-user-menu.show~.nav-user-trigger .nav-user-arrow {
-    transform: rotate(180deg);
-}
-
-.nav-user-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 220px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1000;
-}
-
-.nav-user-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.user-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: var(--primary-text, #333);
-    text-decoration: none;
-    transition: background 0.2s ease;
-}
-
-.user-menu-item:hover {
-    background: var(--hover-bg, #f5f5f5);
-}
-
-.user-menu-item:first-child {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-}
-
-.user-menu-item:last-child {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-.user-menu-icon {
-    font-size: 1.2em;
-    width: 24px;
-    text-align: center;
-}
-
-.user-menu-divider {
-    height: 1px;
-    background: var(--border-color, #e0e0e0);
-    margin: 5px 0;
-}
-
-/* Adjust nav-user-profile to work with dropdown */
-.nav-user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.nav-user-name {
-    font-weight: 600;
-    color: var(--primary-text, #333);
-}
-
-.nav-user-role {
-    font-size: 0.85em;
-    color: var(--secondary-text, #666);
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-    .nav-user-info {
-        display: none;
-    }
-
-    .nav-user-arrow {
-        display: none;
-    }
-
-    .nav-user-menu {
-        right: -10px;
-    }
-
-    .menu-group-header {
-        font-size: 0.9em;
-        padding: 10px 15px;
-    }
+.admin-card.animate-in,
+.section-card.animate-in,
+.package-card.animate-in {
+    animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 
-/* Override nav-user-name to match header subtitle color */
-.nav-user-name {
-    font-weight: 600;
-    color: var(--header-subtitle-color, var(--primary-color, #007bff));
-}
+/* ========== HUB PAGE STYLES ========== */
 
-
-/* Hide the user dropdown arrow */
-.nav-user-arrow {
-    display: none !important;
-}
-
-/* Increase z-index for user dropdown menu */
-.nav-user-menu {
-    z-index: 9999 !important;
-}
-
-
-/* Icon spacing and sizing for sidebar and dropdown */
-.menu-group-header i,
-.admin-menu>li>a i {
-    margin-right: 8px;
-    width: 16px;
-    text-align: center;
-}
 /* ==========================================================================
    HUB PAGE STYLES
    Landing page with section tiles
@@ -1880,12 +1528,12 @@ html.animations-played footer {
 /* Section Cards */
 .section-card {
     background: var(--hub-tile-bg, white);
-    border-radius: 12px;
-    padding: 30px;
+    border-radius: 20px;
+    padding: 30px 20px;
     text-align: center;
     text-decoration: none;
     color: var(--hub-tile-text, #333);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     cursor: pointer;
     position: relative;
@@ -1966,7 +1614,7 @@ html.animations-played footer {
     text-align: center;
     padding: 60px 20px;
     background: rgba(255,255,255,0.9);
-    border-radius: 12px;
+    border-radius: 20px;
     color: #666;
 }
 
@@ -2002,104 +1650,329 @@ html.animations-played footer {
     }
 }
 
-/* ========== DASHBOARD LAYOUT ========== */
-
-
-/* ========== DASHBOARD MODERN ENHANCEMENTS ========== */
-
 /* ==========================================================================
-   MODERN ADMIN DASHBOARD ANIMATIONS
-   Unique, top-notch animations for tables, tabs, and UI elements
+   MODERN HUB STYLES - Enhanced with animations and effects
    ========================================================================== */
 
-/* Tab Content - Slide and Scale from Side */
-.admin-tab {
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+    position: relative;
+}
+
+}
+
+/* Animated particle background - fully customizable via Site Settings */
+.hub-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: var(--hub-particle-display, block);
+    /* Use color-mix to add opacity to hex colors from settings */
+    background:
+        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
+            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%),
+        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
+            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%);
+    filter: blur(var(--hub-particle-blur, 150px));
+    z-index: 0;
+    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
+}
+
+}
+
+/* Hub Container */
+.hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hub Header - Enhanced with animations */
+.hub-header {
+    text-align: center;
+    margin-bottom: 50px;
     opacity: 0;
-    transform: translateX(-30px) scale(0.95);
-    transition: none;
+    animation: fadeInDown 0.8s ease-out forwards;
 }
 
-.admin-tab.active {
-    animation: slideScaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-@keyframes slideScaleIn {
-    0% {
-        opacity: 0;
-        transform: translateX(-30px) scale(0.95);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
+.hub-header-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    line-height: 1;
+    animation: bounceIn 1s ease-out;
 }
 
-/* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
-.data-table tbody tr {
+}
+
+.hub-header h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--hub-title-color, #000);
+    font-weight: 800;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+/* ========== MODULE PAGES STYLES ========== */
+
+/* ==========================================================================
+   MODERN MODULES PAGE - Enhanced with cutting-edge animations
+   ========================================================================== */
+
+.modules-page {
+    min-height: 100vh;
+    background: var(--secondary-color, #000000);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated background particles */
+.modules-page::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
+        radial-gradient(circle at 50% 50%, rgba(201, 151, 0, 0.03) 0%, transparent 30%);
+    animation: particleFloat 20s ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.modules-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Modules Header - Enhanced */
+.modules-header {
+    text-align: center;
+    margin-bottom: 4rem;
     opacity: 0;
-    transform: translateY(-15px);
+    animation: fadeInDown 0.8s ease-out forwards;
 }
 
-.data-table tbody tr.animate-in {
-    animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes accordionDown {
-    0% {
+@keyframes fadeInDown {
+    from {
         opacity: 0;
-        transform: translateY(-15px);
+        transform: translateY(-30px);
     }
-
-    100% {
+    to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* Table Headers - Clean (removed shimmer) */
-.data-table thead {
-    position: relative;
+.modules-header h1 {
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideInLeft 0.8s ease-out 0.2s both;
 }
 
-/* Cards - Flip and Zoom In */
-.admin-card,
-.section-card,
-.package-card {
-    opacity: 0;
-    transform: perspective(1000px) rotateX(-15deg) scale(0.9);
-}
-
-.admin-card.animate-in,
-.section-card.animate-in,
-.package-card.animate-in {
-    animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes flipZoomIn {
-    0% {
+@keyframes slideInLeft {
+    from {
         opacity: 0;
-        transform: perspective(1000px) rotateX(-15deg) scale(0.9);
+        transform: translateX(-30px);
     }
-
-    60% {
-        transform: perspective(1000px) rotateX(5deg) scale(1.02);
-    }
-
-    100% {
+    to {
         opacity: 1;
-        transform: perspective(1000px) rotateX(0deg) scale(1);
+        transform: translateX(0);
     }
 }
 
-/* Buttons - Ripple Expand on Hover */
-.btn {
+.modules-header p {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    animation: slideInLeft 0.8s ease-out 0.4s both;
+}
+
+/* Modules Grid - Staggered animations */
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+/* Module Cards - Glassmorphism with 3D effects */
+.module-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.2),
+        0 0 0 1px rgba(255,255,255,0.3);
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+    transform: translateY(30px) rotateX(10deg);
+    animation: cardEntrance 0.6s ease-out forwards;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
-.btn::before {
+/* Staggered card animations */
+.module-card:nth-child(1) { animation-delay: 0.1s; }
+.module-card:nth-child(2) { animation-delay: 0.2s; }
+.module-card:nth-child(3) { animation-delay: 0.3s; }
+.module-card:nth-child(4) { animation-delay: 0.4s; }
+.module-card:nth-child(5) { animation-delay: 0.5s; }
+.module-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes cardEntrance {
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+    }
+}
+
+/* Shimmer effect on cards */
+.module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.module-card:hover::before {
+    left: 100%;
+}
+
+/* Gradient border animation */
+.module-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        135deg,
+        var(--primary-color, #C99700),
+        var(--primary-dark, #A07800),
+        #FFD700,
+        var(--primary-color, #C99700)
+    );
+    background-size: 300% 300%;
+    border-radius: 24px;
+    z-index: -1;
+    opacity: 0;
+    animation: gradientRotate 4s linear infinite;
+    transition: opacity 0.3s ease;
+}
+
+@keyframes gradientRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.module-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 
+        0 20px 60px rgba(0,0,0,0.3),
+        0 0 0 1px rgba(102, 126, 234, 0.5);
+}
+
+.module-card:hover::after {
+    opacity: 1;
+}
+
+/* Module Icon - Enhanced with 3D effects */
+.module-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s ease;
+    display: inline-block;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+}
+
+.module-card:hover .module-icon {
+    transform: scale(1.2) rotateY(360deg);
+    filter: drop-shadow(0 8px 20px rgba(201, 151, 0, 0.4));
+}
+
+/* Module Title - Gradient text on hover */
+.module-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--secondary-color, #2c3e50);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.module-card:hover .module-title {
+    color: var(--primary-color, #C99700);
+    transform: translateX(5px);
+}
+
+/* Module Description */
+.module-description {
+    color: #666;
+    line-height: 1.8;
+    flex: 1;
+    margin-bottom: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.module-card:hover .module-description {
+    color: #444;
+}
+
+/* Module Role Badge - Animated */
+.module-role {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--gold-gradient, linear-gradient(135deg, #C99700 0%, #FFD700 100%));
+    color: var(--secondary-color, #000);
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    box-shadow: 0 4px 12px rgba(201, 151, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-role::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -2109,1129 +1982,116 @@ html.animations-played footer {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
     transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition: width 0.3s ease, height 0.3s ease;
 }
 
-.btn:hover::before {
+.module-card:hover .module-role {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.5);
+}
+
+.module-card:hover .module-role::before {
     width: 300px;
     height: 300px;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.3);
+/* Empty state - Enhanced */
+.modules-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.8s ease-out;
 }
 
-.btn:active {
-    transform: translateY(0);
-}
-
-/* Sidebar Menu - Drop Down and Bounce (falling effect) - SLOWER */
-.admin-menu li {
-    opacity: 0;
-    transform: translateY(-50px) scale(0.3);
-}
-
-.admin-menu li.animate-in {
-    animation: dropBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-/* Stagger delays using nth-child for sidebar */
-.admin-menu li:nth-child(1) {
-    animation-delay: 0s;
-}
-
-.admin-menu li:nth-child(2) {
-    animation-delay: 0.1s;
-}
-
-.admin-menu li:nth-child(3) {
-    animation-delay: 0.2s;
-}
-
-.admin-menu li:nth-child(4) {
-    animation-delay: 0.3s;
-}
-
-.admin-menu li:nth-child(5) {
-    animation-delay: 0.4s;
-}
-
-.admin-menu li:nth-child(6) {
-    animation-delay: 0.5s;
-}
-
-.admin-menu li:nth-child(7) {
-    animation-delay: 0.6s;
-}
-
-.admin-menu li:nth-child(8) {
-    animation-delay: 0.7s;
-}
-
-@keyframes dropBounce {
-    0% {
+@keyframes fadeInUp {
+    from {
         opacity: 0;
-        transform: translateY(-50px) scale(0.3);
+        transform: translateY(30px);
     }
-
-    60% {
-        opacity: 1;
-        transform: translateY(10px) scale(1.1);
-    }
-
-    80% {
-        transform: translateY(-5px) scale(0.95);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Sidebar Active Item - Simple highlight (no glow) */
-.admin-menu li a.active {
-    position: relative;
-    border-left: 3px solid var(--primary-color);
-    background: rgba(201, 151, 0, 0.05);
-}
-
-/* Input Focus - Expand Border */
-input:focus,
-textarea:focus,
-select:focus {
-    animation: expandBorder 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes expandBorder {
-    0% {
-        border-width: 1px;
-    }
-
-    50% {
-        border-width: 3px;
-    }
-
-    100% {
-        border-width: 2px;
-    }
-}
-
-/* Modals - Enhanced Premium Animations */
-/* DISABLED: Conflicts with admin.css modal display logic
-.modal {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.modal.show,
-.modal[style*="display: block"] {
-    animation: modalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-*/
-
-.modal-overlay {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-    transition: all 0.3s ease-out;
-}
-
-.modal-overlay.show {
-    animation: modalOverlayFadeIn 0.3s ease-out forwards;
-}
-
-/* DISABLED: Conflicts with admin.css modal-content styles
-.modal-content {
-    transform: scale(0.9) translateY(30px);
-    opacity: 0;
-    animation: modalContentEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    animation-delay: 0.1s;
-}
-*/
-
-/* Modal Animations */
-@keyframes modalEnter {
-    0% {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-    }
-
-    60% {
-        transform: scale(1.02) translateY(-5px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-@keyframes modalOverlayFadeIn {
-    0% {
-        opacity: 0;
-        backdrop-filter: blur(0px);
-    }
-
-    100% {
-        opacity: 1;
-        backdrop-filter: blur(4px);
-    }
-}
-
-@keyframes modalContentEnter {
-    0% {
-        opacity: 0;
-        transform: scale(0.9) translateY(30px);
-    }
-
-    50% {
-        transform: scale(1.03) translateY(-10px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-/* Modal Exit Animations */
-.modal.hiding {
-    animation: modalExit 0.25s ease-out forwards;
-}
-
-.modal-overlay.hiding {
-    animation: modalOverlayFadeOut 0.3s ease-out forwards;
-}
-
-@keyframes modalExit {
-    0% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-
-    100% {
-        opacity: 0;
-        transform: scale(0.95) translateY(20px);
-    }
-}
-
-@keyframes modalOverlayFadeOut {
-    0% {
-        opacity: 1;
-        backdrop-filter: blur(4px);
-    }
-
-    100% {
-        opacity: 0;
-        backdrop-filter: blur(0px);
-    }
-}
-
-/* ============================================================================
-   FORM VALIDATION & INPUT ANIMATIONS
-   ============================================================================ */
-
-/* Input Focus Animations */
-input:not([type="checkbox"]):not([type="radio"]):focus,
-select:focus,
-textarea:focus {
-    animation: inputFocusGlow 0.3s ease-out;
-    box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.15);
-}
-
-@keyframes inputFocusGlow {
-    0% {
-        box-shadow: 0 0 0 0 rgba(201, 151, 0, 0);
-    }
-
-    50% {
-        box-shadow: 0 0 0 4px rgba(201, 151, 0, 0.2);
-    }
-
-    100% {
-        box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.15);
-    }
-}
-
-/* Validation States */
-.form-group input.valid,
-.form-group select.valid,
-.form-group textarea.valid {
-    border-color: #10b981;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 20px 20px;
-    padding-right: 40px;
-    animation: validPulse 0.4s ease-out;
-}
-
-.form-group input.invalid,
-.form-group select.invalid,
-.form-group textarea.invalid {
-    border-color: #ef4444;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 20px 20px;
-    padding-right: 40px;
-    animation: invalidShake 0.5s ease-out;
-}
-
-@keyframes validPulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-    }
-
-    50% {
-        transform: scale(1.02);
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
-    }
-
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-    }
-}
-
-@keyframes invalidShake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-        transform: translateX(-8px);
-    }
-
-    20%,
-    40%,
-    60%,
-    80% {
-        transform: translateX(8px);
-    }
-}
-
-/* Error Messages */
-.error-message {
-    color: #ef4444;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    animation: errorSlideDown 0.3s ease-out;
-}
-
-.error-message::before {
-    content: "⚠";
-    font-size: 1rem;
-}
-
-@keyframes errorSlideDown {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-        max-height: 0;
-    }
-
-    100% {
+    to {
         opacity: 1;
         transform: translateY(0);
-        max-height: 50px;
     }
 }
 
-/* Success Messages */
-.success-message {
-    color: #10b981;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
+.modules-empty-state p:first-of-type {
+    font-size: 1.3rem;
+    color: var(--primary-color, #C99700);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.modules-empty-state p:last-of-type {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modules-header h1 {
+        font-size: 2rem;
+    }
+
+    .modules-header p {
+        font-size: 1.1rem;
+    }
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .module-card {
+        padding: 2rem;
+    }
+
+    .module-icon {
+        font-size: 3rem;
+    }
+
+    .module-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* Loading state */
+.modules-loading {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    animation: successSlideDown 0.3s ease-out;
+    min-height: 400px;
 }
 
-.success-message::before {
-    content: "✓";
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-@keyframes successSlideDown {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-        max-height: 0;
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 50px;
-    }
-}
-
-/* Alerts/Notifications - Enhanced Slide from Right */
-.alert,
-.notification,
-.toast-message {
-    animation: slideRightBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-@keyframes slideRightBounce {
-    0% {
-        opacity: 0;
-        transform: translateX(100%) scale(0.9);
-    }
-
-    60% {
-        transform: translateX(-15px) scale(1.02);
-    }
-
-    80% {
-        transform: translateX(5px) scale(0.98);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-/* ============================================================================
-   BUTTON STATES & LOADING ANIMATIONS
-   ============================================================================ */
-
-/* Button Loading State */
-.btn.loading {
-    position: relative;
-    color: transparent !important;
-    pointer-events: none;
-}
-
-.btn.loading::after {
+.modules-loading::after {
     content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
     border-top-color: white;
     border-radius: 50%;
-    animation: buttonSpin 0.6s linear infinite;
-}
-
-@keyframes buttonSpin {
-    0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-
-    100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-
-/* Button Success State */
-.btn.success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    animation: buttonSuccess 0.6s ease-out;
-}
-
-@keyframes buttonSuccess {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Button Pulse Animation (for install/action buttons) */
-@keyframes buttonPulse {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    50% {
-        transform: scale(1.02);
-        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
-    }
-
-    100% {
-        transform: scale(1);
-        box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
-    }
-}
-
-/* Button Error State */
-.btn.error {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    animation: buttonError 0.5s ease-out;
-}
-
-@keyframes buttonError {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-5px);
-    }
-
-    75% {
-        transform: translateX(5px);
-    }
-}
-
-/* Loading Skeleton - Shimmer Wave */
-.skeleton {
-    background: linear-gradient(90deg,
-            #f0f0f0 25%,
-            #e0e0e0 50%,
-            #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: skeletonWave 1.5s infinite;
-}
-
-@keyframes skeletonWave {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-/* Tab Subtabs - Slide Up Stack */
-.subtab-btn {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.subtab-btn.animate-in {
-    animation: slideUpStack 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes slideUpStack {
-    0% {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.subtab-btn.active {
-    position: relative;
-}
-
-.subtab-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary-color), transparent);
-    animation: expandLine 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes expandLine {
-    0% {
-        width: 0;
-    }
-
-    100% {
-        width: 100%;
-    }
-}
-
-/* Notification Badges for Tabs */
-.notification-badge {
-    display: inline-block;
-    min-width: 20px;
-    height: 20px;
-    padding: 2px 6px;
-    margin-left: 8px;
-    background: linear-gradient(135deg, #ff4444, #cc0000);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 10px;
-    line-height: 16px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
-    animation: badgePulse 2s ease-in-out infinite;
-}
-
-@keyframes badgePulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-        box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
-    }
-
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 4px 12px rgba(255, 68, 68, 0.6);
-    }
-}
-
-/* Sidebar Badge (for Package Manager) */
-.sidebar-badge {
-    display: inline-block;
-    min-width: 18px;
-    height: 18px;
-    padding: 2px 5px;
-    margin-left: 8px;
-    background: linear-gradient(135deg, #ff4444, #cc0000);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 9px;
-    line-height: 14px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(255, 68, 68, 0.5);
-    animation: badgePulse 2s ease-in-out infinite;
-}
-
-/* Stats Cards - Count Up with Bounce */
-.stat-card {
-    opacity: 0;
-    transform: translateY(20px) scale(0.9);
-}
-
-.stat-card.animate-in {
-    animation: bounceUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes bounceUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.9);
-    }
-
-    60% {
-        transform: translateY(-5px) scale(1.02);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Search Bar - Glow Pulse on Focus */
-.search-input:focus {
-    animation: glowPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes glowPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 5px rgba(201, 151, 0, 0.2);
-    }
-
-    50% {
-        box-shadow: 0 0 20px rgba(201, 151, 0, 0.5);
-    }
-}
-
-/* Dropdown Menu - Fan Out */
-.dropdown-menu {
-    opacity: 0;
-    transform-origin: top;
-    transform: scaleY(0);
-}
-
-.dropdown-menu.show {
-    animation: fanOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes fanOut {
-    0% {
-        opacity: 0;
-        transform: scaleY(0);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scaleY(1);
-    }
-}
-
-/* ============================================================================
-   VALIDATION MODAL - COMPACT REDESIGN
-   ============================================================================ */
-
-#validationModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999;  /* Reduced from 999999 - modal backdrops */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px);
-    animation: modalOverlayFadeIn 0.3s ease;
-}
-
-.modal-validation {
-    background: white;
-    border-radius: 16px;
-    max-width: 750px !important;
-    width: 95% !important;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
-    animation: modalContentEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden;
-}
-
-/* Compact Header */
-.validation-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    background: #ffffff;
-    color: #1f2937;
-    border-radius: 16px 16px 0 0;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.validation-modal-header .validation-report-title {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.modal-close-btn {
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    color: #6b7280;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    transition: all 0.2s ease;
-}
-
-.modal-close-btn:hover {
-    background: #e5e7eb;
-    color: #374151;
-    transform: scale(1.05);
-}
-
-/* Compact Progress */
-.validation-progress-compact {
-    padding: 1rem 1.5rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.progress-bar-wrapper {
-    background: #e9ecef;
-    border-radius: 8px;
-    height: 8px;
-    overflow: hidden;
-    margin-bottom: 0.75rem;
-}
-
-.progress-bar-wrapper .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #4CAF50, #81C784);
-    transition: width 0.5s ease;
-    border-radius: 8px;
-}
-
-.validation-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #495057;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.spin-icon {
     animation: spin 1s linear infinite;
 }
 
-/* Compact Checks Grid - 3 Columns */
-.validation-checks-compact {
-    padding: 1rem;
-    flex: 1;
-    overflow-y: auto;
-    max-height: calc(85vh - 220px);
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-.checks-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+/* Click ripple effect */
+.module-card.clicked {
+    animation: cardClick 0.4s ease;
 }
 
-.validation-check-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 2px solid #e9ecef;
-    transition: all 0.3s ease;
-    font-size: 0.85rem;
+@keyframes cardClick {
+    0% { transform: translateY(-12px) scale(1.03); }
+    50% { transform: translateY(-8px) scale(0.98); }
+    100% { transform: translateY(-12px) scale(1.03); }
 }
 
-.validation-check-checkbox .check-icon {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 20px !important;
-    height: 20px !important;
-    flex-shrink: 0;
-}
-
-.validation-check-checkbox .check-label {
-    flex: 1;
-    line-height: 1.3;
-    font-size: 0.85rem;
-    color: #495057;
-}
-
-/* Check status colors */
-.validation-check-checkbox.check-pass {
-    border-color: #28a745;
-    background: #d4edda;
-}
-
-.validation-check-checkbox.check-fail {
-    border-color: #dc3545;
-    background: #f8d7da;
-}
-
-/* Footer */
-.modal-footer {
-    padding: 1rem 1.5rem;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    border-radius: 0 0 16px 16px;
-}
-
-/* Responsive - 2 columns on smaller screens */
-@media (max-width: 768px) {
-    .checks-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .checks-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Validation checks animation */
-.checks-grid>div {
-    animation: checkSlideIn 0.3s ease-out backwards;
-}
-
-.checks-grid>div:nth-child(3n+1) {
-    animation-delay: calc(var(--index, 0) * 0.05s);
-}
-
-.checks-grid>div:nth-child(3n+2) {
-    animation-delay: calc(var(--index, 0) * 0.05s + 0.025s);
-}
-
-.checks-grid>div:nth-child(3n) {
-    animation-delay: calc(var(--index, 0) * 0.05s + 0.05s);
-}
-
-@keyframes checkSlideIn {
-    0% {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Validation check status updates */
-.validation-checks-list .check-status {
-    transition: all 0.3s ease-out;
-}
-
-.validation-checks-list .check-status.updating {
-    animation: statusPulse 0.5s ease-out;
-}
-
-@keyframes statusPulse {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Checkbox/Toggle - Bounce Check */
-input[type="checkbox"]:checked+label::before {
-    animation: bounceCheck 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes bounceCheck {
-    0% {
-        transform: scale(0);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Pagination - Ripple Highlight */
-.pagination .page-item.active {
-    position: relative;
-    overflow: hidden;
-}
-
-.pagination .page-item.active::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(201, 151, 0, 0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: rippleHighlight 0.6s ease-out;
-}
-
-@keyframes rippleHighlight {
-    0% {
-        width: 0;
-        height: 0;
-        opacity: 1;
-    }
-
-    100% {
-        width: 100px;
-        height: 100px;
-        opacity: 0;
-    }
-}
-
-/* Stagger Delay Classes for Sequential Animations */
-.delay-1 {
-    animation-delay: 0.05s;
-}
-
-.delay-2 {
-    animation-delay: 0.1s;
-}
-
-.delay-3 {
-    animation-delay: 0.15s;
-}
-
-.delay-4 {
-    animation-delay: 0.2s;
-}
-
-.delay-5 {
-    animation-delay: 0.25s;
-}
-
-.delay-6 {
-    animation-delay: 0.3s;
-}
-
-.delay-7 {
-    animation-delay: 0.35s;
-}
-
-.delay-8 {
-    animation-delay: 0.4s;
-}
-
-.delay-9 {
-    animation-delay: 0.45s;
-}
-
-.delay-10 {
-    animation-delay: 0.5s;
-}
-
-/* Package Row Highlight Animation */
-@keyframes rowHighlight {
-    0% {
-        background-color: #d4edda;
-        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
-    }
-
-    50% {
-        background-color: #d4edda;
-        box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.2);
-    }
-
-    100% {
-        background-color: transparent;
-        box-shadow: none;
-    }
-}
-
-/* ============================================================================
-   PACKAGE ALERTS SYSTEM
-   ============================================================================ */
-
-#packageAlertsContainer {
-    padding: 0 1.5rem;
-    margin-top: 1rem;
-}
-
-.package-alert {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    border-left: 4px solid;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-}
-
-.package-alert.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.package-alert.hiding {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-}
-
-.alert-warning {
-    background: linear-gradient(135deg, #fff3cd 0%, #fffbea 100%);
-    border-left-color: #ffc107;
-    color: #856404;
-}
-
-.alert-info {
-    background: linear-gradient(135deg, #d1ecf1 0%, #e8f5f7 100%);
-    border-left-color: #17a2b8;
-    color: #0c5460;
-}
-
-.alert-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    flex: 1;
-}
-
-.alert-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.alert-text strong {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 1rem;
-}
-
-.alert-text p {
-    margin: 0;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.alert-dismiss {
-    background: rgba(0, 0, 0, 0.1);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    color: inherit;
-}
-
-.alert-dismiss:hover {
-    background: rgba(0, 0, 0, 0.2);
-    transform: scale(1.1);
-}
-
-.alert-dismiss i {
-    font-size: 0.9rem;
-}
-
-/* Responsive: Reduce Motion */
+/* Accessibility: Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -3241,339 +2101,8 @@ input[type="checkbox"]:checked+label::before {
     }
 }
 
-/* ==========================================================================
-   COLLAPSIBLE MENU GROUPS
-   ========================================================================== */
+/* ========== ADMIN DASHBOARD LAYOUT ========== */
 
-.admin-menu .menu-group {
-    margin: 0;
-}
-
-.menu-group-header {
-    padding: 12px 20px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    color: var(--primary-text, #333);
-    background: var(--secondary-bg, #f5f5f5);
-    border-radius: 6px;
-    margin-bottom: 5px;
-    transition: all 0.3s ease;
-}
-
-.menu-group-header:hover {
-    background: var(--hover-bg, #e8e8e8);
-}
-
-.menu-group-arrow {
-    transition: transform 0.3s ease;
-    font-size: 0.8em;
-}
-
-.menu-group.collapsed .menu-group-arrow {
-    transform: rotate(-90deg);
-}
-
-.menu-group-items {
-    list-style: none;
-    padding-left: 15px;
-    margin: 0;
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
-    opacity: 1;
-}
-
-.menu-group.collapsed .menu-group-items {
-    max-height: 0;
-    opacity: 0;
-}
-
-.menu-group-items li {
-    margin: 0;
-}
-
-.menu-group-items li a {
-    padding: 10px 20px;
-    font-size: 0.95em;
-}
-
-/* Menu spacer to push items to bottom */
-.menu-spacer {
-    flex: 1;
-    min-height: 20px;
-}
-
-/* Make sidebar flex column to support spacer */
-.admin-sidebar .admin-menu {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-/* ==========================================================================
-   USER PROFILE DROPDOWN
-   ========================================================================== */
-
-.nav-user-dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.nav-user-trigger {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 8px;
-    transition: background 0.3s ease;
-}
-
-.nav-user-trigger:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.nav-user-arrow {
-    font-size: 0.7em;
-    transition: transform 0.3s ease;
-    color: var(--primary-text, #333);
-}
-
-.nav-user-dropdown.active .nav-user-arrow,
-.nav-user-menu.show~.nav-user-trigger .nav-user-arrow {
-    transform: rotate(180deg);
-}
-
-.nav-user-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 220px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1000;
-}
-
-.nav-user-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.user-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: var(--primary-text, #333);
-    text-decoration: none;
-    transition: background 0.2s ease;
-}
-
-.user-menu-item:hover {
-    background: var(--hover-bg, #f5f5f5);
-}
-
-.user-menu-item:first-child {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-}
-
-.user-menu-item:last-child {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-.user-menu-icon {
-    font-size: 1.2em;
-    width: 24px;
-    text-align: center;
-}
-
-.user-menu-divider {
-    height: 1px;
-    background: var(--border-color, #e0e0e0);
-    margin: 5px 0;
-}
-
-/* Adjust nav-user-profile to work with dropdown */
-.nav-user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.nav-user-name {
-    font-weight: 600;
-    color: var(--primary-text, #333);
-}
-
-.nav-user-role {
-    font-size: 0.85em;
-    color: var(--secondary-text, #666);
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-    .nav-user-info {
-        display: none;
-    }
-
-    .nav-user-arrow {
-        display: none;
-    }
-
-    .nav-user-menu {
-        right: -10px;
-    }
-
-    .menu-group-header {
-        font-size: 0.9em;
-        padding: 10px 15px;
-    }
-}
-
-
-/* Override nav-user-name to match header subtitle color */
-.nav-user-name {
-    font-weight: 600;
-    color: var(--header-subtitle-color, var(--primary-color, #007bff));
-}
-
-
-/* Hide the user dropdown arrow */
-.nav-user-arrow {
-    display: none !important;
-}
-
-/* Increase z-index for user dropdown menu */
-.nav-user-menu {
-    z-index: 9999 !important;
-}
-
-
-/* Icon spacing and sizing for sidebar and dropdown */
-.menu-group-header i,
-.admin-menu>li>a i {
-    margin-right: 8px;
-    width: 16px;
-    text-align: center;
-}
-
-.user-menu-icon i {
-    width: 16px;
-    text-align: center;
-}
-
-/* Force dropdown above all content with fixed positioning */
-.nav-user-dropdown {
-    position: relative;
-    z-index: 10000;
-}
-
-.nav-user-menu {
-    position: fixed !important;
-    z-index: 10001 !important;
-}
-
-/* Start menu groups collapsed by default and implement accordion behavior */
-.menu-group {
-    margin-bottom: 0;
-}
-
-.menu-group.collapsed .menu-group-items {
-    max-height: 0 !important;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.menu-group:not(.collapsed) .menu-group-items {
-    max-height: 500px;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Fix dropdown positioning - use absolute but with higher z-index */
-.nav-user-menu {
-    position: absolute !important;
-    z-index: 999999 !important;
-}
-
-.nav-user-dropdown {
-    z-index: 999998;
-}
-
-/*
-   Z-INDEX HIERARCHY FIX
-   Proper stacking order for dropdowns above header content
-*/
-.nav-user-dropdown {
-    position: relative;
-    z-index: 10002;
-    /* Above nav-content (10001) */
-}
-
-.nav-user-menu {
-    position: absolute !important;
-    z-index: 10003 !important;
-    /* Above dropdown trigger */
-}
-
-/* Ensure dropdown visibility when shown */
-.nav-user-menu.show {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateY(0) !important;
-}
-
-/* FINAL z-index fix - ensure dropdown is absolutely on top */
-.nav-user-dropdown {
-    position: relative;
-    z-index: 100000 !important;
-}
-
-.nav-user-menu {
-    position: absolute !important;
-    z-index: 100001 !important;
-}
-
-.nav-user-menu.show {
-    z-index: 100001 !important;
-}
-
-/* Fix navbar overflow clipping dropdown - allow visible overflow */
-.navbar {
-    overflow: visible !important;
-}
-
-/* Clean z-index hierarchy for dropdown */
-.nav-user-dropdown {
-    position: relative;
-    z-index: 10002 !important;
-    /* Above nav-content (10001) */
-}
-
-.nav-user-menu {
-    position: absolute !important;
-    z-index: 10002 !important;
-    /* Same as parent, positioned correctly */
-}
-
-.nav-user-menu.show {
-    z-index: 10002 !important;
-}
 /* ============================================================================
    ADMIN DASHBOARD LAYOUT - FIXED STRUCTURE
    ============================================================================
@@ -5705,7 +4234,224 @@ input[type="checkbox"]:checked+label::before {
     background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
 }
 
-/* ========== DASHBOARD THEME ========== */
+/* ========== MODERN ENHANCEMENTS ========== */
+
+}
+
+/* Footer first-load animation */
+html:not(.animations-played) .admin-footer,
+html:not(.animations-played) footer {
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+html.animations-played .admin-footer,
+html.animations-played footer {
+    opacity: 1;
+}
+/* Make sidebar flex column to support spacer */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+/* Icon spacing and sizing for sidebar and dropdown */
+.menu-group-header i,
+.admin-menu>li>a i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+/* ==========================================================================
+   MODERN ADMIN DASHBOARD ANIMATIONS
+   Unique, top-notch animations for tables, tabs, and UI elements
+   ========================================================================== */
+
+/* Tab Content - Slide and Scale from Side */
+.admin-tab {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.95);
+    transition: none;
+}
+}
+
+/* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
+.data-table tbody tr {
+    opacity: 0;
+    transform: translateY(-15px);
+}
+.data-table tbody tr.animate-in {
+    animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+}
+
+/* Table Headers - Clean (removed shimmer) */
+.data-table thead {
+    position: relative;
+}
+/* Sidebar Menu - Drop Down and Bounce (falling effect) - SLOWER */
+.admin-menu li {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.3);
+}
+.admin-menu li.animate-in {
+    animation: dropBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+/* Stagger delays using nth-child for sidebar */
+.admin-menu li:nth-child(1) {
+    animation-delay: 0s;
+}
+.admin-menu li:nth-child(2) {
+    animation-delay: 0.1s;
+}
+.admin-menu li:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.admin-menu li:nth-child(4) {
+    animation-delay: 0.3s;
+}
+.admin-menu li:nth-child(5) {
+    animation-delay: 0.4s;
+}
+.admin-menu li:nth-child(6) {
+    animation-delay: 0.5s;
+}
+.admin-menu li:nth-child(7) {
+    animation-delay: 0.6s;
+}
+.admin-menu li:nth-child(8) {
+    animation-delay: 0.7s;
+}
+}
+
+/* Sidebar Active Item - Simple highlight (no glow) */
+.admin-menu li a.active {
+    position: relative;
+    border-left: 3px solid var(--primary-color);
+    background: rgba(201, 151, 0, 0.05);
+}
+}
+
+/* Tab Subtabs - Slide Up Stack */
+.subtab-btn {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.subtab-btn.animate-in {
+    animation: slideUpStack 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+}
+
+.subtab-btn.active {
+    position: relative;
+}
+.subtab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    animation: expandLine 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* Compact Header */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+/* Compact Progress */
+.validation-progress-compact {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+.validation-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+/* Compact Checks Grid - 3 Columns */
+.validation-checks-compact {
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(85vh - 220px);
+}
+.validation-check-checkbox .check-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+}
+.validation-check-checkbox .check-label {
+    flex: 1;
+    line-height: 1.3;
+    font-size: 0.85rem;
+    color: #495057;
+}
+/* Check status colors */
+.validation-check-checkbox.check-pass {
+    border-color: #28a745;
+    background: #d4edda;
+}
+.validation-check-checkbox.check-fail {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+}
+
+/* Validation check status updates */
+.validation-checks-list .check-status {
+    transition: all 0.3s ease-out;
+}
+.validation-checks-list .check-status.updating {
+    animation: statusPulse 0.5s ease-out;
+}
+}
+
+/* ==========================================================================
+   COLLAPSIBLE MENU GROUPS
+   ========================================================================== */
+
+.admin-menu .menu-group {
+    margin: 0;
+}
+/* Make sidebar flex column to support spacer */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+/* Icon spacing and sizing for sidebar and dropdown */
+.menu-group-header i,
+.admin-menu>li>a i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+/* ========== ADMIN DASHBOARD THEME ========== */
 
 /* Admin Dashboard Theme Overrides */
 /* These styles work with CSS variables from theme-css.php */
@@ -6169,7 +4915,7 @@ body {
     }
 }
 
-/* ========== DASHBOARD COLORS ========== */
+/* ========== ADMIN DASHBOARD COLORS ========== */
 
 /* Compact Color Scheme Styles */
 .color-section {
