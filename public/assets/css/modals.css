@@ -1,0 +1,360 @@
+/**
+ * ============================================================================
+ * MODAL STYLES - CENTRALIZED
+ * ============================================================================
+ * All modal-related CSS extracted from admin.css, admin-theme.css,
+ * admin-modern.css, and media.css
+ * 
+ * Modals defined in: /public/admin/partials/modals.php
+ * ============================================================================
+ */
+
+/* ==========================================================================
+   BASE MODAL STRUCTURE
+   ========================================================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-modal-overlay);
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When modal is shown, use flex for centering */
+.modal.show,
+.modal[style*="display: block"] {
+    display: flex !important;
+}
+
+.modal.hiding {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.modal-content {
+    background: white;
+    margin: 0;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, var(--shadow-heavy));
+    position: relative;
+}
+
+/* ==========================================================================
+   MODAL HEADER
+   ========================================================================== */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-right: 2.5rem;
+}
+
+.modal-header h2,
+.modal-header h3 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* ==========================================================================
+   MODAL CLOSE BUTTON
+   ========================================================================== */
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 20px;
+    color: #666;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
+}
+
+.modal-close::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(211, 47, 47, 0.2);
+    border-radius: 4px;
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 0;
+}
+
+.modal-close i {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-close:hover {
+    transform: rotate(180deg) scale(1.2);
+    color: #dc3545;
+}
+
+.modal-close:hover::before {
+    transform: scale(1);
+}
+
+/* Alternative close button style */
+.modal-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: #6c757d;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    transform: rotate(90deg);
+}
+
+/* ==========================================================================
+   MODAL BODY & CONTENT
+   ========================================================================== */
+
+.modal-body {
+    padding: 1rem 0;
+    color: var(--text-color);
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+/* ==========================================================================
+   MODAL FOOTER & ACTIONS
+   ========================================================================== */
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 2px solid #dee2e6;
+}
+
+.modal-actions button {
+    min-width: 100px;
+}
+
+.modal-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   MODAL OVERLAY
+   ========================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-modal-overlay);
+    z-index: 10000;
+    display: none;
+}
+
+.modal-overlay.show {
+    display: block;
+}
+
+.modal-overlay.hiding {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+/* ==========================================================================
+   SPECIFIC MODAL TYPES
+   ========================================================================== */
+
+/* Package Discovery Modal */
+.package-discovery-modal .modal-content {
+    max-width: 900px;
+    width: 95%;
+    max-height: 85vh;
+}
+
+.package-discovery-modal .modal-body {
+    padding: 0;
+    max-height: calc(85vh - 180px);
+    overflow-y: auto;
+}
+
+.package-discovery-modal .modal-actions {
+    border-top: none;
+    margin-top: 1.5rem;
+}
+
+/* Validation Report Modal */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ==========================================================================
+   MODAL ANIMATIONS
+   ========================================================================== */
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE - MOBILE & TABLET
+   ========================================================================== */
+
+/* Tablets (Portrait) - 768px and below */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        padding: 1.5rem;
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding-right: 2rem;
+    }
+
+    .modal-close {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+}
+
+/* Mobile Phones - 480px and below */
+@media (max-width: 480px) {
+    .modal-content {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 1rem;
+    }
+
+    .modal-header h2,
+    .modal-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .package-discovery-modal .modal-content {
+        max-width: none;
+        width: 100%;
+    }
+}
+
+/* Small Mobile - 375px and below */
+@media (max-width: 375px) {
+    .modal-content {
+        padding: 0.75rem;
+    }
+
+    .modal-header {
+        margin-bottom: 1rem;
+        padding-right: 1.5rem;
+    }
+
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .modal-actions {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+    }
+}
