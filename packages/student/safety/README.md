@@ -17,7 +17,7 @@ Anonymous bullying incident reporting system for students. Reports are sent to c
 - Role-based access (students submit, counselors manage, principals view stats)
 - Built-in statistics dashboard
 
-**Tags:** `student`, `safety`
+**Tags:** `safety`, `student-welfare`, `reporting`, `incident-management`
 
 **For:** Students (submit reports), Counselors (manage), Principals (statistics)
 
