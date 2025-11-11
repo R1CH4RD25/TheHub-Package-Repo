@@ -1,7 +1,7 @@
 // Admin Dashboard JavaScript
 
 // Set initial tab IMMEDIATELY (before DOMContentLoaded) to prevent flash
-(function() {
+(function () {
     const savedTab = localStorage.getItem('adminActiveTab');
     if (savedTab) {
         // Add style to hide non-active tabs immediately
@@ -10,7 +10,7 @@
         style.textContent = `
             .admin-tab:not(#tab-${savedTab}) { display: none !important; }
             .admin-menu a:not([data-tab="${savedTab}"]) { opacity: 0.6; }
-            .admin-menu a[data-tab="${savedTab}"] { 
+            .admin-menu a[data-tab="${savedTab}"] {
                 background: rgba(201, 151, 0, 0.05);
                 border-left: 3px solid #C99700;
             }
@@ -39,7 +39,7 @@ async function loadRolesCache() {
 function toggleAuthSection(provider, isEnabled) {
     const sectionId = provider === 'google' ? 'googleAuthSection' : 'microsoftAuthSection';
     const section = document.getElementById(sectionId);
-    
+
     if (section) {
         section.style.display = isEnabled ? 'block' : 'none';
     }
@@ -50,14 +50,14 @@ function toggleAuthSection(provider, isEnabled) {
 function toggleDependentSection(checkboxId, dependentElementId, shouldDisable = false) {
     const checkbox = document.getElementById(checkboxId);
     const element = document.getElementById(dependentElementId);
-    
+
     if (!checkbox || !element) return;
-    
+
     const isEnabled = checkbox.checked;
-    
+
     // Show/hide the element
     element.style.display = isEnabled ? 'block' : 'none';
-    
+
     // Optionally disable inputs within the element when parent is unchecked
     if (shouldDisable) {
         const inputs = element.querySelectorAll('input, select, textarea');
@@ -80,65 +80,65 @@ function initializeDependencies() {
     // Example: Google Groups depends on Google OAuth
     const enableGoogleGroups = document.getElementById('enableGoogleGroups');
     if (enableGoogleGroups) {
-        enableGoogleGroups.addEventListener('change', function() {
+        enableGoogleGroups.addEventListener('change', function () {
             toggleDependentSection('enableGoogleGroups', 'googleGroupsFields', true);
         });
     }
-    
+
     // Example: Microsoft Groups depends on Microsoft OAuth (when implemented)
     const enableMicrosoftGroups = document.getElementById('enableMicrosoftGroups');
     if (enableMicrosoftGroups) {
-        enableMicrosoftGroups.addEventListener('change', function() {
+        enableMicrosoftGroups.addEventListener('change', function () {
             toggleDependentSection('enableMicrosoftGroups', 'microsoftGroupsFields', true);
         });
     }
 }
 
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     // Activity Logs state (must be declared at top of scope)
     let currentLogOffset = 0;
     let currentLogLimit = 100;
-    
+
     // Load roles cache immediately on page load
     await loadRolesCache();
-    
+
     // Initialize cascading dependencies for optional features
     initializeDependencies();
-    
+
     // Check for package alerts on dashboard load (for super admins)
     // Always check to update badges, but only show alert banners if packages tab is active
     if (window.isSuperAdmin) {
         const packagesTabActive = document.getElementById('tab-packages')?.classList.contains('active');
-        checkPackageAlerts(packagesTabActive); 
+        checkPackageAlerts(packagesTabActive);
     }
-    
+
     // Hamburger Menu for Admin Sidebar (Responsive)
     const hamburgerMenu = document.querySelector('.hamburger-menu');
     const adminSidebar = document.querySelector('.admin-sidebar');
     const sidebarOverlay = document.querySelector('.sidebar-overlay');
-    
+
     if (hamburgerMenu && adminSidebar) {
-        hamburgerMenu.addEventListener('click', function() {
+        hamburgerMenu.addEventListener('click', function () {
             hamburgerMenu.classList.toggle('active');
             adminSidebar.classList.toggle('open');
             if (sidebarOverlay) {
                 sidebarOverlay.classList.toggle('active');
             }
         });
-        
+
         // Close sidebar when clicking overlay
         if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', function() {
+            sidebarOverlay.addEventListener('click', function () {
                 hamburgerMenu.classList.remove('active');
                 adminSidebar.classList.remove('open');
                 sidebarOverlay.classList.remove('active');
             });
         }
-        
+
         // Close sidebar when clicking a menu item on mobile
         const sidebarLinks = adminSidebar.querySelectorAll('.sidebar-menu a');
         sidebarLinks.forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function () {
                 if (window.innerWidth <= 1024) {
                     hamburgerMenu.classList.remove('active');
                     adminSidebar.classList.remove('open');
@@ -149,19 +149,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         });
     }
-    
+
     // Mobile navigation toggle
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
-    
+
     if (navToggle && navLinks) {
-        navToggle.addEventListener('click', function(e) {
+        navToggle.addEventListener('click', function (e) {
             e.stopPropagation();
             navLinks.classList.toggle('active');
             console.log('Nav toggled, active:', navLinks.classList.contains('active'));
         });
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
                 navLinks.classList.remove('active');
             }
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Close nav when clicking a link
         const navLinksElements = navLinks.querySelectorAll('.nav-link');
         navLinksElements.forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function () {
                 navLinks.classList.remove('active');
             });
         });
@@ -179,27 +179,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Tab switching (both sidebar and mobile menu)
     const tabs = document.querySelectorAll('[data-tab]');
     tabs.forEach(tab => {
-        tab.addEventListener('click', function(e) {
+        tab.addEventListener('click', function (e) {
             e.preventDefault();
             const tabName = this.dataset.tab;
             switchTab(tabName);
-            
+
             // Close mobile nav when clicking a tab link
             if (navLinks && this.classList.contains('mobile-tab-link')) {
                 navLinks.classList.remove('active');
             }
         });
     });
-    
+
     // Restore last active tab from localStorage FIRST (before loading data)
     const savedTab = localStorage.getItem('adminActiveTab');
-    
+
     // Remove initial tab state style now that we're ready to handle tabs properly
     const initialStyle = document.getElementById('initial-tab-state');
     if (initialStyle) {
         initialStyle.remove();
     }
-    
+
     if (savedTab && document.getElementById(`tab-${savedTab}`)) {
         // Switch to saved tab (this will load the appropriate data)
         console.log('🔄 Restoring saved tab:', savedTab);
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // No saved tab, load default User Management data
         loadUsers();
     }
-    
+
     // Additional check for packages tab loading after a brief delay
     setTimeout(() => {
         const packagesTab = document.getElementById('tab-packages');
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (activeSubtab) {
                 const subtabName = activeSubtab.dataset.subtab;
                 console.log('📋 Loading initial packages subtab:', subtabName);
-                
+
                 if (subtabName === 'installed-packages') {
                     loadInstalledPackages();
                 } else if (subtabName === 'available-packages') {
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }
     }, 200);
-    
+
     // After tab initialization, ensure packages content is loaded if packages tab is active
     setTimeout(() => {
         const packagesTab = document.getElementById('tab-packages');
@@ -263,9 +263,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelectorAll('.modal-cancel').forEach(btn => {
         btn.addEventListener('click', closeModal);
     });
-    
+
     // Close modals when clicking outside
-    window.addEventListener('click', function(e) {
+    window.addEventListener('click', function (e) {
         if (e.target.classList.contains('modal')) {
             closeModal();
         }
@@ -273,18 +273,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Sub-tabs (User Management & Vehicles)
     document.querySelectorAll('.subtab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const subtabName = this.dataset.subtab;
             const parentTab = this.closest('.admin-tab');
-            
+
             // Remove active from subtab buttons and content within this parent tab
             parentTab.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
             parentTab.querySelectorAll('.user-subtab').forEach(t => t.classList.remove('active'));
-            
+
             // Add active to clicked button and corresponding content
             this.classList.add('active');
             document.getElementById(`subtab-${subtabName}`).classList.add('active');
-            
+
             // Show/hide Save All Changes button for Section Access
             const saveSectionAccessBtn = document.getElementById('saveSectionAccessBtn');
             const addSectionBtn = document.getElementById('addSection');
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     if (addSectionBtn) addSectionBtn.style.display = 'inline-flex';
                 }
             }
-            
+
             // Load data for the subtab if needed
             if (subtabName === 'pending-users' && !document.getElementById('pendingTable').dataset.loaded) {
                 loadPendingUsers();
@@ -323,20 +323,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Remove active from all menu links (both sidebar and mobile)
         document.querySelectorAll('.admin-menu a, .mobile-tab-link').forEach(a => a.classList.remove('active'));
         document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-        
+
         // Add active to matching tab links
         document.querySelectorAll(`[data-tab="${tabName}"]`).forEach(link => link.classList.add('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
-        
+
         // Save active tab to localStorage
         localStorage.setItem('adminActiveTab', tabName);
-        
+
         // If switching to users tab, make sure data is loaded
         if (tabName === 'users') {
             const usersTable = document.getElementById('usersTable');
             const pendingTable = document.getElementById('pendingTable');
             const invitationsTable = document.getElementById('invitationsTable');
-            
+
             if (!usersTable.dataset.loaded || usersTable.querySelector('tbody tr').length === 0) {
                 loadUsers();
             }
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 loadAuditLogs();
             }
         }
-        
+
         // If switching to section-config tab, load section configuration
         if (tabName === 'section-config') {
             if (typeof loadSectionConfig === 'function' && typeof sectionsConfigData !== 'undefined') {
@@ -382,11 +382,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         }
-        
+
         // If switching to packages tab, check and show alerts
         if (tabName === 'packages' && window.isSuperAdmin) {
             checkPackageAlerts(true);
-            
+
             // Load content for the currently active packages subtab
             const activePackagesSubtab = document.querySelector('#tab-packages .subtab-nav a.active');
             if (activePackagesSubtab) {
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 loadInstalledPackages();
             }
         }
-        
+
         // Trigger animations for the new tab (if animation controller is loaded)
         if (window.AdminAnimations && typeof window.AdminAnimations.onTabChange === 'function') {
             window.AdminAnimations.onTabChange(tabName);
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const users = await response.json();
 
             // Fetch all users' roles in parallel
-            const rolesPromises = users.map(user => 
+            const rolesPromises = users.map(user =>
                 fetch(`/api/user-roles.php?user_id=${user.id}`)
                     .then(r => r.json())
                     .then(data => ({ userId: user.id, roles: data.roles }))
@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             users.forEach(user => {
                 const status = user.is_active ? '✅ Active' : '❌ Inactive';
                 const lastLogin = user.last_login ? formatDateTime(user.last_login) : 'Never';
-                
+
                 // Display all roles as badges
                 const userRoles = rolesMap[user.id] || [];
                 let rolesHtml = '';
@@ -451,21 +451,21 @@ document.addEventListener('DOMContentLoaded', async function() {
                 } else {
                     rolesHtml = userRoles.map(r => `<span class="role-badge role-badge-${r.role}">${formatRole(r.role)}</span>`).join(' ');
                 }
-                
+
                 html += `<tr data-id="${user.id}">
                     <td>${escapeHtml(user.name)}</td>
                     <td>${escapeHtml(user.email)}</td>
                     <td>${rolesHtml}</td>
                     <td>${status}</td>
                     <td>${lastLogin}</td>`;
-                
+
                 if (window.isSuperAdmin) {
                     html += `<td>
                         <button onclick="editUserRoles(${user.id})" class="btn-icon" title="Edit Global Roles">🎭</button>
                         <button onclick="toggleUser(${user.id}, ${user.is_active})" class="btn-icon" title="Toggle Active">🔄</button>
                     </td>`;
                 }
-                
+
                 html += '</tr>';
             });
 
@@ -489,11 +489,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     function showVehicleModal(vehicleId = null) {
         const modal = document.getElementById('vehicleModal');
         const form = document.getElementById('vehicleForm');
-        
+
         form.reset();
         document.getElementById('vehicleModalTitle').textContent = vehicleId ? 'Edit Vehicle' : 'Add Vehicle';
         document.getElementById('vehicleId').value = vehicleId || '';
-        
+
         if (vehicleId) {
             // Load vehicle data
             fetch(`/api/vehicles.php?id=${vehicleId}`)
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     });
                 });
         }
-        
+
         modal.style.display = 'block';
     }
 
@@ -514,18 +514,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.style.display = 'none';
         });
-        
+
         // Reset forms
         document.getElementById('invitationForm')?.reset();
         document.getElementById('sectionAccessForm')?.reset();
         document.getElementById('sectionForm')?.reset();
         document.getElementById('userRolesForm')?.reset();
-        
+
         // Clear hidden fields
         document.getElementById('sectionId').value = '';
     }
 
-    window.changeUserRole = function(id, currentRole) {
+    window.changeUserRole = function (id, currentRole) {
         const newRole = prompt(`Change role for user (current: ${currentRole}):\nOptions: staff, manager, admin, super_admin`, currentRole);
         if (newRole && ['staff', 'manager', 'admin', 'super_admin'].includes(newRole)) {
             // Implementation here
@@ -533,16 +533,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    window.toggleUser = function(id, isActive) {
+    window.toggleUser = function (id, isActive) {
         const action = isActive ? 'deactivate' : 'activate';
         if (!confirm(`Are you sure you want to ${action} this user?`)) return;
-        
+
         // Implementation here
         alert(`${action} functionality coming soon`);
     };
 
     // Edit User Global Roles
-    window.editUserRoles = async function(userId) {
+    window.editUserRoles = async function (userId) {
         try {
             // Load user info
             const usersResponse = await fetch('/api/users.php');
@@ -583,10 +583,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     // User Roles Form Submit Handler
-    document.getElementById('userRolesForm')?.addEventListener('submit', async function(e) {
+    document.getElementById('userRolesForm')?.addEventListener('submit', async function (e) {
         e.preventDefault();
         const formData = new FormData(e.target);
-        
+
         try {
             const response = await fetch('/api/user-roles.php', {
                 method: 'POST',
@@ -654,7 +654,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    window.approveUser = async function(id) {
+    window.approveUser = async function (id) {
         if (!confirm('Approve this user?')) return;
 
         try {
@@ -682,7 +682,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    window.denyUser = async function(id) {
+    window.denyUser = async function (id) {
         if (!confirm('Permanently delete this user request? This cannot be undone.')) return;
 
         try {
@@ -728,8 +728,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 html += '<tr><td colspan="6" style="text-align:center;">No invitations sent</td></tr>';
             } else {
                 invitations.forEach(inv => {
-                    const status = inv.accepted_at ? '✓ Accepted' : 
-                                  (new Date(inv.expires_at) < new Date() ? '⏰ Expired' : '⏳ Pending');
+                    const status = inv.accepted_at ? '✓ Accepted' :
+                        (new Date(inv.expires_at) < new Date() ? '⏰ Expired' : '⏳ Pending');
                     html += `<tr>
                         <td>${escapeHtml(inv.email)}</td>
                         <td>${formatRole(inv.role)}</td>
@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         e.preventDefault();
 
         const formData = new FormData(e.target);
-        
+
         try {
             const response = await fetch('/api/invitations.php', {
                 method: 'POST',
@@ -792,24 +792,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Create toast element
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
+
         const icons = {
             success: '✅',
             error: '❌',
             warning: '⚠️'
         };
-        
+
         toast.innerHTML = `
             <span class="toast-icon">${icons[type] || '✅'}</span>
             <span class="toast-message">${message}</span>
             <button class="toast-close" onclick="this.parentElement.remove()">×</button>
         `;
-        
+
         document.body.appendChild(toast);
-        
+
         // Trigger animation
         setTimeout(() => toast.classList.add('show'), 10);
-        
+
         // Auto remove after 5 seconds
         setTimeout(() => {
             toast.classList.remove('show');
@@ -820,11 +820,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Event listeners for new features
     if (window.canManageUsers) {
         // Tables are now loaded via subtab system (see subtab-btn click handlers above)
-        
+
         document.getElementById('refreshPending')?.addEventListener('click', loadPendingUsers);
         document.getElementById('sendInvitation')?.addEventListener('click', showInvitationModal);
         document.getElementById('invitationForm')?.addEventListener('submit', handleInvitationSubmit);
-        
+
         // Add close handlers for invitation modal
         const invModal = document.getElementById('invitationModal');
         if (invModal) {
@@ -859,9 +859,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return roleData.label;
             }
         }
-        
+
         // Fallback to capitalizing the role value
-        return role.split('_').map(word => 
+        return role.split('_').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     }
@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 fetch('/api/roles.php'),
                 fetch('/api/section-role-access.php')
             ]);
-            
+
             const roles = await rolesResponse.json();
             const data = await sectionsResponse.json();
 
@@ -919,28 +919,28 @@ document.addEventListener('DOMContentLoaded', async function() {
                     // Emoji or other text icon
                     iconHtml = escapeHtml(section.icon || '📦');
                 }
-                
+
                 // Truncate description to 60 characters
                 let descriptionHtml = '';
                 let nameWithIcon = escapeHtml(section.display_name);
-                
+
                 if (section.description) {
                     const fullDesc = section.description;
                     const truncatedDesc = fullDesc.length > 60 ? fullDesc.substring(0, 60) + '...' : fullDesc;
                     const needsIcon = fullDesc.length > 60;
-                    
+
                     if (needsIcon) {
                         // Add icon next to section name with properly escaped tooltip
                         // Use double escaping for data attribute: once for HTML, once for attribute value
                         const tooltipText = fullDesc.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                         nameWithIcon = `${escapeHtml(section.display_name)} <i class="bi bi-info-circle section-description-icon" data-full-text="${tooltipText}"></i>`;
                     }
-                    
+
                     descriptionHtml = `<div class="section-description">
                         <span class="section-description-text">${escapeHtml(truncatedDesc)}</span>
                     </div>`;
                 }
-                
+
                 html += `<tr>
                     <td class="sticky-col">
                         <div class="section-name-cell">
@@ -956,11 +956,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 roles.forEach(role => {
                     const isChecked = section.roles && section.roles.includes(role.value);
                     const isDisabled = role.value === 'super_admin'; // Super admin always has access
-                    
+
                     html += `<td class="checkbox-cell">
-                        <input 
-                            type="checkbox" 
-                            name="section_${section.id}_roles[]" 
+                        <input
+                            type="checkbox"
+                            name="section_${section.id}_roles[]"
                             value="${role.value}"
                             ${isChecked ? 'checked' : ''}
                             ${isDisabled ? 'checked disabled' : ''}
@@ -980,7 +980,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // Add form submit handler
             document.getElementById('sectionRoleAccessForm').addEventListener('submit', handleSectionRoleAccessSubmit);
-            
+
             // Show the Save All Changes button in header
             const saveBtn = document.getElementById('saveSectionAccessBtn');
             if (saveBtn) {
@@ -1094,12 +1094,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             tbody.innerHTML = data.roles.map(role => {
-                const statusBadge = role.is_active ? 
-                    '<span class="badge badge-success">✓ Active</span>' : 
+                const statusBadge = role.is_active ?
+                    '<span class="badge badge-success">✓ Active</span>' :
                     '<span class="badge badge-inactive">✗ Inactive</span>';
-                
-                const toggleBtn = role.can_disable ? 
-                    `<button class="btn btn-sm ${role.is_active ? 'btn-warning' : 'btn-success'}" 
+
+                const toggleBtn = role.can_disable ?
+                    `<button class="btn btn-sm ${role.is_active ? 'btn-warning' : 'btn-success'}"
                              onclick="toggleRole('${role.value}', ${!role.is_active})">
                         ${role.is_active ? '🔒 Disable' : '✓ Enable'}
                     </button>` :
@@ -1116,9 +1116,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                         </span>
                     </td>
                     <td>
-                        <input type="text" 
-                               id="notes_${role.value}" 
-                               value="${escapeHtml(role.notes || '')}" 
+                        <input type="text"
+                               id="notes_${role.value}"
+                               value="${escapeHtml(role.notes || '')}"
                                placeholder="Add notes..."
                                style="width: 100%; padding: 4px; font-size: 0.85rem;"
                                onblur="updateRoleNotes('${role.value}', this.value)">
@@ -1134,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    window.toggleRole = async function(roleValue, enable) {
+    window.toggleRole = async function (roleValue, enable) {
         if (!confirm(`Are you sure you want to ${enable ? 'enable' : 'disable'} the "${roleValue}" role?\n\n${!enable ? '⚠️ Users with this role will still exist but the role will be hidden from all selection menus.' : ''}`)) {
             return;
         }
@@ -1156,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (result.success) {
                 showToast(`✓ Role ${enable ? 'enabled' : 'disabled'} successfully`, 'success');
                 loadRoleManagement(); // Reload the table
-                
+
                 // Also reload roles cache for the rest of the app
                 rolesCache = null;
                 await loadRolesCache();
@@ -1169,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    window.updateRoleNotes = async function(roleValue, notes) {
+    window.updateRoleNotes = async function (roleValue, notes) {
         try {
             const response = await fetch('/api/role-management.php', {
                 method: 'POST',
@@ -1208,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         try {
             const response = await fetch('/api/sections.php');
             const sections = await response.json();
-            
+
             console.log('📋 Loaded sections:', sections.length, 'sections');
             console.log('🔍 Section data:', sections);
 
@@ -1231,8 +1231,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 html += '<tr><td colspan="7" style="text-align:center;">No sections found</td></tr>';
             } else {
                 sections.forEach(section => {
-                    const statusBadge = section.is_active ? 
-                        '<span class="badge badge-success">Active</span>' : 
+                    const statusBadge = section.is_active ?
+                        '<span class="badge badge-success">Active</span>' :
                         '<span class="badge badge-inactive">Inactive</span>';
 
                     // Render icon - check if it's a Bootstrap Icons class or emoji
@@ -1252,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <td>${statusBadge}</td>
                         <td>
                             <button class="btn btn-sm btn-primary" onclick="editSection(${section.id})">Edit</button>
-                            <button class="btn btn-sm ${section.is_active ? 'btn-warning' : 'btn-success'}" 
+                            <button class="btn btn-sm ${section.is_active ? 'btn-warning' : 'btn-success'}"
                                     onclick="toggleSection(${section.id}, ${section.is_active ? 0 : 1})">
                                 ${section.is_active ? 'Deactivate' : 'Activate'}
                             </button>
@@ -1273,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    window.editSection = async function(sectionId) {
+    window.editSection = async function (sectionId) {
         try {
             const response = await fetch('/api/sections.php');
             const sections = await response.json();
@@ -1301,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    window.toggleSection = async function(sectionId, isActive) {
+    window.toggleSection = async function (sectionId, isActive) {
         const action = isActive ? 'activate' : 'deactivate';
         if (!confirm(`Are you sure you want to ${action} this section? ${!isActive ? 'It will be hidden from all users.' : 'Users with access will see it.'}`)) {
             return;
@@ -1324,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (result.success) {
                 showToast(`Section ${action}d successfully`, 'success');
-                
+
                 // Force reload the sections table
                 console.log('🔄 Reloading sections management table...');
                 await loadSectionsManagement();
@@ -1366,12 +1366,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Event listeners for section management
     if (window.isSuperAdmin) {
-        document.getElementById('addSection')?.addEventListener('click', function() {
+        document.getElementById('addSection')?.addEventListener('click', function () {
             document.getElementById('sectionModalTitle').textContent = 'Add New Section';
             document.getElementById('sectionForm').reset();
             document.getElementById('sectionId').value = '';
             document.getElementById('sectionModal').style.display = 'block';
-            
+
             // Reset manual edit flag when opening for new section
             if (window.sectionSlugManuallyEdited !== undefined) {
                 window.sectionSlugManuallyEdited = false;
@@ -1387,22 +1387,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             sectionModal.querySelector('.modal-close')?.addEventListener('click', closeModal);
             sectionModal.querySelector('.modal-cancel')?.addEventListener('click', closeModal);
         }
-        
+
         // Auto-generate section slug from display name
         const sectionDisplayNameInput = document.getElementById('sectionDisplayName');
         const sectionNameInput = document.getElementById('sectionName');
         const sectionBaseUrlInput = document.getElementById('sectionBaseUrl');
-        
+
         if (sectionDisplayNameInput && sectionNameInput && sectionBaseUrlInput) {
             window.sectionSlugManuallyEdited = false;
-            
+
             // Track if user manually edited the slug
-            sectionNameInput.addEventListener('input', function() {
+            sectionNameInput.addEventListener('input', function () {
                 window.sectionSlugManuallyEdited = true;
             });
-            
+
             // Auto-generate slug from display name
-            sectionDisplayNameInput.addEventListener('input', function() {
+            sectionDisplayNameInput.addEventListener('input', function () {
                 if (!window.sectionSlugManuallyEdited || sectionNameInput.value === '') {
                     const displayName = this.value;
                     const slug = displayName
@@ -1411,7 +1411,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         .replace(/\s+/g, '-')          // Replace spaces with hyphens
                         .replace(/-+/g, '-')           // Replace multiple hyphens with single
                         .replace(/^-|-$/g, '');        // Remove leading/trailing hyphens
-                    
+
                     sectionNameInput.value = slug;
                     sectionBaseUrlInput.value = `/modules/${slug}/`;
                 }
@@ -1423,27 +1423,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     async function loadAuditLogs(offset = 0) {
         currentLogOffset = offset;
         currentLogLimit = parseInt(document.getElementById('filterLimit')?.value || 100);
-        
+
         const action = document.getElementById('filterAction')?.value || '';
         const table = document.getElementById('filterTable')?.value || '';
-        
+
         const params = new URLSearchParams({
             limit: currentLogLimit,
             offset: currentLogOffset
         });
-        
+
         if (action) params.append('action', action);
         if (table) params.append('table', table);
-        
+
         try {
             const response = await fetch(`/api/audit-logs.php?${params}`);
             const data = await response.json();
-            
+
             if (data.error) {
                 document.getElementById('logsTable').innerHTML = '<p class="error">' + escapeHtml(data.error) + '</p>';
                 return;
             }
-            
+
             displayAuditLogs(data);
         } catch (error) {
             console.error('Error loading audit logs:', error);
@@ -1454,14 +1454,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     function displayAuditLogs(data) {
         const container = document.getElementById('logsTable');
         const { logs, total, limit, offset } = data;
-        
+
         if (!logs || logs.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No activity logs found. Actions will be logged here as users make changes.</p>';
             document.getElementById('logsPagination').innerHTML = '';
             container.dataset.loaded = 'true';
             return;
         }
-        
+
         let html = `<div class="table-responsive"><table class="data-table">
             <thead>
                 <tr>
@@ -1475,11 +1475,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 </tr>
             </thead>
             <tbody>`;
-        
+
         logs.forEach(log => {
             const actionBadge = getActionBadge(log.action);
             const details = formatLogDetails(log);
-            
+
             html += `<tr>
                 <td style="white-space: nowrap;">${formatDateTime(log.created_at)}</td>
                 <td>
@@ -1493,11 +1493,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 <td><small>${escapeHtml(log.ip_address || 'N/A')}</small></td>
             </tr>`;
         });
-        
+
         html += '</tbody></table></div>';
         container.innerHTML = html;
         container.dataset.loaded = 'true';
-        
+
         // Update pagination
         updateLogsPagination(total, limit, offset);
     }
@@ -1516,7 +1516,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             'login_failed': '<span class="badge" style="background: #dc2626; color: white;">LOGIN ✗</span>',
             'logout': '<span class="badge" style="background: #6b7280; color: white;">LOGOUT</span>'
         };
-        
+
         return badges[action] || `<span class="badge" style="background: #9ca3af; color: white;">${escapeHtml(action.toUpperCase())}</span>`;
     }
 
@@ -1540,17 +1540,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         const pagination = document.getElementById('logsPagination');
         const currentPage = Math.floor(offset / limit) + 1;
         const totalPages = Math.ceil(total / limit);
-        
+
         let html = `<div style="display: flex; align-items: center; gap: 1rem;">`;
         html += `<span>Page ${currentPage} of ${totalPages} (${total} total records)</span>`;
-        
+
         if (currentPage > 1) {
             html += `<button class="btn btn-sm btn-secondary" onclick="loadAuditLogs(${offset - limit})">← Previous</button>`;
         }
         if (currentPage < totalPages) {
             html += `<button class="btn btn-sm btn-secondary" onclick="loadAuditLogs(${offset + limit})">Next →</button>`;
         }
-        
+
         html += `</div>`;
         pagination.innerHTML = html;
     }
@@ -1558,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Audit Logs Event Listeners
     document.getElementById('refreshLogs')?.addEventListener('click', () => loadAuditLogs(0));
     document.getElementById('applyLogFilters')?.addEventListener('click', () => loadAuditLogs(0));
-    document.getElementById('clearLogFilters')?.addEventListener('click', function() {
+    document.getElementById('clearLogFilters')?.addEventListener('click', function () {
         document.getElementById('filterAction').value = '';
         document.getElementById('filterTable').value = '';
         document.getElementById('filterLimit').value = '100';
@@ -1576,30 +1576,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         try {
             // Add cache-busting parameter to avoid stale cached responses
             const response = await fetch('/api/themes.php?_=' + Date.now());
-            
+
             if (!response.ok) {
                 console.error('Themes API error:', response.status, response.statusText);
                 const text = await response.text();
                 console.error('Response body:', text);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const themes = await response.json();
-            
+
             const container = document.getElementById('themesContainer');
             if (!themes || themes.length === 0) {
                 container.innerHTML = '<p style="color: #6B7280;">No saved themes yet.</p>';
                 return;
             }
-            
+
             let html = '';
             const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#C99700';
-            
+
             themes.forEach(theme => {
                 const isActive = theme.is_active == 1;
                 const isSystem = theme.is_system == 1;
                 const settings = typeof theme.settings === 'string' ? JSON.parse(theme.settings) : theme.settings;
-                
+
                 html += `
                 <div class="theme-card" style="background: white; border: 2px solid ${isActive ? primaryColor : '#E5E7EB'}; border-radius: 8px; padding: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
@@ -1612,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                             ${theme.description ? `<p style="color: #6B7280; font-size: 0.875rem; margin: 0.25rem 0 0 0;">${escapeHtml(theme.description)}</p>` : ''}
                         </div>
                     </div>
-                    
+
                     <!-- Color Preview -->
                     <div style="display: flex; gap: 4px; margin: 0.75rem 0;">
                         <div style="width: 24px; height: 24px; background: ${settings.primary_color || '#C99700'}; border-radius: 4px; border: 1px solid #ddd;"></div>
@@ -1621,12 +1621,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <div style="width: 24px; height: 24px; background: ${settings.header_bg_color || '#000000'}; border-radius: 4px; border: 1px solid #ddd;"></div>
                         <div style="width: 24px; height: 24px; background: ${settings.button_primary_bg || '#C99700'}; border-radius: 4px; border: 1px solid #ddd;"></div>
                     </div>
-                    
+
                     <div style="font-size: 0.75rem; color: #9CA3AF; margin-bottom: 0.75rem;">
                         Created ${theme.created_at ? new Date(theme.created_at).toLocaleDateString() : 'Unknown'}
                         ${theme.creator_name ? ` by ${escapeHtml(theme.creator_name)}` : ''}
                     </div>
-                    
+
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         ${!isActive ? `<button class="btn btn-sm btn-primary" onclick="activateTheme(${theme.id})">Load Theme</button>` : ''}
                         ${!isSystem ? `<button class="btn btn-sm btn-secondary" onclick="selectThemeForUpdate(${theme.id}, '${escapeHtml(theme.name).replace(/'/g, "\\'")}')">Overwrite with Current</button>` : ''}
@@ -1635,7 +1635,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     </div>
                 </div>`;
             });
-            
+
             container.innerHTML = html;
         } catch (error) {
             console.error('Error loading themes:', error);
@@ -1644,29 +1644,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Save current settings as new theme
-    document.getElementById('saveCurrentTheme')?.addEventListener('click', async function() {
+    document.getElementById('saveCurrentTheme')?.addEventListener('click', async function () {
         const name = document.getElementById('newThemeName').value.trim();
         const description = document.getElementById('newThemeDescription').value.trim();
-        
+
         if (!name) {
             showMessage('Please enter a theme name', 'error');
             return;
         }
-        
+
         try {
             const formData = new FormData();
             formData.append('action', 'save_current');
             formData.append('name', name);
             formData.append('description', description);
             formData.append('csrf_token', window.csrfToken);
-            
+
             const response = await fetch('/api/themes.php', {
                 method: 'POST',
                 body: formData
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok && result.success) {
                 showMessage('Theme saved successfully!', 'success');
                 document.getElementById('newThemeName').value = '';
@@ -1682,17 +1682,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Activate theme (load its settings)
-    window.activateTheme = async function(themeId) {
+    window.activateTheme = async function (themeId) {
         if (!confirm('Load this theme? Current settings will be replaced.')) {
             return;
         }
-        
+
         try {
             const formData = new FormData();
             formData.append('action', 'activate');
             formData.append('id', themeId);
             formData.append('csrf_token', window.csrfToken);
-            
+
             const response = await fetch('/api/themes.php', {
                 method: 'PUT',
                 headers: {
@@ -1700,9 +1700,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 },
                 body: new URLSearchParams(formData).toString()
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok && result.success) {
                 showMessage('Theme activated! Page will reload...', 'success');
                 setTimeout(() => window.location.reload(), 1000);
@@ -1717,27 +1717,27 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Select a theme for updating (puts form in update mode)
     window.selectedThemeForUpdate = null;
-    
-    window.selectThemeForUpdate = function(themeId, themeName) {
+
+    window.selectThemeForUpdate = function (themeId, themeName) {
         window.selectedThemeForUpdate = { id: themeId, name: themeName };
-        
+
         // Show update mode UI
         document.getElementById('updateThemeNotice').style.display = 'block';
         document.getElementById('updateThemeName').textContent = themeName;
         document.getElementById('updateSelectedTheme').style.display = 'inline-block';
         document.getElementById('saveCurrentTheme').style.display = 'none';
-        
+
         // Populate the form with the theme name
         document.getElementById('newThemeName').value = themeName;
         document.getElementById('newThemeName').disabled = true;
-        
+
         // Scroll to the form
         document.querySelector('#subtab-themes .settings-section').scrollIntoView({ behavior: 'smooth' });
-        
+
         showMessage(`Click "Update Selected Theme" to overwrite "${themeName}" with current color scheme`, 'info');
     };
-    
-    window.cancelUpdateMode = function() {
+
+    window.cancelUpdateMode = function () {
         window.selectedThemeForUpdate = null;
         document.getElementById('updateThemeNotice').style.display = 'none';
         document.getElementById('updateSelectedTheme').style.display = 'none';
@@ -1745,27 +1745,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('newThemeName').value = '';
         document.getElementById('newThemeName').disabled = false;
     };
-    
+
     // Update selected theme button click
-    document.getElementById('updateSelectedTheme')?.addEventListener('click', async function() {
+    document.getElementById('updateSelectedTheme')?.addEventListener('click', async function () {
         if (!window.selectedThemeForUpdate) {
             showMessage('No theme selected for update', 'error');
             return;
         }
-        
+
         const themeId = window.selectedThemeForUpdate.id;
         const themeName = window.selectedThemeForUpdate.name;
-        
+
         if (!confirm(`Overwrite "${themeName}" with current color scheme? This cannot be undone.`)) {
             return;
         }
-        
+
         try {
             const formData = new FormData();
             formData.append('action', 'update');
             formData.append('id', themeId);
             formData.append('csrf_token', window.csrfToken);
-            
+
             const response = await fetch('/api/themes.php', {
                 method: 'PUT',
                 headers: {
@@ -1773,9 +1773,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 },
                 body: new URLSearchParams(formData).toString()
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok && result.success) {
                 showMessage('Theme overwritten successfully!', 'success');
                 cancelUpdateMode();
@@ -1790,16 +1790,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Delete theme
-    window.deleteTheme = async function(themeId, themeName) {
+    window.deleteTheme = async function (themeId, themeName) {
         if (!confirm(`Delete theme "${themeName}"? This cannot be undone.`)) {
             return;
         }
-        
+
         try {
             const formData = new FormData();
             formData.append('id', themeId);
             formData.append('csrf_token', window.csrfToken);
-            
+
             const response = await fetch('/api/themes.php', {
                 method: 'DELETE',
                 headers: {
@@ -1807,9 +1807,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 },
                 body: new URLSearchParams(formData).toString()
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok && result.success) {
                 showMessage('Theme deleted successfully!', 'success');
                 loadThemes();
@@ -1823,11 +1823,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     // Export theme as JSON
-    window.exportTheme = async function(themeId) {
+    window.exportTheme = async function (themeId) {
         try {
             const response = await fetch(`/api/themes.php?action=export&id=${themeId}`);
             const themeData = await response.json();
-            
+
             if (response.ok) {
                 const blob = new Blob([JSON.stringify(themeData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -1851,7 +1851,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load themes when Themes subtab is shown
     const themesSubtabBtn = document.querySelector('[data-subtab="themes"]');
     if (themesSubtabBtn) {
-        themesSubtabBtn.addEventListener('click', function() {
+        themesSubtabBtn.addEventListener('click', function () {
             // Small delay to ensure subtab is visible
             setTimeout(() => {
                 if (document.getElementById('themesContainer')) {
@@ -1862,12 +1862,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // ===== COMPACT COLOR SCHEME FUNCTIONS =====
-    
+
     // Toggle collapsible color sections
-    window.toggleColorSection = function(header) {
+    window.toggleColorSection = function (header) {
         const toggle = header.querySelector('.color-section-toggle');
         const body = header.nextElementSibling;
-        
+
         if (body.classList.contains('collapsed')) {
             // Expand
             body.classList.remove('collapsed');
@@ -1883,18 +1883,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     function setupColorSync(colorId, hexId, previewCallback) {
         const colorInput = document.getElementById(colorId);
         const hexInput = document.getElementById(hexId);
-        
+
         if (!colorInput || !hexInput) return;
-        
+
         // Update hex when color picker changes
-        colorInput.addEventListener('input', function() {
+        colorInput.addEventListener('input', function () {
             const value = this.value.toUpperCase();
             hexInput.value = value;
             if (previewCallback) previewCallback(value);
         });
-        
+
         // Update color picker when hex changes
-        hexInput.addEventListener('input', function() {
+        hexInput.addEventListener('input', function () {
             let value = this.value.trim();
             // Add # if missing
             if (value && !value.startsWith('#')) {
@@ -1906,9 +1906,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (previewCallback) previewCallback(value);
             }
         });
-        
+
         // Format on blur
-        hexInput.addEventListener('blur', function() {
+        hexInput.addEventListener('blur', function () {
             let value = this.value.trim().toUpperCase();
             if (value && !value.startsWith('#')) {
                 value = '#' + value;
@@ -1929,7 +1929,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         setupColorSync('navbarColor', 'navbarColorHex');
         setupColorSync('backgroundColor', 'backgroundColorHex');
         setupColorSync('accentColor', 'accentColorHex');
-        
+
         // Text colors
         setupColorSync('textPrimary', 'textPrimaryHex');
         setupColorSync('textSecondary', 'textSecondaryHex');
@@ -1937,7 +1937,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         setupColorSync('textDisabled', 'textDisabledHex');
         setupColorSync('textInverse', 'textInverseHex');
         setupColorSync('linkColor', 'linkColorHex');
-        
+
         // Button colors
         setupColorSync('buttonPrimaryBg', 'buttonPrimaryBgHex');
         setupColorSync('buttonPrimaryText', 'buttonPrimaryTextHex');
@@ -1948,7 +1948,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         setupColorSync('buttonSuccessBg', 'buttonSuccessBgHex');
         setupColorSync('buttonSuccessText', 'buttonSuccessTextHex');
         setupColorSync('unsavedChangesGlowColor', 'unsavedChangesGlowColorHex');
-        
+
         // Role badge colors with live preview
         setupColorSync('roleStaffBg', 'roleStaffBgHex', (bg) => {
             updateRoleBadgePreview('staffBadgePreview', bg, document.getElementById('roleStaffText').value);
@@ -1956,42 +1956,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         setupColorSync('roleStaffText', 'roleStaffTextHex', (text) => {
             updateRoleBadgePreview('staffBadgePreview', document.getElementById('roleStaffBg').value, text);
         });
-        
+
         setupColorSync('roleMaintenanceBg', 'roleMaintenanceBgHex', (bg) => {
             updateRoleBadgePreview('maintenanceBadgePreview', bg, document.getElementById('roleMaintenanceText').value);
         });
         setupColorSync('roleMaintenanceText', 'roleMaintenanceTextHex', (text) => {
             updateRoleBadgePreview('maintenanceBadgePreview', document.getElementById('roleMaintenanceBg').value, text);
         });
-        
+
         setupColorSync('roleMaintenanceDirectorBg', 'roleMaintenanceDirectorBgHex', (bg) => {
             updateRoleBadgePreview('directorBadgePreview', bg, document.getElementById('roleMaintenanceDirectorText').value);
         });
         setupColorSync('roleMaintenanceDirectorText', 'roleMaintenanceDirectorTextHex', (text) => {
             updateRoleBadgePreview('directorBadgePreview', document.getElementById('roleMaintenanceDirectorBg').value, text);
         });
-        
+
         setupColorSync('roleManagerBg', 'roleManagerBgHex', (bg) => {
             updateRoleBadgePreview('managerBadgePreview', bg, document.getElementById('roleManagerText').value);
         });
         setupColorSync('roleManagerText', 'roleManagerTextHex', (text) => {
             updateRoleBadgePreview('managerBadgePreview', document.getElementById('roleManagerBg').value, text);
         });
-        
+
         setupColorSync('roleAdminBg', 'roleAdminBgHex', (bg) => {
             updateRoleBadgePreview('adminBadgePreview', bg, document.getElementById('roleAdminText').value);
         });
         setupColorSync('roleAdminText', 'roleAdminTextHex', (text) => {
             updateRoleBadgePreview('adminBadgePreview', document.getElementById('roleAdminBg').value, text);
         });
-        
+
         setupColorSync('roleSuperAdminBg', 'roleSuperAdminBgHex', (bg) => {
             updateRoleBadgePreview('superAdminBadgePreview', bg, document.getElementById('roleSuperAdminText').value);
         });
         setupColorSync('roleSuperAdminText', 'roleSuperAdminTextHex', (text) => {
             updateRoleBadgePreview('superAdminBadgePreview', document.getElementById('roleSuperAdminBg').value, text);
         });
-        
+
         // Success Badge
         setupColorSync('badgeSuccessBg', 'badgeSuccessBgHex', (bg) => {
             updateRoleBadgePreview('successBadgePreview', bg, document.getElementById('badgeSuccessText').value);
@@ -1999,7 +1999,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         setupColorSync('badgeSuccessText', 'badgeSuccessTextHex', (text) => {
             updateRoleBadgePreview('successBadgePreview', document.getElementById('badgeSuccessBg').value, text);
         });
-        
+
         // System Badge
         setupColorSync('badgeSystemBg', 'badgeSystemBgHex', (bg) => {
             updateRoleBadgePreview('systemBadgePreview', bg, document.getElementById('badgeSystemText').value);
@@ -2021,13 +2021,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize color sync on Colors tab load
     const colorsSubtabBtn = document.querySelector('[data-subtab="colors"]');
     if (colorsSubtabBtn) {
-        colorsSubtabBtn.addEventListener('click', function() {
+        colorsSubtabBtn.addEventListener('click', function () {
             setTimeout(() => {
                 initializeColorSync();
             }, 100);
         });
     }
-    
+
     // Initialize immediately if on colors tab
     if (document.getElementById('subtab-colors')) {
         setTimeout(() => {
@@ -2038,15 +2038,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // ============================================
     // ADVANCED SETTINGS (System Configuration)
     // ============================================
-    
+
     let advancedSettingsOriginal = null;
-    
+
     // Load advanced settings
     async function loadAdvancedSettings() {
         try {
             const response = await fetch('/api/system-config.php?action=load');
             const result = await response.json();
-            
+
             if (response.ok && result.success) {
                 populateAdvancedSettings(result.config);
                 advancedSettingsOriginal = JSON.parse(JSON.stringify(result.config)); // Deep copy
@@ -2058,7 +2058,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             showMessage('Error loading system configuration', 'error');
         }
     }
-    
+
     // Populate form fields with config data
     function populateAdvancedSettings(config) {
         // Authentication
@@ -2068,38 +2068,38 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('requireDomainMatch').checked = config.auth.require_domain_match;
         document.getElementById('allowedDomains').value = config.auth.allowed_domains;
         document.getElementById('sessionTimeout').value = config.auth.session_timeout;
-        
+
         // Initialize section visibility based on checkbox states
         toggleAuthSection('google', config.google_oauth?.enabled !== false);
         toggleAuthSection('microsoft', config.microsoft_oauth?.enabled || false);
-        
+
         // Google OAuth
         document.getElementById('googleClientId').value = config.google_oauth.client_id;
         document.getElementById('googleClientSecret').value = config.google_oauth.client_secret;
         document.getElementById('googleRedirectUri').value = config.google_oauth.redirect_uri;
-        
+
         // Microsoft OAuth
         document.getElementById('microsoftClientId').value = config.microsoft_oauth?.client_id || '';
         document.getElementById('microsoftClientSecret').value = config.microsoft_oauth?.client_secret || '';
         document.getElementById('microsoftTenantId').value = config.microsoft_oauth?.tenant_id || 'common';
         document.getElementById('microsoftRedirectUri').value = config.microsoft_oauth?.redirect_uri || '';
-        
+
         // Google Groups
         const enableGoogleGroupsEl = document.getElementById('enableGoogleGroups');
         if (enableGoogleGroupsEl) {
             enableGoogleGroupsEl.checked = config.google_groups.enabled;
             toggleDependentSection('enableGoogleGroups', 'googleGroupsFields', true); // Initialize visibility
         }
-        
+
         const googleAdminEmailEl = document.getElementById('googleAdminEmail');
         if (googleAdminEmailEl) googleAdminEmailEl.value = config.google_groups.admin_email;
-        
+
         const googleServiceAccountEmailEl = document.getElementById('googleServiceAccountEmail');
         if (googleServiceAccountEmailEl) googleServiceAccountEmailEl.value = config.google_groups.service_account_email;
-        
+
         const googleServiceAccountKeyPathEl = document.getElementById('googleServiceAccountKeyPath');
         if (googleServiceAccountKeyPathEl) googleServiceAccountKeyPathEl.value = config.google_groups.key_path;
-        
+
         // Google Group Role Associations - Convert array back to pipe-separated string
         const googleGroupRoleAssociationsEl = document.getElementById('googleGroupRoleAssociations');
         if (googleGroupRoleAssociationsEl) {
@@ -2110,21 +2110,21 @@ document.addEventListener('DOMContentLoaded', async function() {
                 .join('|');
             googleGroupRoleAssociationsEl.value = associationString;
         }
-        
+
         // Database
         document.getElementById('dbHost').value = config.database.host;
         document.getElementById('dbName').value = config.database.name;
         document.getElementById('dbUser').value = config.database.user;
         document.getElementById('dbPassword').value = ''; // Don't populate password
         document.getElementById('dbPassword').placeholder = config.database.password ? '••••••••' : '';
-        
+
         // Application
         document.getElementById('appUrl').value = config.app.url;
         document.getElementById('appEnvironment').value = config.app.environment;
         document.getElementById('debugMode').checked = config.app.debug_mode;
         document.getElementById('maxUploadSize').value = config.app.max_upload_size;
         document.getElementById('maintenanceMode').checked = config.app.maintenance_mode;
-        
+
         // Email
         document.getElementById('smtpHost').value = config.email.smtp_host;
         document.getElementById('smtpPort').value = config.email.smtp_port;
@@ -2134,7 +2134,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('smtpFromEmail').value = config.email.from_email;
         document.getElementById('smtpFromName').value = config.email.from_name;
     }
-    
+
     // Gather current form values
     function gatherAdvancedSettings() {
         return {
@@ -2164,10 +2164,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 key_path: document.getElementById('googleServiceAccountKeyPath')?.value || '',
                 // Parse the text field into array format for API
                 // Keep roles as-is (comma-separated if multiple)
-                role_associations: (function() {
+                role_associations: (function () {
                     const field = document.getElementById('googleGroupRoleAssociations');
                     if (!field || !field.value) return [];
-                    
+
                     return field.value.split('|')
                         .map(mapping => mapping.trim())
                         .filter(mapping => mapping.includes(':'))
@@ -2200,17 +2200,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         };
     }
-    
+
     // Save advanced settings
     const saveAdvancedBtn = document.getElementById('saveAdvancedSettings');
     if (saveAdvancedBtn) {
-        saveAdvancedBtn.addEventListener('click', async function() {
+        saveAdvancedBtn.addEventListener('click', async function () {
             if (!confirm('⚠️ Changing system configuration can break the application.\n\nAre you sure you want to save these changes?')) {
                 return;
             }
-            
+
             const config = gatherAdvancedSettings();
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=save', {
                     method: 'POST',
@@ -2220,13 +2220,13 @@ document.addEventListener('DOMContentLoaded', async function() {
                     },
                     body: JSON.stringify(config)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok && result.success) {
                     showMessage(result.message, 'success');
                     advancedSettingsOriginal = JSON.parse(JSON.stringify(config)); // Update original
-                    
+
                     // If maintenance mode was enabled, warn user
                     if (config.app.maintenance_mode) {
                         showMessage('⚠️ Maintenance Mode is now ACTIVE. Non-admin users cannot access the system.', 'warning');
@@ -2240,36 +2240,36 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // Reload advanced settings
     const reloadAdvancedBtn = document.getElementById('reloadAdvancedSettings');
     if (reloadAdvancedBtn) {
-        reloadAdvancedBtn.addEventListener('click', function() {
+        reloadAdvancedBtn.addEventListener('click', function () {
             if (confirm('Discard all unsaved changes and reload settings from .env file?')) {
                 loadAdvancedSettings();
             }
         });
     }
-    
+
     // Test database connection
     const testDbBtn = document.getElementById('testDbConnection');
     if (testDbBtn) {
-        testDbBtn.addEventListener('click', async function() {
+        testDbBtn.addEventListener('click', async function () {
             const dbTestResult = document.getElementById('dbTestResult');
             dbTestResult.innerHTML = '<em>Testing connection...</em>';
-            
+
             const config = {
                 host: document.getElementById('dbHost').value,
                 name: document.getElementById('dbName').value,
                 user: document.getElementById('dbUser').value,
                 password: document.getElementById('dbPassword').value || advancedSettingsOriginal?.database?.password
             };
-            
+
             if (!config.host || !config.name || !config.user) {
                 dbTestResult.innerHTML = '<span style="color: #DC2626;">❌ Please fill in all database fields</span>';
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=test-db', {
                     method: 'POST',
@@ -2278,9 +2278,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                     },
                     body: JSON.stringify(config)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     dbTestResult.innerHTML = `<span style="color: #16A34A;">✅ Connected successfully to <strong>${result.database}</strong>! MySQL ${result.version}</span>`;
                 } else {
@@ -2292,22 +2292,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // Clear all sessions
     const clearSessionsBtn = document.getElementById('clearAllSessions');
     if (clearSessionsBtn) {
-        clearSessionsBtn.addEventListener('click', async function() {
+        clearSessionsBtn.addEventListener('click', async function () {
             if (!confirm('⚠️ This will log out ALL users, including yourself.\n\nYou will need to log back in. Continue?')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=clear-sessions', {
                     method: 'POST'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     alert(`${result.message}\n\nYou will now be redirected to the login page.`);
                     window.location.href = '/logout.php';
@@ -2320,22 +2320,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // Regenerate .env file
     const regenerateEnvBtn = document.getElementById('regenerateEnv');
     if (regenerateEnvBtn) {
-        regenerateEnvBtn.addEventListener('click', async function() {
+        regenerateEnvBtn.addEventListener('click', async function () {
             if (!confirm('⚠️ This will regenerate the .env file from current database settings.\n\nThe current .env will be backed up. Continue?')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=regenerate-env', {
                     method: 'POST'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showMessage(result.message, 'success');
                 } else {
@@ -2347,27 +2347,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // ============================================
     // ROLE ASSOCIATIONS MANAGEMENT
     // ============================================
-    
+
     let roleAssociationsData = [];
-    
+
     function renderRoleAssociations() {
         const container = document.getElementById('roleAssociationsContainer');
         if (!container) return;
-        
+
         if (roleAssociationsData.length === 0) {
             container.innerHTML = '<p style="color: var(--text-muted); font-style: italic; margin: 0;">No group associations configured. Click "Add Group Association" below.</p>';
             return;
         }
-        
+
         container.innerHTML = roleAssociationsData.map((assoc, index) => `
             <div style="display: grid; grid-template-columns: 1fr 150px auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
-                <input type="text" 
-                       placeholder="students@example.com" 
-                       value="${assoc.group || ''}" 
+                <input type="text"
+                       placeholder="students@example.com"
+                       value="${assoc.group || ''}"
                        onchange="updateRoleAssociation(${index}, 'group', this.value)"
                        style="margin: 0;">
                 <select onchange="updateRoleAssociation(${index}, 'role', this.value)" style="margin: 0;">
@@ -2383,53 +2383,53 @@ document.addEventListener('DOMContentLoaded', async function() {
             </div>
         `).join('');
     }
-    
-    window.updateRoleAssociation = function(index, field, value) {
+
+    window.updateRoleAssociation = function (index, field, value) {
         roleAssociationsData[index][field] = value;
     };
-    
-    window.removeRoleAssociation = function(index) {
+
+    window.removeRoleAssociation = function (index) {
         roleAssociationsData.splice(index, 1);
         renderRoleAssociations();
     };
-    
+
     const addRoleAssociationBtn = document.getElementById('addRoleAssociation');
     if (addRoleAssociationBtn) {
-        addRoleAssociationBtn.addEventListener('click', function() {
+        addRoleAssociationBtn.addEventListener('click', function () {
             roleAssociationsData.push({ group: '', role: 'viewer' });
             renderRoleAssociations();
         });
     }
-    
+
     // ============================================
     // SERVICE ACCOUNT UPLOAD
     // ============================================
-    
+
     const serviceAccountUpload = document.getElementById('serviceAccountUpload');
     if (serviceAccountUpload) {
-        serviceAccountUpload.addEventListener('change', async function(e) {
+        serviceAccountUpload.addEventListener('change', async function (e) {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             if (!file.name.endsWith('.json')) {
                 showMessage('Please upload a JSON file', 'error');
                 e.target.value = '';
                 return;
             }
-            
+
             const formData = new FormData();
             formData.append('serviceAccountFile', file);
-            
+
             try {
                 showMessage('Uploading service account...', 'info');
-                
+
                 const response = await fetch('/api/system-config.php?action=upload-service-account', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showMessage(result.message, 'success');
                     // Update form fields
@@ -2442,24 +2442,24 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.error('Error uploading service account:', error);
                 showMessage('Error uploading file', 'error');
             }
-            
+
             // Clear file input
             e.target.value = '';
         });
     }
-    
+
     // ============================================
     // TEST SMTP
     // ============================================
-    
+
     const testSmtpBtn = document.getElementById('testSmtpConfig');
     if (testSmtpBtn) {
-        testSmtpBtn.addEventListener('click', async function() {
+        testSmtpBtn.addEventListener('click', async function () {
             const resultDiv = document.getElementById('smtpTestResult');
             resultDiv.innerHTML = '<em style="color: var(--text-muted);">Testing SMTP connection...</em>';
-            
+
             const testEmail = document.getElementById('testEmailAddress').value;
-            
+
             const config = {
                 host: document.getElementById('smtpHost').value,
                 port: parseInt(document.getElementById('smtpPort').value) || 587,
@@ -2467,21 +2467,21 @@ document.addEventListener('DOMContentLoaded', async function() {
                 password: document.getElementById('smtpPassword').value || (advancedSettingsOriginal?.email?.smtp_password !== '********' ? '********' : ''),
                 test_email: testEmail
             };
-            
+
             if (!config.host || !config.username) {
                 resultDiv.innerHTML = '<span style="color: #DC2626;">❌ Please configure SMTP host and username</span>';
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=test-smtp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     resultDiv.innerHTML = `<span style="color: #16A34A;">✅ ${result.message}</span>`;
                 } else {
@@ -2493,24 +2493,24 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // ============================================
     // SEND TEST EMAIL
     // ============================================
-    
+
     const sendTestEmailBtn = document.getElementById('sendTestEmail');
     if (sendTestEmailBtn) {
-        sendTestEmailBtn.addEventListener('click', async function() {
+        sendTestEmailBtn.addEventListener('click', async function () {
             const resultDiv = document.getElementById('smtpTestResult');
             resultDiv.innerHTML = '<em style="color: var(--text-muted);">Sending test email...</em>';
-            
+
             const testEmail = document.getElementById('testEmailAddress').value;
-            
+
             if (!testEmail) {
                 resultDiv.innerHTML = '<span style="color: #DC2626;">❌ Please enter an email address</span>';
                 return;
             }
-            
+
             const config = {
                 host: document.getElementById('smtpHost').value,
                 port: parseInt(document.getElementById('smtpPort').value) || 587,
@@ -2520,21 +2520,21 @@ document.addEventListener('DOMContentLoaded', async function() {
                 from_name: document.getElementById('smtpFromName').value,
                 test_email: testEmail
             };
-            
+
             if (!config.host || !config.username || !config.from_email) {
                 resultDiv.innerHTML = '<span style="color: #DC2626;">❌ Please configure SMTP host, username, and from email</span>';
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=send-test-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     resultDiv.innerHTML = `<span style="color: #16A34A;">${result.message}</span>`;
                 } else {
@@ -2546,37 +2546,37 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // ============================================
     // TEST GOOGLE GROUPS
     // ============================================
-    
+
     const testGoogleGroupsBtn = document.getElementById('testGoogleGroups');
     if (testGoogleGroupsBtn) {
-        testGoogleGroupsBtn.addEventListener('click', async function() {
+        testGoogleGroupsBtn.addEventListener('click', async function () {
             const resultDiv = document.getElementById('googleGroupsTestResult');
             resultDiv.innerHTML = '<em style="color: var(--text-muted);">Testing Google Groups connection...</em>';
-            
+
             const config = {
                 key_path: document.getElementById('googleServiceAccountKeyPath').value,
                 admin_email: document.getElementById('googleAdminEmail').value,
                 test_group: document.getElementById('testGroupEmail').value
             };
-            
+
             if (!config.key_path || !config.admin_email) {
                 resultDiv.innerHTML = '<span style="color: #DC2626;">❌ Please configure service account key and admin email</span>';
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/system-config.php?action=test-google-groups', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     resultDiv.innerHTML = `<span style="color: #16A34A;">✅ ${result.message}</span>`;
                 } else {
@@ -2588,15 +2588,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // Load advanced settings when Advanced subtab is clicked
     const advancedSubtabBtn = document.querySelector('[data-subtab="advanced"]');
     if (advancedSubtabBtn) {
-        advancedSubtabBtn.addEventListener('click', function() {
+        advancedSubtabBtn.addEventListener('click', function () {
             if (!advancedSettingsOriginal) {
                 loadAdvancedSettings();
             }
-            
+
             // Check if we should open a specific section (from maintenance banner click)
             const openSection = localStorage.getItem('openAdvancedSection');
             if (openSection && openSection === 'app') {
@@ -2638,11 +2638,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 function openGoogleGroupModal() {
     const modal = document.getElementById('googleGroupModal');
     const form = document.getElementById('googleGroupForm');
-    
+
     if (modal && form) {
         // Reset form
         form.reset();
-        
+
         // Show modal
         modal.style.display = 'flex';
     }
@@ -2656,7 +2656,7 @@ function parseGoogleGroups(pipeString) {
     if (!pipeString || pipeString.trim() === '') {
         return [];
     }
-    
+
     return pipeString.split('|')
         .map(mapping => mapping.trim())
         .filter(mapping => mapping.includes(':'))
@@ -2678,42 +2678,42 @@ function serializeGoogleGroups(groups) {
 }
 
 // Handle Google Groups form submission
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('googleGroupForm');
     const modal = document.getElementById('googleGroupModal');
-    
+
     if (form && modal) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('googleGroupEmail').value.trim();
             const roleCheckboxes = document.querySelectorAll('input[name="googleGroupRoles"]:checked');
-            
+
             if (!email) {
                 showMessage('Please enter a group email', 'error');
                 return;
             }
-            
+
             if (roleCheckboxes.length === 0) {
                 showMessage('Please select at least one role', 'error');
                 return;
             }
-            
+
             const roles = Array.from(roleCheckboxes).map(cb => cb.value);
-            
+
             // Get current associations field
             const associationsField = document.getElementById('googleGroupRoleAssociations');
             if (!associationsField) {
                 showMessage('Could not find associations field', 'error');
                 return;
             }
-            
+
             // Parse existing associations
             const currentGroups = parseGoogleGroups(associationsField.value);
-            
+
             // Check if this email already exists
             const existingIndex = currentGroups.findIndex(g => g.email.toLowerCase() === email.toLowerCase());
-            
+
             if (existingIndex >= 0) {
                 // Update existing
                 currentGroups[existingIndex].roles = roles;
@@ -2723,10 +2723,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentGroups.push({ email, roles });
                 showMessage(`Added ${email} with roles: ${roles.join(', ')}`, 'success');
             }
-            
+
             // Update the field
             associationsField.value = serializeGoogleGroups(currentGroups);
-            
+
             // Close modal
             modal.style.display = 'none';
             form.reset();
@@ -2747,7 +2747,7 @@ window.openGoogleGroupModal = openGoogleGroupModal;
 function openMicrosoftGroupModal() {
     const modal = document.getElementById('microsoftGroupModal');
     const form = document.getElementById('microsoftGroupForm');
-    
+
     if (modal && form) {
         form.reset();
         modal.style.display = 'flex';
@@ -2755,42 +2755,42 @@ function openMicrosoftGroupModal() {
 }
 
 // Handle Microsoft Groups form submission
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('microsoftGroupForm');
     const modal = document.getElementById('microsoftGroupModal');
-    
+
     if (form && modal) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const groupId = document.getElementById('microsoftGroupId').value.trim();
             const roleCheckboxes = document.querySelectorAll('input[name="microsoftGroupRoles"]:checked');
-            
+
             if (!groupId) {
                 showMessage('Please enter an Azure AD Group ID', 'error');
                 return;
             }
-            
+
             if (roleCheckboxes.length === 0) {
                 showMessage('Please select at least one role', 'error');
                 return;
             }
-            
+
             const roles = Array.from(roleCheckboxes).map(cb => cb.value);
-            
+
             // Get current associations field
             const associationsField = document.getElementById('microsoftGroupRoleAssociations');
             if (!associationsField) {
                 showMessage('Could not find associations field', 'error');
                 return;
             }
-            
+
             // Parse existing associations (same format as Google Groups)
             const currentGroups = parseGoogleGroups(associationsField.value); // Reuse parser
-            
+
             // Check if this group ID already exists
             const existingIndex = currentGroups.findIndex(g => g.email.toLowerCase() === groupId.toLowerCase());
-            
+
             if (existingIndex >= 0) {
                 // Update existing
                 currentGroups[existingIndex].roles = roles;
@@ -2800,10 +2800,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentGroups.push({ email: groupId, roles });
                 showMessage(`Added ${groupId} with roles: ${roles.join(', ')}`, 'success');
             }
-            
+
             // Update the field (reuse serializer)
             associationsField.value = serializeGoogleGroups(currentGroups);
-            
+
             // Close modal
             modal.style.display = 'none';
             form.reset();
@@ -2819,54 +2819,54 @@ window.openMicrosoftGroupModal = openMicrosoftGroupModal;
 // ============================================================================
 
 // Load Package Manager when tab is opened
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const packageTab = document.querySelector('[data-tab="packages"]');
-    
+
     if (packageTab) {
-        packageTab.addEventListener('click', function() {
+        packageTab.addEventListener('click', function () {
             loadInstalledPackages();
             loadAvailablePackages();
             loadPackageUpdates();
             checkPackageAlerts(true); // Show alerts when tab is clicked
         });
     }
-    
+
     // Upload button
     const uploadBtn = document.getElementById('uploadPackageBtn');
     const fileInput = document.getElementById('packageFileInput');
     const dropzone = document.getElementById('uploadDropzone');
-    
+
     if (uploadBtn && fileInput) {
         uploadBtn.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', function() {
+
+        fileInput.addEventListener('change', function () {
             if (this.files.length > 0) {
                 uploadPackageFile(this.files[0]);
             }
         });
     }
-    
+
     // Drag and drop
     if (dropzone) {
         dropzone.addEventListener('click', () => fileInput.click());
-        
-        dropzone.addEventListener('dragover', function(e) {
+
+        dropzone.addEventListener('dragover', function (e) {
             e.preventDefault();
             this.style.borderColor = '#4CAF50';
             this.style.background = '#e8f5e9';
         });
-        
-        dropzone.addEventListener('dragleave', function(e) {
+
+        dropzone.addEventListener('dragleave', function (e) {
             e.preventDefault();
             this.style.borderColor = '#dee2e6';
             this.style.background = '#f8f9fa';
         });
-        
-        dropzone.addEventListener('drop', function(e) {
+
+        dropzone.addEventListener('drop', function (e) {
             e.preventDefault();
             this.style.borderColor = '#dee2e6';
             this.style.background = '#f8f9fa';
-            
+
             const file = e.dataTransfer.files[0];
             if (file && file.name.endsWith('.hubpkg')) {
                 uploadPackageFile(file);
@@ -2875,7 +2875,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Check updates button
     const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
     if (checkUpdatesBtn) {
@@ -2889,18 +2889,18 @@ async function uploadPackageFile(file) {
     const progressBar = document.getElementById('uploadProgressBar');
     const progressText = document.getElementById('uploadProgressText');
     const dropzone = document.getElementById('uploadDropzone');
-    
+
     try {
         // Show progress
         dropzone.style.display = 'none';
         progressDiv.style.display = 'block';
         progressBar.style.width = '0%';
         progressText.textContent = 'Uploading...';
-        
+
         const formData = new FormData();
         formData.append('package', file);
         formData.append('csrf_token', window.csrfToken);
-        
+
         // Simulate progress (since fetch doesn't support upload progress easily)
         let progress = 0;
         const progressInterval = setInterval(() => {
@@ -2908,28 +2908,28 @@ async function uploadPackageFile(file) {
             if (progress > 90) progress = 90;
             progressBar.style.width = progress + '%';
         }, 100);
-        
+
         const response = await fetch('/api/packages.php', {
             method: 'POST',
             body: formData
         });
-        
+
         clearInterval(progressInterval);
         progressBar.style.width = '100%';
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             progressText.textContent = 'Upload complete!';
             showMessage(result.message, result.validation.can_install ? 'success' : 'warning');
-            
+
             // Show validation results
             if (!result.validation.can_install) {
                 setTimeout(() => {
                     showValidationModal(result);
                 }, 500);
             }
-            
+
             // Reload available packages
             setTimeout(() => {
                 dropzone.style.display = 'block';
@@ -2939,7 +2939,7 @@ async function uploadPackageFile(file) {
         } else {
             throw new Error(result.error || 'Upload failed');
         }
-        
+
     } catch (error) {
         progressDiv.style.display = 'none';
         dropzone.style.display = 'block';
@@ -2954,20 +2954,20 @@ async function loadInstalledPackages() {
         console.error('❌ installedPackagesTable container not found!');
         return;
     }
-    
+
     console.log('🔄 Loading installed packages...');
-    
+
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading...</p>';
-        
+
         const response = await fetch('/api/packages.php?action=installed');
         const result = await response.json();
-        
+
         if (!result.success) throw new Error(result.error);
-        
+
         const packages = result.packages;
         console.log('📦 Loaded', packages.length, 'installed packages');
-        
+
         if (packages.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem 1rem; color: #6c757d;">
@@ -2975,15 +2975,30 @@ async function loadInstalledPackages() {
                     <h4 style="margin-bottom: 0.75rem; color: #495057; font-size: 1.1rem;">No Packages Installed</h4>
                     <p style="margin-bottom: 1.25rem; font-size: 0.95em;">You haven't installed any packages yet.</p>
                     <p style="font-size: 0.9rem;">
-                        <a href="#" onclick="switchSubtab('packages', 'available-packages'); return false;" class="btn btn-primary btn-sm">
-                            <i class="bi bi-download"></i> Browse Available Packages
-                        </a>
+                        <button class="btn btn-primary btn-sm" id="browsePackagesBtn">
+                            <i class="bi bi-arrow-right-circle"></i> View Available Packages
+                        </button>
+                    </p>
+                    <p style="margin-top: 0.5rem; font-size: 0.85em; color: #999;">
+                        Switches to the Available Packages tab
                     </p>
                 </div>
             `;
+
+            // Add click handler to switch to available packages tab
+            setTimeout(() => {
+                const browseBtn = document.getElementById('browsePackagesBtn');
+                if (browseBtn) {
+                    browseBtn.addEventListener('click', () => {
+                        const availableTab = document.querySelector('[data-subtab="available-packages"]');
+                        if (availableTab) availableTab.click();
+                    });
+                }
+            }, 100);
+
             return;
         }
-        
+
         let html = '<table class="data-table"><thead><tr>';
         html += '<th>Package Name</th>';
         html += '<th>Version</th>';
@@ -2991,31 +3006,31 @@ async function loadInstalledPackages() {
         html += '<th>Status</th>';
         html += '<th>Actions</th>';
         html += '</tr></thead><tbody>';
-        
+
         packages.forEach(pkg => {
-            const hasUpdate = pkg.latest_available_version && 
-                             pkg.latest_available_version !== pkg.installed_version;
+            const hasUpdate = pkg.latest_available_version &&
+                pkg.latest_available_version !== pkg.installed_version;
             const isEnabled = pkg.is_active == 1;
-            
+
             html += '<tr>';
             html += `<td><strong>${escapeHtml(pkg.display_name || pkg.package_id)}</strong><br><small style="color: #6c757d;">${escapeHtml(pkg.package_id)}</small></td>`;
             html += `<td><span class="badge badge-info">${escapeHtml(pkg.installed_version)}</span></td>`;
             html += `<td>${formatDate(pkg.installed_at)}</td>`;
             html += '<td>';
-            
+
             if (isEnabled) {
                 html += '<span class="badge badge-success">✓ Enabled</span>';
             } else {
                 html += '<span class="badge badge-secondary">○ Disabled</span>';
             }
-            
+
             if (hasUpdate) {
                 html += '<br><small style="color: #ff9800;">Update available!</small>';
             }
-            
+
             html += '</td>';
             html += '<td>';
-            
+
             // Enable/Disable toggle
             if (isEnabled) {
                 html += `<button class="btn btn-sm btn-secondary" onclick="toggleSectionStatus('${pkg.package_id}', '${escapeHtml(pkg.display_name)}', false)">
@@ -3026,23 +3041,23 @@ async function loadInstalledPackages() {
                     <i class="bi bi-play-circle"></i> Enable
                 </button>`;
             }
-            
+
             if (hasUpdate) {
                 html += `<button class="btn btn-sm btn-warning" onclick="upgradePackage('${pkg.package_id}', '${escapeHtml(pkg.latest_available_version)}')">
                     <i class="bi bi-arrow-up-circle"></i> Upgrade
                 </button>`;
             }
-            
+
             html += `<button class="btn btn-sm btn-danger" onclick="uninstallPackagePrompt('${pkg.package_id}', '${escapeHtml(pkg.display_name)}')">
                 Uninstall
             </button>`;
             html += '</td>';
             html += '</tr>';
         });
-        
+
         html += '</tbody></table>';
         container.innerHTML = html;
-        
+
     } catch (error) {
         console.error('Error loading installed packages:', error);
         container.innerHTML = `
@@ -3065,49 +3080,49 @@ async function loadAvailablePackages() {
         console.error('❌ availablePackagesTable container not found!');
         return;
     }
-    
+
     console.log('📦 Loading available packages...');
-    
+
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading...</p>';
-        
+
         // Fetch both packages and dismissed alerts
         const [packagesResponse, alertsResponse] = await Promise.all([
             fetch('/api/packages.php'),
             fetch('/api/package-alerts.php?action=check')
         ]);
-        
+
         const [packagesResult, alertsResult] = await Promise.all([
             packagesResponse.json(),
             alertsResponse.json()
         ]);
-        
+
         console.log('📦 Packages API response:', packagesResult);
         console.log('📦 Alerts API response:', alertsResult);
-        
+
         if (!packagesResult.success) throw new Error(packagesResult.error);
-        
+
         const packages = packagesResult.packages;
         const dismissedPackages = new Set();
-        
+
         // Track dismissed packages
         if (alertsResult.success && alertsResult.alerts.validation.packages) {
             // All packages not in the validation packages list are dismissed
             const validationPackageIds = new Set(alertsResult.alerts.validation.packages.map(p => p.id));
             packages.forEach(pkg => {
-                if (!validationPackageIds.has(pkg.id) && 
+                if (!validationPackageIds.has(pkg.id) &&
                     (pkg.validation_status === 'pending' || !pkg.validation_status)) {
                     dismissedPackages.add(pkg.id);
                 }
             });
         }
-        
+
         // Filter out installed packages for the Available tab
         const availablePackages = packages.filter(pkg => !pkg.is_installed);
-        
+
         console.log('📦 Found', packages.length, 'total packages,', availablePackages.length, 'available for installation');
         console.log('📦 Dismissed packages:', Array.from(dismissedPackages));
-        
+
         if (availablePackages.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem 1rem;">
@@ -3123,14 +3138,14 @@ async function loadAvailablePackages() {
                             <i class="fas fa-upload"></i> Upload Package
                         </button>
                         <button class="btn btn-outline-primary" onclick="showPackageDiscovery()">
-                            <i class="fas fa-box-open"></i> Browse Available Packages
+                            <i class="fas fa-search"></i> Search Package Repository
                         </button>
                     </div>
                 </div>
             `;
             return;
         }
-        
+
         let html = '<table class="data-table"><thead><tr>';
         html += '<th>Package Name</th>';
         html += '<th>Version</th>';
@@ -3138,16 +3153,16 @@ async function loadAvailablePackages() {
         html += '<th>Uploaded</th>';
         html += '<th>Actions</th>';
         html += '</tr></thead><tbody>';
-        
+
         availablePackages.forEach(pkg => {
             const canInstall = pkg.can_install;
             // isInstalled is always false since we filtered them out
-            
+
             html += '<tr>';
             html += `<td><strong>${escapeHtml(pkg.display_name)}</strong><br><small style="color: #6c757d;">${escapeHtml(pkg.package_id)}</small></td>`;
             html += `<td><span class="badge badge-info">${escapeHtml(pkg.version)}</span></td>`;
             html += '<td>';
-            
+
             if (pkg.validation_status === 'pending' || !pkg.validation_status) {
                 html += '<span class="badge badge-warning">⏳ Awaiting Validation</span>';
             } else if (canInstall) {
@@ -3155,11 +3170,11 @@ async function loadAvailablePackages() {
             } else {
                 html += '<span class="badge badge-danger">✗ Validation Failed</span>';
             }
-            
+
             html += '</td>';
             html += `<td>${formatDate(pkg.uploaded_at)}</td>`;
             html += '<td>';
-            
+
             // Validate button (primary action for unvalidated packages)
             if (pkg.validation_status === 'pending' || !pkg.validation_status) {
                 html += `<button class="btn btn-sm btn-primary" onclick="validatePackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
@@ -3172,18 +3187,18 @@ async function loadAvailablePackages() {
                     ${canInstall ? 'View Report' : 'View Issues'}
                 </button>`;
             }
-            
+
             if (canInstall && pkg.validation_status !== 'pending') {
                 html += `<button class="btn btn-sm btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
                     Install
                 </button>`;
             }
-            
-            if (!isInstalled) {
+
+            if (!pkg.is_installed) {
                 html += `<button class="btn btn-sm btn-danger" onclick="deletePackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
                     Delete
                 </button>`;
-                
+
                 // Add dismiss button only for packages needing validation that haven't been dismissed
                 if ((pkg.validation_status === 'pending' || !pkg.validation_status) && !dismissedPackages.has(pkg.id)) {
                     html += `<button class="btn btn-sm btn-secondary" onclick="dismissPackageRow(${pkg.id}, 'package_validation', event)" title="Don't show this alert again">
@@ -3191,32 +3206,32 @@ async function loadAvailablePackages() {
                     </button>`;
                 }
             }
-            
+
             html += '</td>';
             html += '</tr>';
         });
-        
+
         html += '</tbody></table>';
-        
-        // Add "Browse Available Packages" button after the table
+
+        // Add "Search Repository" button after the table
         html += `
             <div class="find-more-packages-section" style="text-align: center; margin-top: 1.5rem; padding: 1.25rem;">
                 <button class="btn btn-outline-primary" onclick="showPackageDiscovery()">
-                    <i class="fas fa-box-open"></i> Browse Available Packages
+                    <i class="fas fa-search"></i> Search Package Repository
                 </button>
                 <div style="margin-top: 0.75rem; color: #6c757d; font-size: 0.875rem;">
-                    <i class="fas fa-download"></i> Download additional packages from the repository
+                    <i class="fas fa-cloud-download-alt"></i> Find and download additional packages from the online repository
                 </div>
             </div>
         `;
-        
+
         container.innerHTML = html;
         console.log('✅ Available packages table rendered with', availablePackages.length, 'packages (', packages.length - availablePackages.length, 'installed packages filtered out)');
-        
+
         // Update notification badge for packages needing validation (use count from alerts API)
         const validationCount = alertsResult.success ? alertsResult.alerts.validation.count : 0;
         updatePackageBadge('availablePackagesBadge', validationCount);
-        
+
     } catch (error) {
         console.error('❌ Error loading packages:', error);
         container.innerHTML = `<p style="text-align: center; padding: 2rem; color: #d32f2f;">Error: ${error.message}</p>`;
@@ -3227,7 +3242,7 @@ async function loadAvailablePackages() {
 function updatePackageBadge(badgeId, count) {
     const badge = document.getElementById(badgeId);
     if (!badge) return;
-    
+
     if (count > 0) {
         badge.textContent = count;
         badge.style.display = 'inline-block';
@@ -3240,17 +3255,17 @@ function updatePackageBadge(badgeId, count) {
 async function loadPackageUpdates() {
     const container = document.getElementById('packageUpdatesTable');
     if (!container) return;
-    
+
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Checking for updates...</p>';
-        
+
         const response = await fetch('/api/packages.php?action=updates');
         const result = await response.json();
-        
+
         if (!result.success) throw new Error(result.error);
-        
+
         const updates = result.updates;
-        
+
         if (updates.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem 1rem; color: #4CAF50;">
@@ -3260,14 +3275,14 @@ async function loadPackageUpdates() {
             `;
             return;
         }
-        
+
         let html = '<table class="data-table"><thead><tr>';
         html += '<th>Package Name</th>';
         html += '<th>Current Version</th>';
         html += '<th>Available Version</th>';
         html += '<th>Actions</th>';
         html += '</tr></thead><tbody>';
-        
+
         updates.forEach(update => {
             html += '<tr>';
             html += `<td><strong>${escapeHtml(update.display_name)}</strong><br><small style="color: #6c757d;">${escapeHtml(update.package_id)}</small></td>`;
@@ -3278,13 +3293,13 @@ async function loadPackageUpdates() {
             </button></td>`;
             html += '</tr>';
         });
-        
+
         html += '</tbody></table>';
         container.innerHTML = html;
-        
+
         // Update notification badge for available updates
         updatePackageBadge('updatesBadge', updates.length);
-        
+
     } catch (error) {
         container.innerHTML = `<p style="text-align: center; padding: 2rem; color: #d32f2f;">Error: ${error.message}</p>`;
         updatePackageBadge('updatesBadge', 0);
@@ -3296,23 +3311,23 @@ async function installPackage(packageId, packageName) {
     if (!confirm(`Install package "${packageName}"?\n\nThis will create a new section with all defined fields and permissions.`)) {
         return;
     }
-    
+
     try {
         console.log('📦 Installing package:', packageId, packageName);
         console.log('🔍 CSRF token available:', !!window.csrfToken, window.csrfToken?.substring(0, 10) + '...');
-        
+
         showMessage('Installing package...', 'info');
-        
+
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
-        
+
         const response = await fetch(`/api/packages.php?action=install&id=${packageId}`, {
             method: 'POST',
             body: formData
         });
-        
+
         console.log('🔍 Install response status:', response.status);
-        
+
         let result;
         try {
             result = await response.json();
@@ -3322,7 +3337,7 @@ async function installPackage(packageId, packageName) {
             console.error('🔍 Failed to parse response as JSON:', responseText);
             throw new Error('Server returned invalid response: ' + responseText);
         }
-        
+
         if (result.success) {
             showMessage(result.message, 'success');
             loadInstalledPackages();
@@ -3330,7 +3345,7 @@ async function installPackage(packageId, packageName) {
         } else {
             showMessage('Installation failed: ' + result.error, 'error');
         }
-        
+
     } catch (error) {
         showMessage('Installation error: ' + error.message, 'error');
     }
@@ -3341,20 +3356,20 @@ async function upgradePackageById(packageId, packageName) {
     if (!confirm(`Upgrade package "${packageName}"?\n\nThis will update the package to the latest version. Data will be preserved.`)) {
         return;
     }
-    
+
     try {
         showMessage('Upgrading package...', 'info');
-        
+
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
-        
+
         const response = await fetch(`/api/packages.php?action=upgrade&id=${packageId}`, {
             method: 'POST',
             body: formData
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showMessage(result.message, 'success');
             loadInstalledPackages();
@@ -3362,7 +3377,7 @@ async function upgradePackageById(packageId, packageName) {
         } else {
             showMessage('Upgrade failed: ' + result.error, 'error');
         }
-        
+
     } catch (error) {
         showMessage('Upgrade error: ' + error.message, 'error');
     }
@@ -3374,14 +3389,14 @@ async function validatePackage(packageId, packageName) {
     try {
         console.log('🎯 validatePackage START - packageId:', packageId, 'packageName:', packageName);
         console.log('🔍 DEBUG: Function called, about to create modal');
-        
+
         // Check if modal already exists
         const existingModal = document.getElementById('validationModal');
         if (existingModal) {
             console.log('🔍 DEBUG: Removing existing modal');
             existingModal.remove();
         }
-        
+
         // Open modal immediately with progress state - CLEAN DESIGN
         const modalHtml = `
             <div class="modal-overlay show" id="validationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem;" onclick="if(event.target === this) closeValidationModal()">
@@ -3396,7 +3411,7 @@ async function validatePackage(packageId, packageName) {
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
-                    
+
                     <!-- Compact Progress Section -->
                     <div class="validation-progress-compact">
                         <div class="progress-bar-wrapper">
@@ -3407,14 +3422,14 @@ async function validatePackage(packageId, packageName) {
                             <span>Running validation...</span>
                         </div>
                     </div>
-                    
+
                     <!-- Compact Checks Grid (3 columns, no scroll) -->
                     <div class="validation-checks-compact" id="validationChecksContainer">
                         <div class="checks-grid" id="validationChecksList">
                             <!-- Checks will be pre-populated here in 3-column grid -->
                         </div>
                     </div>
-                    
+
                     <!-- Footer Actions -->
                     <div class="modal-footer">
                         <button class="btn btn-secondary" id="closeValidationBtn" type="button" onclick="closeValidationModal()">
@@ -3424,17 +3439,17 @@ async function validatePackage(packageId, packageName) {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         console.log('🔍 DEBUG: Modal HTML added to DOM');
-        
+
         const modal = document.getElementById('validationModal');
         if (!modal) {
             console.error('❌ DEBUG: Modal not found in DOM after insertion!');
             return;
         }
         console.log('✅ Modal found in DOM');
-        
+
         // Force modal visibility with essential overrides
         modal.style.display = 'flex';
         modal.style.opacity = '1';
@@ -3447,9 +3462,9 @@ async function validatePackage(packageId, packageName) {
         modal.style.height = '100%';
         modal.style.zIndex = '999999';
         modal.classList.add('show');
-        
+
         console.log('✅ Modal forced visible');
-        
+
         // Ensure modal content is properly displayed
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent) {
@@ -3457,14 +3472,14 @@ async function validatePackage(packageId, packageName) {
             modalContent.style.transform = 'none';
             console.log('✅ Modal content made visible');
         }
-        
+
         // Prevent any CSS animations from hiding the modal
         setTimeout(() => {
             modal.style.opacity = '1';
             modal.style.display = 'flex';
             console.log('✅ Modal visibility reinforced after timeout');
         }, 100);
-        
+
         // Keep checking modal visibility during validation process
         const visibilityChecker = setInterval(() => {
             if (modal && document.body.contains(modal)) {
@@ -3478,22 +3493,22 @@ async function validatePackage(packageId, packageName) {
                 clearInterval(visibilityChecker);
             }
         }, 500);
-        
+
         // Store the checker ID so we can clear it later
         modal.setAttribute('data-visibility-checker', visibilityChecker);
         console.log('✅ Modal found in DOM:', modal !== null, 'Computed style:', modal ? window.getComputedStyle(modal).display : 'N/A');
-        
+
         const progressBar = document.getElementById('validationProgressBar');
         const liveStats = document.getElementById('validationLiveStats');
         const checksContainer = document.getElementById('validationChecksContainer');
         const checksList = document.getElementById('validationChecksList');
         const closeBtn = document.getElementById('closeValidationBtn');
-        
+
         // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
         progressBar.style.transition = 'width 0.5s ease';
         console.log('✅ Progress bar initialized at 0%');
-        
+
         // Pre-populate standard checks IMMEDIATELY (before API call)
         const standardChecks = [
             'Package Format Version',
@@ -3507,7 +3522,7 @@ async function validatePackage(packageId, packageName) {
             'Security Scan',
             'Disk Space'
         ];
-        
+
         standardChecks.forEach((checkName, index) => {
             const checkHtml = `
                 <div class="validation-check-checkbox" id="check-${index}" data-check-name="${escapeHtml(checkName)}">
@@ -3521,24 +3536,24 @@ async function validatePackage(packageId, packageName) {
             checksList.insertAdjacentHTML('beforeend', checkHtml);
         });
         console.log(`✅ Pre-populated ${standardChecks.length} standard checks`);
-        
+
         // Add click handler to close button (IMPORTANT: must enable first)
         closeBtn.disabled = false;
-        closeBtn.onclick = function() {
+        closeBtn.onclick = function () {
             console.log('Close button clicked via onclick');
             closeValidationModal();
         };
-        
+
         // Add click handler to overlay (close when clicking outside modal)
-        modal.onclick = function(e) {
+        modal.onclick = function (e) {
             if (e.target === modal) {
                 console.log('Overlay clicked, closing modal');
                 closeValidationModal();
             }
         };
-        
+
         console.log('✅ All modal elements found, event handlers attached');
-        
+
         // Add CSS for spinning animation if not already present
         if (!document.getElementById('validation-spin-style')) {
             const style = document.createElement('style');
@@ -3551,7 +3566,7 @@ async function validatePackage(packageId, packageName) {
             `;
             document.head.appendChild(style);
         }
-        
+
         // Show spinning animation while waiting
         liveStats.innerHTML = `
             <span class="stat-item stat-running">
@@ -3559,10 +3574,10 @@ async function validatePackage(packageId, packageName) {
                 Preparing validation environment...
             </span>
         `;
-        
+
         console.log('Modal opened with pre-populated checks, waiting 3s for effect...');
         await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second dramatic pause
-        
+
         // Show progress simulation
         const checkTypes = [
             'Analyzing package structure...',
@@ -3572,7 +3587,7 @@ async function validatePackage(packageId, packageName) {
             'Validating field definitions...',
             'Checking resource availability...'
         ];
-        
+
         // Cycle through check types during validation
         let checkTypeIndex = 0;
         const progressInterval = setInterval(() => {
@@ -3584,30 +3599,30 @@ async function validatePackage(packageId, packageName) {
             `;
             checkTypeIndex = (checkTypeIndex + 1) % checkTypes.length;
         }, 1200); // Change message every 1.2 seconds
-        
+
         console.log('Starting validation API call...');
-        
+
         // Add artificial delay before API call
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         // Trigger actual validation
         console.log('🔍 DEBUG: About to send validation request to API...');
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
-        
+
         console.log('🔍 DEBUG: FormData created, making fetch request...');
         const response = await fetch(`/api/packages.php?action=validate&id=${packageId}`, {
             method: 'POST',
             body: formData
         });
-        
+
         console.log('🔍 DEBUG: Fetch completed, response status:', response.status);
-        
+
         // Clear progress simulation
         clearInterval(progressInterval);
-        
+
         console.log('Validation API responded with status:', response.status);
-        
+
         // Add pause after validation completes to show "Processing results..."
         liveStats.innerHTML = `
             <span class="stat-item stat-running">
@@ -3616,7 +3631,7 @@ async function validatePackage(packageId, packageName) {
             </span>
         `;
         await new Promise(resolve => setTimeout(resolve, 2500)); // 2.5s pause after validation
-        
+
         // Check if response is OK
         if (!response.ok) {
             const errorText = await response.text();
@@ -3630,7 +3645,7 @@ async function validatePackage(packageId, packageName) {
             closeBtn.disabled = false;
             return;
         }
-        
+
         // Parse JSON with error handling
         let result;
         try {
@@ -3648,9 +3663,9 @@ async function validatePackage(packageId, packageName) {
             closeBtn.disabled = false;
             return;
         }
-        
+
         // Don't set progress to 100% here - let the animated check display handle it
-        
+
         if (!result.success) {
             liveStats.innerHTML = `
                 <span class="stat-item stat-error">
@@ -3661,10 +3676,10 @@ async function validatePackage(packageId, packageName) {
             closeBtn.disabled = false;
             return;
         }
-        
+
         // Now fetch the actual validation results
         const detailsResponse = await fetch(`/api/packages.php?action=validation&id=${packageId}`);
-        
+
         if (!detailsResponse.ok) {
             const errorText = await detailsResponse.text();
             console.error('Validation details request failed:', errorText);
@@ -3677,7 +3692,7 @@ async function validatePackage(packageId, packageName) {
             closeBtn.disabled = false;
             return;
         }
-        
+
         let detailsResult;
         try {
             const detailsText = await detailsResponse.text();
@@ -3694,25 +3709,25 @@ async function validatePackage(packageId, packageName) {
             closeBtn.disabled = false;
             return;
         }
-        
+
         if (detailsResult.success) {
             console.log('Processing validation details...', detailsResult);
             const summary = detailsResult.summary;
             const checks = detailsResult.all_checks || [];
-            
+
             console.log('Summary:', summary);
             console.log('Checks count:', checks.length);
-            
+
             // Update header with result
             document.querySelector('.validation-report-title').innerHTML = `
                 <i class="bi bi-clipboard-check"></i>
                 Validating Package...
             `;
             console.log('Header updated');
-            
+
             // Don't clear - keep the pre-populated checkboxes
             console.log('Using pre-populated checks');
-            
+
             // Show initial progress message
             liveStats.innerHTML = `
                 <span class="stat-item stat-running">
@@ -3720,19 +3735,19 @@ async function validatePackage(packageId, packageName) {
                     Running validation checks...
                 </span>
             `;
-            
+
             // Map API results to pre-populated checkboxes
             const allChecks = checks;
-            
+
             // Now animate checking them one by one
             let checkIndex = 0;
-            
+
             // Show checks progressively with delay
             const showNextCheck = async () => {
                 if (checkIndex >= allChecks.length) {
                     // All checks shown, update final state with celebration
                     progressBar.style.width = '100%';
-                    
+
                     // Show "Finalizing..." message first
                     liveStats.innerHTML = `
                         <span class="stat-item stat-running">
@@ -3740,10 +3755,10 @@ async function validatePackage(packageId, packageName) {
                             Finalizing validation...
                         </span>
                     `;
-                    
+
                     // Wait 2 seconds for dramatic effect
                     await new Promise(resolve => setTimeout(resolve, 2000));
-                    
+
                     // Now show final results with celebration
                     liveStats.innerHTML = `
                         <span class="stat-item ${summary.failed > 0 ? 'stat-error' : 'stat-success'}">
@@ -3760,10 +3775,10 @@ async function validatePackage(packageId, packageName) {
                             ${summary.warnings} warnings
                         </span>
                     `;
-                    
+
                     // Wait another 1.5 seconds before showing install button
                     await new Promise(resolve => setTimeout(resolve, 1500));
-                    
+
                     // Add install button if validation passed
                     if (summary.failed === 0 && summary.critical === 0) {
                         console.log('Adding install button with animation');
@@ -3776,13 +3791,13 @@ async function validatePackage(packageId, packageName) {
                                 <i class="bi bi-download"></i> Install Package
                             </button>
                         `;
-                        
+
                         // Add event listeners to new buttons using onclick for reliability
-                        document.getElementById('modalCloseBtn').onclick = function() {
+                        document.getElementById('modalCloseBtn').onclick = function () {
                             console.log('Modal close clicked');
                             closeValidationModal();
                         };
-                        document.getElementById('modalInstallBtn').onclick = function() {
+                        document.getElementById('modalInstallBtn').onclick = function () {
                             console.log('Install clicked');
                             closeValidationModal();
                             installPackage(packageId, packageName);
@@ -3793,17 +3808,17 @@ async function validatePackage(packageId, packageName) {
                         const closeBtn = document.getElementById('closeValidationBtn');
                         if (closeBtn) closeBtn.disabled = false;
                     }
-                    
+
                     // Update final header with animation
                     document.querySelector('.validation-report-title').innerHTML = `
                         <i class="bi bi-${summary.failed === 0 ? 'check-circle-fill' : 'x-circle-fill'}" style="color: ${summary.failed === 0 ? '#28a745' : '#dc3545'};"></i>
                         ${summary.failed === 0 ? 'Package Validated - Ready to Install! 🚀' : 'Validation Failed'}
                     `;
-                    
+
                     // Reload packages list IMMEDIATELY to update button states
                     console.log('🔄 Reloading packages list to show updated status...');
                     await loadAvailablePackages();
-                    
+
                     // Force rows to be visible immediately (CSS has opacity: 0 by default)
                     setTimeout(() => {
                         const container = document.getElementById('availablePackagesTable');
@@ -3817,7 +3832,7 @@ async function validatePackage(packageId, packageName) {
                             console.log('  ✅ Row', index + 1, 'made visible');
                         });
                     }, 150); // Increased delay to ensure DOM is ready
-                    
+
                     // Highlight the updated package row with a flash effect
                     setTimeout(() => {
                         const rows = document.querySelectorAll('#availablePackagesTable tbody tr');
@@ -3830,28 +3845,28 @@ async function validatePackage(packageId, packageName) {
                             }
                         });
                     }, 200);
-                    
+
                     return;
                 }
-                
+
                 const check = allChecks[checkIndex];
-                
+
                 // Find the existing checkbox by matching check name
                 const checkDiv = Array.from(document.querySelectorAll('.validation-check-checkbox')).find(div => {
                     const checkName = div.getAttribute('data-check-name');
                     return checkName === check.check_name;
                 });
-                
+
                 if (!checkDiv) {
                     console.warn(`Checkbox not found for: ${check.check_name}`);
                     checkIndex++;
                     setTimeout(showNextCheck, 300);
                     return;
                 }
-                
+
                 const checkIcon = checkDiv.querySelector('.check-icon');
                 const labelSpan = checkDiv.querySelector('.check-label');
-                
+
                 // Animate the check with color change and checkmark
                 if (check.status === 'pass') {
                     checkIcon.textContent = '✓';
@@ -3876,11 +3891,11 @@ async function validatePackage(packageId, packageName) {
                     checkIcon.style.transition = 'all 0.3s ease';
                     labelSpan.style.color = '#856404';
                 }
-                
+
                 // Update progress
                 const percent = ((checkIndex + 1) / allChecks.length) * 100;
                 progressBar.style.width = percent + '%';
-                
+
                 // Update live stats
                 const currentPassed = allChecks.slice(0, checkIndex + 1).filter(c => c.status === 'pass').length;
                 const currentFailed = allChecks.slice(0, checkIndex + 1).filter(c => c.status === 'fail').length;
@@ -3890,35 +3905,35 @@ async function validatePackage(packageId, packageName) {
                         Checking ${checkIndex + 1} of ${allChecks.length}...
                     </span>
                 `;
-                
+
                 checkIndex++;
-                
+
                 // Show next check after delay (800ms for dramatic effect)
                 setTimeout(showNextCheck, 800);
             };
-            
+
             // Start showing checks with initial delay
             setTimeout(showNextCheck, 500); // Wait 500ms before first check appears
-            
+
             console.log('Starting animated check display');
         } else {
             console.error('Validation details request failed:', detailsResult);
         }
-        
+
     } catch (error) {
         console.error('🔍 DEBUG: validatePackage caught error:', error);
         console.error('🔍 DEBUG: Error stack:', error.stack);
         console.log('🔍 DEBUG: Error occurred, modal should still be visible');
-        
+
         showMessage('Validation error: ' + error.message, 'error');
-        
+
         // Keep modal open and enable close button
         const closeBtn = document.getElementById('closeValidationBtn');
         if (closeBtn) {
             closeBtn.disabled = false;
             console.log('🔍 DEBUG: Close button enabled after error');
         }
-        
+
         // Update modal to show error state
         const liveStats = document.getElementById('validationLiveStats');
         if (liveStats) {
@@ -3934,22 +3949,22 @@ async function validatePackage(packageId, packageName) {
 
 function closeValidationModal() {
     console.log('🔍 DEBUG: closeValidationModal called');
-    
+
     const modal = document.getElementById('validationModal');
     if (modal) {
         console.log('🔍 DEBUG: Closing modal');
-        
+
         // Clear the visibility checker
         const checkerId = modal.getAttribute('data-visibility-checker');
         if (checkerId) {
             clearInterval(parseInt(checkerId));
             console.log('🔍 DEBUG: Cleared visibility checker');
         }
-        
+
         // Add hiding class for exit animation
         modal.classList.add('hiding');
         modal.classList.remove('show');
-        
+
         // Wait for animation before removing
         setTimeout(() => {
             modal.remove();
@@ -3964,31 +3979,31 @@ function closeValidationModal() {
 async function toggleSectionStatus(packageId, packageName, enable) {
     const action = enable ? 'enable' : 'disable';
     const actionLabel = enable ? 'Enable' : 'Disable';
-    
+
     if (!confirm(`${actionLabel} section "${packageName}"?`)) {
         return;
     }
-    
+
     try {
         showMessage(`${actionLabel.slice(0, -1)}ing section...`, 'info');
-        
+
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
-        
+
         const response = await fetch(`/api/packages.php?action=${action}&package_id=${encodeURIComponent(packageId)}`, {
             method: 'POST',
             body: formData
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showMessage(result.message, 'success');
             loadInstalledPackages();
         } else {
             showMessage(`${actionLabel} failed: ` + result.error, 'error');
         }
-        
+
     } catch (error) {
         showMessage(`${actionLabel} error: ` + error.message, 'error');
     }
@@ -4001,9 +4016,9 @@ async function uninstallPackagePrompt(packageId, packageName) {
         `Click Cancel to abort\n\n` +
         `To DELETE all data, click OK then confirm in the next dialog.`
     );
-    
+
     if (keepData === null) return; // User cancelled
-    
+
     let deleteData = false;
     if (keepData) {
         deleteData = confirm(
@@ -4012,21 +4027,21 @@ async function uninstallPackagePrompt(packageId, packageName) {
             `OK = Delete all data\nCancel = Keep data`
         );
     }
-    
+
     try {
         showMessage('Uninstalling package...', 'info');
-        
+
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
-        
+
         const keepDataParam = deleteData ? '0' : '1';
         const response = await fetch(`/api/packages.php?action=uninstall&package_id=${encodeURIComponent(packageId)}&keep_data=${keepDataParam}`, {
             method: 'POST',
             body: formData
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showMessage(result.message, 'success');
             loadInstalledPackages();
@@ -4034,7 +4049,7 @@ async function uninstallPackagePrompt(packageId, packageName) {
         } else {
             showMessage('Uninstall failed: ' + result.error, 'error');
         }
-        
+
     } catch (error) {
         showMessage('Uninstall error: ' + error.message, 'error');
     }
@@ -4045,21 +4060,21 @@ async function deletePackage(packageId, packageName) {
     if (!confirm(`Delete package "${packageName}"?\n\nThis will remove the uploaded package file. This action cannot be undone.`)) {
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/packages.php?id=${packageId}&csrf_token=${window.csrfToken}`, {
             method: 'DELETE'
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showMessage('Package deleted', 'success');
             loadAvailablePackages();
         } else {
             showMessage('Delete failed: ' + result.error, 'error');
         }
-        
+
     } catch (error) {
         showMessage('Delete error: ' + error.message, 'error');
     }
@@ -4070,18 +4085,18 @@ async function showValidationDetails(packageId) {
     try {
         const response = await fetch(`/api/packages.php?action=validation&id=${packageId}`);
         const result = await response.json();
-        
+
         if (!result.success) throw new Error(result.error);
-        
+
         const pkg = result.package;
         const summary = result.summary;
         const checks = result.all_checks;
-        
+
         const summaryClass = pkg.can_install ? 'success' : (pkg.validation_status === 'pending' ? 'pending' : 'failure');
         const summaryIcon = pkg.can_install ? '✓' : (pkg.validation_status === 'pending' ? '⏳' : '✗');
-        const summaryText = pkg.can_install ? 'Package Validated - Ready to Install' : 
-                           (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
-        
+        const summaryText = pkg.can_install ? 'Package Validated - Ready to Install' :
+            (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
+
         let html = `
             <div class="validation-report" style="display: flex; flex-direction: column; height: 100%; max-height: 85vh; padding: 0.3125rem;">
                 <div class="validation-report-header" style="padding: 20px 32px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
@@ -4097,7 +4112,7 @@ async function showValidationDetails(packageId) {
                         ✕
                     </button>
                 </div>
-                
+
                 ${pkg.validation_status === 'pending' ? `
                 <div class="validation-summary pending">
                     <span class="validation-summary-icon">⏳</span>
@@ -4110,28 +4125,28 @@ async function showValidationDetails(packageId) {
                     </div>
                 </div>
                 ` : ''}
-                
+
                 <div class="validation-summary ${summaryClass}" style="padding: 16px 24px;">
                     <span class="validation-summary-icon">${summaryIcon}</span>
                     <div class="validation-summary-content">
                         <strong>${summaryText}</strong>
                         <div class="validation-summary-stats">
                             <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
-                            <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.passed || 0} passed</span> • 
-                            <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.failed || 0} failed</span> • 
+                            <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.passed || 0} passed</span> •
+                            <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.failed || 0} failed</span> •
                             <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.warnings || 0} warnings</span>
                             ${(summary.critical || 0) > 0 ? `<br><span style="color: #d32f2f; font-weight: bold;">⚠️ ${summary.critical} critical issues</span>` : ''}
                         </div>
                     </div>
                 </div>
-                
+
                 <h3 class="validation-checks-header" style="padding: 16px 32px; margin: 0; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; font-size: 1rem; color: #374151;">
                     All Compatibility Checks
                     <small style="color: #9ca3af;">(showing all ${checks.length} checks)</small>
                 </h3>
                 <div class="validation-checks-container" style="max-height: 50vh; overflow-y: auto; flex: 1;">
         `;
-        
+
         // Group checks by type
         const groupedChecks = {};
         checks.forEach(check => {
@@ -4140,7 +4155,7 @@ async function showValidationDetails(packageId) {
             }
             groupedChecks[check.check_type].push(check);
         });
-        
+
         // Display checks by group
         Object.keys(groupedChecks).forEach(checkType => {
             const typeChecks = groupedChecks[checkType];
@@ -4148,7 +4163,7 @@ async function showValidationDetails(packageId) {
             const typeFailed = typeChecks.filter(c => c.status === 'fail').length;
             const typeIcon = typeFailed > 0 ? '✗' : typePassed === typeChecks.length ? '✓' : '⚠';
             const typeIconClass = typeFailed > 0 ? 'fail' : typePassed === typeChecks.length ? 'pass' : 'warning';
-            
+
             html += `
                 <div class="validation-check-group">
                     <div class="validation-check-group-header" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: 600; font-size: 0.9rem;">
@@ -4157,10 +4172,10 @@ async function showValidationDetails(packageId) {
                         <small style="margin-left: auto; color: #6b7280; font-weight: normal;">${typePassed}/${typeChecks.length} passed</small>
                     </div>
             `;
-            
+
             typeChecks.forEach(check => {
                 const icon = check.status === 'fail' ? '✗' : check.status === 'warning' ? '⚠' : '✓';
-                
+
                 html += `
                     <div class="validation-check-item ${check.status}" style="display: flex; align-items: flex-start; gap: 12px; padding: 8px 16px; border-bottom: 1px solid #f3f4f6;">
                         <span class="validation-check-icon ${check.status}" style="flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">${icon}</span>
@@ -4174,24 +4189,24 @@ async function showValidationDetails(packageId) {
                     </div>
                 `;
             });
-            
+
             html += `</div>`;
         });
-        
+
         html += `
                 </div>
                 <div class="modal-actions" style="flex-shrink: 0; padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end; background: #ffffff;">
                     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-                    ${pkg.can_install && !result.package.is_installed ? 
-                        `<button class="btn btn-primary" onclick="closeModal(); installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
+                    ${pkg.can_install && !result.package.is_installed ?
+                `<button class="btn btn-primary" onclick="closeModal(); installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
                             Install Package
                         </button>` : ''}
                 </div>
             </div>
         `;
-        
+
         showModalWithContent(html);
-        
+
     } catch (error) {
         showMessage('Error loading validation: ' + error.message, 'error');
     }
@@ -4202,21 +4217,21 @@ function showModalWithContent(htmlContent) {
     // Remove existing modal if any
     let modal = document.getElementById('dynamicModal');
     if (modal) modal.remove();
-    
+
     // Create modal
     modal = document.createElement('div');
     modal.id = 'dynamicModal';
     modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
-    
+
     const modalContent = document.createElement('div');
     modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15);';
     modalContent.innerHTML = htmlContent;
-    
+
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
-    
+
     // Close on background click
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) closeModal();
     });
 }
@@ -4239,7 +4254,7 @@ function escapeHtml(text) {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 // ============================================================================
@@ -4253,21 +4268,21 @@ async function checkPackageAlerts(showAlerts = true) {
             credentials: 'same-origin'
         });
         const result = await response.json();
-        
+
         if (!result.success) return;
-        
+
         const { validation, installed, updates } = result.alerts;
-        
+
         // Always update sidebar badge and subtab badges
         updatePackageAlertBadge(validation, updates);
         updateSubtabBadges(validation, installed, updates);
-        
+
         // Only show alert banners if requested
         if (!showAlerts) return;
-        
+
         // Alert banners are no longer used - badges are sufficient
         // The alerts are now shown through the subtab badges and sidebar badge
-        
+
     } catch (error) {
         console.error('Error checking package alerts:', error);
     }
@@ -4278,7 +4293,7 @@ function updatePackageAlertBadge(validation, updates) {
     const sidebarBadge = document.getElementById('sidebarPackageBadge');
     if (sidebarBadge) {
         const totalAlerts = (validation.dismissed ? 0 : validation.count) + (updates.dismissed ? 0 : updates.count);
-        
+
         if (totalAlerts > 0) {
             sidebarBadge.textContent = totalAlerts;
             sidebarBadge.style.display = 'inline-block';
@@ -4295,7 +4310,7 @@ function updateSubtabBadges(validation, installed, updates) {
     if (installedBadge) {
         installedBadge.style.display = 'none';
     }
-    
+
     // Available Packages badge (shows validation count, can be dismissed)
     const availableBadge = document.getElementById('availablePackagesBadge');
     if (availableBadge) {
@@ -4306,7 +4321,7 @@ function updateSubtabBadges(validation, installed, updates) {
             availableBadge.style.display = 'none';
         }
     }
-    
+
     // Updates badge (can be dismissed)
     const updatesBadge = document.getElementById('updatesBadge');
     if (updatesBadge) {
@@ -4325,15 +4340,15 @@ async function dismissPackageAlert(alertType) {
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
         formData.append('alert_type', alertType);
-        
+
         const response = await fetch('/api/package-alerts.php?action=dismiss', {
             method: 'POST',
             credentials: 'same-origin',
             body: formData
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Fade out and remove the alert banner
             const alert = document.querySelector(`.package-alert[data-alert-type="${alertType}"]`);
@@ -4341,7 +4356,7 @@ async function dismissPackageAlert(alertType) {
                 alert.classList.add('hiding');
                 setTimeout(() => alert.remove(), 300);
             }
-            
+
             // Update badges to hide dismissed alerts
             if (alertType === 'package_validation') {
                 const badge = document.getElementById('availablePackagesBadge');
@@ -4350,7 +4365,7 @@ async function dismissPackageAlert(alertType) {
                 const badge = document.getElementById('updatesBadge');
                 if (badge) badge.style.display = 'none';
             }
-            
+
             // Update sidebar badge
             const sidebarBadge = document.getElementById('sidebarPackageBadge');
             if (sidebarBadge) {
@@ -4362,7 +4377,7 @@ async function dismissPackageAlert(alertType) {
                     sidebarBadge.style.display = 'none';
                 }
             }
-            
+
             showMessage('Alert dismissed for 7 days', 'success');
         }
     } catch (error) {
@@ -4377,28 +4392,28 @@ async function dismissPackageRow(packageId, alertType, event) {
         event.stopPropagation();
         event.preventDefault();
     }
-    
+
     try {
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
         formData.append('alert_type', alertType);
         formData.append('package_id', packageId);
-        
+
         const response = await fetch('/api/package-alerts.php?action=dismiss', {
             method: 'POST',
             credentials: 'same-origin',
             body: formData
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Simply hide the dismiss button for this package
             const dismissBtn = event.target.closest('button');
             if (dismissBtn) {
                 dismissBtn.style.display = 'none';
             }
-            
+
             // Update the available packages badge
             const availableBadge = document.getElementById('availablePackagesBadge');
             if (availableBadge) {
@@ -4410,7 +4425,7 @@ async function dismissPackageRow(packageId, alertType, event) {
                     availableBadge.style.display = 'none';
                 }
             }
-            
+
             // Update sidebar badge
             const sidebarBadge = document.getElementById('sidebarPackageBadge');
             if (sidebarBadge) {
@@ -4422,7 +4437,7 @@ async function dismissPackageRow(packageId, alertType, event) {
                     sidebarBadge.style.display = 'none';
                 }
             }
-            
+
             if (typeof showMessage === 'function') {
                 showMessage(`Alert dismissed for package "${packageId}"`, 'success');
             } else {
@@ -4455,7 +4470,7 @@ function showPackageDiscovery() {
     modal.setAttribute('tabindex', '-1');
     modal.setAttribute('aria-labelledby', 'packageDiscoveryModalLabel');
     modal.setAttribute('aria-hidden', 'true');
-    
+
     modal.innerHTML = `
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -4463,34 +4478,36 @@ function showPackageDiscovery() {
                     <h5 class="modal-title" id="packageDiscoveryModalLabel">
                         <i class="fas fa-box-open text-primary"></i> Browse Available Packages
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Filters & Search -->
-                    <div class="package-filters mb-3">
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <input type="text" id="packageSearchInput" class="form-control" placeholder="🔍 Search packages...">
+                    <!-- Compact Filters & Search -->
+                    <div class="package-filters mb-2" style="background: #f8f9fa; padding: 0.75rem; border-radius: 0.375rem;">
+                        <!-- Search Bar -->
+                        <div class="mb-2">
+                            <input
+                                type="text"
+                                id="packageSearchInput"
+                                class="form-control form-control-sm"
+                                placeholder="🔍 Search packages..."
+                                style="font-size: 0.875rem;">
+                        </div>
+                        <!-- Compact Tag Filters -->
+                        <div class="d-flex align-items-center justify-content-between" style="min-height: 28px;">
+                            <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                <small class="text-muted fw-bold" style="font-size: 0.75rem; white-space: nowrap;">Tags:</small>
+                                <div id="tagFilters" class="d-flex flex-wrap gap-1 flex-grow-1">
+                                    <small class="text-muted" style="font-size: 0.75rem;">Loading...</small>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <select id="categoryFilter" class="form-select">
-                                    <option value="">All Categories</option>
-                                    <option value="analytics">📊 Analytics</option>
-                                    <option value="forms">📝 Forms</option>
-                                    <option value="integrations">🔌 Integrations</option>
-                                    <option value="redirects">🔀 Redirects</option>
-                                    <option value="reporting">📋 Reporting</option>
-                                    <option value="workflows">⚙️ Workflows</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 text-end">
-                                <button id="selectAllPackages" class="btn btn-outline-secondary btn-sm" style="display: none;">
-                                    <i class="fas fa-check-square"></i> Select All
-                                </button>
-                            </div>
+                            <button id="clearTagFilters" class="btn btn-sm btn-link text-decoration-none p-0 ms-2" style="font-size: 0.75rem; display: none; white-space: nowrap;">
+                                Clear All
+                            </button>
                         </div>
                     </div>
-                    
+
                     <!-- Results -->
                     <div id="packageSearchResults" class="package-discovery-results">
                         <div class="text-center py-4">
@@ -4517,34 +4534,41 @@ function showPackageDiscovery() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
-    // Show the modal using Bootstrap 5 modal
-    const bootstrapModal = new bootstrap.Modal(modal);
-    bootstrapModal.show();
-    
+
     // Store packages globally for filtering
     window.discoveredPackages = [];
     window.selectedPackages = new Set();
-    
-    // Add event listeners
-    document.getElementById('packageSearchInput').addEventListener('input', filterDiscoveredPackages);
-    document.getElementById('categoryFilter').addEventListener('change', filterDiscoveredPackages);
-    document.getElementById('selectAllPackages').addEventListener('click', toggleSelectAll);
-    document.getElementById('downloadSelectedBtn').addEventListener('click', downloadSelectedPackages);
-    
+
+    // Add event listeners - query from modal since elements are inside it
+    modal.querySelector('#packageSearchInput').addEventListener('input', filterDiscoveredPackages);
+    modal.querySelector('#downloadSelectedBtn').addEventListener('click', downloadSelectedPackages);
+
+    // Fix accessibility: Blur focused elements BEFORE modal hides (prevents aria-hidden warning)
+    modal.addEventListener('hide.bs.modal', function () {
+        // Blur any focused elements before Bootstrap sets aria-hidden
+        const focusedElement = document.activeElement;
+        if (focusedElement && modal.contains(focusedElement)) {
+            focusedElement.blur();
+        }
+    });
+
+    // Clean up after modal is fully hidden
+    modal.addEventListener('hidden.bs.modal', function () {
+        window.discoveredPackages = [];
+        window.selectedPackages = new Set();
+        setTimeout(() => modal.remove(), 100);
+    });
+
+    // Show the modal using Bootstrap 5 modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+
     // Automatically search packages from the default repository
     setTimeout(() => {
         searchPackages();
     }, 100);
-    
-    // Remove modal from DOM when hidden
-    modal.addEventListener('hidden.bs.modal', () => {
-        window.discoveredPackages = [];
-        window.selectedPackages = new Set();
-        modal.remove();
-    });
 }
 
 async function searchPackages() {
@@ -4552,9 +4576,9 @@ async function searchPackages() {
     const repositoryUrl = 'https://github.com/R1CH4RD25/TheHub-Package-Repo';
     const owner = 'R1CH4RD25';
     const repo = 'TheHub-Package-Repo';
-    
+
     const resultsContainer = document.getElementById('packageSearchResults');
-    
+
     try {
         resultsContainer.innerHTML = `
             <div class="text-center py-4">
@@ -4564,7 +4588,7 @@ async function searchPackages() {
                 <div class="mt-2">Loading available packages...</div>
             </div>
         `;
-        
+
         const response = await fetch('/api/package-discovery.php', {
             method: 'POST',
             headers: {
@@ -4577,15 +4601,15 @@ async function searchPackages() {
                 repo: repo
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (!result.success) {
             throw new Error(result.error || 'Failed to load packages');
         }
-        
+
         renderPackageSearchResults(result.packages);
-        
+
     } catch (error) {
         console.error('Error loading packages:', error);
         resultsContainer.innerHTML = `
@@ -4601,26 +4625,36 @@ async function searchPackages() {
 
 function renderPackageSearchResults(packages) {
     const container = document.getElementById('packageSearchResults');
-    
+
     // Store packages globally for filtering
     window.discoveredPackages = packages || [];
-    
+
     if (!packages || packages.length === 0) {
         container.innerHTML = `
             <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> No packages available at this time
-                <div class="mt-2 small text-muted">
-                    Check back later for new packages or upload your own .hubpkg files
+                <i class="fas fa-box-open"></i> <strong>Package Repository Is Empty</strong>
+                <div class="mt-3">
+                    <p class="mb-2">The package repository hasn't been populated yet. You have two options:</p>
+                    <div class="ms-3">
+                        <p class="mb-1"><strong>1. Upload Local Packages:</strong></p>
+                        <p class="text-muted small mb-3">Use the "Upload Package" section above to install .hubpkg files directly</p>
+
+                        <p class="mb-1"><strong>2. Contribute to the Repository:</strong></p>
+                        <p class="text-muted small mb-1">Help build the community package library at:</p>
+                        <a href="https://github.com/R1CH4RD25/TheHub-Package-Repo" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fab fa-github"></i> View Repository
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
         return;
     }
-    
+
     // Filter out already installed packages
     const availablePackages = packages.filter(pkg => !pkg.is_installed);
     const installedCount = packages.length - availablePackages.length;
-    
+
     if (availablePackages.length === 0) {
         container.innerHTML = `
             <div class="alert alert-success">
@@ -4632,82 +4666,307 @@ function renderPackageSearchResults(packages) {
         `;
         return;
     }
-    
-    // Show select all button if there are packages
-    document.getElementById('selectAllPackages').style.display = availablePackages.length > 0 ? 'inline-block' : 'none';
-    
+
     let html = `
         <div class="mb-3 d-flex justify-content-between align-items-center">
             <div>
                 <h6 class="mb-1">
-                    <i class="fas fa-download text-primary"></i> 
+                    <i class="fas fa-download text-primary"></i>
                     ${availablePackages.length} Package${availablePackages.length !== 1 ? 's' : ''} Available
                 </h6>
     `;
-    
+
     if (installedCount > 0) {
         html += `
             <small class="text-muted">
-                <i class="fas fa-check"></i> 
+                <i class="fas fa-check"></i>
                 ${installedCount} already installed
             </small>
         `;
     }
-    
+
     html += `
             </div>
         </div>
-        <div class="row g-3">
+
+        <!-- Package Table - Compact Design -->
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.875rem;">
+                <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <tr>
+                        <th style="width: 40px; padding: 0.5rem 0.25rem; text-align: center;">
+                            <input type="checkbox" class="form-check-input" id="selectAllPackages" title="Select All" style="margin: 0;">
+                        </th>
+                        <th style="width: 20%; padding: 0.5rem;">Package</th>
+                        <th style="width: 68%; padding: 0.5rem;">Description</th>
+                        <th style="width: 12%; padding: 0.5rem;">Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
     `;
-    
+
     availablePackages.forEach(pkg => {
-        // Extract category from path (e.g., packages/analytics/... => analytics)
-        const category = pkg.path ? pkg.path.split('/')[1] : 'other';
+        // Use tags from API or extract from path as fallback
+        const tags = pkg.tags || [];
+        const author = pkg.author || 'WISD';
+        const version = pkg.version || 'Unknown';
+        const description = pkg.description || 'No description available';
         const isSelected = window.selectedPackages.has(pkg.download_url);
-        
+
         html += `
-            <div class="col-md-6 package-card-wrapper" data-category="${category}" data-package-name="${escapeHtml(pkg.name.toLowerCase())}">
-                <div class="card package-card h-100 ${isSelected ? 'border-primary' : ''}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="form-check">
-                                <input 
-                                    class="form-check-input package-checkbox" 
-                                    type="checkbox" 
-                                    id="pkg_${escapeHtml(pkg.download_url)}"
-                                    data-download-url="${escapeHtml(pkg.download_url)}"
-                                    data-package-name="${escapeHtml(pkg.name)}"
-                                    ${isSelected ? 'checked' : ''}
-                                    onchange="togglePackageSelection(this)"
-                                >
-                                <label class="form-check-label fw-bold" for="pkg_${escapeHtml(pkg.download_url)}">
-                                    ${escapeHtml(pkg.name)}
-                                </label>
+            <tr class="package-row" data-tags="${tags.join(',')}" data-package-name="${escapeHtml(pkg.name.toLowerCase())}" style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 0.4rem 0.25rem; text-align: center; vertical-align: middle;">
+                    <input
+                        class="form-check-input package-checkbox"
+                        type="checkbox"
+                        id="pkg_${escapeHtml(pkg.id || pkg.name)}"
+                        data-download-url="${escapeHtml(pkg.download_url)}"
+                        data-package-name="${escapeHtml(pkg.name)}"
+                        ${isSelected ? 'checked' : ''}
+                        onchange="togglePackageSelection(this)"
+                        style="margin: 0;"
+                    >
+                </td>
+                <td style="padding: 0.4rem 0.5rem;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-cube text-primary me-2" style="font-size: 1.1rem;"></i>
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.15rem;">
+                                <strong style="font-size: 0.9rem; line-height: 1.3;">${escapeHtml(pkg.name)}</strong>
+                                <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 0.65rem; padding: 0.2em 0.5em;">
+                                    v${escapeHtml(version)}
+                                </span>
                             </div>
-                            <span class="badge bg-${getCategoryColor(category)}">${getCategoryIcon(category)} ${category}</span>
-                        </div>
-                        <p class="card-text small text-muted mb-2">${escapeHtml(pkg.description || 'No description available')}</p>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <small class="text-muted">
-                                <i class="fas fa-tag"></i> v${escapeHtml(pkg.version)}
-                            </small>
-                            <small class="text-muted">
-                                <i class="fas fa-weight-hanging"></i> ${formatFileSize(pkg.size || 0)}
+                            <small class="text-muted d-block" style="font-size: 0.7rem;">
+                                <i class="fas fa-user" style="font-size: 0.65rem;"></i> ${escapeHtml(author)}
                             </small>
                         </div>
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <button class="btn btn-sm btn-primary w-100" onclick="downloadPackageFromRepo('${escapeHtml(pkg.download_url)}', '${escapeHtml(pkg.name)}')">
-                            <i class="fas fa-download"></i> Download Now
-                        </button>
+                </td>
+                <td style="padding: 0.4rem 0.5rem;">
+                    <div style="font-size: 0.8rem; line-height: 1.3; color: #495057;" title="${escapeHtml(description)}">
+                        ${escapeHtml(description.length > 120 ? description.substring(0, 120) + '...' : description)}
                     </div>
-                </div>
-            </div>
+                </td>
+                <td style="padding: 0.4rem 0.5rem;">
+                    <div class="d-flex flex-wrap gap-1">
+                        ${tags.slice(0, 2).map(tag => `
+                            <span class="badge bg-${getTagColor(tag)}" style="font-size: 0.65rem; padding: 0.25em 0.45em;">
+                                ${getTagIcon(tag)} ${tag}
+                            </span>
+                        `).join('')}
+                        ${tags.length > 2 ? `<span class="badge bg-secondary" style="font-size: 0.65rem; padding: 0.25em 0.45em; cursor: help;" title="${tags.slice(2).join(', ')}">+${tags.length - 2}</span>` : ''}
+                    </div>
+                </td>
+            </tr>
         `;
     });
-    
-    html += '</div>';
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
     container.innerHTML = html;
+
+    // Add select all functionality
+    setTimeout(() => {
+        const selectAllCheckbox = document.getElementById('selectAllPackages');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function () {
+                const checkboxes = document.querySelectorAll('.package-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                    togglePackageSelection(cb);
+                });
+            });
+        }
+    }, 100);
+
+    // Populate tag filters
+    populateTagFilters(packages);
+
+    // Attach event listeners
+    attachPackageFilterListeners();
+}
+
+// Populate dynamic tag filters based on discovered packages
+function populateTagFilters(packages) {
+    const tagCounts = {};
+
+    // Count occurrences of each tag
+    packages.forEach(pkg => {
+        const tags = pkg.tags || [];
+        tags.forEach(tag => {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+    });
+
+    // Sort tags by count (most common first)
+    const sortedTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([tag, count]) => ({ tag, count }));
+
+    const tagContainer = document.getElementById('tagFilters');
+
+    if (sortedTags.length === 0) {
+        tagContainer.innerHTML = '<small class="text-muted">No tags available</small>';
+        return;
+    }
+
+    // Store active filters globally
+    window.activeTagFilters = window.activeTagFilters || new Set();
+
+    let html = sortedTags.map(({ tag, count }) => {
+        const isActive = window.activeTagFilters.has(tag);
+        return `
+            <button
+                class="btn btn-sm tag-filter-btn ${isActive ? 'btn-primary' : 'btn-outline-secondary'}"
+                data-tag="${tag}"
+                onclick="toggleTagFilter('${tag}')"
+                title="${count} package${count !== 1 ? 's' : ''}"
+            >
+                ${getTagIcon(tag)} ${tag} <span class="badge bg-secondary">${count}</span>
+            </button>
+        `;
+    }).join('');
+
+    tagContainer.innerHTML = html;
+
+    // Show/hide clear button
+    document.getElementById('clearTagFilters').style.display =
+        window.activeTagFilters.size > 0 ? 'inline-block' : 'none';
+}
+
+// Toggle tag filter
+function toggleTagFilter(tag) {
+    window.activeTagFilters = window.activeTagFilters || new Set();
+
+    if (window.activeTagFilters.has(tag)) {
+        window.activeTagFilters.delete(tag);
+    } else {
+        window.activeTagFilters.add(tag);
+    }
+
+    // Update button states
+    document.querySelectorAll('.tag-filter-btn').forEach(btn => {
+        const btnTag = btn.dataset.tag;
+        if (window.activeTagFilters.has(btnTag)) {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-primary');
+        } else {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-secondary');
+        }
+    });
+
+    // Show/hide clear button
+    document.getElementById('clearTagFilters').style.display =
+        window.activeTagFilters.size > 0 ? 'inline-block' : 'none';
+
+    // Apply filters
+    filterPackages();
+}
+
+// Clear all tag filters
+function clearAllTagFilters() {
+    window.activeTagFilters.clear();
+
+    // Reset all filter buttons
+    document.querySelectorAll('.tag-filter-btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-secondary');
+    });
+
+    document.getElementById('clearTagFilters').style.display = 'none';
+
+    // Apply filters (show all)
+    filterPackages();
+}
+
+// Filter packages based on search and tags
+function filterPackages() {
+    const searchTerm = (document.getElementById('packageSearchInput')?.value || '').toLowerCase();
+    const activeFilters = window.activeTagFilters || new Set();
+
+    document.querySelectorAll('.package-row').forEach(row => {
+        const packageName = row.dataset.packageName || '';
+        const packageTags = (row.dataset.tags || '').split(',').filter(t => t);
+
+        // Search filter
+        const matchesSearch = !searchTerm || packageName.includes(searchTerm);
+
+        // Tag filter (if any tags are active, package must have at least one matching tag)
+        const matchesTags = activeFilters.size === 0 ||
+            [...activeFilters].some(filter => packageTags.includes(filter));
+
+        // Show/hide row
+        if (matchesSearch && matchesTags) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Update visible count
+    const visibleCount = document.querySelectorAll('.package-row:not([style*="display: none"])').length;
+    const totalCount = document.querySelectorAll('.package-row').length;
+
+    // Could add a status message here if desired
+}
+
+// Attach event listeners for filtering
+function attachPackageFilterListeners() {
+    // Search input
+    const searchInput = document.getElementById('packageSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterPackages);
+    }
+
+    // Clear filters button
+    const clearBtn = document.getElementById('clearTagFilters');
+    if (clearBtn) {
+        clearBtn.onclick = clearAllTagFilters;
+    }
+}
+
+// Get icon for tag
+function getTagIcon(tag) {
+    const icons = {
+        'student': '🎓',
+        'staff': '👥',
+        'parent': '👨‍👩‍👧',
+        'maintenance': '🔧',
+        'safety': '🛡️',
+        'reporting': '📋',
+        'schoolwide': '🏫',
+        'communication': '💬',
+        'facilities': '🏢',
+        'forms': '📝',
+        'workflows': '⚙️',
+        'analytics': '📊'
+    };
+    return icons[tag] || '🏷️';
+}
+
+// Get color for tag
+function getTagColor(tag) {
+    const colors = {
+        'student': 'primary',
+        'staff': 'info',
+        'parent': 'success',
+        'maintenance': 'warning',
+        'safety': 'danger',
+        'reporting': 'secondary',
+        'schoolwide': 'dark',
+        'communication': 'info',
+        'facilities': 'warning',
+        'forms': 'success',
+        'workflows': 'secondary',
+        'analytics': 'primary'
+    };
+    return colors[tag] || 'secondary';
 }
 
 function getCategoryIcon(category) {
@@ -4735,17 +4994,21 @@ function getCategoryColor(category) {
 }
 
 function togglePackageSelection(checkbox) {
+    if (!checkbox) return;
+
     const url = checkbox.dataset.downloadUrl;
     const name = checkbox.dataset.packageName;
-    
+
     if (checkbox.checked) {
         window.selectedPackages.add(url);
-        checkbox.closest('.package-card').classList.add('border-primary');
+        const row = checkbox.closest('tr.package-row') || checkbox.closest('.package-card') || checkbox.closest('.package-row');
+        if (row) row.classList.add('table-primary');
     } else {
         window.selectedPackages.delete(url);
-        checkbox.closest('.package-card').classList.remove('border-primary');
+        const row = checkbox.closest('tr.package-row') || checkbox.closest('.package-card') || checkbox.closest('.package-row');
+        if (row) row.classList.remove('table-primary');
     }
-    
+
     updateSelectedCount();
 }
 
@@ -4754,7 +5017,7 @@ function updateSelectedCount() {
     const countSpan = document.getElementById('selectedPackageCount');
     const downloadBtn = document.getElementById('downloadSelectedBtn');
     const downloadCount = document.getElementById('downloadCount');
-    
+
     if (count > 0) {
         countSpan.style.display = 'inline';
         countSpan.querySelector('strong').textContent = count;
@@ -4766,96 +5029,188 @@ function updateSelectedCount() {
     }
 }
 
-function toggleSelectAll() {
-    const checkboxes = document.querySelectorAll('.package-checkbox:not(:disabled)');
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
-    checkboxes.forEach(cb => {
-        cb.checked = !allChecked;
-        togglePackageSelection(cb);
-    });
-    
-    const btn = document.getElementById('selectAllPackages');
-    btn.innerHTML = allChecked ? '<i class="fas fa-check-square"></i> Select All' : '<i class="fas fa-square"></i> Deselect All';
-}
+// NOTE: Select All functionality removed - using individual package selection
+// function toggleSelectAll() { ... }
 
 function filterDiscoveredPackages() {
     const searchTerm = document.getElementById('packageSearchInput').value.toLowerCase();
-    const category = document.getElementById('categoryFilter').value;
-    
-    const cards = document.querySelectorAll('.package-card-wrapper');
-    let visibleCount = 0;
-    
-    cards.forEach(card => {
-        const packageName = card.dataset.packageName;
-        const packageCategory = card.dataset.category;
-        
-        const matchesSearch = !searchTerm || packageName.includes(searchTerm);
-        const matchesCategory = !category || packageCategory === category;
-        
-        if (matchesSearch && matchesCategory) {
-            card.style.display = '';
-            visibleCount++;
-        } else {
-            card.style.display = 'none';
+
+    const filtered = window.discoveredPackages.filter(pkg => {
+        // Filter by search term
+        if (searchTerm) {
+            const matchesName = pkg.name.toLowerCase().includes(searchTerm);
+            const matchesDesc = pkg.description && pkg.description.toLowerCase().includes(searchTerm);
+            const matchesFilename = pkg.filename.toLowerCase().includes(searchTerm);
+            return matchesName || matchesDesc || matchesFilename;
         }
+
+        return true;
     });
-    
-    // Update count display
-    const container = document.getElementById('packageSearchResults');
-    const countDisplay = container.querySelector('h6');
-    if (countDisplay) {
-        countDisplay.innerHTML = `
-            <i class="fas fa-download text-primary"></i> 
-            ${visibleCount} Package${visibleCount !== 1 ? 's' : ''} Available
-        `;
-    }
+
+    renderPackageSearchResults(filtered);
 }
+
+// NOTE: Category filter removed - using tag-based filtering instead
+// function populatePackageCategories(packages) { ... }
 
 async function downloadSelectedPackages() {
     const selectedUrls = Array.from(window.selectedPackages);
-    
+
     if (selectedUrls.length === 0) {
         showMessage('Please select at least one package', 'warning');
         return;
     }
-    
+
     const btn = document.getElementById('downloadSelectedBtn');
     const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Downloading...';
-    
+
+    // Create progress overlay
+    const progressOverlay = document.createElement('div');
+    progressOverlay.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10001; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+            <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="display: inline-block; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin-bottom: 1rem;">
+                        <i class="fas fa-download" style="font-size: 2rem; color: white;"></i>
+                    </div>
+                    <h4 style="margin: 0; color: #1e293b; font-weight: 600;">Downloading Packages</h4>
+                    <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.9rem;">Please wait while we fetch your selected packages...</p>
+                </div>
+
+                <!-- Progress bar -->
+                <div style="background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 1rem;">
+                    <div id="downloadProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+
+                <!-- Progress text -->
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <span id="downloadProgressText" style="color: #64748b; font-size: 0.875rem; font-weight: 500;">Preparing download...</span>
+                </div>
+
+                <!-- Package list -->
+                <div id="downloadPackageList" style="max-height: 200px; overflow-y: auto; padding: 0.5rem 0;">
+                    <!-- Package items will be added here -->
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(progressOverlay);
+
+    const progressBar = document.getElementById('downloadProgressBar');
+    const progressText = document.getElementById('downloadProgressText');
+    const packageList = document.getElementById('downloadPackageList');
+
     let successCount = 0;
     let failCount = 0;
-    
-    for (const url of selectedUrls) {
+    const total = selectedUrls.length;
+
+    for (let i = 0; i < selectedUrls.length; i++) {
+        const url = selectedUrls[i];
         const checkbox = document.querySelector(`[data-download-url="${url}"]`);
         const packageName = checkbox?.dataset.packageName || 'Unknown';
-        
+
+        // Add package item to list
+        const packageItem = document.createElement('div');
+        packageItem.id = `pkg-status-${i}`;
+        packageItem.style.cssText = 'display: flex; align-items: center; padding: 0.75rem; background: #f8fafc; border-radius: 8px; margin-bottom: 0.5rem; transition: all 0.3s ease;';
+        packageItem.innerHTML = `
+            <div class="spinner-border spinner-border-sm text-primary" style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;"></div>
+            <div style="flex-grow: 1;">
+                <div style="font-weight: 500; color: #1e293b; font-size: 0.875rem;">${escapeHtml(packageName)}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Downloading...</div>
+            </div>
+        `;
+        packageList.appendChild(packageItem);
+
+        // Update progress
+        const percent = ((i + 1) / total) * 100;
+        progressBar.style.width = `${percent}%`;
+        progressText.textContent = `Processing ${i + 1} of ${total} packages...`;
+
         try {
-            await downloadPackageFromRepo(url, packageName, true); // Silent mode
+            await downloadPackageFromRepo(url, packageName, true);
             successCount++;
+
+            // Update to success state
+            packageItem.style.background = '#dcfce7';
+            packageItem.innerHTML = `
+                <div style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-check-circle" style="color: #16a34a; font-size: 1.25rem;"></i>
+                </div>
+                <div style="flex-grow: 1;">
+                    <div style="font-weight: 500; color: #15803d; font-size: 0.875rem;">${escapeHtml(packageName)}</div>
+                    <div style="font-size: 0.75rem; color: #16a34a;">Downloaded successfully</div>
+                </div>
+            `;
         } catch (error) {
             console.error(`Failed to download ${packageName}:`, error);
             failCount++;
+
+            // Update to error state
+            packageItem.style.background = '#fee2e2';
+            packageItem.innerHTML = `
+                <div style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times-circle" style="color: #dc2626; font-size: 1.25rem;"></i>
+                </div>
+                <div style="flex-grow: 1;">
+                    <div style="font-weight: 500; color: #991b1b; font-size: 0.875rem;">${escapeHtml(packageName)}</div>
+                    <div style="font-size: 0.75rem; color: #dc2626;">Download failed</div>
+                </div>
+            `;
         }
+
+        // Small delay for visual feedback
+        await new Promise(resolve => setTimeout(resolve, 300));
     }
-    
+
+    // Update final progress
+    progressBar.style.width = '100%';
+    progressText.textContent = 'Download complete!';
+
+    // Wait a moment to show completion
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Remove overlay
+    progressOverlay.remove();
+
     btn.disabled = false;
     btn.innerHTML = originalText;
-    
-    // Show summary
+
+    // Show summary with Notyf (if available) or fallback to showMessage
     if (successCount > 0) {
-        showMessage(`Successfully downloaded ${successCount} package(s)!`, 'success');
-        
+        if (window.notyf) {
+            window.notyf.success({
+                message: `🎉 Successfully downloaded ${successCount} package${successCount > 1 ? 's' : ''}!`,
+                duration: 4000
+            });
+        } else {
+            showMessage(`Successfully downloaded ${successCount} package(s)!`, 'success');
+        }
+
         // Close modal and refresh
         const modal = bootstrap.Modal.getInstance(document.getElementById('packageDiscoveryModal'));
         if (modal) modal.hide();
-        loadAvailablePackages();
+
+        // Switch to Available Packages subtab and reload
+        const availableSubtab = document.querySelector('#tab-packages .subtab-nav a[data-subtab="available-packages"]');
+        if (availableSubtab) {
+            availableSubtab.click();
+        } else {
+            // Fallback: just reload available packages
+            loadAvailablePackages();
+        }
     }
-    
+
     if (failCount > 0) {
-        showMessage(`Failed to download ${failCount} package(s)`, 'error');
+        if (window.notyf) {
+            window.notyf.error({
+                message: `❌ Failed to download ${failCount} package${failCount > 1 ? 's' : ''}`,
+                duration: 5000
+            });
+        } else {
+            showMessage(`Failed to download ${failCount} package(s)`, 'error');
+        }
     }
 }
 
@@ -4873,17 +5228,17 @@ async function downloadPackageFromRepo(downloadUrl, packageName, silent = false)
                 package_name: packageName
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             if (!silent) {
                 showMessage(`Package "${packageName}" downloaded successfully! Check the Available Packages tab to install it.`, 'success');
-                
+
                 // Close the discovery modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('packageDiscoveryModal'));
                 if (modal) modal.hide();
-                
+
                 // Refresh the available packages tab
                 loadAvailablePackages();
             }
@@ -4891,7 +5246,7 @@ async function downloadPackageFromRepo(downloadUrl, packageName, silent = false)
         } else {
             throw new Error(result.error || 'Download failed');
         }
-        
+
     } catch (error) {
         console.error('Error downloading package:', error);
         if (!silent) {
