@@ -1558,7 +1558,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function loadThemes() {
         try {
             // Add cache-busting parameter to avoid stale cached responses
-            const response = await fetch('/api/themes.php?_=' + Date.now());
+            // const response = await fetch('/api/themes.php?_=' + Date.now());
+            const response = await fetch('/api/themes.php');
 
             if (!response.ok) {
                 console.error('Themes API error:', response.status, response.statusText);
@@ -4065,68 +4066,7 @@ async function showValidationDetails(packageId) {
         const summaryText = pkg.can_install ? 'Package Validated - Ready to Install' :
             (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
 
-        // Create Bootstrap modal HTML
-        const modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.id = 'validationReportModal';
-        modal.setAttribute('tabindex', '-1');
-        modal.setAttribute('aria-labelledby', 'validationReportModalLabel');
-        modal.setAttribute('aria-hidden', 'true');
-
-        modal.innerHTML = `
-            <div class="modal-dialog modal-xl" style="max-width: 90vw;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="validationReportModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            <span>${pkg.validation_status === 'pending' ? '⏳ Validation In Progress' : '📋 Package Validation Report'}</span>
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                        <!-- Package Header -->
-                        <div class="mb-3">
-                            <h6 class="text-muted mb-1">Package Details</h6>
-                            <h4 class="mb-0">${escapeHtml(pkg.display_name)} <small class="text-muted">v${escapeHtml(pkg.version)}</small></h4>
-                        </div>
-
-                        ${pkg.validation_status === 'pending' ? `
-                        <div class="alert alert-info d-flex align-items-center mb-3">
-                            <span class="me-3" style="font-size: 1.5rem;">⏳</span>
-                            <div>
-                                <strong>Running Complete Validation...</strong>
-                                <div class="mt-1 small">
-                                    This is a comprehensive audit of the package.<br>
-                                    All ${summary.total_checks || 0} checks are being performed.
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        <!-- Validation Summary -->
-                        <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3">
-                            <span class="me-3" style="font-size: 1.5rem;">${summaryIcon}</span>
-                            <div class="flex-grow-1">
-                                <strong>${summaryText}</strong>
-                                <div class="mt-2 small">
-                                    <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
-                                    <span class="badge bg-success me-1">${summary.passed || 0} passed</span>
-                                    <span class="badge bg-danger me-1">${summary.failed || 0} failed</span>
-                                    <span class="badge bg-warning text-dark">${summary.warnings || 0} warnings</span>
-                                    ${(summary.critical || 0) > 0 ? `<br><span class="text-danger fw-bold mt-1 d-inline-block">⚠️ ${summary.critical} critical issues</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Compatibility Checks -->
-                        <h6 class="mb-3">
-                            <i class="bi bi-list-check text-primary me-2"></i>
-                            All Compatibility Checks
-                            <small class="text-muted">(${checks.length} total)</small>
-                        </h6>
-
-                        <div class="accordion" id="validationChecksAccordion">`;
-
-        // Group checks by type
+        // Group checks by type FIRST (before building HTML)
         const groupedChecks = {};
         checks.forEach(check => {
             if (!groupedChecks[check.check_type]) {
@@ -4186,8 +4126,67 @@ async function showValidationDetails(packageId) {
             accordionIndex++;
         });
 
-        // Complete the modal HTML with accordion content
-        modal.innerHTML += accordionHTML + `
+        // Create Bootstrap modal HTML with accordion items INSIDE modal body
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'validationReportModal';
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('aria-labelledby', 'validationReportModalLabel');
+        modal.setAttribute('aria-hidden', 'true');
+
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl" style="max-width: 90vw;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="validationReportModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span>${pkg.validation_status === 'pending' ? '⏳ Validation In Progress' : '📋 Package Validation Report'}</span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <!-- Package Header -->
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Package Details</h6>
+                            <h4 class="mb-0">${escapeHtml(pkg.display_name)} <small class="text-muted">v${escapeHtml(pkg.version)}</small></h4>
+                        </div>
+
+                        ${pkg.validation_status === 'pending' ? `
+                        <div class="alert alert-info d-flex align-items-center mb-3">
+                            <span class="me-3" style="font-size: 1.5rem;">⏳</span>
+                            <div>
+                                <strong>Running Complete Validation...</strong>
+                                <div class="mt-1 small">
+                                    This is a comprehensive audit of the package.<br>
+                                    All ${summary.total_checks || 0} checks are being performed.
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Validation Summary -->
+                        <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3">
+                            <span class="me-3" style="font-size: 1.5rem;">${summaryIcon}</span>
+                            <div class="flex-grow-1">
+                                <strong>${summaryText}</strong>
+                                <div class="mt-2 small">
+                                    <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
+                                    <span class="badge bg-success me-1">${summary.passed || 0} passed</span>
+                                    <span class="badge bg-danger me-1">${summary.failed || 0} failed</span>
+                                    <span class="badge bg-warning text-dark">${summary.warnings || 0} warnings</span>
+                                    ${(summary.critical || 0) > 0 ? `<br><span class="text-danger fw-bold mt-1 d-inline-block">⚠️ ${summary.critical} critical issues</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compatibility Checks -->
+                        <h6 class="mb-3">
+                            <i class="bi bi-list-check text-primary me-2"></i>
+                            All Compatibility Checks
+                            <small class="text-muted">(${checks.length} total)</small>
+                        </h6>
+
+                        <div class="accordion" id="validationChecksAccordion">
+                            ${accordionHTML}
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -4333,9 +4332,9 @@ function formatDate(dateString) {
 // Check for package alerts and display if not dismissed
 async function checkPackageAlerts(showAlerts = true) {
     try {
-        const response = await fetch('/api/package-alerts.php?action=check', {
+        const response = await fetch('/api/package-alerts.php?action=check'/*, {
             credentials: 'same-origin'
-        });
+        }*/);
         const result = await response.json();
 
         if (!result.success) return;
@@ -4412,7 +4411,7 @@ async function dismissPackageAlert(alertType) {
 
         const response = await fetch('/api/package-alerts.php?action=dismiss', {
             method: 'POST',
-            credentials: 'same-origin',
+            // credentials: 'same-origin',
             body: formData
         });
 
@@ -4470,7 +4469,7 @@ async function dismissPackageRow(packageId, packageName, alertType, event) {
 
         const response = await fetch('/api/package-alerts.php?action=dismiss', {
             method: 'POST',
-            credentials: 'same-origin',
+            // credentials: 'same-origin',
             body: formData
         });
 
