@@ -3201,7 +3201,7 @@ async function loadAvailablePackages() {
 
                 // Add dismiss button only for packages needing validation that haven't been dismissed
                 if ((pkg.validation_status === 'pending' || !pkg.validation_status) && !dismissedPackages.has(pkg.id)) {
-                    html += `<button class="btn btn-sm btn-secondary" onclick="dismissPackageRow(${pkg.id}, 'package_validation', event)" title="Don't show this alert again">
+                    html += `<button class="btn btn-sm btn-secondary" onclick="dismissPackageRow(${pkg.id}, '${escapeHtml(pkg.display_name)}', 'package_validation', event)" title="Don't show this alert again">
                         <i class="bi bi-x-circle"></i> Dismiss Alert
                     </button>`;
                 }
@@ -4097,55 +4097,68 @@ async function showValidationDetails(packageId) {
         const summaryText = pkg.can_install ? 'Package Validated - Ready to Install' :
             (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
 
-        let html = `
-            <div class="validation-report" style="display: flex; flex-direction: column; height: 100%; max-height: 85vh; padding: 0.3125rem;">
-                <div class="validation-report-header" style="padding: 20px 32px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h2 class="validation-report-title" style="margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 600; color: #111827;">
-                            ${pkg.validation_status === 'pending' ? 'Package Validation In Progress' : 'Package Validation Report'}
-                        </h2>
-                        <h3 class="validation-report-subtitle" style="margin: 0; font-size: 1.1rem; font-weight: 400; color: #6b7280;">
-                            ${escapeHtml(pkg.display_name)} <small style="color: #9ca3af;">v${escapeHtml(pkg.version)}</small>
-                        </h3>
-                    </div>
-                    <button onclick="closeModal()" style="background: #f3f4f6; border: 1px solid #d1d5db; color: #6b7280; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-                        ✕
-                    </button>
-                </div>
+        // Create Bootstrap modal HTML
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'validationReportModal';
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('aria-labelledby', 'validationReportModalLabel');
+        modal.setAttribute('aria-hidden', 'true');
 
-                ${pkg.validation_status === 'pending' ? `
-                <div class="validation-summary pending">
-                    <span class="validation-summary-icon">⏳</span>
-                    <div class="validation-summary-content">
-                        <strong>Running Complete Validation...</strong>
-                        <div class="validation-summary-stats">
-                            This is a comprehensive audit of the package.<br>
-                            All ${summary.total_checks || 0} checks are being performed.
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="validationReportModalLabel">
+                            <i class="fas fa-check-circle text-primary"></i> ${pkg.validation_status === 'pending' ? 'Validation In Progress' : 'Package Validation Report'}
+                        </h5>
+                        <button type="button" class="modal-close-btn btn btn-sm" data-bs-dismiss="modal" aria-label="Close" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(0,0,0,0.06); color: #374151; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s ease;">
+                            <i class="bi bi-x-circle" style="margin-left: 6px;"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <!-- Package Header -->
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Package Details</h6>
+                            <h4 class="mb-0">${escapeHtml(pkg.display_name)} <small class="text-muted">v${escapeHtml(pkg.version)}</small></h4>
                         </div>
-                    </div>
-                </div>
-                ` : ''}
 
-                <div class="validation-summary ${summaryClass}" style="padding: 16px 24px;">
-                    <span class="validation-summary-icon">${summaryIcon}</span>
-                    <div class="validation-summary-content">
-                        <strong>${summaryText}</strong>
-                        <div class="validation-summary-stats">
-                            <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
-                            <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.passed || 0} passed</span> •
-                            <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.failed || 0} failed</span> •
-                            <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${summary.warnings || 0} warnings</span>
-                            ${(summary.critical || 0) > 0 ? `<br><span style="color: #d32f2f; font-weight: bold;">⚠️ ${summary.critical} critical issues</span>` : ''}
+                        ${pkg.validation_status === 'pending' ? `
+                        <div class="alert alert-info d-flex align-items-center mb-3">
+                            <span class="me-3" style="font-size: 1.5rem;">⏳</span>
+                            <div>
+                                <strong>Running Complete Validation...</strong>
+                                <div class="mt-1 small">
+                                    This is a comprehensive audit of the package.<br>
+                                    All ${summary.total_checks || 0} checks are being performed.
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                        ` : ''}
 
-                <h3 class="validation-checks-header" style="padding: 16px 32px; margin: 0; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; font-size: 1rem; color: #374151;">
-                    All Compatibility Checks
-                    <small style="color: #9ca3af;">(showing all ${checks.length} checks)</small>
-                </h3>
-                <div class="validation-checks-container" style="max-height: 50vh; overflow-y: auto; flex: 1;">
-        `;
+                        <!-- Validation Summary -->
+                        <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3">
+                            <span class="me-3" style="font-size: 1.5rem;">${summaryIcon}</span>
+                            <div class="flex-grow-1">
+                                <strong>${summaryText}</strong>
+                                <div class="mt-2 small">
+                                    <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
+                                    <span class="badge bg-success me-1">${summary.passed || 0} passed</span>
+                                    <span class="badge bg-danger me-1">${summary.failed || 0} failed</span>
+                                    <span class="badge bg-warning text-dark">${summary.warnings || 0} warnings</span>
+                                    ${(summary.critical || 0) > 0 ? `<br><span class="text-danger fw-bold mt-1 d-inline-block">⚠️ ${summary.critical} critical issues</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compatibility Checks -->
+                        <h6 class="mb-3">
+                            <i class="fas fa-tasks text-primary me-2"></i>
+                            All Compatibility Checks
+                            <small class="text-muted">(${checks.length} total)</small>
+                        </h6>
+
+                        <div class="accordion" id="validationChecksAccordion">`;
 
         // Group checks by type
         const groupedChecks = {};
@@ -4156,90 +4169,184 @@ async function showValidationDetails(packageId) {
             groupedChecks[check.check_type].push(check);
         });
 
-        // Display checks by group
+        // Build accordion HTML
+        let accordionHTML = '';
+        let accordionIndex = 0;
         Object.keys(groupedChecks).forEach(checkType => {
             const typeChecks = groupedChecks[checkType];
             const typePassed = typeChecks.filter(c => c.status === 'pass').length;
             const typeFailed = typeChecks.filter(c => c.status === 'fail').length;
             const typeIcon = typeFailed > 0 ? '✗' : typePassed === typeChecks.length ? '✓' : '⚠';
-            const typeIconClass = typeFailed > 0 ? 'fail' : typePassed === typeChecks.length ? 'pass' : 'warning';
+            const typeColor = typeFailed > 0 ? 'danger' : typePassed === typeChecks.length ? 'success' : 'warning';
 
-            html += `
-                <div class="validation-check-group">
-                    <div class="validation-check-group-header" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: 600; font-size: 0.9rem;">
-                        <span class="validation-check-icon ${typeIconClass}" style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">${typeIcon}</span>
-                        ${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}
-                        <small style="margin-left: auto; color: #6b7280; font-weight: normal;">${typePassed}/${typeChecks.length} passed</small>
-                    </div>
-            `;
+            accordionHTML += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading${accordionIndex}">
+                        <button class="accordion-button ${accordionIndex > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${accordionIndex}" aria-expanded="${accordionIndex === 0}" aria-controls="collapse${accordionIndex}">
+                            <span class="badge bg-${typeColor} me-2">${typeIcon}</span>
+                            ${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}
+                            <small class="ms-auto me-2 text-muted">${typePassed}/${typeChecks.length} passed</small>
+                        </button>
+                    </h2>
+                    <div id="collapse${accordionIndex}" class="accordion-collapse collapse ${accordionIndex === 0 ? 'show' : ''}" aria-labelledby="heading${accordionIndex}" data-bs-parent="#validationChecksAccordion">
+                        <div class="accordion-body p-0">
+                            <div class="list-group list-group-flush">`;
 
             typeChecks.forEach(check => {
                 const icon = check.status === 'fail' ? '✗' : check.status === 'warning' ? '⚠' : '✓';
+                const statusColor = check.status === 'fail' ? 'danger' : check.status === 'warning' ? 'warning' : 'success';
 
-                html += `
-                    <div class="validation-check-item ${check.status}" style="display: flex; align-items: flex-start; gap: 12px; padding: 8px 16px; border-bottom: 1px solid #f3f4f6;">
-                        <span class="validation-check-icon ${check.status}" style="flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">${icon}</span>
-                        <div class="validation-check-content" style="flex: 1; min-width: 0;">
-                            <strong style="font-size: 0.9rem; color: #374151;">${escapeHtml(check.check_name)}</strong>
-                            <div class="validation-check-message" style="font-size: 0.85rem; color: #6b7280; margin-top: 2px;">${escapeHtml(check.message)}</div>
-                            ${check.resolution ? `<div class="validation-check-resolution" style="font-size: 0.8rem; color: #059669; margin-top: 4px;">
-                                <strong>Fix:</strong> ${escapeHtml(check.resolution)}
-                            </div>` : ''}
+                accordionHTML += `
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-start">
+                            <span class="badge bg-${statusColor} me-2 mt-1">${icon}</span>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${escapeHtml(check.check_name)}</div>
+                                <div class="text-muted small">${escapeHtml(check.message)}</div>
+                                ${check.resolution ? `<div class="text-success small mt-1">
+                                    <strong>Fix:</strong> ${escapeHtml(check.resolution)}
+                                </div>` : ''}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
 
-            html += `</div>`;
+            accordionHTML += `
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            accordionIndex++;
         });
 
-        html += `
-                </div>
-                <div class="modal-actions" style="flex-shrink: 0; padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end; background: #ffffff;">
-                    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-                    ${pkg.can_install && !result.package.is_installed ?
-                `<button class="btn btn-primary" onclick="closeModal(); installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}')">
-                            Install Package
+        // Complete the modal HTML with accordion content
+        modal.innerHTML += accordionHTML + `
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                        ${pkg.can_install && !result.package.is_installed ?
+                `<button type="button" class="btn btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}'); bootstrap.Modal.getInstance(document.getElementById('validationReportModal')).hide();">
+                            <i class="fas fa-download"></i> Install Package
                         </button>` : ''}
+                    </div>
                 </div>
             </div>
         `;
 
-        showModalWithContent(html);
+        document.body.appendChild(modal);
+
+        // Show the modal using Bootstrap
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+
+        // Clean up when modal is hidden
+        modal.addEventListener('hidden.bs.modal', function () {
+            modal.remove();
+        });
+
+        // Add hover animation for header close button
+        setTimeout(() => {
+            const headerClose = modal.querySelector('.modal-close-btn');
+            if (headerClose) {
+                headerClose.addEventListener('mouseenter', () => {
+                    headerClose.style.transform = 'translateY(-2px) scale(1.02)';
+                });
+                headerClose.addEventListener('mouseleave', () => {
+                    headerClose.style.transform = '';
+                });
+            }
+
+            // Footer close button icon margin-left
+            const footerCloseIcon = modal.querySelector('.modal-footer .btn-secondary i');
+            if (footerCloseIcon) footerCloseIcon.style.marginLeft = '6px';
+        }, 40);
 
     } catch (error) {
         showMessage('Error loading validation: ' + error.message, 'error');
     }
 }
 
-// Show modal with custom content
+// Show modal with custom content (DEPRECATED - keeping for backwards compatibility)
 function showModalWithContent(htmlContent) {
     // Remove existing modal if any
     let modal = document.getElementById('dynamicModal');
     if (modal) modal.remove();
 
-    // Create modal
+    // Create modal backdrop
     modal = document.createElement('div');
     modal.id = 'dynamicModal';
-    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem;';
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: background 0.3s ease; opacity: 0;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15);';
+    modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0;';
     modalContent.innerHTML = htmlContent;
 
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
 
+    // Trigger animations
+    requestAnimationFrame(() => {
+        modal.style.background = 'rgba(0,0,0,0.5)';
+        modal.style.opacity = '1';
+        modalContent.style.transform = 'scale(1)';
+        modalContent.style.opacity = '1';
+    });
+
+    // Add hover effect to close button
+    setTimeout(() => {
+        const closeBtn = modalContent.querySelector('.modal-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255,255,255,0.3)';
+                this.style.transform = 'rotate(90deg)';
+            });
+            closeBtn.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(255,255,255,0.2)';
+                this.style.transform = 'rotate(0deg)';
+            });
+        }
+    }, 100);
+
     // Close on background click
     modal.addEventListener('click', function (e) {
         if (e.target === modal) closeModal();
     });
+
+    // Close on ESC key
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
 }
 
-// Close modal
+// Close modal with animation
 function closeModal() {
     const modal = document.getElementById('dynamicModal');
-    if (modal) modal.remove();
+    if (!modal) return;
+
+    const modalContent = modal.querySelector('div');
+
+    // Animate out
+    modal.style.background = 'rgba(0,0,0,0)';
+    modal.style.opacity = '0';
+    if (modalContent) {
+        modalContent.style.transform = 'scale(0.9)';
+        modalContent.style.opacity = '0';
+    }
+
+    // Remove after animation
+    setTimeout(() => {
+        if (modal.parentNode) {
+            modal.remove();
+        }
+    }, 300);
 }
 
 // Helper: Escape HTML
@@ -4386,7 +4493,7 @@ async function dismissPackageAlert(alertType) {
 }
 
 // Dismiss a specific package row alert
-async function dismissPackageRow(packageId, alertType, event) {
+async function dismissPackageRow(packageId, packageName, alertType, event) {
     // Prevent event bubbling
     if (event) {
         event.stopPropagation();
@@ -4439,9 +4546,9 @@ async function dismissPackageRow(packageId, alertType, event) {
             }
 
             if (typeof showMessage === 'function') {
-                showMessage(`Alert dismissed for package "${packageId}"`, 'success');
+                showMessage(`Alert dismissed for "${packageName}"`, 'success');
             } else {
-                console.log(`Alert dismissed for package "${packageId}"`);
+                console.log(`Alert dismissed for package "${packageName}" (ID: ${packageId})`);
             }
         } else {
             const errorMsg = 'Failed to dismiss alert: ' + (result.error || 'Unknown error');
@@ -4651,16 +4758,28 @@ function renderPackageSearchResults(packages) {
         return;
     }
 
-    // Filter out already installed packages
-    const availablePackages = packages.filter(pkg => !pkg.is_installed);
-    const installedCount = packages.length - availablePackages.length;
+    // Filter out already installed or downloaded packages
+    const availablePackages = packages.filter(pkg => !pkg.is_installed && !pkg.is_downloaded);
+    const installedCount = packages.filter(pkg => pkg.is_installed).length;
+    const downloadedCount = packages.filter(pkg => pkg.is_downloaded && !pkg.is_installed).length;
 
     if (availablePackages.length === 0) {
+        let message = 'All available packages are already ';
+        if (installedCount > 0 && downloadedCount > 0) {
+            message += 'installed or downloaded!';
+        } else if (installedCount > 0) {
+            message += 'installed!';
+        } else {
+            message += 'downloaded!';
+        }
+
         container.innerHTML = `
             <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> All available packages are already installed!
+                <i class="fas fa-check-circle"></i> ${message}
                 <div class="mt-2 small text-muted">
-                    You have ${packages.length} package${packages.length !== 1 ? 's' : ''} installed from the repository
+                    ${installedCount > 0 ? `${installedCount} installed` : ''}
+                    ${installedCount > 0 && downloadedCount > 0 ? ' • ' : ''}
+                    ${downloadedCount > 0 ? `${downloadedCount} downloaded (available in "Available Packages" tab)` : ''}
                 </div>
             </div>
         `;
@@ -4673,16 +4792,20 @@ function renderPackageSearchResults(packages) {
                 <h6 class="mb-1">
                     <i class="fas fa-download text-primary"></i>
                     ${availablePackages.length} Package${availablePackages.length !== 1 ? 's' : ''} Available
-                </h6>
-    `;
+                </h6>`;
 
-    if (installedCount > 0) {
-        html += `
-            <small class="text-muted">
-                <i class="fas fa-check"></i>
-                ${installedCount} already installed
-            </small>
-        `;
+    if (installedCount > 0 || downloadedCount > 0) {
+        html += `<small class="text-muted">`;
+        if (installedCount > 0) {
+            html += `<i class="fas fa-check"></i> ${installedCount} installed`;
+        }
+        if (installedCount > 0 && downloadedCount > 0) {
+            html += ` • `;
+        }
+        if (downloadedCount > 0) {
+            html += `<i class="fas fa-download"></i> ${downloadedCount} already downloaded`;
+        }
+        html += `</small>`;
     }
 
     html += `
