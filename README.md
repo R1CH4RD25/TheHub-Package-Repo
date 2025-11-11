@@ -2,11 +2,56 @@
 
 Official package repository for The Hub dynamic sections system. This repository contains validated `.hubpkg` packages that extend The Hub with custom forms, reporting tools, and workflows.
 
-## 📦 Available Packages
+## 📦 Package Categories
 
-| Package | Version | Description | Download |
-|---------|---------|-------------|----------|
-| **Bullying Report** | 1.0.0 | Anonymous bullying incident reporting system with comprehensive tracking | [Download](packages/reporting/bullying-report/bullying-report_1.0.0.hubpkg) |
+Browse packages by category:
+
+### 📊 [Reporting](packages/reporting/)
+Incident reporting, data collection, and compliance documentation.
+- **[Bullying Report](packages/reporting/bullying-report/)** `v1.0.0` - Comprehensive bullying incident reporting system
+
+### �� [Analytics](packages/analytics/)
+Data analysis, visualization, and reporting dashboards.
+- _No packages available yet_
+
+### 📝 [Forms](packages/forms/)
+Custom form builders and data collection tools.
+- _No packages available yet_
+
+### 🔗 [Integrations](packages/integrations/)
+Third-party integrations and API connectors.
+- _No packages available yet_
+
+### 🔀 [Redirects](packages/redirects/)
+URL management, short links, and redirect tools.
+- _No packages available yet_
+
+### ⚙️ [Workflows](packages/workflows/)
+Automated workflows, approval processes, and task management.
+- _No packages available yet_
+
+## 📂 Repository Structure
+
+```
+packages/
+├── reporting/           # Incident reporting & compliance
+│   └── bullying-report/
+│       ├── 1.0.0/
+│       │   └── bullying-report_1.0.0.hubpkg
+│       ├── CHANGELOG.md
+│       └── README.md
+├── analytics/          # Data visualization & dashboards
+├── forms/              # Form builders & surveys
+├── integrations/       # Third-party connectors
+├── redirects/          # URL management tools
+└── workflows/          # Automation & approval systems
+```
+
+Each package is self-contained with:
+- ✅ Version folder (e.g., `1.0.0/`)
+- ✅ Package file (`.hubpkg`)
+- ✅ Documentation (`README.md`)
+- ✅ Version history (`CHANGELOG.md`)
 
 ## 🚀 Quick Start
 
