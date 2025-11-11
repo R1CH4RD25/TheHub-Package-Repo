@@ -16,9 +16,7 @@ use Hub\Roles;
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="confirmTitle">Confirm Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p id="confirmMessage"></p>
@@ -40,9 +38,7 @@ use Hub\Roles;
                 <h5 class="modal-title" id="invitationModalLabel">
                     <i class="bi bi-envelope-plus"></i> Send Invitation
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="invitationForm">
                 <div class="modal-body">
@@ -87,9 +83,7 @@ use Hub\Roles;
                 <h5 class="modal-title" id="userRolesModalLabel">
                     <i class="bi bi-shield-lock"></i> Manage Global Roles
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="userRolesForm">
                 <div class="modal-body">
@@ -151,9 +145,7 @@ use Hub\Roles;
                 <h5 class="modal-title" id="sectionAccessModalLabel">
                     <i class="bi bi-key"></i> Manage Section Access
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="sectionAccessForm">
                 <div class="modal-body">
@@ -211,9 +203,7 @@ use Hub\Roles;
                 <h5 class="modal-title" id="sectionModalTitle">
                     <i class="bi bi-plus-circle"></i> Add New Section
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="sectionForm">
                 <div class="modal-body">
@@ -439,9 +429,7 @@ use Hub\Roles;
                 <h5 class="modal-title" id="googleGroupModalLabel">
                     <i class="bi bi-google"></i> Add Google Group Mapping
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="googleGroupForm">
                 <div class="modal-body">
@@ -504,9 +492,7 @@ use Hub\Roles;
                 <h5 class="modal-title" id="microsoftGroupModalLabel">
                     <i class="bi bi-microsoft"></i> Add Microsoft Group Mapping
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="microsoftGroupForm">
                 <div class="modal-body">
