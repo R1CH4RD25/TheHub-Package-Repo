@@ -256,18 +256,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }, 100); // Small delay to ensure DOM is ready
 
-    // Modal controls - Attach to ALL modals
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', closeModal);
-    });
-    document.querySelectorAll('.modal-cancel').forEach(btn => {
-        btn.addEventListener('click', closeModal);
-    });
+    // Modal controls - Bootstrap API (no need for manual click handlers, Bootstrap handles via data-bs-dismiss)
+    // Close modals when clicking outside - Bootstrap handles this automatically
 
-    // Close modals when clicking outside
+    // Close modals when clicking outside (legacy support for dynamically created modals)
     window.addEventListener('click', function (e) {
-        if (e.target.classList.contains('modal')) {
-            closeModal();
+        if (e.target.classList.contains('modal') && e.target.classList.contains('show')) {
+            const modalInstance = bootstrap.Modal.getInstance(e.target);
+            if (modalInstance) modalInstance.hide();
         }
     });
 
@@ -487,9 +483,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function closeModal() {
-        // Close all modals
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.style.display = 'none';
+        // Close all Bootstrap modals using Bootstrap API
+        document.querySelectorAll('.modal').forEach(modalElement => {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
         });
 
         // Reset forms
@@ -499,7 +498,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('userRolesForm')?.reset();
 
         // Clear hidden fields
-        document.getElementById('sectionId').value = '';
+        const sectionIdField = document.getElementById('sectionId');
+        if (sectionIdField) sectionIdField.value = '';
     }
 
     window.changeUserRole = function (id, currentRole) {
@@ -551,8 +551,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (checkbox) checkbox.checked = true;
             });
 
-            // Show modal
-            document.getElementById('userRolesModal').style.display = 'block';
+            // Show modal using Bootstrap API
+            const modalElement = document.getElementById('userRolesModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
         } catch (error) {
             console.error('Error loading user roles:', error);
             showToast('Failed to load user roles', 'error');
@@ -728,7 +730,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function showInvitationModal() {
-        document.getElementById('invitationModal').style.display = 'block';
+        const modalElement = document.getElementById('invitationModal');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
     }
 
     async function handleInvitationSubmit(e) {
@@ -746,7 +750,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             if (response.ok) {
                 showToast('✓ Invitation sent successfully! The user will receive an email.', 'success');
-                document.getElementById('invitationModal').style.display = 'none';
+                const modalElement = document.getElementById('invitationModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) modalInstance.hide();
                 e.target.reset();
                 loadInvitations();
             } else {
@@ -1271,7 +1277,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('sectionSortOrder').value = section.sort_order;
             document.getElementById('sectionIsActive').checked = section.is_active;
 
-            document.getElementById('sectionModal').style.display = 'block';
+            const modalElement = document.getElementById('sectionModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
         } catch (error) {
             console.error('Error loading section:', error);
             showToast('Failed to load section', 'error');
@@ -1347,7 +1355,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('sectionModalTitle').textContent = 'Add New Section';
             document.getElementById('sectionForm').reset();
             document.getElementById('sectionId').value = '';
-            document.getElementById('sectionModal').style.display = 'block';
+
+            const modalElement = document.getElementById('sectionModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
 
             // Reset manual edit flag when opening for new section
             if (window.sectionSlugManuallyEdited !== undefined) {
@@ -1358,12 +1369,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('refreshSections')?.addEventListener('click', loadSectionsManagement);
         document.getElementById('sectionForm')?.addEventListener('submit', handleSectionFormSubmit);
 
-        // Add modal close handlers
-        const sectionModal = document.getElementById('sectionModal');
-        if (sectionModal) {
-            sectionModal.querySelector('.modal-close')?.addEventListener('click', closeModal);
-            sectionModal.querySelector('.modal-cancel')?.addEventListener('click', closeModal);
-        }
+        // Modal close handlers are handled by Bootstrap via data-bs-dismiss attribute
 
         // Auto-generate section slug from display name
         const sectionDisplayNameInput = document.getElementById('sectionDisplayName');
