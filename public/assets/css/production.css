@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Fri Nov  7 05:50:56 PM UTC 2025
+ * Generated: Tue Nov 11 03:32:59 PM UTC 2025
  * ============================================================================
  */
 
@@ -26,9 +26,12 @@
 /* Black & Notre Dame Gold Color Scheme */
 
 :root {
-    --primary-color: #C99700; /* Notre Dame Gold */
+    /* Primary Colors */
+    --primary-color: #C99700;
+    /* Notre Dame Gold */
     --primary-dark: #A07800;
-    --secondary-color: var(--text-primary)000; /* Black */
+    --secondary-color: #000000;
+    /* Black */
     --secondary-light: #2a2a2a;
     --success-color: #28a745;
     --danger-color: #dc3545;
@@ -36,8 +39,53 @@
     --light-bg: #f8f9fa;
     --border-color: #dee2e6;
     --text-color: #212529;
-    --shadow: 0 2px 4px rgba(0,0,0,var(--shadow-light));
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     --gold-gradient: linear-gradient(135deg, #C99700 0%, #FFD700 100%);
+
+    /* Background Colors */
+    --background-color: #FFFFFF;
+    --bg-secondary: #F5F5F5;
+    --bg-hover: #E8E8E8;
+    --bg-active: #D4D4D4;
+    --bg-code: #2C2C2C;
+    --bg-modal-overlay: rgba(0, 0, 0, 0.5);
+
+    /* Text Colors */
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --text-muted: #6B7280;
+    --text-disabled: #9CA3AF;
+    --text-inverse: #FFFFFF;
+
+    /* Border Colors */
+    --border-primary: #E5E7EB;
+    --border-secondary: #D1D5DB;
+    --border-focus: #3B82F6;
+
+    /* Shadow Levels */
+    --shadow-light: 0.1;
+    --shadow-medium: 0.15;
+    --shadow-heavy: 0.2;
+
+    /* Button Colors */
+    --success-button: #059669;
+    --success-button-hover: #047857;
+    --danger-button: #DC2626;
+    --danger-button-hover: #B91C1C;
+    --warning-button: #F59E0B;
+    --warning-button-hover: #D97706;
+    --primary-light: #FEF3C7;
+
+    /* Scrollbar Colors */
+    --scrollbar-track: #F3F4F6;
+    --scrollbar-thumb: #D1D5DB;
+    --scrollbar-thumb-hover: #9CA3AF;
+
+    /* Badge Colors */
+    --badge-success-bg: #10B981;
+    --badge-success-text: #FFFFFF;
+    --badge-system-bg: #6B7280;
+    --badge-system-text: #FFFFFF;
 }
 
 * {
@@ -46,7 +94,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     overflow-x: hidden;
     width: 100%;
 }
@@ -259,7 +308,7 @@ body {
     justify-content: center;
     min-height: 100vh;
     background: var(--secondary-color);
-    background-image: 
+    background-image:
         radial-gradient(circle at 20% 50%, rgba(var(--primary-color), 0.15) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(var(--primary-color), 0.1) 0%, transparent 50%);
 }
@@ -290,8 +339,15 @@ body {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .logo h1 {
@@ -329,7 +385,7 @@ body {
     color: #4285f4;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,var(--shadow-light));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, var(--shadow-light));
 }
 
 .google-icon {
@@ -340,7 +396,7 @@ body {
     height: 40px;
     background: #f8f9fa;
     border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
     border: 1px solid #e0e0e0;
 }
@@ -358,7 +414,7 @@ body {
 }
 
 .google-login-btn:hover .google-icon {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     background: white;
 }
 
@@ -381,7 +437,7 @@ body {
     color: #2f2f2f;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,var(--shadow-light));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, var(--shadow-light));
 }
 
 .microsoft-icon {
@@ -392,7 +448,7 @@ body {
     height: 40px;
     background: #f8f9fa;
     border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
     border: 1px solid #e0e0e0;
 }
@@ -410,7 +466,7 @@ body {
 }
 
 .microsoft-login-btn:hover .microsoft-icon {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     background: white;
 }
 
@@ -430,19 +486,19 @@ body {
     .login-container {
         padding: 1rem;
     }
-    
+
     .login-card {
         padding: 2rem 1.5rem;
     }
-    
+
     .logo h1 {
         font-size: 1.75rem;
     }
-    
+
     .logo h2 {
         font-size: 1rem;
     }
-    
+
     .google-login-btn {
         font-size: 1rem;
         padding: 0.875rem 1.5rem;
@@ -526,7 +582,7 @@ body {
         flex-direction: column;
         gap: 0;
         padding: 1rem;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
         z-index: 9999;
     }
 
@@ -596,6 +652,7 @@ body {
         padding: 1rem;
     }
 }
+
 /* Version: 1760996007 */
 
 /* ========== HEADER STYLES (CONSOLIDATED) ========== */
@@ -1011,6 +1068,7 @@ body {
     .nav-user-info {
         display: none;
     }
+}
 
 /* ========== FOOTER STYLES ========== */
 
@@ -1020,21 +1078,21 @@ body {
    ========================================================================== */
 
 /* Footer Container */
-.admin-footer {
-    grid-row: 3;
-    background: var(--footer-bg-color, #F3F4F6);
-    border-top: 1px solid var(--border-primary, #e0e0e0);
-    display: flex;
-    align-items: center;
-    padding: 0 2rem;
-    font-size: var(--footer-text-size, 0.875rem);
-    color: var(--footer-text-color, #6B7280);
-    min-height: var(--footer-height, 40px);
-    max-height: var(--footer-height, 40px);
-    height: var(--footer-height, 40px);
-    overflow: hidden;
-    position: relative;
-    z-index: 10;
+footer.footer {
+    grid-row: 3 !important;
+    background: var(--footer-bg-color, #F3F4F6) !important;
+    border-top: 1px solid var(--border-primary, #e0e0e0) !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 2rem !important;
+    font-size: var(--footer-text-size, 0.875rem) !important;
+    color: var(--footer-text-color, #6B7280) !important;
+    min-height: var(--footer-height, 40px) !important;
+    max-height: var(--footer-height, 40px) !important;
+    height: var(--footer-height, 40px) !important;
+    overflow: hidden !important;
+    position: relative !important;
+    z-index: 10 !important;
 }
 
 /* Footer Content Layout */
@@ -1047,12 +1105,12 @@ body {
 }
 
 /* Footer Sections */
-.footer-left,
-.footer-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+.footer .footer-left,
+.footer .footer-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
 }
 
 /* Footer Separator */
@@ -1082,20 +1140,20 @@ body {
    ========================================================================== */
 
 @media (max-width: 768px) {
-    .admin-footer {
+    .footer {
         padding: 0 1rem;
         font-size: 0.75rem;
         min-height: auto;
         height: auto;
     }
-    
+
     .footer-content {
         flex-direction: column;
         gap: 0.25rem;
         text-align: center;
         padding: 0.5rem 0;
     }
-    
+
     .footer-left,
     .footer-right {
         gap: 0.5rem;
@@ -1104,14 +1162,14 @@ body {
 }
 
 @media (max-width: 480px) {
-    .admin-footer {
+    .footer {
         font-size: 0.7rem;
     }
-    
+
     .footer-separator {
         display: none;
     }
-    
+
     .footer-left,
     .footer-right {
         flex-direction: column;
@@ -1151,7 +1209,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: 
+    background-image:
         radial-gradient(circle at 20% 20%, rgba(201, 151, 0, 0.08) 0%, transparent 30%),
         radial-gradient(circle at 80% 80%, rgba(201, 151, 0, 0.08) 0%, transparent 30%);
     z-index: 0;
@@ -1172,15 +1230,13 @@ body {
     animation: slideInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-}
-
 /* Login Card - Glassmorphism */
 .login-card {
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: 24px;
     padding: 3rem;
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(201, 151, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1191,8 +1247,6 @@ body {
 /* Remove pulsing animation */
 .login-card::before {
     display: none;
-}
-
 }
 
 /* Login Content */
@@ -1209,8 +1263,6 @@ body {
     color: #666;
     font-size: 0.95rem;
     animation: fadeIn 1s ease-out 0.8s both;
-}
-
 }
 
 /* Loading State */
@@ -1242,7 +1294,6 @@ body {
     color: #aaa;
 }
 
-
 /* ========== SECTIONS PAGE STYLES ========== */
 
 /**
@@ -1253,8 +1304,6 @@ body {
  * Includes: section cards, grid layout, icons, hover effects
  * ============================================================================
  */
-
-}
 
 /* Sections Grid - Staggered animation */
 .sections-grid {
@@ -1319,7 +1368,6 @@ body {
     animation-delay: 0.8s;
 }
 
-}
 
 /* Gradient border on top */
 .section-card::before {
@@ -1366,7 +1414,6 @@ body {
     animation: gradientSlide 2s linear infinite;
 }
 
-}
 
 .section-card:hover::after {
     opacity: 1;
@@ -1390,7 +1437,6 @@ body {
     animation: iconBounce 0.6s ease;
 }
 
-}
 
 /* Section Title - Enhanced typography */
 .section-title {
@@ -1408,7 +1454,6 @@ body {
     animation: titlePulse 0.6s ease;
 }
 
-}
 
 /* Section Description */
 .section-description {
@@ -1450,7 +1495,7 @@ body {
 
 .sections-grid {
     grid-template-columns: 1fr;
-        gap: 20px;
+    gap: 20px;
 }
 
 .section-card {
@@ -1469,7 +1514,6 @@ body {
     color: var(--hub-card-description, #aaa);
 }
 
-}
 
 /* Success state animation */
 .section-card.clicked {
@@ -1489,7 +1533,6 @@ body {
 .package-card.animate-in {
     animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
-
 
 /* ========== HUB PAGE STYLES ========== */
 
@@ -1678,7 +1721,6 @@ body {
     position: relative;
 }
 
-}
 
 /* Animated particle background - fully customizable via Site Settings */
 .hub-page::before {
@@ -1702,7 +1744,6 @@ body {
     animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
 }
 
-}
 
 /* Hub Container */
 .hub-container {
@@ -1721,7 +1762,6 @@ body {
     animation: fadeInDown 0.8s ease-out forwards;
 }
 
-}
 
 .hub-header-icon {
     font-size: 4rem;
@@ -1730,7 +1770,6 @@ body {
     animation: bounceIn 1s ease-out;
 }
 
-}
 
 .hub-header h1 {
     font-size: 3rem;
@@ -2116,6 +2155,441 @@ body {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========== MODAL STYLES (CENTRALIZED) ========== */
+
+/**
+ * ============================================================================
+ * MODAL STYLES - CENTRALIZED
+ * ============================================================================
+ * All modal-related CSS extracted from admin.css, admin-theme.css,
+ * admin-modern.css, and media.css
+ *
+ * Modals defined in: /public/admin/partials/modals.php
+ * ============================================================================
+ */
+
+/* ==========================================================================
+   BASE MODAL STRUCTURE
+   ========================================================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-modal-overlay);
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When modal is shown, use flex for centering */
+.modal.show,
+.modal[style*="display: block"] {
+    display: flex !important;
+}
+
+.modal.hiding {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.modal-content {
+    background: white;
+    margin: 0;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, var(--shadow-heavy));
+    position: relative;
+}
+
+/* ==========================================================================
+   MODAL HEADER
+   ========================================================================== */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    padding-right: 2.5rem;
+}
+
+.modal-header h2,
+.modal-header h3 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* ==========================================================================
+   MODAL CLOSE BUTTON
+   ========================================================================== */
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 20px;
+    color: #666;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
+}
+
+.modal-close::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(211, 47, 47, 0.2);
+    border-radius: 4px;
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 0;
+}
+
+.modal-close i {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-close:hover {
+    transform: rotate(180deg) scale(1.2);
+    color: #dc3545;
+}
+
+.modal-close:hover::before {
+    transform: scale(1);
+}
+
+/* Alternative close button style */
+.modal-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: #6c757d;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    transform: rotate(90deg);
+}
+
+/* Bootstrap close button - fix offset from .btn i:last-child */
+.btn-close,
+button.btn-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    line-height: 1;
+    font-size: 1.5rem;
+    color: #666;
+    border-radius: 4px;
+}
+
+.btn-close:hover,
+button.btn-close:hover {
+    opacity: 1;
+    background: rgba(220, 53, 69, 0.1);
+    transform: rotate(180deg);
+    color: #dc3545;
+}
+
+/* Fix icon offset in close buttons - override .btn i:last-child */
+.btn-close i,
+.modal-close i,
+.modal-close-btn i,
+button[data-bs-dismiss="modal"] i {
+    margin: 0 !important;
+    line-height: 1;
+    display: block;
+}
+
+/* ==========================================================================
+   MODAL BODY & CONTENT
+   ========================================================================== */
+
+.modal-body {
+    padding: 1rem 0;
+    color: var(--text-color);
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+/* ==========================================================================
+   MODAL FOOTER & ACTIONS
+   ========================================================================== */
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 2px solid #dee2e6;
+}
+
+.modal-actions button {
+    min-width: 100px;
+}
+
+.modal-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   MODAL OVERLAY
+   ========================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-modal-overlay);
+    z-index: 10000;
+    display: none;
+}
+
+.modal-overlay.show {
+    display: block;
+}
+
+.modal-overlay.hiding {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+/* ==========================================================================
+   SPECIFIC MODAL TYPES
+   ========================================================================== */
+
+/* Package Discovery Modal - Large, Centered, Full-Screen Experience */
+.package-discovery-modal {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.package-discovery-modal .modal-dialog {
+    max-width: 90vw;
+    width: 90vw;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.package-discovery-modal .modal-content {
+    max-width: 90vw;
+    width: 90vw;
+    height: 90vh;
+    max-height: 90vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.package-discovery-modal .modal-header {
+    flex-shrink: 0;
+    padding: 1.5rem 2rem 1rem 2rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.package-discovery-modal .modal-body {
+    flex: 1;
+    padding: 1rem 2rem 2rem 2rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+.package-discovery-modal .modal-footer {
+    flex-shrink: 0;
+    padding: 1rem 2rem;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+/* Validation Report Modal */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ==========================================================================
+   MODAL ANIMATIONS
+   ========================================================================== */
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE - MOBILE & TABLET
+   ========================================================================== */
+
+/* Tablets (Portrait) - 768px and below */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        padding: 1.5rem;
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding-right: 2rem;
+    }
+
+    .modal-close {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+}
+
+/* Mobile Phones - 480px and below */
+@media (max-width: 480px) {
+    .modal-content {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 1rem;
+    }
+
+    .modal-header h2,
+    .modal-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .package-discovery-modal .modal-content {
+        max-width: none;
+        width: 100%;
+    }
+}
+
+/* Small Mobile - 375px and below */
+@media (max-width: 375px) {
+    .modal-content {
+        padding: 0.75rem;
+    }
+
+    .modal-header {
+        margin-bottom: 1rem;
+        padding-right: 1.5rem;
+    }
+
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .modal-actions {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
     }
 }
 
@@ -2558,116 +3032,8 @@ body {
     background: var(--bg-secondary);
 }
 
-/* Modal - Modern centered layout */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 10001;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg-modal-overlay);
-    overflow: hidden;
-    /* Changed from auto - allows flexbox centering */
-    align-items: center;
-    /* Vertically center */
-    justify-content: center;
-    /* Horizontally center */
-}
-
-/* When modal is shown, use flex for centering */
-.modal[style*="display: block"] {
-    display: flex !important;
-}
-
-.modal-content {
-    background: white;
-    margin: 0;
-    /* Changed from 5% auto - flex handles centering */
-    padding: 2rem;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    /* Prevent modal from exceeding viewport */
-    overflow-y: auto;
-    /* Allow scrolling if content is too tall */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, var(--shadow-heavy));
-    position: relative;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-    padding-right: 2.5rem;
-}
-
-.modal-header h2 {
-    margin: 0;
-    flex: 1;
-}
-
-.modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 40px;
-    height: 40px;
-    background: transparent;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    font-size: 20px;
-    color: #666;
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
-}
-
-.modal-close::before {
-    content: '';
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background: rgba(211, 47, 47, 0.2);
-    border-radius: 4px;
-    transform: scale(0);
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 0;
-}
-
-.modal-close i {
-    position: relative;
-    z-index: 1;
-}
-
-.modal-close:hover {
-    transform: rotate(180deg) scale(1.2);
-    color: #dc3545;
-}
-
-.modal-close:hover::before {
-    transform: scale(1);
-}
-
-.modal h2 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 2px solid #dee2e6;
-}
+/* ========== MODAL STYLES MOVED TO modals.css ========== */
+/* All modal-related styles have been centralized in modals.css */
 
 /* Validation Report Modal */
 .validation-report-header {
@@ -3892,6 +4258,16 @@ body {
     color: white;
 }
 
+.badge-warning {
+    background: #fbbf24;
+    color: #78350f;
+}
+
+.badge-danger {
+    background: #ef4444;
+    color: white;
+}
+
 .role-management .info-text {
     background: #e3f2fd;
     border-left: 4px solid #2196f3;
@@ -3958,36 +4334,10 @@ body {
 
 
 /* ============================================================================
-   MODAL OVERLAY & VALIDATION MODAL
+   MODAL STYLES MOVED TO modals.css
    ============================================================================ */
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    backdrop-filter: blur(4px);
-}
-
-/* REMOVED DUPLICATE .modal-content - primary definition at line 461 */
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
+/* All modal-related styles (modal-overlay, modal-actions, validation-modal,
+   package-discovery-modal, etc.) have been centralized in modals.css */
 
 .modal-large {
     width: 900px;
@@ -4090,18 +4440,6 @@ body {
     transition: accent-color 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .validation-checks-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -4115,58 +4453,9 @@ body {
     }
 }
 
-.modal-actions {
-    padding: 20px 32px;
-    border-top: 2px solid #e5e7eb;
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-    background: #f9fafb;
-    flex-shrink: 0;
-    /* Prevent shrinking - sticky footer */
-}
-
-.modal-actions button {
-    cursor: pointer;
-}
-
-.modal-actions button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
 /* ============================================================================
    PACKAGE DISCOVERY STYLES
    ============================================================================ */
-
-/* Large modal for package discovery - extends base modal */
-.package-discovery-modal .modal-content {
-    max-width: 1400px;
-    width: 95vw;
-    height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    /* Content area handles scrolling */
-}
-
-.package-discovery-modal .modal-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
-    min-height: 0;
-    /* Important for flex children with overflow */
-}
-
-.package-discovery-modal .modal-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-color);
-    background: var(--bg-secondary);
-}
 
 .package-discovery-modal .list-group-item {
     border-left: 3px solid transparent;
@@ -4254,18 +4543,9 @@ body {
 
 /* ========== MODERN ENHANCEMENTS ========== */
 
-}
-
-/* Footer first-load animation */
-html:not(.animations-played) .admin-footer,
-html:not(.animations-played) footer {
-    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 0.2s;
-    opacity: 0;
-}
-
-html.animations-played .admin-footer,
-html.animations-played footer {
+/* Footer - Always visible on admin dashboard (no animation needed) */
+.admin-footer,
+footer {
     opacity: 1;
 }
 
@@ -4295,7 +4575,6 @@ html.animations-played footer {
     transform: translateX(-30px) scale(0.95);
     transition: none;
 }
-}
 
 /* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
 .data-table tbody tr {
@@ -4305,7 +4584,6 @@ html.animations-played footer {
 
 .data-table tbody tr.animate-in {
     animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
 }
 
 /* Table Headers - Clean (removed shimmer) */
@@ -4355,14 +4633,12 @@ html.animations-played footer {
 .admin-menu li:nth-child(8) {
     animation-delay: 0.7s;
 }
-}
 
 /* Sidebar Active Item - Simple highlight (no glow) */
 .admin-menu li a.active {
     position: relative;
     border-left: 3px solid var(--primary-color);
     background: rgba(201, 151, 0, 0.05);
-}
 }
 
 /* Tab Subtabs - Slide Up Stack */
@@ -4374,7 +4650,6 @@ html.animations-played footer {
 
 .subtab-btn.animate-in {
     animation: slideUpStack 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
 }
 
 .subtab-btn.active {
@@ -4463,7 +4738,6 @@ html.animations-played footer {
     border-color: #dc3545;
     background: #f8d7da;
 }
-}
 
 /* Validation check status updates */
 .validation-checks-list .check-status {
@@ -4472,7 +4746,6 @@ html.animations-played footer {
 
 .validation-checks-list .check-status.updating {
     animation: statusPulse 0.5s ease-out;
-}
 }
 
 /* ==========================================================================
@@ -4496,6 +4769,1582 @@ html.animations-played footer {
     margin-right: 8px;
     width: 16px;
     text-align: center;
+}
+
+/* ==========================================================================
+   PACKAGE DISCOVERY TABLE
+   ========================================================================== */
+
+.package-discovery-modal .table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.package-discovery-modal thead th {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 10;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.75rem 0.5rem;
+}
+
+.package-discovery-modal tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.package-discovery-modal tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.package-discovery-modal .package-checkbox {
+    cursor: pointer;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.package-discovery-modal tbody td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.package-discovery-modal .text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mobile responsive table */
+@media (max-width: 768px) {
+    .package-discovery-modal .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    .package-discovery-modal thead th:not(:first-child):not(:nth-child(2)) {
+        display: none;
+    }
+
+    .package-discovery-modal tbody td {
+        padding: 0.5rem;
+    }
+
+    .package-discovery-modal .table-responsive {
+        max-height: 400px;
+    }
+}
+
+/* Tag badges in table */
+.package-discovery-modal .badge {
+    white-space: nowrap;
+    padding: 0.25em 0.5em;
+    font-size: 0.7rem;
+}
+
+/* Select all checkbox styling */
+.package-discovery-modal #selectAllPackages {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+}
+
+/* Ensure proper spacing for multi-line content */
+.package-discovery-modal tbody td > div {
+    line-height: 1.4;
+}
+
+/* ========== ADMIN DASHBOARD MODERN ANIMATIONS ========== */
+
+/* ==========================================================================
+   MODERN ADMIN DASHBOARD ANIMATIONS
+   Unique, top-notch animations for tables, tabs, and UI elements
+   ========================================================================== */
+
+/* Tab Content - Slide and Scale from Side */
+.admin-tab {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.95);
+    transition: none;
+}
+
+.admin-tab.active {
+    animation: slideScaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideScaleIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
+.data-table tbody tr {
+    opacity: 0;
+    transform: translateY(-15px);
+}
+
+.data-table tbody tr.animate-in {
+    animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes accordionDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Table Headers - Clean (removed shimmer) */
+.data-table thead {
+    position: relative;
+}
+
+/* Cards - Flip and Zoom In */
+.admin-card,
+.section-card,
+.package-card {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-15deg) scale(0.9);
+}
+
+.admin-card.animate-in,
+.section-card.animate-in,
+.package-card.animate-in {
+    animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes flipZoomIn {
+    0% {
+        opacity: 0;
+        transform: perspective(1000px) rotateX(-15deg) scale(0.9);
+    }
+
+    60% {
+        transform: perspective(1000px) rotateX(5deg) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(1000px) rotateX(0deg) scale(1);
+    }
+}
+
+/* Buttons - Ripple Expand on Hover */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Sidebar Menu - Drop Down and Bounce (falling effect) - SLOWER */
+.admin-menu li {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.3);
+}
+
+.admin-menu li.animate-in {
+    animation: dropBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Stagger delays using nth-child for sidebar */
+.admin-menu li:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.admin-menu li:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.admin-menu li:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.admin-menu li:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.admin-menu li:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.admin-menu li:nth-child(6) {
+    animation-delay: 0.5s;
+}
+
+.admin-menu li:nth-child(7) {
+    animation-delay: 0.6s;
+}
+
+.admin-menu li:nth-child(8) {
+    animation-delay: 0.7s;
+}
+
+@keyframes dropBounce {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.3);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateY(10px) scale(1.1);
+    }
+
+    80% {
+        transform: translateY(-5px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Sidebar Active Item - Simple highlight (no glow) */
+.admin-menu li a.active {
+    position: relative;
+    border-left: 3px solid var(--primary-color);
+    background: rgba(201, 151, 0, 0.05);
+}
+
+/* Input Focus - Expand Border */
+input:focus,
+textarea:focus,
+select:focus {
+    animation: expandBorder 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes expandBorder {
+    0% {
+        border-width: 1px;
+    }
+
+    50% {
+        border-width: 3px;
+    }
+
+    100% {
+        border-width: 2px;
+    }
+}
+
+/* ========== MODAL STYLES MOVED TO modals.css ========== */
+/* All modal-related styles have been centralized in modals.css
+   This includes: .modal, .modal-overlay, .modal-content, .modal-close-btn,
+   .modal-footer, and all modal animations */
+
+@keyframes modalExit {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+}
+
+@keyframes modalOverlayFadeOut {
+    0% {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+
+    100% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+}
+
+/* ============================================================================
+   FORM VALIDATION & INPUT ANIMATIONS
+   ============================================================================ */
+
+/* Input Focus Animations */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+    animation: inputFocusGlow 0.3s ease-out;
+    box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.15);
+}
+
+@keyframes inputFocusGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(201, 151, 0, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(201, 151, 0, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.15);
+    }
+}
+
+/* Validation States */
+.form-group input.valid,
+.form-group select.valid,
+.form-group textarea.valid {
+    border-color: #10b981;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px 20px;
+    padding-right: 40px;
+    animation: validPulse 0.4s ease-out;
+}
+
+.form-group input.invalid,
+.form-group select.invalid,
+.form-group textarea.invalid {
+    border-color: #ef4444;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px 20px;
+    padding-right: 40px;
+    animation: invalidShake 0.5s ease-out;
+}
+
+@keyframes validPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+@keyframes invalidShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-8px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(8px);
+    }
+}
+
+/* Error Messages */
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: errorSlideDown 0.3s ease-out;
+}
+
+.error-message::before {
+    content: "⚠";
+    font-size: 1rem;
+}
+
+@keyframes errorSlideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 50px;
+    }
+}
+
+/* Success Messages */
+.success-message {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: successSlideDown 0.3s ease-out;
+}
+
+.success-message::before {
+    content: "✓";
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+@keyframes successSlideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 50px;
+    }
+}
+
+/* Alerts/Notifications - Enhanced Slide from Right */
+.alert,
+.notification,
+.toast-message {
+    animation: slideRightBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes slideRightBounce {
+    0% {
+        opacity: 0;
+        transform: translateX(100%) scale(0.9);
+    }
+
+    60% {
+        transform: translateX(-15px) scale(1.02);
+    }
+
+    80% {
+        transform: translateX(5px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* ============================================================================
+   BUTTON STATES & LOADING ANIMATIONS
+   ============================================================================ */
+
+/* Button Loading State */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: buttonSpin 0.6s linear infinite;
+}
+
+@keyframes buttonSpin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Button Success State */
+.btn.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    animation: buttonSuccess 0.6s ease-out;
+}
+
+@keyframes buttonSuccess {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Button Pulse Animation (for install/action buttons) */
+@keyframes buttonPulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+    }
+}
+
+/* Button Error State */
+.btn.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    animation: buttonError 0.5s ease-out;
+}
+
+@keyframes buttonError {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+/* Loading Skeleton - Shimmer Wave */
+.skeleton {
+    background: linear-gradient(90deg,
+            #f0f0f0 25%,
+            #e0e0e0 50%,
+            #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonWave 1.5s infinite;
+}
+
+@keyframes skeletonWave {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Tab Subtabs - Slide Up Stack */
+.subtab-btn {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.subtab-btn.animate-in {
+    animation: slideUpStack 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideUpStack {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subtab-btn.active {
+    position: relative;
+}
+
+.subtab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    animation: expandLine 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes expandLine {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+/* Notification Badges for Tabs */
+.notification-badge {
+    display: inline-block;
+    min-width: 20px;
+    height: 20px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 68, 68, 0.6);
+    }
+}
+
+/* Sidebar Badge (for Package Manager) */
+.sidebar-badge {
+    display: inline-block;
+    min-width: 18px;
+    height: 18px;
+    padding: 2px 5px;
+    margin-left: 8px;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 9px;
+    line-height: 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(255, 68, 68, 0.5);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+/* Stats Cards - Count Up with Bounce */
+.stat-card {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+}
+
+.stat-card.animate-in {
+    animation: bounceUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes bounceUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+
+    60% {
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Search Bar - Glow Pulse on Focus */
+.search-input:focus {
+    animation: glowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(201, 151, 0, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(201, 151, 0, 0.5);
+    }
+}
+
+/* Dropdown Menu - Fan Out */
+.dropdown-menu {
+    opacity: 0;
+    transform-origin: top;
+    transform: scaleY(0);
+}
+
+.dropdown-menu.show {
+    animation: fanOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fanOut {
+    0% {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+/* ============================================================================
+   VALIDATION MODAL - COMPACT REDESIGN
+   ============================================================================ */
+
+#validationModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    /* Reduced from 999999 - modal backdrops */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    animation: modalOverlayFadeIn 0.3s ease;
+}
+
+.modal-validation {
+    background: white;
+    border-radius: 16px;
+    max-width: 750px !important;
+    width: 95% !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: modalContentEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+/* Compact Header */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-close-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+    transform: scale(1.05);
+}
+
+/* Compact Progress */
+.validation-progress-compact {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.progress-bar-wrapper {
+    background: #e9ecef;
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar-wrapper .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #81C784);
+    transition: width 0.5s ease;
+    border-radius: 8px;
+}
+
+.validation-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.spin-icon {
+    animation: spin 1s linear infinite;
+}
+
+/* Compact Checks Grid - 3 Columns */
+.validation-checks-compact {
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(85vh - 220px);
+}
+
+.checks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.validation-check-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.validation-check-checkbox .check-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+}
+
+.validation-check-checkbox .check-label {
+    flex: 1;
+    line-height: 1.3;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+/* Check status colors */
+.validation-check-checkbox.check-pass {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.validation-check-checkbox.check-fail {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+
+/* Footer */
+.modal-footer {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Responsive - 2 columns on smaller screens */
+@media (max-width: 768px) {
+    .checks-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .checks-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Validation checks animation */
+.checks-grid>div {
+    animation: checkSlideIn 0.3s ease-out backwards;
+}
+
+.checks-grid>div:nth-child(3n+1) {
+    animation-delay: calc(var(--index, 0) * 0.05s);
+}
+
+.checks-grid>div:nth-child(3n+2) {
+    animation-delay: calc(var(--index, 0) * 0.05s + 0.025s);
+}
+
+.checks-grid>div:nth-child(3n) {
+    animation-delay: calc(var(--index, 0) * 0.05s + 0.05s);
+}
+
+@keyframes checkSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Validation check status updates */
+.validation-checks-list .check-status {
+    transition: all 0.3s ease-out;
+}
+
+.validation-checks-list .check-status.updating {
+    animation: statusPulse 0.5s ease-out;
+}
+
+@keyframes statusPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Checkbox/Toggle - Bounce Check */
+input[type="checkbox"]:checked+label::before {
+    animation: bounceCheck 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bounceCheck {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Pagination - Ripple Highlight */
+.pagination .page-item.active {
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination .page-item.active::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(201, 151, 0, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: rippleHighlight 0.6s ease-out;
+}
+
+@keyframes rippleHighlight {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+
+    100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+    }
+}
+
+/* Stagger Delay Classes for Sequential Animations */
+.delay-1 {
+    animation-delay: 0.05s;
+}
+
+.delay-2 {
+    animation-delay: 0.1s;
+}
+
+.delay-3 {
+    animation-delay: 0.15s;
+}
+
+.delay-4 {
+    animation-delay: 0.2s;
+}
+
+.delay-5 {
+    animation-delay: 0.25s;
+}
+
+.delay-6 {
+    animation-delay: 0.3s;
+}
+
+.delay-7 {
+    animation-delay: 0.35s;
+}
+
+.delay-8 {
+    animation-delay: 0.4s;
+}
+
+.delay-9 {
+    animation-delay: 0.45s;
+}
+
+.delay-10 {
+    animation-delay: 0.5s;
+}
+
+/* Package Row Highlight Animation */
+@keyframes rowHighlight {
+    0% {
+        background-color: #d4edda;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+    }
+
+    50% {
+        background-color: #d4edda;
+        box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.2);
+    }
+
+    100% {
+        background-color: transparent;
+        box-shadow: none;
+    }
+}
+
+/* ============================================================================
+   PACKAGE ALERTS SYSTEM
+   ============================================================================ */
+
+#packageAlertsContainer {
+    padding: 0 1.5rem;
+    margin-top: 1rem;
+}
+
+.package-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.package-alert.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.package-alert.hiding {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #fffbea 100%);
+    border-left-color: #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #e8f5f7 100%);
+    border-left-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.alert-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.alert-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.alert-dismiss {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.alert-dismiss:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
+}
+
+.alert-dismiss i {
+    font-size: 0.9rem;
+}
+
+/* Responsive: Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================================================
+   COLLAPSIBLE MENU GROUPS
+   ========================================================================== */
+
+.admin-menu .menu-group {
+    margin: 0;
+}
+
+.menu-group-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: var(--primary-text, #333);
+    background: var(--secondary-bg, #f5f5f5);
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.menu-group-header:hover {
+    background: var(--hover-bg, #e8e8e8);
+}
+
+.menu-group-arrow {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.menu-group.collapsed .menu-group-arrow {
+    transform: rotate(-90deg);
+}
+
+.menu-group-items {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0;
+    opacity: 0;
+}
+
+.menu-group-items li {
+    margin: 0;
+}
+
+.menu-group-items li a {
+    padding: 10px 20px;
+    font-size: 0.95em;
+}
+
+/* Menu spacer to push items to bottom */
+.menu-spacer {
+    flex: 1;
+    min-height: 20px;
+}
+
+/* Make sidebar flex column to support spacer */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-user-arrow {
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show~.nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+}
+
+.nav-user-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+
+/* Adjust nav-user-profile to work with dropdown */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.nav-user-name {
+    font-weight: 600;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-role {
+    font-size: 0.85em;
+    color: var(--secondary-text, #666);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+    }
+
+    .nav-user-arrow {
+        display: none;
+    }
+
+    .nav-user-menu {
+        right: -10px;
+    }
+
+    .menu-group-header {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+}
+
+
+/* Override nav-user-name to match header subtitle color */
+.nav-user-name {
+    font-weight: 600;
+    color: var(--header-subtitle-color, var(--primary-color, #007bff));
+}
+
+
+/* Hide the user dropdown arrow */
+.nav-user-arrow {
+    display: none !important;
+}
+
+/* Increase z-index for user dropdown menu */
+.nav-user-menu {
+    z-index: 9999 !important;
+}
+
+
+/* Icon spacing and sizing for sidebar and dropdown */
+.menu-group-header i,
+.admin-menu>li>a i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.user-menu-icon i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Force dropdown above all content with fixed positioning */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10000;
+}
+
+.nav-user-menu {
+    position: fixed !important;
+    z-index: 10001 !important;
+}
+
+/* Start menu groups collapsed by default and implement accordion behavior */
+.menu-group {
+    margin-bottom: 0;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0 !important;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.menu-group:not(.collapsed) .menu-group-items {
+    max-height: 500px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Fix dropdown positioning - use absolute but with higher z-index */
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 999999 !important;
+}
+
+.nav-user-dropdown {
+    z-index: 999998;
+}
+
+/*
+   Z-INDEX HIERARCHY FIX
+   Proper stacking order for dropdowns above header content
+*/
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10002;
+    /* Above nav-content (10001) */
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 10003 !important;
+    /* Above dropdown trigger */
+}
+
+/* Ensure dropdown visibility when shown */
+.nav-user-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+}
+
+/* FINAL z-index fix - ensure dropdown is absolutely on top */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 100000 !important;
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 100001 !important;
+}
+
+.nav-user-menu.show {
+    z-index: 100001 !important;
+}
+
+/* Fix navbar overflow clipping dropdown - allow visible overflow */
+.navbar {
+    overflow: visible !important;
+}
+
+/* Clean z-index hierarchy for dropdown */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10002 !important;
+    /* Above nav-content (10001) */
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 10002 !important;
+    /* Same as parent, positioned correctly */
+}
+
+.nav-user-menu.show {
+    z-index: 10002 !important;
 }
 
 /* ========== ADMIN DASHBOARD THEME ========== */
@@ -4530,7 +6379,7 @@ body {
     background-color: var(--background-color) !important;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    /* overflow: hidden; */ /* REMOVED - was hiding dashboard content */
     height: 100vh;
 }
 
@@ -4738,64 +6587,8 @@ body {
     margin-left: auto;
 }
 
-/* Confirmation Modal */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--bg-modal-overlay);
-    backdrop-filter: blur(4px);
-    z-index: 100000;
-    animation: fadeIn 0.2s ease-out;
-}
-
-.modal-overlay.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-dialog {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0,0,0,var(--shadow-heavy));
-    animation: slideUp 0.3s ease-out;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    color: #1f2937;
-}
-
-.modal-icon {
-    font-size: 2rem;
-}
-
-.modal-body {
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-}
-
-.modal-footer {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
+/* ========== MODAL STYLES MOVED TO modals.css ========== */
+/* All modal styles centralized in modals.css */
 
 @keyframes fadeIn {
     from {
@@ -4902,20 +6695,20 @@ body {
 }
 
 @keyframes pulse-glow {
-    0%, 100% { 
+    0%, 100% {
         box-shadow: 0 0 0 0 rgba(var(--border-focus), 0.4);
     }
-    50% { 
+    50% {
         box-shadow: 0 0 12px 2px rgba(var(--unsaved-changes-glow-color), 0.6);
     }
 }
 
 @keyframes shimmer {
-    0%, 100% { 
+    0%, 100% {
         opacity: 0.6;
         transform: scaleX(0.8);
     }
-    50% { 
+    50% {
         opacity: 1;
         transform: scaleX(1);
     }
@@ -5204,7 +6997,7 @@ body {
         grid-template-columns: 1fr !important;
         position: relative;
     }
-    
+
     .admin-sidebar {
         position: fixed;
         left: -280px;
@@ -5216,11 +7009,11 @@ body {
         overflow-y: auto;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     }
-    
+
     .admin-sidebar.open {
         left: 0;
     }
-    
+
     /* Hamburger Menu Button */
     .hamburger-menu {
         display: flex !important;
@@ -5237,7 +7030,7 @@ body {
         top: 15px;
         z-index: 10000;
     }
-    
+
     .hamburger-menu span {
         width: 30px;
         height: 3px;
@@ -5246,19 +7039,19 @@ body {
         transition: all 0.3s ease;
         transform-origin: center;
     }
-    
+
     .hamburger-menu.active span:nth-child(1) {
         transform: translateY(11px) rotate(45deg);
     }
-    
+
     .hamburger-menu.active span:nth-child(2) {
         opacity: 0;
     }
-    
+
     .hamburger-menu.active span:nth-child(3) {
         transform: translateY(-11px) rotate(-45deg);
     }
-    
+
     /* Sidebar Overlay */
     .sidebar-overlay {
         display: none;
@@ -5270,57 +7063,52 @@ body {
         background: rgba(0, 0, 0, 0.5);
         z-index: 9998;
     }
-    
+
     .sidebar-overlay.active {
         display: block;
     }
-    
+
     /* Admin Content - Full Width */
     .admin-content {
         margin-left: 0 !important;
         padding: 20px 15px;
         width: 100%;
     }
-    
+
     /* Navbar adjustments */
     .navbar {
         padding-left: 60px !important;
     }
-    
+
     /* Color Grid - 2 columns on tablet */
     .color-grid {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 15px;
     }
-    
+
     /* Tables - Horizontal scroll */
     .table-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     table {
         min-width: 600px;
     }
-    
+
     /* Theme cards - Stack vertically */
     #themesContainer .theme-card {
         margin-bottom: 15px;
     }
-    
+
     /* Forms - Full width inputs */
     .form-group input,
     .form-group select,
     .form-group textarea {
         width: 100% !important;
     }
-    
-    /* Modal adjustments */
-    .modal-content {
-        width: 90%;
-        max-width: 600px;
-        margin: 10% auto;
-    }
+
+    /* Modal styles moved to modals.css responsive section */
 }
 
 /* ==========================================================================
@@ -5331,128 +7119,128 @@ body {
     h1 {
         font-size: 1.5rem !important;
     }
-    
+
     h2 {
         font-size: 1.3rem !important;
     }
-    
+
     h3 {
         font-size: 1.1rem !important;
     }
-    
+
     h4 {
         font-size: 1rem !important;
     }
-    
+
     /* Navbar - Compact */
     .navbar {
         padding: 10px 15px 10px 60px !important;
         height: auto !important;
         min-height: 60px;
     }
-    
+
     .nav-brand {
         font-size: 1.1rem !important;
     }
-    
+
     .nav-brand-title {
         font-size: 1.1rem !important;
     }
-    
+
     .nav-brand-subtitle {
         font-size: 0.75rem !important;
     }
-    
+
     /* Logo - Smaller on mobile */
     .logo {
         height: var(--logo-height-mobile, 50px) !important;
         max-height: 50px !important;
     }
-    
+
     /* Admin Sidebar - Full screen when open */
     .admin-sidebar {
         width: 100% !important;
         left: -100%;
     }
-    
+
     .admin-sidebar.open {
         left: 0;
     }
-    
+
     /* Sidebar Menu Items - Larger touch targets */
     .sidebar-menu a {
         padding: 15px 20px !important;
         font-size: 1rem !important;
     }
-    
+
     /* Admin Content - More padding */
     .admin-content {
         padding: 15px 10px !important;
     }
-    
+
     /* Color Grid - Single column */
     .color-grid {
         grid-template-columns: 1fr !important;
         gap: 12px;
     }
-    
+
     /* Color Pairs - Stack vertically */
     .color-pair {
         flex-direction: column !important;
         gap: 12px;
     }
-    
+
     .color-pair .color-item {
         width: 100% !important;
     }
-    
+
     /* Color Inputs - Full width */
     .color-input-group {
         width: 100% !important;
     }
-    
+
     .color-input-group input[type="color"] {
         width: 60px !important;
         height: 50px !important;
     }
-    
+
     .color-input-group input[type="text"] {
         flex: 1;
         font-size: 1rem !important;
     }
-    
+
     /* Buttons - Stack and full width */
     .btn-group {
         flex-direction: column !important;
         gap: 10px;
     }
-    
+
     .btn {
         width: 100% !important;
         padding: 12px 20px !important;
         font-size: 1rem !important;
     }
-    
+
     .btn-sm {
         padding: 8px 16px !important;
         font-size: 0.875rem !important;
     }
-    
+
     /* Theme Cards - Full width buttons */
     .theme-card .btn {
         width: 100% !important;
         margin-bottom: 8px;
     }
-    
+
     /* Tables - Card view on mobile */
     .table-responsive {
         border: 0;
     }
-    
+
     .table-responsive thead {
         display: none;
     }
-    
+
     .table-responsive tr {
         display: block;
         margin-bottom: 15px;
@@ -5461,7 +7249,7 @@ body {
         padding: 10px;
         background: white;
     }
-    
+
     .table-responsive td {
         display: block;
         text-align: right;
@@ -5470,7 +7258,7 @@ body {
         position: relative;
         padding-left: 50%;
     }
-    
+
     .table-responsive td:before {
         content: attr(data-label);
         position: absolute;
@@ -5478,47 +7266,42 @@ body {
         font-weight: bold;
         text-align: left;
     }
-    
+
     /* Forms - Stack labels */
     .form-row {
         flex-direction: column !important;
     }
-    
+
     .form-group {
         width: 100% !important;
         margin-bottom: 15px;
     }
-    
+
     /* Color Section Headers - Larger touch targets */
     .color-section-header {
         padding: 15px !important;
         cursor: pointer;
     }
-    
+
     .color-section-header h3 {
         font-size: 1.1rem !important;
     }
-    
+
     /* Badges - Slightly larger */
     .badge {
         padding: 6px 12px !important;
         font-size: 0.875rem !important;
     }
-    
+
     /* Role Badge Preview - Full width */
     .role-badge-preview {
         padding: 8px 16px !important;
         font-size: 0.875rem !important;
     }
-    
+
     /* Modal - Full screen */
-    .modal-content {
-        width: 95%;
-        margin: 5% auto;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-    
+    /* Modal styles moved to modals.css responsive section */
+
     /* Tabs - Scrollable */
     .tab-buttons {
         overflow-x: auto;
@@ -5526,63 +7309,63 @@ body {
         white-space: nowrap;
         margin-bottom: 20px;
     }
-    
+
     .tab-button {
         padding: 10px 15px !important;
         font-size: 0.875rem !important;
     }
-    
+
     /* Cards - Full width */
     .card {
         margin-bottom: 15px;
     }
-    
+
     /* Footer - Stack items */
     .footer-content {
         flex-direction: column !important;
         text-align: center;
         gap: 10px;
     }
-    
+
     /* Search and Filter - Stack */
     .filter-group {
         flex-direction: column !important;
         gap: 10px;
     }
-    
+
     .filter-group input,
     .filter-group select {
         width: 100% !important;
     }
-    
+
     /* Hub Tiles - Single column */
     .hub-tiles,
     .module-grid {
         grid-template-columns: 1fr !important;
         gap: 15px;
     }
-    
+
     /* Section Cards - Full width */
     .section-card {
         width: 100% !important;
     }
-    
+
     /* Vehicle Cards - Full width */
     .vehicle-card {
         width: 100% !important;
     }
-    
+
     /* Stats Cards - Stack */
     .stats-grid {
         grid-template-columns: 1fr !important;
     }
-    
+
     /* Header Actions - Stack */
     .header-actions {
         flex-direction: column !important;
         align-items: stretch !important;
     }
-    
+
     /* Color Preview Swatches - Wrap */
     .color-preview {
         flex-wrap: wrap !important;
@@ -5596,11 +7379,11 @@ body {
     .admin-sidebar {
         padding-top: 10px;
     }
-    
+
     .sidebar-menu a {
         padding: 10px 15px !important;
     }
-    
+
     .modal-content {
         max-height: 85vh;
         overflow-y: auto;
@@ -5614,27 +7397,27 @@ body {
     .navbar {
         padding-left: 50px !important;
     }
-    
+
     .hamburger-menu {
         left: 10px;
         width: 25px;
         height: 20px;
     }
-    
+
     .hamburger-menu span {
         width: 25px;
         height: 2px;
     }
-    
+
     .btn {
         padding: 10px 15px !important;
         font-size: 0.875rem !important;
     }
-    
+
     h1 {
         font-size: 1.3rem !important;
     }
-    
+
     h2 {
         font-size: 1.1rem !important;
     }
@@ -5652,16 +7435,16 @@ body {
     button {
         display: none !important;
     }
-    
+
     .admin-content {
         margin: 0 !important;
         padding: 0 !important;
     }
-    
+
     .color-section-body {
         display: block !important;
     }
-    
+
     .collapsed {
         display: block !important;
     }
@@ -5682,7 +7465,7 @@ body {
     .mobile-only {
         display: block !important;
     }
-    
+
     .desktop-only {
         display: none !important;
     }
