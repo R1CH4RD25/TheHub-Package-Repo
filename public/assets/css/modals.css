@@ -4,7 +4,7 @@
  * ============================================================================
  * All modal-related CSS extracted from admin.css, admin-theme.css,
  * admin-modern.css, and media.css
- * 
+ *
  * Modals defined in: /public/admin/partials/modals.php
  * ============================================================================
  */
@@ -58,7 +58,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
     padding-right: 2.5rem;
 }
 
@@ -122,27 +122,68 @@
 
 /* Alternative close button style */
 .modal-close-btn {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    color: #6c757d;
-    cursor: pointer;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #374151;
     width: 36px;
     height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .modal-close-btn:hover {
     background: rgba(220, 53, 69, 0.1);
     color: #dc3545;
-    transform: rotate(90deg);
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* When used in modal header (not absolute positioned) */
+.modal-header .modal-close-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+}
+
+/* Bootstrap close button - fix offset from .btn i:last-child */
+.btn-close,
+button.btn-close {
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin: auto;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    line-height: 1;
+    font-size: 1.5rem;
+    color: #666;
+    border-radius: 4px;
+}
+
+.btn-close:hover,
+button.btn-close:hover {
+    opacity: 1;
+    background: rgba(220, 53, 69, 0.1);
+    transform: rotate(180deg);
+    color: #dc3545;
+}
+
+/* Fix icon offset in close buttons - override .btn i:last-child */
+.btn-close i,
+.modal-close i,
+.modal-close-btn i,
+button[data-bs-dismiss="modal"] i {
+    margin: 0 !important;
+    line-height: 1;
+    display: block;
 }
 
 /* ==========================================================================
@@ -218,22 +259,52 @@
    SPECIFIC MODAL TYPES
    ========================================================================== */
 
-/* Package Discovery Modal */
+/* Package Discovery Modal - Large, Centered, Full-Screen Experience */
+.package-discovery-modal {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.package-discovery-modal .modal-dialog {
+    max-width: 90vw;
+    width: 90vw;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .package-discovery-modal .modal-content {
-    max-width: 900px;
-    width: 95%;
-    max-height: 85vh;
+    max-width: 90vw;
+    width: 90vw;
+    height: 90vh;
+    max-height: 90vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.package-discovery-modal .modal-header {
+    flex-shrink: 0;
+    padding: 1.5rem 2rem 1rem 2rem;
+    border-bottom: 2px solid #e9ecef;
 }
 
 .package-discovery-modal .modal-body {
-    padding: 0;
-    max-height: calc(85vh - 180px);
+    flex: 1;
+    padding: 1rem 2rem 2rem 2rem;
     overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
 }
 
-.package-discovery-modal .modal-actions {
-    border-top: none;
-    margin-top: 1.5rem;
+.package-discovery-modal .modal-footer {
+    flex-shrink: 0;
+    padding: 1rem 2rem;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
 }
 
 /* Validation Report Modal */
@@ -266,6 +337,7 @@
         opacity: 0;
         transform: translateY(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -276,6 +348,7 @@
     from {
         opacity: 1;
     }
+
     to {
         opacity: 0;
     }
