@@ -3449,6 +3449,13 @@ async function validatePackage(packageId, packageName) {
         const checksContainer = document.getElementById('validationChecksContainer');
         const checksList = document.getElementById('validationChecksList');
 
+        // Header/footer close button for the modal (may not exist yet in footer)
+        const closeBtn = modalElement.querySelector('.btn-close, .modal-footer button[data-bs-dismiss="modal"]');
+        if (closeBtn) {
+            // Prevent closing while validation is actively running until we re-enable it
+            try { closeBtn.disabled = true; } catch (e) { /* ignore */ }
+        }
+
         // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
         progressBar.style.transition = 'width 0.5s ease';
@@ -3572,7 +3579,7 @@ async function validatePackage(packageId, packageName) {
                     Server error: ${response.status}
                 </span>
             `;
-            closeBtn.disabled = false;
+            if (closeBtn) closeBtn.disabled = false;
             return;
         }
 
@@ -3590,7 +3597,7 @@ async function validatePackage(packageId, packageName) {
                     Invalid response from server
                 </span>
             `;
-            closeBtn.disabled = false;
+            if (closeBtn) closeBtn.disabled = false;
             return;
         }
 
@@ -3603,7 +3610,7 @@ async function validatePackage(packageId, packageName) {
                     Validation failed: ${escapeHtml(result.error || 'Unknown error')}
                 </span>
             `;
-            closeBtn.disabled = false;
+            if (closeBtn) closeBtn.disabled = false;
             return;
         }
 
@@ -3619,7 +3626,7 @@ async function validatePackage(packageId, packageName) {
                     Failed to load validation details
                 </span>
             `;
-            closeBtn.disabled = false;
+            if (closeBtn) closeBtn.disabled = false;
             return;
         }
 
@@ -3636,7 +3643,7 @@ async function validatePackage(packageId, packageName) {
                     Invalid validation details response
                 </span>
             `;
-            closeBtn.disabled = false;
+            if (closeBtn) closeBtn.disabled = false;
             return;
         }
 
