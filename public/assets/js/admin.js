@@ -4041,6 +4041,16 @@ async function deletePackage(packageId, packageName) {
 // Show validation details modal
 async function showValidationDetails(packageId) {
     try {
+        // Remove any existing validation report modal first
+        const existingModal = document.getElementById('validationReportModal');
+        if (existingModal) {
+            const existingInstance = bootstrap.Modal.getInstance(existingModal);
+            if (existingInstance) {
+                existingInstance.dispose();
+            }
+            existingModal.remove();
+        }
+
         const response = await fetch(`/api/packages.php?action=validation&id=${packageId}`);
         const result = await response.json();
 
