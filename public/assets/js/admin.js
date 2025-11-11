@@ -3399,44 +3399,43 @@ async function validatePackage(packageId, packageName) {
             existingModal.remove();
         }
 
-        // Open modal immediately with progress state - CLEAN DESIGN
+        // Create Bootstrap modal structure (matches Browse Available Packages)
         const modalHtml = `
-            <div class="modal-overlay show" id="validationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem;" onclick="if(event.target === this) closeValidationModal()">
-                <div class="modal-content modal-validation" style="background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 0.3125rem;" onclick="event.stopPropagation()">
-                    <!-- Header with Close Button -->
-                    <div class="validation-modal-header">
-                        <h2 class="validation-report-title">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
-                        </h2>
-                        <button type="button" class="btn-close" onclick="closeValidationModal()" aria-label="Close">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-
-                    <!-- Compact Progress Section -->
-                    <div class="validation-progress-compact">
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar" id="validationProgressBar"></div>
+            <div class="modal fade" id="validationModal" tabindex="-1" aria-labelledby="validationModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="validationModalLabel">
+                                <i class="bi bi-clipboard-check"></i> <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         </div>
-                        <div class="validation-status" id="validationLiveStats">
-                            <i class="bi bi-hourglass-split spin-icon"></i>
-                            <span>Running validation...</span>
-                        </div>
-                    </div>
+                        <div class="modal-body">
+                            <!-- Compact Progress Section -->
+                            <div class="validation-progress-compact">
+                                <div class="progress-bar-wrapper">
+                                    <div class="progress-bar" id="validationProgressBar"></div>
+                                </div>
+                                <div class="validation-status" id="validationLiveStats">
+                                    <i class="bi bi-hourglass-split spin-icon"></i>
+                                    <span>Running validation...</span>
+                                </div>
+                            </div>
 
-                    <!-- Compact Checks Grid (3 columns, no scroll) -->
-                    <div class="validation-checks-compact" id="validationChecksContainer">
-                        <div class="checks-grid" id="validationChecksList">
-                            <!-- Checks will be pre-populated here in 3-column grid -->
+                            <!-- Compact Checks Grid (3 columns, no scroll) -->
+                            <div class="validation-checks-compact" id="validationChecksContainer">
+                                <div class="checks-grid" id="validationChecksList">
+                                    <!-- Checks will be pre-populated here in 3-column grid -->
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Footer Actions -->
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" id="closeValidationBtn" type="button" onclick="closeValidationModal()">
-                            <i class="bi bi-x-circle"></i> Close
-                        </button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle"></i> Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3445,65 +3444,22 @@ async function validatePackage(packageId, packageName) {
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         console.log('🔍 DEBUG: Modal HTML added to DOM');
 
-        const modal = document.getElementById('validationModal');
-        if (!modal) {
+        const modalElement = document.getElementById('validationModal');
+        if (!modalElement) {
             console.error('❌ DEBUG: Modal not found in DOM after insertion!');
             return;
         }
-        console.log('✅ Modal found in DOM');
 
-        // Force modal visibility with essential overrides
-        modal.style.display = 'flex';
-        modal.style.opacity = '1';
-        modal.style.visibility = 'visible';
-        modal.style.background = 'rgba(0, 0, 0, 0.6)';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.zIndex = '999999';
-        modal.classList.add('show');
+        // Initialize Bootstrap modal
+        const bsModal = new bootstrap.Modal(modalElement);
+        bsModal.show();
 
-        console.log('✅ Modal forced visible');
-
-        // Ensure modal content is properly displayed
-        const modalContent = modal.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.style.opacity = '1';
-            modalContent.style.transform = 'none';
-            console.log('✅ Modal content made visible');
-        }
-
-        // Prevent any CSS animations from hiding the modal
-        setTimeout(() => {
-            modal.style.opacity = '1';
-            modal.style.display = 'flex';
-            console.log('✅ Modal visibility reinforced after timeout');
-        }, 100);
-
-        // Keep checking modal visibility during validation process
-        const visibilityChecker = setInterval(() => {
-            if (modal && document.body.contains(modal)) {
-                if (modal.style.opacity !== '1' || modal.style.display !== 'flex') {
-                    console.log('🔧 Modal became invisible, restoring...');
-                    modal.style.opacity = '1';
-                    modal.style.display = 'flex';
-                    modal.style.visibility = 'visible';
-                }
-            } else {
-                clearInterval(visibilityChecker);
-            }
-        }, 500);
-
-        // Store the checker ID so we can clear it later
-        modal.setAttribute('data-visibility-checker', visibilityChecker);
-        console.log('✅ Modal found in DOM:', modal !== null, 'Computed style:', modal ? window.getComputedStyle(modal).display : 'N/A');
+        console.log('✅ Modal shown with Bootstrap');
 
         // Helper function to check if modal still exists
         const isModalOpen = () => {
-            const modalElement = document.getElementById('validationModal');
-            if (!modalElement || !document.body.contains(modalElement)) {
+            const modal = document.getElementById('validationModal');
+            if (!modal || !document.body.contains(modal)) {
                 console.log('⚠️ Modal was closed, aborting validation updates');
                 validationAborted = true;
                 return false;
@@ -3820,26 +3776,19 @@ async function validatePackage(packageId, packageName) {
                     // Add install button if validation passed
                     if (summary.failed === 0 && summary.critical === 0) {
                         console.log('Adding install button with animation');
-                        const modalActions = document.querySelector('.modal-actions');
-                        if (modalActions) {
-                            modalActions.innerHTML = `
-                                <button class="btn btn-secondary" id="modalCloseBtn" type="button">
-                                    Close
-                                </button>
-                                <button class="btn btn-primary" id="modalInstallBtn" type="button" style="animation: buttonPulse 0.6s ease;">
+                        const modalFooter = document.querySelector('#validationModal .modal-footer');
+                        if (modalFooter) {
+                            modalFooter.innerHTML = `
+                                <button type="button" class="btn btn-primary" id="modalInstallBtn" style="animation: buttonPulse 0.6s ease;">
                                     <i class="bi bi-download"></i> Install Package
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Close
                                 </button>
                             `;
 
-                            // Add event listeners to new buttons using onclick for reliability
-                            const closeButton = document.getElementById('modalCloseBtn');
+                            // Add event listener to install button
                             const installButton = document.getElementById('modalInstallBtn');
-                            if (closeButton) {
-                                closeButton.onclick = function () {
-                                    console.log('Modal close clicked');
-                                    closeValidationModal();
-                                };
-                            }
                             if (installButton) {
                                 installButton.onclick = function () {
                                     console.log('Install clicked');
@@ -3848,21 +3797,13 @@ async function validatePackage(packageId, packageName) {
                                 };
                             }
                         }
-                    } else {
-                        console.log('Validation had failures, enabling close button');
-                        // Enable close button after failures
-                        const closeBtn = document.getElementById('closeValidationBtn');
-                        if (closeBtn) closeBtn.disabled = false;
                     }
 
                     // Update final header with animation - check if modal still exists
                     if (!isModalOpen()) return;
-                    const titleElement = document.querySelector('.validation-report-title');
+                    const titleElement = document.querySelector('#validationModalLabel span');
                     if (titleElement) {
-                        titleElement.innerHTML = `
-                            <i class="bi bi-${summary.failed === 0 ? 'check-circle-fill' : 'x-circle-fill'}" style="color: ${summary.failed === 0 ? '#28a745' : '#dc3545'};"></i>
-                            ${summary.failed === 0 ? 'Package Validated - Ready to Install! 🚀' : 'Validation Failed'}
-                        `;
+                        titleElement.innerHTML = `${summary.failed === 0 ? 'Package Validated - Ready to Install! 🚀' : 'Validation Failed'}`;
                     }
 
                     // Reload packages list IMMEDIATELY to update button states
@@ -4003,26 +3944,29 @@ async function validatePackage(packageId, packageName) {
 function closeValidationModal() {
     console.log('🔍 DEBUG: closeValidationModal called');
 
-    const modal = document.getElementById('validationModal');
-    if (modal) {
+    const modalElement = document.getElementById('validationModal');
+    if (modalElement) {
         console.log('🔍 DEBUG: Closing modal');
 
         // Clear the visibility checker
-        const checkerId = modal.getAttribute('data-visibility-checker');
+        const checkerId = modalElement.getAttribute('data-visibility-checker');
         if (checkerId) {
             clearInterval(parseInt(checkerId));
             console.log('🔍 DEBUG: Cleared visibility checker');
         }
 
-        // Add hiding class for exit animation
-        modal.classList.add('hiding');
-        modal.classList.remove('show');
+        // Use Bootstrap modal API to hide
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
 
-        // Wait for animation before removing
-        setTimeout(() => {
-            modal.remove();
-            console.log('🔍 DEBUG: Modal removed from DOM');
-        }, 300);
+        // Clean up after modal is fully hidden
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            setTimeout(() => modalElement.remove(), 100);
+        }, { once: true });
+
+        console.log('🔍 DEBUG: Modal hide initiated');
     } else {
         console.log('🔍 DEBUG: No modal found to close');
     }
