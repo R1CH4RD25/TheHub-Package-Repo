@@ -3110,7 +3110,7 @@ async function loadAvailablePackages() {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem 1rem;">
                     <div style="color: #6c757d; font-size: 1.1em; margin-bottom: 0.75rem;">
-                        <i class="fas fa-box-open" style="font-size: 1.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.5;"></i>
+                        <i class="bi bi-box-seam" style="font-size: 1.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.5;"></i>
                         No packages available for installation
                     </div>
                     <p style="color: #6c757d; margin-bottom: 1.5rem; font-size: 0.95em;">
@@ -3118,10 +3118,10 @@ async function loadAvailablePackages() {
                     </p>
                     <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="document.querySelector('input[type=file]').click()">
-                            <i class="fas fa-upload"></i> Upload Package
+                            <i class="bi bi-upload"></i> Upload Package
                         </button>
                         <button class="btn btn-outline-primary" onclick="showPackageDiscovery()">
-                            <i class="fas fa-search"></i> Search Package Repository
+                            <i class="bi bi-search"></i> Search Package Repository
                         </button>
                     </div>
                 </div>
@@ -3200,10 +3200,10 @@ async function loadAvailablePackages() {
         html += `
             <div class="find-more-packages-section" style="text-align: center; margin-top: 1.5rem; padding: 1.25rem;">
                 <button class="btn btn-outline-primary" onclick="showPackageDiscovery()">
-                    <i class="fas fa-search"></i> Search Package Repository
+                    <i class="bi bi-search"></i> Search Package Repository
                 </button>
                 <div style="margin-top: 0.75rem; color: #6c757d; font-size: 0.875rem;">
-                    <i class="fas fa-cloud-download-alt"></i> Find and download additional packages from the online repository
+                    <i class="bi bi-cloud-download"></i> Find and download additional packages from the online repository
                 </div>
             </div>
         `;
@@ -3252,7 +3252,7 @@ async function loadPackageUpdates() {
         if (updates.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem 1rem; color: #4CAF50;">
-                    <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.75rem; opacity: 0.7;"></i>
+                    <i class="bi bi-check-circle" style="font-size: 1.5rem; margin-bottom: 0.75rem; opacity: 0.7;"></i>
                     <p style="margin: 0; font-size: 1rem;">✓ All packages are up to date!</p>
                 </div>
             `;
@@ -3773,6 +3773,9 @@ async function validatePackage(packageId, packageName) {
                         }
                     }
 
+                    // Re-enable header close button after validation completes
+                    if (closeBtn) closeBtn.disabled = false;
+
                     // Update final header with animation - check if modal still exists
                     if (!isModalOpen()) return;
                     const titleElement = document.querySelector('#validationModalLabel span');
@@ -4067,7 +4070,7 @@ async function showValidationDetails(packageId) {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="validationReportModalLabel">
-                            <i class="fas fa-check-circle text-primary"></i> ${pkg.validation_status === 'pending' ? 'Validation In Progress' : 'Package Validation Report'}
+                            <i class="bi bi-check-circle text-primary"></i> ${pkg.validation_status === 'pending' ? 'Validation In Progress' : 'Package Validation Report'}
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                             <i class="bi bi-x-lg"></i>
@@ -4110,7 +4113,7 @@ async function showValidationDetails(packageId) {
 
                         <!-- Compatibility Checks -->
                         <h6 class="mb-3">
-                            <i class="fas fa-tasks text-primary me-2"></i>
+                            <i class="bi bi-list-check text-primary me-2"></i>
                             All Compatibility Checks
                             <small class="text-muted">(${checks.length} total)</small>
                         </h6>
@@ -4183,11 +4186,11 @@ async function showValidationDetails(packageId) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> Close
+                            <i class="bi bi-x-circle"></i> Close
                         </button>
                         ${pkg.can_install && !result.package.is_installed ?
                 `<button type="button" class="btn btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}'); bootstrap.Modal.getInstance(document.getElementById('validationReportModal')).hide();">
-                            <i class="fas fa-download"></i> Install Package
+                            <i class="bi bi-download"></i> Install Package
                         </button>` : ''}
                     </div>
                 </div>
@@ -4536,10 +4539,10 @@ function showPackageDiscovery() {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="packageDiscoveryModalLabel">
-                        <i class="fas fa-box-open text-primary"></i> Browse Available Packages
+                        <i class="bi bi-box-seam text-primary"></i> Browse Available Packages
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="fas fa-times"></i>
+                        <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -4585,10 +4588,10 @@ function showPackageDiscovery() {
                         </span>
                     </div>
                     <button type="button" id="downloadSelectedBtn" class="btn btn-primary" style="display: none;">
-                        <i class="fas fa-download"></i> Download Selected (<span id="downloadCount">0</span>)
+                        <i class="bi bi-download"></i> Download Selected (<span id="downloadCount">0</span>)
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> Close
+                        <i class="bi bi-x-circle"></i> Close
                     </button>
                 </div>
             </div>
@@ -4675,7 +4678,7 @@ async function searchPackages() {
         console.error('Error loading packages:', error);
         resultsContainer.innerHTML = `
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i> Error loading packages: ${error.message}
+                <i class="bi bi-exclamation-circle"></i> Error loading packages: ${error.message}
                 <div class="mt-2 small">
                     Please ensure you have internet connectivity and try again.
                 </div>
@@ -4693,7 +4696,7 @@ function renderPackageSearchResults(packages) {
     if (!packages || packages.length === 0) {
         container.innerHTML = `
             <div class="alert alert-info">
-                <i class="fas fa-box-open"></i> <strong>Package Repository Is Empty</strong>
+                <i class="bi bi-box-seam"></i> <strong>Package Repository Is Empty</strong>
                 <div class="mt-3">
                     <p class="mb-2">The package repository hasn't been populated yet. You have two options:</p>
                     <div class="ms-3">
@@ -4703,7 +4706,7 @@ function renderPackageSearchResults(packages) {
                         <p class="mb-1"><strong>2. Contribute to the Repository:</strong></p>
                         <p class="text-muted small mb-1">Help build the community package library at:</p>
                         <a href="https://github.com/R1CH4RD25/TheHub-Package-Repo" target="_blank" class="btn btn-sm btn-outline-primary">
-                            <i class="fab fa-github"></i> View Repository
+                            <i class="bi bi-github"></i> View Repository
                         </a>
                     </div>
                 </div>
@@ -4729,7 +4732,7 @@ function renderPackageSearchResults(packages) {
 
         container.innerHTML = `
             <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> ${message}
+                <i class="bi bi-check-circle"></i> ${message}
                 <div class="mt-2 small text-muted">
                     ${installedCount > 0 ? `${installedCount} installed` : ''}
                     ${installedCount > 0 && downloadedCount > 0 ? ' • ' : ''}
@@ -4744,20 +4747,20 @@ function renderPackageSearchResults(packages) {
         <div class="mb-3 d-flex justify-content-between align-items-center">
             <div>
                 <h6 class="mb-1">
-                    <i class="fas fa-download text-primary"></i>
+                    <i class="bi bi-download text-primary"></i>
                     ${availablePackages.length} Package${availablePackages.length !== 1 ? 's' : ''} Available
                 </h6>`;
 
     if (installedCount > 0 || downloadedCount > 0) {
         html += `<small class="text-muted">`;
         if (installedCount > 0) {
-            html += `<i class="fas fa-check"></i> ${installedCount} installed`;
+            html += `<i class="bi bi-check-lg"></i> ${installedCount} installed`;
         }
         if (installedCount > 0 && downloadedCount > 0) {
             html += ` • `;
         }
         if (downloadedCount > 0) {
-            html += `<i class="fas fa-download"></i> ${downloadedCount} already downloaded`;
+            html += `<i class="bi bi-download"></i> ${downloadedCount} already downloaded`;
         }
         html += `</small>`;
     }
@@ -4806,7 +4809,7 @@ function renderPackageSearchResults(packages) {
                 </td>
                 <td style="padding: 0.4rem 0.5rem;">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-cube text-primary me-2" style="font-size: 1.1rem;"></i>
+                        <i class="bi bi-box text-primary me-2" style="font-size: 1.1rem;"></i>
                         <div style="flex-grow: 1;">
                             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.15rem;">
                                 <strong style="font-size: 0.9rem; line-height: 1.3;">${escapeHtml(pkg.name)}</strong>
@@ -4815,7 +4818,7 @@ function renderPackageSearchResults(packages) {
                                 </span>
                             </div>
                             <small class="text-muted d-block" style="font-size: 0.7rem;">
-                                <i class="fas fa-user" style="font-size: 0.65rem;"></i> ${escapeHtml(author)}
+                                <i class="bi bi-person" style="font-size: 0.65rem;"></i> ${escapeHtml(author)}
                             </small>
                         </div>
                     </div>
@@ -5149,7 +5152,7 @@ async function downloadSelectedPackages() {
             <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
                 <div style="text-align: center; margin-bottom: 1.5rem;">
                     <div style="display: inline-block; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin-bottom: 1rem;">
-                        <i class="fas fa-download" style="font-size: 2rem; color: white;"></i>
+                        <i class="bi bi-download" style="font-size: 2rem; color: white;"></i>
                     </div>
                     <h4 style="margin: 0; color: #1e293b; font-weight: 600;">Downloading Packages</h4>
                     <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.9rem;">Please wait while we fetch your selected packages...</p>
@@ -5213,7 +5216,7 @@ async function downloadSelectedPackages() {
             packageItem.style.background = '#dcfce7';
             packageItem.innerHTML = `
                 <div style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-check-circle" style="color: #16a34a; font-size: 1.25rem;"></i>
+                    <i class="bi bi-check-circle" style="color: #16a34a; font-size: 1.25rem;"></i>
                 </div>
                 <div style="flex-grow: 1;">
                     <div style="font-weight: 500; color: #15803d; font-size: 0.875rem;">${escapeHtml(packageName)}</div>
@@ -5228,7 +5231,7 @@ async function downloadSelectedPackages() {
             packageItem.style.background = '#fee2e2';
             packageItem.innerHTML = `
                 <div style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-times-circle" style="color: #dc2626; font-size: 1.25rem;"></i>
+                    <i class="bi bi-x-circle-circle" style="color: #dc2626; font-size: 1.25rem;"></i>
                 </div>
                 <div style="flex-grow: 1;">
                     <div style="font-weight: 500; color: #991b1b; font-size: 0.875rem;">${escapeHtml(packageName)}</div>
