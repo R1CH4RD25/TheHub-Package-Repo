@@ -4078,8 +4078,7 @@ async function showValidationDetails(packageId) {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="validationReportModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            <i class="bi bi-check-circle text-primary"></i>
-                            <span>${pkg.validation_status === 'pending' ? 'Validation In Progress' : 'Package Validation Report'}</span>
+                            <span>${pkg.validation_status === 'pending' ? '⏳ Validation In Progress' : '📋 Package Validation Report'}</span>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
