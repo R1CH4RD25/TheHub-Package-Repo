@@ -4349,11 +4349,11 @@ function showModalWithContent(htmlContent) {
     setTimeout(() => {
         const closeBtn = modalContent.querySelector('.modal-close-btn');
         if (closeBtn) {
-            closeBtn.addEventListener('mouseenter', function() {
+            closeBtn.addEventListener('mouseenter', function () {
                 this.style.background = 'rgba(255,255,255,0.3)';
                 this.style.transform = 'rotate(90deg)';
             });
-            closeBtn.addEventListener('mouseleave', function() {
+            closeBtn.addEventListener('mouseleave', function () {
                 this.style.background = 'rgba(255,255,255,0.2)';
                 this.style.transform = 'rotate(0deg)';
             });
@@ -4752,6 +4752,7 @@ async function searchPackages() {
                 'X-CSRF-Token': window.csrfToken || ''
             },
             body: JSON.stringify({
+                action: 'search',
                 repository_url: repositoryUrl,
                 owner: owner,
                 repo: repo
