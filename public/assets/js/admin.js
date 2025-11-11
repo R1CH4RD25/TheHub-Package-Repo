@@ -3164,7 +3164,7 @@ async function loadAvailablePackages() {
             html += '<td>';
 
             if (pkg.validation_status === 'pending' || !pkg.validation_status) {
-                html += '<span class="badge badge-warning">⏳ Awaiting Validation</span>';
+                html += '<span class="badge badge-warning">🔍 Awaiting Validation</span>';
             } else if (canInstall) {
                 html += '<span class="badge badge-success">✓ Validated - Ready</span>';
             } else {
