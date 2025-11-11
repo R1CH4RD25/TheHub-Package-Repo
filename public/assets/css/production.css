@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Tue Nov 11 04:51:01 PM UTC 2025
+ * Generated: Tue Nov 11 06:26:06 PM UTC 2025
  * ============================================================================
  */
 
@@ -2488,6 +2488,11 @@ button[data-bs-dismiss="modal"] i {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+.validation-modal-header .btn-close {
+    margin: 0;
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
 }
 
 /* ==========================================================================
@@ -5573,20 +5578,10 @@ textarea:focus {
    VALIDATION MODAL - COMPACT REDESIGN
    ============================================================================ */
 
-#validationModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999;
-    /* Reduced from 999999 - modal backdrops */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Add blur effect to Bootstrap's modal backdrop */
+.modal-backdrop.show {
     backdrop-filter: blur(5px);
-    animation: modalOverlayFadeIn 0.3s ease;
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .modal-validation {
