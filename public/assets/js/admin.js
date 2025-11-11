@@ -3409,7 +3409,7 @@ async function validatePackage(packageId, packageName) {
                             <i class="bi bi-clipboard-check"></i>
                             <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
                         </h2>
-                        <button class="modal-close-btn" onclick="closeValidationModal()" title="Close">
+                        <button type="button" class="btn-close" onclick="closeValidationModal()" aria-label="Close">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
