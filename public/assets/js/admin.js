@@ -486,29 +486,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         loadRecords();
     }
 
-    function showVehicleModal(vehicleId = null) {
-        const modal = document.getElementById('vehicleModal');
-        const form = document.getElementById('vehicleForm');
-
-        form.reset();
-        document.getElementById('vehicleModalTitle').textContent = vehicleId ? 'Edit Vehicle' : 'Add Vehicle';
-        document.getElementById('vehicleId').value = vehicleId || '';
-
-        if (vehicleId) {
-            // Load vehicle data
-            fetch(`/api/vehicles.php?id=${vehicleId}`)
-                .then(r => r.json())
-                .then(vehicle => {
-                    Object.keys(vehicle).forEach(key => {
-                        const input = form.querySelector(`[name="${key}"]`);
-                        if (input) input.value = vehicle[key] || '';
-                    });
-                });
-        }
-
-        modal.style.display = 'block';
-    }
-
     function closeModal() {
         // Close all modals
         document.querySelectorAll('.modal').forEach(modal => {
@@ -4079,8 +4056,8 @@ async function showValidationDetails(packageId) {
                         <h5 class="modal-title" id="validationReportModalLabel">
                             <i class="fas fa-check-circle text-primary"></i> ${pkg.validation_status === 'pending' ? 'Validation In Progress' : 'Package Validation Report'}
                         </h5>
-                        <button type="button" class="modal-close-btn btn btn-sm" data-bs-dismiss="modal" aria-label="Close">
-                            <i class="bi bi-x-circle"></i>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                     <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
