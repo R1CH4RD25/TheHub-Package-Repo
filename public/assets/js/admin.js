@@ -3386,6 +3386,8 @@ async function upgradePackageById(packageId, packageName) {
 // Uninstall package
 // Validate a package (runs full validation and shows report)
 async function validatePackage(packageId, packageName) {
+    let validationAborted = false;
+
     try {
         console.log('🎯 validatePackage START - packageId:', packageId, 'packageName:', packageName);
         console.log('🔍 DEBUG: Function called, about to create modal');
@@ -3497,6 +3499,17 @@ async function validatePackage(packageId, packageName) {
         // Store the checker ID so we can clear it later
         modal.setAttribute('data-visibility-checker', visibilityChecker);
         console.log('✅ Modal found in DOM:', modal !== null, 'Computed style:', modal ? window.getComputedStyle(modal).display : 'N/A');
+
+        // Helper function to check if modal still exists
+        const isModalOpen = () => {
+            const modalElement = document.getElementById('validationModal');
+            if (!modalElement || !document.body.contains(modalElement)) {
+                console.log('⚠️ Modal was closed, aborting validation updates');
+                validationAborted = true;
+                return false;
+            }
+            return true;
+        };
 
         const progressBar = document.getElementById('validationProgressBar');
         const liveStats = document.getElementById('validationLiveStats');
@@ -3718,23 +3731,30 @@ async function validatePackage(packageId, packageName) {
             console.log('Summary:', summary);
             console.log('Checks count:', checks.length);
 
-            // Update header with result
-            document.querySelector('.validation-report-title').innerHTML = `
-                <i class="bi bi-clipboard-check"></i>
-                Validating Package...
-            `;
-            console.log('Header updated');
+            // Update header with result - check if modal still exists
+            if (!isModalOpen()) return;
+            const titleElement = document.querySelector('.validation-report-title');
+            if (titleElement) {
+                titleElement.innerHTML = `
+                    <i class="bi bi-clipboard-check"></i>
+                    Validating Package...
+                `;
+                console.log('Header updated');
+            }
 
             // Don't clear - keep the pre-populated checkboxes
             console.log('Using pre-populated checks');
 
-            // Show initial progress message
-            liveStats.innerHTML = `
-                <span class="stat-item stat-running">
-                    <i class="bi bi-hourglass-split"></i>
-                    Running validation checks...
-                </span>
-            `;
+            // Show initial progress message - check if modal still exists
+            if (!isModalOpen()) return;
+            if (liveStats) {
+                liveStats.innerHTML = `
+                    <span class="stat-item stat-running">
+                        <i class="bi bi-hourglass-split"></i>
+                        Running validation checks...
+                    </span>
+                `;
+            }
 
             // Map API results to pre-populated checkboxes
             const allChecks = checks;
@@ -3744,64 +3764,90 @@ async function validatePackage(packageId, packageName) {
 
             // Show checks progressively with delay
             const showNextCheck = async () => {
+                // Check if modal was closed
+                if (!isModalOpen()) {
+                    console.log('⚠️ Modal closed during validation, stopping check animation');
+                    return;
+                }
+
                 if (checkIndex >= allChecks.length) {
                     // All checks shown, update final state with celebration
-                    progressBar.style.width = '100%';
+                    if (!isModalOpen()) return;
+                    if (progressBar) progressBar.style.width = '100%';
 
                     // Show "Finalizing..." message first
-                    liveStats.innerHTML = `
-                        <span class="stat-item stat-running">
-                            <i class="bi bi-stars" style="color: #ffc107;"></i>
-                            Finalizing validation...
-                        </span>
-                    `;
+                    if (!isModalOpen()) return;
+                    if (liveStats) {
+                        liveStats.innerHTML = `
+                            <span class="stat-item stat-running">
+                                <i class="bi bi-stars" style="color: #ffc107;"></i>
+                                Finalizing validation...
+                            </span>
+                        `;
+                    }
 
                     // Wait 2 seconds for dramatic effect
                     await new Promise(resolve => setTimeout(resolve, 2000));
 
+                    // Check again after delay
+                    if (!isModalOpen()) return;
+
                     // Now show final results with celebration
-                    liveStats.innerHTML = `
-                        <span class="stat-item ${summary.failed > 0 ? 'stat-error' : 'stat-success'}">
-                            <i class="bi bi-${summary.failed > 0 ? 'x-circle' : 'check-circle'}"></i>
-                            Validation complete! 🎉
-                        </span>
-                        <span class="stat-item" style="background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
-                            ${summary.passed} passed
-                        </span>
-                        <span class="stat-item" style="background: #f8d7da; color: #721c24; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
-                            ${summary.failed} failed
-                        </span>
-                        <span class="stat-item" style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
-                            ${summary.warnings} warnings
-                        </span>
-                    `;
+                    if (liveStats) {
+                        liveStats.innerHTML = `
+                            <span class="stat-item ${summary.failed > 0 ? 'stat-error' : 'stat-success'}">
+                                <i class="bi bi-${summary.failed > 0 ? 'x-circle' : 'check-circle'}"></i>
+                                Validation complete! 🎉
+                            </span>
+                            <span class="stat-item" style="background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
+                                ${summary.passed} passed
+                            </span>
+                            <span class="stat-item" style="background: #f8d7da; color: #721c24; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
+                                ${summary.failed} failed
+                            </span>
+                            <span class="stat-item" style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
+                                ${summary.warnings} warnings
+                            </span>
+                        `;
+                    }
 
                     // Wait another 1.5 seconds before showing install button
                     await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    // Check again after delay
+                    if (!isModalOpen()) return;
 
                     // Add install button if validation passed
                     if (summary.failed === 0 && summary.critical === 0) {
                         console.log('Adding install button with animation');
                         const modalActions = document.querySelector('.modal-actions');
-                        modalActions.innerHTML = `
-                            <button class="btn btn-secondary" id="modalCloseBtn" type="button">
-                                Close
-                            </button>
-                            <button class="btn btn-primary" id="modalInstallBtn" type="button" style="animation: buttonPulse 0.6s ease;">
-                                <i class="bi bi-download"></i> Install Package
-                            </button>
-                        `;
+                        if (modalActions) {
+                            modalActions.innerHTML = `
+                                <button class="btn btn-secondary" id="modalCloseBtn" type="button">
+                                    Close
+                                </button>
+                                <button class="btn btn-primary" id="modalInstallBtn" type="button" style="animation: buttonPulse 0.6s ease;">
+                                    <i class="bi bi-download"></i> Install Package
+                                </button>
+                            `;
 
-                        // Add event listeners to new buttons using onclick for reliability
-                        document.getElementById('modalCloseBtn').onclick = function () {
-                            console.log('Modal close clicked');
-                            closeValidationModal();
-                        };
-                        document.getElementById('modalInstallBtn').onclick = function () {
-                            console.log('Install clicked');
-                            closeValidationModal();
-                            installPackage(packageId, packageName);
-                        };
+                            // Add event listeners to new buttons using onclick for reliability
+                            const closeButton = document.getElementById('modalCloseBtn');
+                            const installButton = document.getElementById('modalInstallBtn');
+                            if (closeButton) {
+                                closeButton.onclick = function () {
+                                    console.log('Modal close clicked');
+                                    closeValidationModal();
+                                };
+                            }
+                            if (installButton) {
+                                installButton.onclick = function () {
+                                    console.log('Install clicked');
+                                    closeValidationModal();
+                                    installPackage(packageId, packageName);
+                                };
+                            }
+                        }
                     } else {
                         console.log('Validation had failures, enabling close button');
                         // Enable close button after failures
@@ -3809,18 +3855,24 @@ async function validatePackage(packageId, packageName) {
                         if (closeBtn) closeBtn.disabled = false;
                     }
 
-                    // Update final header with animation
-                    document.querySelector('.validation-report-title').innerHTML = `
-                        <i class="bi bi-${summary.failed === 0 ? 'check-circle-fill' : 'x-circle-fill'}" style="color: ${summary.failed === 0 ? '#28a745' : '#dc3545'};"></i>
-                        ${summary.failed === 0 ? 'Package Validated - Ready to Install! 🚀' : 'Validation Failed'}
-                    `;
+                    // Update final header with animation - check if modal still exists
+                    if (!isModalOpen()) return;
+                    const titleElement = document.querySelector('.validation-report-title');
+                    if (titleElement) {
+                        titleElement.innerHTML = `
+                            <i class="bi bi-${summary.failed === 0 ? 'check-circle-fill' : 'x-circle-fill'}" style="color: ${summary.failed === 0 ? '#28a745' : '#dc3545'};"></i>
+                            ${summary.failed === 0 ? 'Package Validated - Ready to Install! 🚀' : 'Validation Failed'}
+                        `;
+                    }
 
                     // Reload packages list IMMEDIATELY to update button states
+                    if (!isModalOpen()) return;
                     console.log('🔄 Reloading packages list to show updated status...');
                     await loadAvailablePackages();
 
                     // Force rows to be visible immediately (CSS has opacity: 0 by default)
                     setTimeout(() => {
+                        if (!isModalOpen()) return;
                         const container = document.getElementById('availablePackagesTable');
                         const rows = container ? container.querySelectorAll('tbody tr') : [];
                         console.log('🎨 Forcing', rows.length, 'rows visible (container found:', !!container, ')');
@@ -3835,6 +3887,7 @@ async function validatePackage(packageId, packageName) {
 
                     // Highlight the updated package row with a flash effect
                     setTimeout(() => {
+                        if (!isModalOpen()) return;
                         const rows = document.querySelectorAll('#availablePackagesTable tbody tr');
                         console.log('🔍 Found', rows.length, 'rows to check for highlight');
                         rows.forEach(row => {
@@ -4112,8 +4165,8 @@ async function showValidationDetails(packageId) {
                         <h5 class="modal-title" id="validationReportModalLabel">
                             <i class="fas fa-check-circle text-primary"></i> ${pkg.validation_status === 'pending' ? 'Validation In Progress' : 'Package Validation Report'}
                         </h5>
-                        <button type="button" class="modal-close-btn btn btn-sm" data-bs-dismiss="modal" aria-label="Close" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(0,0,0,0.06); color: #374151; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s ease;">
-                            <i class="bi bi-x-circle" style="margin-left: 6px;"></i>
+                        <button type="button" class="modal-close-btn btn btn-sm" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bi bi-x-circle"></i>
                         </button>
                     </div>
                     <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
@@ -4259,10 +4312,6 @@ async function showValidationDetails(packageId) {
                     headerClose.style.transform = '';
                 });
             }
-
-            // Footer close button icon margin-left
-            const footerCloseIcon = modal.querySelector('.modal-footer .btn-secondary i');
-            if (footerCloseIcon) footerCloseIcon.style.marginLeft = '6px';
         }, 40);
 
     } catch (error) {
