@@ -3471,7 +3471,6 @@ async function validatePackage(packageId, packageName) {
         const liveStats = document.getElementById('validationLiveStats');
         const checksContainer = document.getElementById('validationChecksContainer');
         const checksList = document.getElementById('validationChecksList');
-        const closeBtn = document.getElementById('closeValidationBtn');
 
         // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
@@ -3505,21 +3504,6 @@ async function validatePackage(packageId, packageName) {
             checksList.insertAdjacentHTML('beforeend', checkHtml);
         });
         console.log(`✅ Pre-populated ${standardChecks.length} standard checks`);
-
-        // Add click handler to close button (IMPORTANT: must enable first)
-        closeBtn.disabled = false;
-        closeBtn.onclick = function () {
-            console.log('Close button clicked via onclick');
-            closeValidationModal();
-        };
-
-        // Add click handler to overlay (close when clicking outside modal)
-        modal.onclick = function (e) {
-            if (e.target === modal) {
-                console.log('Overlay clicked, closing modal');
-                closeValidationModal();
-            }
-        };
 
         console.log('✅ All modal elements found, event handlers attached');
 
@@ -3921,13 +3905,6 @@ async function validatePackage(packageId, packageName) {
 
         showMessage('Validation error: ' + error.message, 'error');
 
-        // Keep modal open and enable close button
-        const closeBtn = document.getElementById('closeValidationBtn');
-        if (closeBtn) {
-            closeBtn.disabled = false;
-            console.log('🔍 DEBUG: Close button enabled after error');
-        }
-
         // Update modal to show error state
         const liveStats = document.getElementById('validationLiveStats');
         if (liveStats) {
@@ -3947,13 +3924,6 @@ function closeValidationModal() {
     const modalElement = document.getElementById('validationModal');
     if (modalElement) {
         console.log('🔍 DEBUG: Closing modal');
-
-        // Clear the visibility checker
-        const checkerId = modalElement.getAttribute('data-visibility-checker');
-        if (checkerId) {
-            clearInterval(parseInt(checkerId));
-            console.log('🔍 DEBUG: Cleared visibility checker');
-        }
 
         // Use Bootstrap modal API to hide
         const modal = bootstrap.Modal.getInstance(modalElement);
