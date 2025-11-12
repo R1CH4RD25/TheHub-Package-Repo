@@ -3571,22 +3571,23 @@ async function validatePackage(packageId, packageName) {
 
         // Helper function to re-enable close buttons
         const enableCloseButtons = () => {
-            closeButtons.forEach(btn => {
-                // Restore the close attribute if it was originally there
+            // Re-query buttons to catch any that were dynamically added/replaced
+            const currentCloseButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close], button[data-original-close]');
+
+            currentCloseButtons.forEach(btn => {
+                // Restore the close attribute if it was originally disabled
                 if (btn.hasAttribute('data-original-close')) {
                     btn.setAttribute('data-micromodal-close', '');
                     btn.removeAttribute('data-original-close');
                 }
 
-                // Restore visual state
+                // Restore visual state (clear any disabled styling)
                 btn.style.opacity = '';
                 btn.style.cursor = '';
                 btn.title = '';
                 btn.disabled = false;
             });
-        };
-
-        // Reset progress bar to 0% at start
+        };        // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
         progressBar.style.transition = 'width 0.5s ease';
         console.log('✅ Progress bar initialized at 0%');
