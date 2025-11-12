@@ -3530,22 +3530,40 @@ async function validatePackage(packageId, packageName) {
         const checksContainer = document.getElementById('validationChecksContainer');
         const checksList = document.getElementById('validationChecksList');
 
-        // Header/footer close buttons - add manual close handler
+        // Header/footer close buttons - prevent closing during validation
         const closeButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close]');
 
-        // Add manual close handler that works even when disabled
-        const manualClose = () => {
-            console.log('🔍 Manual close triggered');
-            MicroModal.close('validationModal');
-        };
-
         closeButtons.forEach(btn => {
-            // Prevent closing while validation is actively running
-            try { btn.disabled = true; } catch (e) { /* ignore */ }
+            // Store the original close attribute so we can restore it
+            if (btn.hasAttribute('data-micromodal-close')) {
+                btn.setAttribute('data-original-close', 'true');
+            }
 
-            // Add click handler that will work once enabled
-            btn.addEventListener('click', manualClose);
+            // Remove the close attribute to prevent MicroModal from closing
+            btn.removeAttribute('data-micromodal-close');
+
+            // Add visual indicator that close is disabled
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.title = 'Please wait for validation to complete';
         });
+
+        // Helper function to re-enable close buttons
+        const enableCloseButtons = () => {
+            closeButtons.forEach(btn => {
+                // Restore the close attribute if it was originally there
+                if (btn.hasAttribute('data-original-close')) {
+                    btn.setAttribute('data-micromodal-close', '');
+                    btn.removeAttribute('data-original-close');
+                }
+
+                // Restore visual state
+                btn.style.opacity = '';
+                btn.style.cursor = '';
+                btn.title = '';
+                btn.disabled = false;
+            });
+        };
 
         // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
@@ -3667,7 +3685,8 @@ async function validatePackage(packageId, packageName) {
                     Server error: ${response.status}
                 </span>
             `;
-            closeButtons.forEach(btn => btn.disabled = false);
+            enableCloseButtons();
+            validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
 
@@ -3685,7 +3704,8 @@ async function validatePackage(packageId, packageName) {
                     Invalid response from server
                 </span>
             `;
-            closeButtons.forEach(btn => btn.disabled = false);
+            enableCloseButtons();
+            validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
 
@@ -3698,7 +3718,7 @@ async function validatePackage(packageId, packageName) {
                     Validation failed: ${escapeHtml(result.error || 'Unknown error')}
                 </span>
             `;
-            closeButtons.forEach(btn => btn.disabled = false);
+            enableCloseButtons();
             validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
@@ -3715,7 +3735,7 @@ async function validatePackage(packageId, packageName) {
                     Failed to load validation details
                 </span>
             `;
-            closeButtons.forEach(btn => btn.disabled = false);
+            enableCloseButtons();
             validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
@@ -3733,7 +3753,7 @@ async function validatePackage(packageId, packageName) {
                     Invalid validation details response
                 </span>
             `;
-            closeButtons.forEach(btn => btn.disabled = false);
+            enableCloseButtons();
             validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
@@ -3859,8 +3879,7 @@ async function validatePackage(packageId, packageName) {
                     }
 
                     // Re-enable close buttons after validation completes
-                    const closeButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close]');
-                    closeButtons.forEach(btn => btn.disabled = false);
+                    enableCloseButtons();
 
                     // Mark validation as complete (prevents toast on close)
                     validationComplete = true;
