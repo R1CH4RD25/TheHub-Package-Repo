@@ -131,6 +131,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (window.isSuperAdmin) {
         const packagesTabActive = document.getElementById('tab-packages')?.classList.contains('active');
         checkPackageAlerts(packagesTabActive);
+
+        // Poll for package alerts every 5 minutes to keep badges updated
+        setInterval(() => {
+            checkPackageAlerts(false); // Don't show alert banners, just update badges
+        }, 5 * 60 * 1000); // 5 minutes
     }
 
     // Hamburger Menu for Admin Sidebar (Responsive)
@@ -2940,6 +2945,7 @@ async function uploadPackageFile(file) {
                 dropzone.style.display = 'block';
                 progressDiv.style.display = 'none';
                 loadAvailablePackages();
+                checkPackageAlerts(false); // Refresh badge counts after upload
             }, 2000);
         } else {
             throw new Error(result.error || 'Upload failed');
@@ -5499,6 +5505,7 @@ async function downloadPackageFromRepo(downloadUrl, packageName, silent = false)
                 setTimeout(() => {
                     console.log('📦 Calling loadAvailablePackages() now...');
                     loadAvailablePackages();
+                    checkPackageAlerts(false); // Refresh badge counts after download
                 }, 500);
             }
             return true;
