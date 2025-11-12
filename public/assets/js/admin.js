@@ -3582,8 +3582,14 @@ async function validatePackage(packageId, packageName) {
 
         // Helper function to re-enable close buttons
         const enableCloseButtons = () => {
-            // Re-query buttons to catch any that were dynamically added/replaced
-            const currentCloseButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close], button[data-original-close]');
+            // Re-query from document to ensure we catch the current state
+            const modal = document.getElementById('validationModal');
+            if (!modal) {
+                console.warn('⚠️ Modal not found when trying to enable close buttons');
+                return;
+            }
+
+            const currentCloseButtons = modal.querySelectorAll('.modal__close, button[data-micromodal-close], button[data-original-close]');
 
             console.log('🔓 Enabling close buttons. Found:', currentCloseButtons.length);
 
