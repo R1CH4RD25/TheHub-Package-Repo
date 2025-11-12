@@ -25,7 +25,7 @@
 
 .modal.is-open {
     display: block;
-    z-index: 10500 !important; /* Above header (10002) but below SweetAlert (10000+) */
+    z-index: 10050 !important; /* Above header (10002) but below SweetAlert/admin overlays (100000+) */
 }
 
 /**
