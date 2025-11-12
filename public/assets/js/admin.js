@@ -3043,6 +3043,14 @@ async function loadInstalledPackages() {
         html += '</tbody></table>';
         container.innerHTML = html;
 
+        // Re-trigger table row animations (fix for packages appearing but not animating)
+        if (window.AdminAnimations && packages.length > 0) {
+            console.log('🎬 Re-triggering table animations for', packages.length, 'installed packages');
+            setTimeout(() => {
+                window.AdminAnimations.animateTableRows('#installedPackagesTable table', 60);
+            }, 100);
+        }
+
     } catch (error) {
         console.error('Error loading installed packages:', error);
         container.innerHTML = `
@@ -3212,11 +3220,26 @@ async function loadAvailablePackages() {
         `;
 
         container.innerHTML = html;
+
+        // Force reflow/repaint to ensure content is visible
+        void container.offsetHeight;
+
         console.log('✅ Available packages table rendered with', availablePackages.length, 'packages (', packages.length - availablePackages.length, 'installed packages filtered out)');
 
-        // Update notification badge for packages needing validation (use count from alerts API)
-        const validationCount = alertsResult.success ? alertsResult.alerts.validation.count : 0;
+        // Update notification badge for packages needing validation
+        // Only show if not dismissed (respect user's dismiss action)
+        const validationCount = alertsResult.success && !alertsResult.alerts.validation.dismissed
+            ? alertsResult.alerts.validation.count
+            : 0;
         updatePackageBadge('availablePackagesBadge', validationCount);
+
+        // Re-trigger table row animations (fix for packages appearing but not animating)
+        if (window.AdminAnimations && availablePackages.length > 0) {
+            console.log('🎬 Re-triggering table animations for', availablePackages.length, 'packages');
+            setTimeout(() => {
+                window.AdminAnimations.animateTableRows('#availablePackagesTable table', 60);
+            }, 100);
+        }
 
     } catch (error) {
         console.error('❌ Error loading packages:', error);
@@ -3327,8 +3350,20 @@ async function installPackage(packageId, packageName) {
 
         if (result.success) {
             showMessage(result.message, 'success');
-            loadInstalledPackages();
-            loadAvailablePackages();
+            // Small delay to ensure DB has updated before refreshing lists
+            console.log('📦 Package installed, refreshing lists in 500ms...');
+            setTimeout(() => {
+                console.log('📦 Calling loadInstalledPackages() and loadAvailablePackages() now...');
+                loadInstalledPackages();
+                loadAvailablePackages();
+
+                // Switch to Installed Packages subtab so user can see the newly installed package
+                const installedSubtab = document.querySelector('[data-subtab="installed-packages"]');
+                if (installedSubtab) {
+                    installedSubtab.click();
+                    console.log('📦 Switched to Installed Packages subtab');
+                }
+            }, 500);
         } else {
             showMessage('Installation failed: ' + result.error, 'error');
         }
@@ -3359,8 +3394,13 @@ async function upgradePackageById(packageId, packageName) {
 
         if (result.success) {
             showMessage(result.message, 'success');
-            loadInstalledPackages();
-            loadPackageUpdates();
+            // Small delay to ensure DB has updated before refreshing lists
+            console.log('🔄 Package upgraded, refreshing lists in 500ms...');
+            setTimeout(() => {
+                console.log('🔄 Calling loadInstalledPackages() and loadPackageUpdates() now...');
+                loadInstalledPackages();
+                loadPackageUpdates();
+            }, 500);
         } else {
             showMessage('Upgrade failed: ' + result.error, 'error');
         }
@@ -3386,18 +3426,23 @@ async function validatePackage(packageId, packageName) {
             existingModal.remove();
         }
 
-        // Create Bootstrap modal structure (matches Browse Available Packages)
+        // Create MicroModal structure (matches our new standard)
         const modalHtml = `
-            <div class="modal fade" id="validationModal" tabindex="-1" aria-labelledby="validationModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl" style="max-width: 95vw; max-height: 95vh;">
-                    <div class="modal-content" style="height: 95vh;">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="validationModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="modal micromodal-slide" id="validationModal" aria-hidden="true">
+                <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+                    <div class="modal__container modal-compact" role="dialog" aria-modal="true" aria-labelledby="validationModalLabel">
+                        <header class="modal__header">
+                            <h5 class="modal-title" id="validationModalLabel" style="display: flex; align-items: center; gap: 8px;">
                                 <i class="bi bi-clipboard-check"></i> <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
                             </h5>
-                            <button type="button" class="btn-close" data-micromodal-close aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body" style="max-height: calc(95vh - 140px); overflow-y: auto;">
+                            <button type="button" class="modal__close" data-micromodal-close aria-label="Close">
+                                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </header>
+                        <main class="modal__content">
                             <!-- Compact Progress Section -->
                             <div class="validation-progress-compact">
                                 <div class="progress-bar-wrapper">
@@ -3409,18 +3454,18 @@ async function validatePackage(packageId, packageName) {
                                 </div>
                             </div>
 
-                            <!-- Compact Checks Grid (3 columns, no scroll) -->
+                            <!-- Compact Checks Grid (4 columns for better space usage) -->
                             <div class="validation-checks-compact" id="validationChecksContainer">
                                 <div class="checks-grid" id="validationChecksList">
-                                    <!-- Checks will be pre-populated here in 3-column grid -->
+                                    <!-- Checks will be pre-populated here in grid -->
                                 </div>
                             </div>
-                        </div>
-                        <div class="modal-footer">
+                        </main>
+                        <footer class="modal__footer">
                             <button type="button" class="btn btn-secondary" data-micromodal-close>
                                 <i class="bi bi-x-circle"></i> Close
                             </button>
-                        </div>
+                        </footer>
                     </div>
                 </div>
             </div>
@@ -3435,11 +3480,39 @@ async function validatePackage(packageId, packageName) {
             return;
         }
 
-        // Initialize Bootstrap modal
-        const bsModal = new bootstrap.Modal(modalElement);
-        bsModal.show();
+        // Track validation completion state
+        let validationComplete = false;
 
-        console.log('✅ Modal shown with Bootstrap');
+        // Initialize MicroModal (not Bootstrap!)
+        MicroModal.show('validationModal', {
+            disableScroll: true,
+            awaitCloseAnimation: true,
+            onClose: (modal) => {
+                console.log('🔍 DEBUG: Modal closed via MicroModal');
+
+                // Show toast if validation not complete
+                if (!validationComplete && !validationAborted) {
+                    console.log('⚠️ Validation still running when modal closed');
+                    if (window.notyf) {
+                        window.notyf.open({
+                            type: 'info',
+                            message: '⏳ Validation is still running in the background...',
+                            duration: 4000
+                        });
+                    } else {
+                        showMessage('Validation is still running in the background...', 'info');
+                    }
+                }
+
+                // Remove focus from any modal elements before closing to prevent ARIA warning
+                if (document.activeElement && modal.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+                setTimeout(() => modal.remove(), 100);
+            }
+        });
+
+        console.log('✅ Modal shown with MicroModal');
 
         // Helper function to check if modal still exists
         const isModalOpen = () => {
@@ -3457,12 +3530,22 @@ async function validatePackage(packageId, packageName) {
         const checksContainer = document.getElementById('validationChecksContainer');
         const checksList = document.getElementById('validationChecksList');
 
-        // Header/footer close button for the modal (may not exist yet in footer)
-        const closeBtn = modalElement.querySelector('.btn-close, .modal-footer button[data-micromodal-close]');
-        if (closeBtn) {
-            // Prevent closing while validation is actively running until we re-enable it
-            try { closeBtn.disabled = true; } catch (e) { /* ignore */ }
-        }
+        // Header/footer close buttons - add manual close handler
+        const closeButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close]');
+
+        // Add manual close handler that works even when disabled
+        const manualClose = () => {
+            console.log('🔍 Manual close triggered');
+            MicroModal.close('validationModal');
+        };
+
+        closeButtons.forEach(btn => {
+            // Prevent closing while validation is actively running
+            try { btn.disabled = true; } catch (e) { /* ignore */ }
+
+            // Add click handler that will work once enabled
+            btn.addEventListener('click', manualClose);
+        });
 
         // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
@@ -3486,11 +3569,8 @@ async function validatePackage(packageId, packageName) {
         standardChecks.forEach((checkName, index) => {
             const checkHtml = `
                 <div class="validation-check-checkbox" id="check-${index}" data-check-name="${escapeHtml(checkName)}">
-                    <span class="check-icon" style="display: inline-block; width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 4px; margin-right: 12px; text-align: center; line-height: 18px; color: #ccc; font-weight: bold;">
-                    </span>
-                    <span class="check-label" style="color: #666;">
-                        ${escapeHtml(checkName)}
-                    </span>
+                    <span class="check-icon"></span>
+                    <span class="check-label">${escapeHtml(checkName)}</span>
                 </div>
             `;
             checksList.insertAdjacentHTML('beforeend', checkHtml);
@@ -3587,7 +3667,7 @@ async function validatePackage(packageId, packageName) {
                     Server error: ${response.status}
                 </span>
             `;
-            if (closeBtn) closeBtn.disabled = false;
+            closeButtons.forEach(btn => btn.disabled = false);
             return;
         }
 
@@ -3605,7 +3685,7 @@ async function validatePackage(packageId, packageName) {
                     Invalid response from server
                 </span>
             `;
-            if (closeBtn) closeBtn.disabled = false;
+            closeButtons.forEach(btn => btn.disabled = false);
             return;
         }
 
@@ -3618,7 +3698,8 @@ async function validatePackage(packageId, packageName) {
                     Validation failed: ${escapeHtml(result.error || 'Unknown error')}
                 </span>
             `;
-            if (closeBtn) closeBtn.disabled = false;
+            closeButtons.forEach(btn => btn.disabled = false);
+            validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
 
@@ -3634,7 +3715,8 @@ async function validatePackage(packageId, packageName) {
                     Failed to load validation details
                 </span>
             `;
-            if (closeBtn) closeBtn.disabled = false;
+            closeButtons.forEach(btn => btn.disabled = false);
+            validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
 
@@ -3651,7 +3733,8 @@ async function validatePackage(packageId, packageName) {
                     Invalid validation details response
                 </span>
             `;
-            if (closeBtn) closeBtn.disabled = false;
+            closeButtons.forEach(btn => btn.disabled = false);
+            validationComplete = true; // Mark as complete so toast doesn't show
             return;
         }
 
@@ -3752,7 +3835,7 @@ async function validatePackage(packageId, packageName) {
                     // Add install button if validation passed
                     if (summary.failed === 0 && summary.critical === 0) {
                         console.log('Adding install button with animation');
-                        const modalFooter = document.querySelector('#validationModal .modal-footer');
+                        const modalFooter = document.querySelector('#validationModal .modal__footer');
                         if (modalFooter) {
                             modalFooter.innerHTML = `
                                 <button type="button" class="btn btn-primary" id="modalInstallBtn" style="animation: buttonPulse 0.6s ease;">
@@ -3775,8 +3858,13 @@ async function validatePackage(packageId, packageName) {
                         }
                     }
 
-                    // Re-enable header close button after validation completes
-                    if (closeBtn) closeBtn.disabled = false;
+                    // Re-enable close buttons after validation completes
+                    const closeButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close]');
+                    closeButtons.forEach(btn => btn.disabled = false);
+
+                    // Mark validation as complete (prevents toast on close)
+                    validationComplete = true;
+                    console.log('✅ Validation marked as complete');
 
                     // Update final header with animation - check if modal still exists
                     if (!isModalOpen()) return;
@@ -3900,6 +3988,8 @@ async function validatePackage(packageId, packageName) {
 
         showMessage('Validation error: ' + error.message, 'error');
 
+        validationComplete = true; // Mark as complete so toast doesn't show
+
         // Update modal to show error state
         const liveStats = document.getElementById('validationLiveStats');
         if (liveStats) {
@@ -3918,20 +4008,19 @@ function closeValidationModal() {
 
     const modalElement = document.getElementById('validationModal');
     if (modalElement) {
-        console.log('🔍 DEBUG: Closing modal');
+        console.log('🔍 DEBUG: Closing modal with MicroModal');
 
-        // Use Bootstrap modal API to hide
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) {
-            modal.hide();
-        }
+        // Use MicroModal API to close
+        MicroModal.close('validationModal');
 
-        // Clean up after modal is fully hidden
-        modalElement.addEventListener('hidden.bs.modal', function () {
-            setTimeout(() => modalElement.remove(), 100);
-        }, { once: true });
+        // Clean up after animation completes
+        setTimeout(() => {
+            if (modalElement && document.body.contains(modalElement)) {
+                modalElement.remove();
+            }
+        }, 300); // Match MicroModal animation time
 
-        console.log('🔍 DEBUG: Modal hide initiated');
+        console.log('🔍 DEBUG: Modal close initiated');
     } else {
         console.log('🔍 DEBUG: No modal found to close');
     }
@@ -4006,8 +4095,20 @@ async function uninstallPackagePrompt(packageId, packageName) {
 
         if (result.success) {
             showMessage(result.message, 'success');
-            loadInstalledPackages();
-            loadAvailablePackages();
+            // Small delay to ensure DB has updated before refreshing lists
+            console.log('🗑️  Package uninstalled, refreshing lists in 500ms...');
+            setTimeout(() => {
+                console.log('🗑️  Calling loadInstalledPackages() and loadAvailablePackages() now...');
+                loadInstalledPackages();
+                loadAvailablePackages();
+
+                // Switch to Available Packages subtab so user can see the uninstalled package
+                const availableSubtab = document.querySelector('[data-subtab="available-packages"]');
+                if (availableSubtab) {
+                    availableSubtab.click();
+                    console.log('🗑️  Switched to Available Packages subtab');
+                }
+            }, 500);
         } else {
             showMessage('Uninstall failed: ' + result.error, 'error');
         }
@@ -4031,11 +4132,12 @@ async function deletePackage(packageId, packageName) {
         const result = await response.json();
 
         if (result.success) {
-            showMessage('Package deleted', 'success');
+            showMessage('Package deleted successfully', 'success');
             // Small delay to ensure filesystem/DB has updated
-            console.log('🗑️  Package deleted, refreshing list in 500ms...');
+            console.log('🗑️  Package deleted, refreshing lists in 500ms...');
             setTimeout(() => {
-                console.log('🗑️  Calling loadAvailablePackages() now...');
+                console.log('🗑️  Reloading both installed and available packages...');
+                loadInstalledPackages();
                 loadAvailablePackages();
             }, 500);
         } else {
@@ -4093,9 +4195,9 @@ async function showValidationDetails(packageId) {
             groupedChecks[check.check_type].push(check);
         });
 
-        // Build accordion HTML
-        let accordionHTML = '';
-        let accordionIndex = 0;
+        // Build compact grid HTML for checks
+        let checksHTML = '<div class="row g-3">';
+
         Object.keys(groupedChecks).forEach(checkType => {
             const typeChecks = groupedChecks[checkType];
             const typePassed = typeChecks.filter(c => c.status === 'pass').length;
@@ -4103,31 +4205,31 @@ async function showValidationDetails(packageId) {
             const typeIcon = typeFailed > 0 ? '✗' : typePassed === typeChecks.length ? '✓' : '⚠';
             const typeColor = typeFailed > 0 ? 'danger' : typePassed === typeChecks.length ? 'success' : 'warning';
 
-            accordionHTML += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading${accordionIndex}">
-                        <button class="accordion-button ${accordionIndex > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${accordionIndex}" aria-expanded="${accordionIndex === 0}" aria-controls="collapse${accordionIndex}">
-                            <span class="badge bg-${typeColor} me-2">${typeIcon}</span>
-                            ${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}
-                            <small class="ms-auto me-2 text-muted">${typePassed}/${typeChecks.length} passed</small>
-                        </button>
-                    </h2>
-                    <div id="collapse${accordionIndex}" class="accordion-collapse collapse ${accordionIndex === 0 ? 'show' : ''}" aria-labelledby="heading${accordionIndex}" data-bs-parent="#validationChecksAccordion">
-                        <div class="accordion-body p-0">
-                            <div class="list-group list-group-flush">`;
+            // Each check type gets its own column (responsive: 1 col mobile, 2 col tablet, 3 col desktop)
+            checksHTML += `
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 border-${typeColor}">
+                        <div class="card-header bg-${typeColor} bg-opacity-10 py-2">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-${typeColor} me-2">${typeIcon}</span>
+                                <strong class="small">${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}</strong>
+                                <small class="ms-auto text-muted">${typePassed}/${typeChecks.length}</small>
+                            </div>
+                        </div>
+                        <div class="card-body p-2 validation-card-body">`;
 
             typeChecks.forEach(check => {
                 const icon = check.status === 'fail' ? '✗' : check.status === 'warning' ? '⚠' : '✓';
                 const statusColor = check.status === 'fail' ? 'danger' : check.status === 'warning' ? 'warning' : 'success';
 
-                accordionHTML += `
-                    <div class="list-group-item">
+                checksHTML += `
+                    <div class="border-bottom pb-2 mb-2">
                         <div class="d-flex align-items-start">
-                            <span class="badge bg-${statusColor} me-2 mt-1">${icon}</span>
-                            <div class="flex-grow-1">
+                            <span class="badge bg-${statusColor} me-2 flex-shrink-0" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;">${icon}</span>
+                            <div class="small">
                                 <div class="fw-bold">${escapeHtml(check.check_name)}</div>
-                                <div class="text-muted small">${escapeHtml(check.message)}</div>
-                                ${check.resolution ? `<div class="text-success small mt-1">
+                                <div class="text-muted" style="font-size: 0.85rem;">${escapeHtml(check.message)}</div>
+                                ${check.resolution ? `<div class="text-success mt-1" style="font-size: 0.85rem;">
                                     <strong>Fix:</strong> ${escapeHtml(check.resolution)}
                                 </div>` : ''}
                             </div>
@@ -4135,61 +4237,54 @@ async function showValidationDetails(packageId) {
                     </div>`;
             });
 
-            accordionHTML += `
-                            </div>
+            checksHTML += `
                         </div>
                     </div>
                 </div>`;
-
-            accordionIndex++;
         });
+
+        checksHTML += '</div>';
 
         // Build modal body HTML
         const bodyHTML = `
             <!-- Package Header -->
-            <div class="mb-3">
-                <h6 class="text-muted mb-1">Package Details</h6>
-                <h4 class="mb-0">${escapeHtml(pkg.display_name)} <small class="text-muted">v${escapeHtml(pkg.version)}</small></h4>
+            <div class="row mb-3">
+                <div class="col">
+                    <h4 class="mb-0">${escapeHtml(pkg.display_name)} <span class="badge bg-secondary">${escapeHtml(pkg.version)}</span></h4>
+                </div>
             </div>
 
             ${pkg.validation_status === 'pending' ? `
-            <div class="alert alert-info d-flex align-items-center mb-3">
+            <div class="alert alert-info d-flex align-items-center mb-3 py-2">
                 <span class="me-3" style="font-size: 1.5rem;">⏳</span>
                 <div>
                     <strong>Running Complete Validation...</strong>
-                    <div class="mt-1 small">
-                        This is a comprehensive audit of the package.<br>
-                        All ${summary.total_checks || 0} checks are being performed.
-                    </div>
+                    <div class="mt-1 small">All ${summary.total_checks || 0} checks are being performed.</div>
                 </div>
             </div>
             ` : ''}
 
             <!-- Validation Summary -->
-            <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3">
+            <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3 py-2">
                 <span class="me-3" style="font-size: 1.5rem;">${summaryIcon}</span>
                 <div class="flex-grow-1">
                     <strong>${summaryText}</strong>
-                    <div class="mt-2 small">
-                        <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
+                    <div class="mt-1 small">
                         <span class="badge bg-success me-1">${summary.passed || 0} passed</span>
                         <span class="badge bg-danger me-1">${summary.failed || 0} failed</span>
                         <span class="badge bg-warning text-dark">${summary.warnings || 0} warnings</span>
-                        ${(summary.critical || 0) > 0 ? `<br><span class="text-danger fw-bold mt-1 d-inline-block">⚠️ ${summary.critical} critical issues</span>` : ''}
+                        ${(summary.critical || 0) > 0 ? `<span class="badge bg-danger ms-1">⚠️ ${summary.critical} critical</span>` : ''}
                     </div>
                 </div>
             </div>
 
-            <!-- Compatibility Checks -->
-            <h6 class="mb-3">
+            <!-- Compatibility Checks Grid -->
+            <h6 class="mb-2">
                 <i class="bi bi-list-check text-primary me-2"></i>
-                All Compatibility Checks
-                <small class="text-muted">(${checks.length} total)</small>
+                Compatibility Checks <small class="text-muted">(${checks.length} total)</small>
             </h6>
 
-            <div class="accordion" id="validationChecksAccordion">
-                ${accordionHTML}
-            </div>
+            ${checksHTML}
         `;
 
         // Build footer HTML
@@ -4198,7 +4293,7 @@ async function showValidationDetails(packageId) {
                 <i class="bi bi-x-circle"></i> Close
             </button>
             ${pkg.can_install && !result.package.is_installed ?
-            `<button type="button" class="btn btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}'); ModalRenderer.hide('packageValidationModal');">
+                `<button type="button" class="btn btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}'); ModalRenderer.hide('packageValidationModal');">
                 <i class="bi bi-download"></i> Install Package
             </button>` : ''}
         `;
@@ -4346,9 +4441,13 @@ function updatePackageAlertBadge(validation, updates) {
         const totalAlerts = (validation.dismissed ? 0 : validation.count) + (updates.dismissed ? 0 : updates.count);
 
         if (totalAlerts > 0) {
-            sidebarBadge.textContent = totalAlerts;
+            // Show red dot indicator (no number) on sidebar
+            sidebarBadge.textContent = '';  // Empty - just a dot
+            sidebarBadge.classList.add('dot');
             sidebarBadge.style.display = 'inline-block';
         } else {
+            sidebarBadge.textContent = '';
+            sidebarBadge.classList.remove('dot');
             sidebarBadge.style.display = 'none';
         }
     }
@@ -4851,7 +4950,7 @@ function renderPackageSearchResults(packages) {
         // Add click handler to rows to toggle checkboxes
         const packageRows = document.querySelectorAll('.package-row');
         packageRows.forEach(row => {
-            row.addEventListener('click', function(e) {
+            row.addEventListener('click', function (e) {
                 // Don't trigger if clicking the checkbox itself
                 if (e.target.type === 'checkbox') {
                     return;
@@ -5277,13 +5376,17 @@ async function downloadSelectedPackages() {
         // Close modal and refresh
         ModalRenderer.hide('packageDiscoveryModal');
 
-        // Switch to Available Packages subtab and reload
+        // Reload packages with delay to ensure DB/filesystem updated
+        console.log('📦 Packages downloaded, reloading lists in 500ms...');
+        setTimeout(() => {
+            console.log('📦 Reloading available packages (includes alerts and badges)...');
+            loadAvailablePackages(); // This already fetches alerts and updates badges
+        }, 500);
+
+        // Switch to Available Packages subtab
         const availableSubtab = document.querySelector('#tab-packages .subtab-nav a[data-subtab="available-packages"]');
         if (availableSubtab) {
             availableSubtab.click();
-        } else {
-            // Fallback: just reload available packages
-            loadAvailablePackages();
         }
     }
 
