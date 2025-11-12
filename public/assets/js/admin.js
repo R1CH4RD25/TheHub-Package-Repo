@@ -4621,10 +4621,9 @@ async function searchPackages() {
 
     const resultsContainer = document.getElementById('packageSearchResults');
 
-    // Safety check: If container doesn't exist yet, MicroModal hasn't rendered
+    // Safety check: element should exist after ModalRenderer injects content
     if (!resultsContainer) {
-        console.warn('⚠️ packageSearchResults not found in DOM yet, retrying...');
-        setTimeout(() => searchPackages(), 200);
+        console.error('❌ packageSearchResults not found! ModalRenderer may have failed to inject body content.');
         return;
     }
 
