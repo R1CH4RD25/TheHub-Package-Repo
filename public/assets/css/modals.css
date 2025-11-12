@@ -40,7 +40,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10001;
+    z-index: 100000; /* Above everything including header (10002) */
 }
 
 /**
@@ -52,6 +52,7 @@
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
     max-height: 95vh;
+    min-height: 60vh;
     max-width: 600px;
     width: 90%;
 }
@@ -63,6 +64,7 @@
     max-width: 90vw !important;
     width: 90vw !important;
     max-height: 98vh !important;
+    min-height: 90vh !important;
 }
 
 /**
@@ -113,6 +115,7 @@
     padding: 1.5rem;
     overflow-y: auto;
     max-height: calc(95vh - 140px);
+    min-height: calc(60vh - 140px);
 }
 
 /**
@@ -120,6 +123,7 @@
  */
 .modal-wide .modal__content {
     max-height: calc(98vh - 140px);
+    min-height: calc(90vh - 140px);
 }
 
 /**
