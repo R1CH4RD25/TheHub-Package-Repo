@@ -1,0 +1,63 @@
+{
+  "defined_in_modals_php": [
+    {
+      "id": "confirmModal",
+      "size": "default",
+      "scrollable": false
+    },
+    {
+      "id": "invitationModal",
+      "size": "default",
+      "scrollable": false
+    },
+    {
+      "id": "userRolesModal",
+      "size": "lg",
+      "scrollable": false
+    },
+    {
+      "id": "sectionAccessModal",
+      "size": "default",
+      "scrollable": false
+    },
+    {
+      "id": "sectionModal",
+      "size": "xl",
+      "scrollable": true
+    },
+    {
+      "id": "googleGroupModal",
+      "size": "default",
+      "scrollable": true
+    },
+    {
+      "id": "microsoftGroupModal",
+      "size": "default",
+      "scrollable": true
+    },
+    {
+      "id": "packageValidationModal",
+      "size": "xl-90vw",
+      "scrollable": true
+    },
+    {
+      "id": "dynamicContentModal",
+      "size": "xl-90vw",
+      "scrollable": true
+    }
+  ],
+  "dynamically_created_js": [
+    {
+      "id": "dynamicModal",
+      "function": "loadRolesCache",
+      "deprecated": true
+    },
+    {
+      "id": "packageDiscoveryModal",
+      "function": "loadRolesCache",
+      "deprecated": false
+    }
+  ],
+  "bootstrap_instances": [],
+  "summary": {}
+}
