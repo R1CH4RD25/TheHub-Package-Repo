@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 02:58:07 PM UTC 2025
+ * Generated: Wed Nov 12 03:27:38 PM UTC 2025
  * ============================================================================
  */
 
@@ -2162,44 +2162,216 @@ footer.footer {
 
 /**
  * ============================================================================
- * MODAL STYLES - CENTRALIZED
+ * MODAL STYLES - MICROMODAL EDITION
  * ============================================================================
- * All modal-related CSS extracted from admin.css, admin-theme.css,
- * admin-modern.css, and media.css
+ * Migrated from Bootstrap 5 to MicroModal.js (1.9KB gzipped)
+ * - No CSS conflicts with framework defaults
+ * - Full control over modal behavior and styling
+ * - Accessibility-first (WAI-ARIA compliant)
  *
  * Modals defined in: /public/admin/partials/modals.php
+ * MicroModal docs: https://micromodal.vercel.app/
  * ============================================================================
  */
 
 /* ==========================================================================
-   BASE MODAL STRUCTURE
+   MICROMODAL BASE STRUCTURE
    ========================================================================== */
 
+/**
+ * Modal container - Hidden by default
+ */
 .modal {
     display: none;
+}
+
+.modal.is-open {
+    display: block;
+}
+
+/**
+ * Modal overlay - Semi-transparent backdrop
+ */
+.modal__overlay {
     position: fixed;
-    z-index: 10001;
-    left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg-modal-overlay);
-    overflow: hidden;
-    align-items: center;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
     justify-content: center;
+    align-items: center;
+    z-index: 10001;
 }
 
-/* When modal is shown, use flex for centering */
-.modal.show,
-.modal[style*="display: block"] {
-    display: flex !important;
+/**
+ * Modal container - The actual modal box
+ */
+.modal__container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    max-height: 90vh;
+    max-width: 600px;
+    width: 90%;
 }
 
-.modal.hiding {
-    animation: fadeOut 0.3s ease-out forwards;
+/**
+ * Wide modals - 90vw width (our requirement!)
+ */
+.modal__container.modal-wide {
+    max-width: 90vw !important;
+    width: 90vw !important;
 }
 
-.modal-content {
+/**
+ * Modal header
+ */
+.modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+/**
+ * Modal close button (X button)
+ */
+.modal__close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #6c757d;
+    transition: color 0.15s ease-in-out;
+}
+
+.modal__close:hover {
+    color: #000;
+}
+
+.modal__close:before {
+    content: "✕";
+}
+
+/**
+ * Modal content area
+ */
+.modal__content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: calc(90vh - 140px);
+}
+
+/**
+ * Modal footer
+ */
+.modal__footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* ==========================================================================
+   MICROMODAL ANIMATIONS
+   ========================================================================== */
+
+/**
+ * Slide animation for modal appearance
+ */
+@keyframes mmfadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes mmslideIn {
+    from {
+        transform: translateY(15%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.micromodal-slide {
+    display: none;
+}
+
+.micromodal-slide.is-open {
+    display: block;
+}
+
+.micromodal-slide[aria-hidden="false"] .modal__overlay {
+    animation: mmfadeIn 0.3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.micromodal-slide[aria-hidden="false"] .modal__container {
+    animation: mmslideIn 0.3s cubic-bezier(0, 0, .2, 1);
+}
+
+.micromodal-slide[aria-hidden="true"] .modal__overlay {
+    animation: mmfadeOut 0.3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.micromodal-slide[aria-hidden="true"] .modal__container {
+    animation: mmslideOut 0.3s cubic-bezier(0, 0, .2, 1);
+}
+
+@keyframes mmfadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes mmslideOut {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-10%);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .modal__container.modal-wide {
+        max-width: 95vw !important;
+        width: 95vw !important;
+    }
+
+    .modal__header,
+    .modal__content,
+    .modal__footer {
+        padding: 1rem;
+    }
+}
+
+/* ==========================================================================
+   LEGACY BOOTSTRAP CLASSES (For Backwards Compatibility)
+   ========================================================================== */
+
+/* Keep Bootstrap utility classes working inside modals */.modal-content {
     background: white;
     margin: 0;
     padding: 2rem;
