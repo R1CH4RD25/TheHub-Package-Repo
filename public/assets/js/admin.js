@@ -4135,15 +4135,15 @@ async function showValidationDetails(packageId) {
         modal.setAttribute('aria-hidden', 'true');
 
         modal.innerHTML = `
-            <div class="modal-dialog modal-xl" style="max-width: 90vw;">
-                <div class="modal-content">
+            <div class="modal-dialog modal-xl" style="max-width: 95vw; max-height: 95vh;">
+                <div class="modal-content" style="height: 95vh;">
                     <div class="modal-header">
                         <h5 class="modal-title" id="validationReportModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                             <span>${pkg.validation_status === 'pending' ? '⏳ Validation In Progress' : '📋 Package Validation Report'}</span>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="modal-body" style="max-height: calc(95vh - 140px); overflow-y: auto;">
                         <!-- Package Header -->
                         <div class="mb-3">
                             <h6 class="text-muted mb-1">Package Details</h6>
