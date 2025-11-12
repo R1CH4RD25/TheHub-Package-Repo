@@ -3563,16 +3563,27 @@ async function validatePackage(packageId, packageName) {
 
         console.log('🔒 Disabling close buttons. Found:', closeButtons.length);
 
+        let validationInProgress = true; // Flag to track validation state
+
+        // Add click handler that prevents closing during validation
+        const preventCloseHandler = (e) => {
+            if (validationInProgress) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('🚫 Close prevented - validation still in progress');
+                return false;
+            }
+        };
+
         closeButtons.forEach(btn => {
             console.log('  Disabling:', btn.className, 'has data-micromodal-close:', btn.hasAttribute('data-micromodal-close'));
 
-            // Store the original close attribute so we can restore it
-            if (btn.hasAttribute('data-micromodal-close')) {
-                btn.setAttribute('data-original-close', 'true');
-            }
+            // Add handler to prevent closing (higher priority than MicroModal)
+            btn.addEventListener('click', preventCloseHandler, true); // Use capture phase
 
-            // Remove the close attribute to prevent MicroModal from closing
-            btn.removeAttribute('data-micromodal-close');
+            // Store handler reference so we can remove it later
+            btn._preventCloseHandler = preventCloseHandler;
 
             // Add visual indicator that close is disabled
             btn.style.opacity = '0.5';
@@ -3582,6 +3593,9 @@ async function validatePackage(packageId, packageName) {
 
         // Helper function to re-enable close buttons
         const enableCloseButtons = () => {
+            // Mark validation as no longer in progress
+            validationInProgress = false;
+
             // Re-query from document to ensure we catch the current state
             const modal = document.getElementById('validationModal');
             if (!modal) {
@@ -3589,18 +3603,18 @@ async function validatePackage(packageId, packageName) {
                 return;
             }
 
-            const currentCloseButtons = modal.querySelectorAll('.modal__close, button[data-micromodal-close], button[data-original-close]');
+            const currentCloseButtons = modal.querySelectorAll('.modal__close, button[data-micromodal-close]');
 
             console.log('🔓 Enabling close buttons. Found:', currentCloseButtons.length);
 
             currentCloseButtons.forEach(btn => {
-                console.log('  Button:', btn.className, 'has data-original-close:', btn.hasAttribute('data-original-close'));
+                console.log('  Button:', btn.className);
 
-                // Restore the close attribute if it was originally disabled
-                if (btn.hasAttribute('data-original-close')) {
-                    btn.setAttribute('data-micromodal-close', '');
-                    btn.removeAttribute('data-original-close');
-                    console.log('  ✅ Restored data-micromodal-close attribute');
+                // Remove the prevent-close handler
+                if (btn._preventCloseHandler) {
+                    btn.removeEventListener('click', btn._preventCloseHandler, true);
+                    delete btn._preventCloseHandler;
+                    console.log('  ✅ Removed prevent-close handler');
                 }
 
                 // Restore visual state (clear any disabled styling)
@@ -3950,6 +3964,7 @@ async function validatePackage(packageId, packageName) {
                     if (!isModalOpen()) return;
                     console.log('🔄 Reloading packages list to show updated status...');
                     await loadAvailablePackages();
+                    checkPackageAlerts(false); // Refresh badge counts after validation
 
                     // Force rows to be visible immediately (CSS has opacity: 0 by default)
                     setTimeout(() => {
