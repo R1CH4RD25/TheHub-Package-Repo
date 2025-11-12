@@ -25,6 +25,7 @@
 
 .modal.is-open {
     display: block;
+    z-index: 100000 !important; /* Above header (10002) */
 }
 
 /**
@@ -40,7 +41,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100000; /* Above everything including header (10002) */
 }
 
 /**

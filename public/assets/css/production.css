@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 03:34:54 PM UTC 2025
+ * Generated: Wed Nov 12 03:38:59 PM UTC 2025
  * ============================================================================
  */
 
@@ -2187,6 +2187,7 @@ footer.footer {
 
 .modal.is-open {
     display: block;
+    z-index: 100000 !important; /* Above header (10002) */
 }
 
 /**
@@ -2202,7 +2203,6 @@ footer.footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100000; /* Above everything including header (10002) */
 }
 
 /**
