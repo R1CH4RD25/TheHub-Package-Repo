@@ -197,7 +197,7 @@ use Hub\Roles;
 <!-- Section Management Modal (Super Admin Only) -->
 <?php if ($isSuperAdmin): ?>
 <div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 90vw !important;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="sectionModalTitle">
@@ -207,7 +207,7 @@ use Hub\Roles;
             </div>
             <form id="sectionForm">
                 <div class="modal-body">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">"
                     <input type="hidden" id="sectionId" name="id">
 
                     <div class="mb-3">
@@ -539,3 +539,82 @@ use Hub\Roles;
     </div>
 </div>
 <?php endif; ?>
+
+<!-- ============================================================================
+     REUSABLE DYNAMIC CONTENT MODALS
+     These modals are populated dynamically via JavaScript
+     ============================================================================ -->
+
+<!-- Package Validation Report Modal -->
+<div class="modal fade" id="packageValidationModal" tabindex="-1" aria-labelledby="packageValidationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 90vw !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="packageValidationModalLabel">
+                    <i class="bi bi-clipboard-check"></i> Package Validation Report
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="packageValidationModalBody">
+                <!-- Content populated by JavaScript -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading validation report...</p>
+                </div>
+            </div>
+            <div class="modal-footer" id="packageValidationModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generic Large Content Modal (for dynamic content) -->
+<div class="modal fade" id="dynamicContentModal" tabindex="-1" aria-labelledby="dynamicContentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" style="max-width: 90vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dynamicContentModalLabel">Modal Title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="dynamicContentModalBody">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="modal-footer" id="dynamicContentModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Package Discovery Modal (Browse Repository) -->
+<div class="modal fade" id="packageDiscoveryModal" tabindex="-1" aria-labelledby="packageDiscoveryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 90vw !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="packageDiscoveryModalLabel">
+                    <i class="bi bi-box-seam text-primary"></i> Browse Available Packages
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="packageDiscoveryModalBody">
+                <!-- Content populated by JavaScript -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading package repository...</p>
+                </div>
+            </div>
+            <div class="modal-footer" id="packageDiscoveryModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

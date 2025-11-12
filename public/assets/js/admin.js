@@ -4049,49 +4049,172 @@ async function deletePackage(packageId, packageName) {
 
 // Show validation details modal
 async function showValidationDetails(packageId) {
-    console.log('🔍 TEST: showValidationDetails called with packageId:', packageId);
-    console.log('🔍 TEST: ModalRenderer exists?', typeof ModalRenderer !== 'undefined');
-
     try {
-        // SIMPLE TEST MODAL - No API calls, just static content
+        // Show loading state
         ModalRenderer.show('packageValidationModal', {
-            title: '🧪 TEST: This is the Title',
+            title: '<i class="bi bi-hourglass-split"></i> Loading Validation Report...',
             body: `
-                <div style="padding: 2rem;">
-                    <h3>🎯 This is the Body Content</h3>
-                    <p>If you can see this, the ModalRenderer is working!</p>
-                    <div class="alert alert-info mt-3">
-                        <strong>Testing Modal System:</strong>
-                        <ul class="mb-0 mt-2">
-                            <li>✅ Modal template exists in modals.php</li>
-                            <li>✅ ModalRenderer.show() was called</li>
-                            <li>✅ This content was dynamically inserted</li>
-                            <li>✅ You should be able to close this modal</li>
-                        </ul>
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-3"><strong>Package ID:</strong> ${packageId}</p>
-                    <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                    <p class="mt-3 text-muted">Fetching package validation data...</p>
                 </div>
             `,
             footer: `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Close Button Test
-                </button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                    <i class="bi bi-check-circle"></i> Another Close Test
+                    <i class="bi bi-x-circle"></i> Close
                 </button>
             `
         });
 
-        console.log('🔍 TEST: ModalRenderer.show() completed successfully');
+        // Fetch validation data with cache-busting
+        const timestamp = Date.now();
+        const response = await fetch(`/api/packages.php?action=validation&id=${packageId}&_=${timestamp}`);
+        const result = await response.json();
+
+        if (!result.success) throw new Error(result.error);
+
+        const pkg = result.package;
+        const summary = result.summary;
+        const checks = result.all_checks;
+
+        const summaryClass = pkg.can_install ? 'success' : (pkg.validation_status === 'pending' ? 'pending' : 'failure');
+        const summaryIcon = pkg.can_install ? '✓' : (pkg.validation_status === 'pending' ? '⏳' : '✗');
+        const summaryText = pkg.can_install ? 'Package Validated - Ready to Install' :
+            (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
+
+        // Group checks by type
+        const groupedChecks = {};
+        checks.forEach(check => {
+            if (!groupedChecks[check.check_type]) {
+                groupedChecks[check.check_type] = [];
+            }
+            groupedChecks[check.check_type].push(check);
+        });
+
+        // Build accordion HTML
+        let accordionHTML = '';
+        let accordionIndex = 0;
+        Object.keys(groupedChecks).forEach(checkType => {
+            const typeChecks = groupedChecks[checkType];
+            const typePassed = typeChecks.filter(c => c.status === 'pass').length;
+            const typeFailed = typeChecks.filter(c => c.status === 'fail').length;
+            const typeIcon = typeFailed > 0 ? '✗' : typePassed === typeChecks.length ? '✓' : '⚠';
+            const typeColor = typeFailed > 0 ? 'danger' : typePassed === typeChecks.length ? 'success' : 'warning';
+
+            accordionHTML += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading${accordionIndex}">
+                        <button class="accordion-button ${accordionIndex > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${accordionIndex}" aria-expanded="${accordionIndex === 0}" aria-controls="collapse${accordionIndex}">
+                            <span class="badge bg-${typeColor} me-2">${typeIcon}</span>
+                            ${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}
+                            <small class="ms-auto me-2 text-muted">${typePassed}/${typeChecks.length} passed</small>
+                        </button>
+                    </h2>
+                    <div id="collapse${accordionIndex}" class="accordion-collapse collapse ${accordionIndex === 0 ? 'show' : ''}" aria-labelledby="heading${accordionIndex}" data-bs-parent="#validationChecksAccordion">
+                        <div class="accordion-body p-0">
+                            <div class="list-group list-group-flush">`;
+
+            typeChecks.forEach(check => {
+                const icon = check.status === 'fail' ? '✗' : check.status === 'warning' ? '⚠' : '✓';
+                const statusColor = check.status === 'fail' ? 'danger' : check.status === 'warning' ? 'warning' : 'success';
+
+                accordionHTML += `
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-start">
+                            <span class="badge bg-${statusColor} me-2 mt-1">${icon}</span>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${escapeHtml(check.check_name)}</div>
+                                <div class="text-muted small">${escapeHtml(check.message)}</div>
+                                ${check.resolution ? `<div class="text-success small mt-1">
+                                    <strong>Fix:</strong> ${escapeHtml(check.resolution)}
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            accordionHTML += `
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            accordionIndex++;
+        });
+
+        // Build modal body HTML
+        const bodyHTML = `
+            <!-- Package Header -->
+            <div class="mb-3">
+                <h6 class="text-muted mb-1">Package Details</h6>
+                <h4 class="mb-0">${escapeHtml(pkg.display_name)} <small class="text-muted">v${escapeHtml(pkg.version)}</small></h4>
+            </div>
+
+            ${pkg.validation_status === 'pending' ? `
+            <div class="alert alert-info d-flex align-items-center mb-3">
+                <span class="me-3" style="font-size: 1.5rem;">⏳</span>
+                <div>
+                    <strong>Running Complete Validation...</strong>
+                    <div class="mt-1 small">
+                        This is a comprehensive audit of the package.<br>
+                        All ${summary.total_checks || 0} checks are being performed.
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Validation Summary -->
+            <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3">
+                <span class="me-3" style="font-size: 1.5rem;">${summaryIcon}</span>
+                <div class="flex-grow-1">
+                    <strong>${summaryText}</strong>
+                    <div class="mt-2 small">
+                        <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
+                        <span class="badge bg-success me-1">${summary.passed || 0} passed</span>
+                        <span class="badge bg-danger me-1">${summary.failed || 0} failed</span>
+                        <span class="badge bg-warning text-dark">${summary.warnings || 0} warnings</span>
+                        ${(summary.critical || 0) > 0 ? `<br><span class="text-danger fw-bold mt-1 d-inline-block">⚠️ ${summary.critical} critical issues</span>` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compatibility Checks -->
+            <h6 class="mb-3">
+                <i class="bi bi-list-check text-primary me-2"></i>
+                All Compatibility Checks
+                <small class="text-muted">(${checks.length} total)</small>
+            </h6>
+
+            <div class="accordion" id="validationChecksAccordion">
+                ${accordionHTML}
+            </div>
+        `;
+
+        // Build footer HTML
+        const footerHTML = `
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="bi bi-x-circle"></i> Close
+            </button>
+            ${pkg.can_install && !result.package.is_installed ?
+            `<button type="button" class="btn btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}'); ModalRenderer.hide('packageValidationModal');">
+                <i class="bi bi-download"></i> Install Package
+            </button>` : ''}
+        `;
+
+        // Update modal with full content
+        ModalRenderer.update('packageValidationModal', {
+            title: `<i class="bi bi-clipboard-check"></i> ${pkg.validation_status === 'pending' ? '⏳ Validation In Progress' : 'Package Validation Report'}`,
+            body: bodyHTML,
+            footer: footerHTML
+        });
 
     } catch (error) {
-        console.error('❌ TEST: Error in showValidationDetails:', error);
-        alert('ERROR: ' + error.message);
+        showMessage('Error loading validation: ' + error.message, 'error');
+        ModalRenderer.hide('packageValidationModal');
     }
-}
-
-// Show modal with custom content (DEPRECATED - keeping for backwards compatibility)
+}// Show modal with custom content (DEPRECATED - keeping for backwards compatibility)
 function showModalWithContent(htmlContent) {
     // Remove existing modal if any
     let modal = document.getElementById('dynamicModal');
