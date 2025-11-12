@@ -4847,6 +4847,27 @@ function renderPackageSearchResults(packages) {
                 });
             });
         }
+
+        // Add click handler to rows to toggle checkboxes
+        const packageRows = document.querySelectorAll('.package-row');
+        packageRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Don't trigger if clicking the checkbox itself
+                if (e.target.type === 'checkbox') {
+                    return;
+                }
+
+                // Find the checkbox in this row
+                const checkbox = this.querySelector('.package-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    togglePackageSelection(checkbox);
+                }
+            });
+
+            // Add cursor pointer style to indicate clickability
+            row.style.cursor = 'pointer';
+        });
     }, 100);
 
     // Populate tag filters
