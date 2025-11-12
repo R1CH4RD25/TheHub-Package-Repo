@@ -3377,6 +3377,7 @@ async function installPackage(packageId, packageName) {
                 console.log('📦 Calling loadInstalledPackages() and loadAvailablePackages() now...');
                 loadInstalledPackages();
                 loadAvailablePackages();
+                checkPackageAlerts(false); // Refresh badge counts (no alert banners)
 
                 // Switch to Installed Packages subtab so user can see the newly installed package
                 const installedSubtab = document.querySelector('[data-subtab="installed-packages"]');
@@ -4151,6 +4152,7 @@ async function uninstallPackagePrompt(packageId, packageName) {
                 console.log('🗑️  Calling loadInstalledPackages() and loadAvailablePackages() now...');
                 loadInstalledPackages();
                 loadAvailablePackages();
+                checkPackageAlerts(false); // Refresh badge counts (no alert banners)
 
                 // Switch to Available Packages subtab so user can see the uninstalled package
                 const availableSubtab = document.querySelector('[data-subtab="available-packages"]');
@@ -4189,6 +4191,7 @@ async function deletePackage(packageId, packageName) {
                 console.log('🗑️  Reloading both installed and available packages...');
                 loadInstalledPackages();
                 loadAvailablePackages();
+                checkPackageAlerts(false); // Refresh badge counts (no alert banners)
             }, 500);
         } else {
             showMessage('Delete failed: ' + result.error, 'error');
