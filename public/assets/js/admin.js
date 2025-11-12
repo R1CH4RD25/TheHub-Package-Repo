@@ -5451,6 +5451,7 @@ async function downloadSelectedPackages() {
         setTimeout(() => {
             console.log('📦 Reloading available packages (includes alerts and badges)...');
             loadAvailablePackages(); // This already fetches alerts and updates badges
+            checkPackageAlerts(false); // Refresh sidebar badge counts after batch download
         }, 500);
 
         // Switch to Available Packages subtab
