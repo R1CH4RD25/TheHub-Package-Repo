@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 03:42:54 PM UTC 2025
+ * Generated: Wed Nov 12 03:46:41 PM UTC 2025
  * ============================================================================
  */
 
@@ -2249,30 +2249,37 @@ footer.footer {
 }
 
 /**
- * Modal close button (X button) - Smooth hover animation
+ * Modal close button (X button) - Modern SVG icon with smooth animation
  */
 .modal__close {
     background: transparent !important;
     border: none !important;
-    padding: 0.5rem !important;
+    padding: 8px !important;
+    border-radius: 6px !important;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
     cursor: pointer !important;
-    color: #6c757d !important;
-    font-size: 2rem !important;
-    line-height: 1 !important;
-    opacity: 0.7 !important;
-    transition: opacity 0.2s ease !important;
+    color: #dc3545 !important;
+    transform: rotate(180deg) scale(1.2) !important;
+    outline: 0 !important;
     margin-left: auto !important;
-    font-weight: 300 !important;
 }
 
 .modal__close:hover,
 .modal__close:focus {
-    opacity: 1 !important;
+    transform: rotate(180deg) scale(1.4) !important;
+    background: rgba(220, 53, 69, 0.1) !important;
     outline: none !important;
 }
 
-.modal__close::before {
-    content: '×' !important;
+.modal__close svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    stroke-width: 2;
 }
 
 /**

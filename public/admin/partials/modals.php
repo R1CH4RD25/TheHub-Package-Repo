@@ -197,7 +197,7 @@ use Hub\Roles;
 <!-- Section Management Modal (Super Admin Only) -->
 <?php if ($isSuperAdmin): ?>
 <div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 90vw !important;">
+    <div class="modal-dialog modal-dialog-scrollable modal-wide">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="sectionModalTitle">
@@ -546,16 +546,21 @@ use Hub\Roles;
      ============================================================================ -->
 
 <!-- Package Validation Report Modal -->
-<div class="modal fade" id="packageValidationModal" tabindex="-1" aria-labelledby="packageValidationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 90vw !important;">
-        <div class="modal-content">
-            <div class="modal-header">
+<div class="modal micromodal-slide" id="packageValidationModal" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+        <div class="modal__container modal-wide" role="dialog" aria-modal="true" aria-labelledby="packageValidationModalLabel">
+            <header class="modal__header">
                 <h5 class="modal-title" id="packageValidationModalLabel">
                     <i class="bi bi-clipboard-check"></i> Package Validation Report
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="packageValidationModalBody">
+                <button class="modal__close" aria-label="Close modal" data-micromodal-close title="Close (ESC)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </header>
+            <main class="modal__content" id="packageValidationModalBody">
                 <!-- Content populated by JavaScript -->
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -563,12 +568,12 @@ use Hub\Roles;
                     </div>
                     <p class="mt-3 text-muted">Loading validation report...</p>
                 </div>
-            </div>
-            <div class="modal-footer" id="packageValidationModalFooter">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            </main>
+            <footer class="modal__footer" id="packageValidationModalFooter">
+                <button type="button" class="btn btn-secondary" data-micromodal-close>
                     <i class="bi bi-x-circle"></i> Close
                 </button>
-            </div>
+            </footer>
         </div>
     </div>
 </div>
@@ -592,16 +597,21 @@ use Hub\Roles;
 </div>
 
 <!-- Package Discovery Modal (Browse Repository) -->
-<div class="modal fade" id="packageDiscoveryModal" tabindex="-1" aria-labelledby="packageDiscoveryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 90vw !important;">
-        <div class="modal-content">
-            <div class="modal-header">
+<div class="modal micromodal-slide" id="packageDiscoveryModal" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+        <div class="modal__container modal-wide" role="dialog" aria-modal="true" aria-labelledby="packageDiscoveryModalLabel">
+            <header class="modal__header">
                 <h5 class="modal-title" id="packageDiscoveryModalLabel">
                     <i class="bi bi-box-seam text-primary"></i> Browse Available Packages
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="packageDiscoveryModalBody">
+                <button class="modal__close" aria-label="Close modal" data-micromodal-close title="Close (ESC)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </header>
+            <main class="modal__content" id="packageDiscoveryModalBody">
                 <!-- Content populated by JavaScript -->
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -609,12 +619,12 @@ use Hub\Roles;
                     </div>
                     <p class="mt-3 text-muted">Loading package repository...</p>
                 </div>
-            </div>
-            <div class="modal-footer" id="packageDiscoveryModalFooter">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            </main>
+            <footer class="modal__footer" id="packageDiscoveryModalFooter">
+                <button type="button" class="btn btn-secondary" data-micromodal-close>
                     <i class="bi bi-x-circle"></i> Close
                 </button>
-            </div>
+            </footer>
         </div>
     </div>
 </div>
