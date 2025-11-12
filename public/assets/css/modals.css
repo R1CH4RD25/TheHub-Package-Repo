@@ -87,25 +87,31 @@
 }
 
 /**
- * Modal close button (X button)
+ * Modal close button (X button) - Smooth hover animation
  */
 .modal__close {
     background: transparent;
     border: none;
-    cursor: pointer;
     padding: 0.5rem;
+    cursor: pointer;
+    color: #6c757d;
     font-size: 1.5rem;
     line-height: 1;
-    color: #6c757d;
-    transition: color 0.15s ease-in-out;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-left: auto;
 }
 
-.modal__close:hover {
-    color: #000;
+.modal__close:hover,
+.modal__close:focus {
+    opacity: 1;
+    outline: none;
 }
 
-.modal__close:before {
-    content: "✕";
+.modal__close::before {
+    content: '×';
+    font-size: 2rem;
+    font-weight: 300;
 }
 
 /**

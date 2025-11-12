@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 03:38:59 PM UTC 2025
+ * Generated: Wed Nov 12 03:40:12 PM UTC 2025
  * ============================================================================
  */
 
@@ -2249,25 +2249,31 @@ footer.footer {
 }
 
 /**
- * Modal close button (X button)
+ * Modal close button (X button) - Smooth hover animation
  */
 .modal__close {
     background: transparent;
     border: none;
-    cursor: pointer;
     padding: 0.5rem;
+    cursor: pointer;
+    color: #6c757d;
     font-size: 1.5rem;
     line-height: 1;
-    color: #6c757d;
-    transition: color 0.15s ease-in-out;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-left: auto;
 }
 
-.modal__close:hover {
-    color: #000;
+.modal__close:hover,
+.modal__close:focus {
+    opacity: 1;
+    outline: none;
 }
 
-.modal__close:before {
-    content: "✕";
+.modal__close::before {
+    content: '×';
+    font-size: 2rem;
+    font-weight: 300;
 }
 
 /**
