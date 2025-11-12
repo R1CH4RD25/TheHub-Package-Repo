@@ -4531,8 +4531,8 @@ function showPackageDiscovery() {
         onShow: () => {
             // Attach event listeners after content is rendered
             attachPackageDiscoveryListeners();
-            // Start loading packages
-            setTimeout(() => searchPackages(), 100);
+            // Start loading packages (increased delay for MicroModal DOM rendering)
+            setTimeout(() => searchPackages(), 300);
         },
         onHide: () => {
             // Cleanup global state
@@ -4620,6 +4620,13 @@ async function searchPackages() {
     const repo = 'TheHub-Package-Repo';
 
     const resultsContainer = document.getElementById('packageSearchResults');
+
+    // Safety check: If container doesn't exist yet, MicroModal hasn't rendered
+    if (!resultsContainer) {
+        console.warn('⚠️ packageSearchResults not found in DOM yet, retrying...');
+        setTimeout(() => searchPackages(), 200);
+        return;
+    }
 
     try {
         resultsContainer.innerHTML = `
