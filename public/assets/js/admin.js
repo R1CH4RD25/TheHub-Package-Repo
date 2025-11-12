@@ -35,6 +35,27 @@ async function loadRolesCache() {
     return rolesCache;
 }
 
+// Fetch with timeout wrapper to handle hung requests
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('Request timed out - the server may be busy or the connection is slow');
+        }
+        throw error;
+    }
+}
+
 // Toggle visibility of OAuth configuration sections based on checkbox state
 function toggleAuthSection(provider, isEnabled) {
     const sectionId = provider === 'google' ? 'googleAuthSection' : 'microsoftAuthSection';
@@ -3648,16 +3669,20 @@ async function validatePackage(packageId, packageName) {
         // Add artificial delay before API call
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Trigger actual validation
+        // Trigger actual validation with timeout (60 seconds for validation)
         console.log('🔍 DEBUG: About to send validation request to API...');
         const formData = new FormData();
         formData.append('csrf_token', window.csrfToken);
 
         console.log('🔍 DEBUG: FormData created, making fetch request...');
-        const response = await fetch(`/api/packages.php?action=validate&id=${packageId}`, {
-            method: 'POST',
-            body: formData
-        });
+        const response = await fetchWithTimeout(
+            `/api/packages.php?action=validate&id=${packageId}`,
+            {
+                method: 'POST',
+                body: formData
+            },
+            60000 // 60 second timeout for validation
+        );
 
         console.log('🔍 DEBUG: Fetch completed, response status:', response.status);
 
@@ -3723,8 +3748,12 @@ async function validatePackage(packageId, packageName) {
             return;
         }
 
-        // Now fetch the actual validation results
-        const detailsResponse = await fetch(`/api/packages.php?action=validation&id=${packageId}`);
+        // Now fetch the actual validation results with timeout
+        const detailsResponse = await fetchWithTimeout(
+            `/api/packages.php?action=validation&id=${packageId}`,
+            {},
+            30000 // 30 second timeout for fetching results
+        );
 
         if (!detailsResponse.ok) {
             const errorText = await detailsResponse.text();
@@ -4008,6 +4037,7 @@ async function validatePackage(packageId, packageName) {
         showMessage('Validation error: ' + error.message, 'error');
 
         validationComplete = true; // Mark as complete so toast doesn't show
+        enableCloseButtons(); // Re-enable close buttons on error
 
         // Update modal to show error state
         const liveStats = document.getElementById('validationLiveStats');
@@ -5423,18 +5453,22 @@ async function downloadSelectedPackages() {
 
 async function downloadPackageFromRepo(downloadUrl, packageName, silent = false) {
     try {
-        const response = await fetch('/api/package-discovery.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': window.csrfToken || ''
+        const response = await fetchWithTimeout(
+            '/api/package-discovery.php',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': window.csrfToken || ''
+                },
+                body: JSON.stringify({
+                    action: 'download',
+                    download_url: downloadUrl,
+                    package_name: packageName
+                })
             },
-            body: JSON.stringify({
-                action: 'download',
-                download_url: downloadUrl,
-                package_name: packageName
-            })
-        });
+            120000 // 120 second (2 minute) timeout for downloads
+        );
 
         const result = await response.json();
 
