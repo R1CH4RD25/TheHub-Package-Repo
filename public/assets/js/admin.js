@@ -3395,7 +3395,7 @@ async function validatePackage(packageId, packageName) {
                             <h5 class="modal-title" id="validationModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 <i class="bi bi-clipboard-check"></i> <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
                             </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-micromodal-close aria-label="Close"></button>
                         </div>
                         <div class="modal-body" style="max-height: calc(95vh - 140px); overflow-y: auto;">
                             <!-- Compact Progress Section -->
@@ -3417,7 +3417,7 @@ async function validatePackage(packageId, packageName) {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-secondary" data-micromodal-close>
                                 <i class="bi bi-x-circle"></i> Close
                             </button>
                         </div>
@@ -3458,7 +3458,7 @@ async function validatePackage(packageId, packageName) {
         const checksList = document.getElementById('validationChecksList');
 
         // Header/footer close button for the modal (may not exist yet in footer)
-        const closeBtn = modalElement.querySelector('.btn-close, .modal-footer button[data-bs-dismiss="modal"]');
+        const closeBtn = modalElement.querySelector('.btn-close, .modal-footer button[data-micromodal-close]');
         if (closeBtn) {
             // Prevent closing while validation is actively running until we re-enable it
             try { closeBtn.disabled = true; } catch (e) { /* ignore */ }
@@ -3758,7 +3758,7 @@ async function validatePackage(packageId, packageName) {
                                 <button type="button" class="btn btn-primary" id="modalInstallBtn" style="animation: buttonPulse 0.6s ease;">
                                     <i class="bi bi-download"></i> Install Package
                                 </button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <button type="button" class="btn btn-secondary" data-micromodal-close>
                                     <i class="bi bi-x-circle"></i> Close
                                 </button>
                             `;
@@ -4062,7 +4062,7 @@ async function showValidationDetails(packageId) {
                 </div>
             `,
             footer: `
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-secondary" data-micromodal-close>
                     <i class="bi bi-x-circle"></i> Close
                 </button>
             `
@@ -4194,7 +4194,7 @@ async function showValidationDetails(packageId) {
 
         // Build footer HTML
         const footerHTML = `
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <button type="button" class="btn btn-secondary" data-micromodal-close>
                 <i class="bi bi-x-circle"></i> Close
             </button>
             ${pkg.can_install && !result.package.is_installed ?
@@ -4593,7 +4593,7 @@ function buildPackageDiscoveryFooterHTML() {
         <button type="button" id="downloadSelectedBtn" class="btn btn-primary" style="display: none;">
             <i class="bi bi-download"></i> Download Selected (<span id="downloadCount">0</span>)
         </button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-secondary" data-micromodal-close>
             <i class="bi bi-x-circle"></i> Close
         </button>
     `;
