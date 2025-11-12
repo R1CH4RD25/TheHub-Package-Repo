@@ -2944,7 +2944,8 @@ async function loadInstalledPackages() {
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading...</p>';
 
-        const response = await fetch('/api/packages.php?action=installed');
+        const timestamp = Date.now();
+        const response = await fetch(`/api/packages.php?action=installed&_=${timestamp}`);
         const result = await response.json();
 
         if (!result.success) throw new Error(result.error);
@@ -3070,10 +3071,11 @@ async function loadAvailablePackages() {
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading...</p>';
 
-        // Fetch both packages and dismissed alerts
+        // Fetch both packages and dismissed alerts (add cache-busting timestamp)
+        const timestamp = Date.now();
         const [packagesResponse, alertsResponse] = await Promise.all([
-            fetch('/api/packages.php'),
-            fetch('/api/package-alerts.php?action=check')
+            fetch(`/api/packages.php?_=${timestamp}`),
+            fetch(`/api/package-alerts.php?action=check&_=${timestamp}`)
         ]);
 
         const [packagesResult, alertsResult] = await Promise.all([
@@ -3243,7 +3245,8 @@ async function loadPackageUpdates() {
     try {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Checking for updates...</p>';
 
-        const response = await fetch('/api/packages.php?action=updates');
+        const timestamp = Date.now();
+        const response = await fetch(`/api/packages.php?action=updates&_=${timestamp}`);
         const result = await response.json();
 
         if (!result.success) throw new Error(result.error);
@@ -4029,7 +4032,12 @@ async function deletePackage(packageId, packageName) {
 
         if (result.success) {
             showMessage('Package deleted', 'success');
-            loadAvailablePackages();
+            // Small delay to ensure filesystem/DB has updated
+            console.log('🗑️  Package deleted, refreshing list in 500ms...');
+            setTimeout(() => {
+                console.log('🗑️  Calling loadAvailablePackages() now...');
+                loadAvailablePackages();
+            }, 500);
         } else {
             showMessage('Delete failed: ' + result.error, 'error');
         }
@@ -4041,193 +4049,45 @@ async function deletePackage(packageId, packageName) {
 
 // Show validation details modal
 async function showValidationDetails(packageId) {
+    console.log('🔍 TEST: showValidationDetails called with packageId:', packageId);
+    console.log('🔍 TEST: ModalRenderer exists?', typeof ModalRenderer !== 'undefined');
+
     try {
-        // Remove any existing validation report modal first
-        const existingModal = document.getElementById('validationReportModal');
-        if (existingModal) {
-            const existingInstance = bootstrap.Modal.getInstance(existingModal);
-            if (existingInstance) {
-                existingInstance.dispose();
-            }
-            existingModal.remove();
-        }
-
-        const response = await fetch(`/api/packages.php?action=validation&id=${packageId}`);
-        const result = await response.json();
-
-        if (!result.success) throw new Error(result.error);
-
-        const pkg = result.package;
-        const summary = result.summary;
-        const checks = result.all_checks;
-
-        const summaryClass = pkg.can_install ? 'success' : (pkg.validation_status === 'pending' ? 'pending' : 'failure');
-        const summaryIcon = pkg.can_install ? '✓' : (pkg.validation_status === 'pending' ? '⏳' : '✗');
-        const summaryText = pkg.can_install ? 'Package Validated - Ready to Install' :
-            (pkg.validation_status === 'pending' ? 'Running Complete Validation...' : 'Validation Failed - Installation Blocked');
-
-        // Group checks by type FIRST (before building HTML)
-        const groupedChecks = {};
-        checks.forEach(check => {
-            if (!groupedChecks[check.check_type]) {
-                groupedChecks[check.check_type] = [];
-            }
-            groupedChecks[check.check_type].push(check);
-        });
-
-        // Build accordion HTML
-        let accordionHTML = '';
-        let accordionIndex = 0;
-        Object.keys(groupedChecks).forEach(checkType => {
-            const typeChecks = groupedChecks[checkType];
-            const typePassed = typeChecks.filter(c => c.status === 'pass').length;
-            const typeFailed = typeChecks.filter(c => c.status === 'fail').length;
-            const typeIcon = typeFailed > 0 ? '✗' : typePassed === typeChecks.length ? '✓' : '⚠';
-            const typeColor = typeFailed > 0 ? 'danger' : typePassed === typeChecks.length ? 'success' : 'warning';
-
-            accordionHTML += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading${accordionIndex}">
-                        <button class="accordion-button ${accordionIndex > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${accordionIndex}" aria-expanded="${accordionIndex === 0}" aria-controls="collapse${accordionIndex}">
-                            <span class="badge bg-${typeColor} me-2">${typeIcon}</span>
-                            ${escapeHtml(checkType.toUpperCase().replace(/_/g, ' '))}
-                            <small class="ms-auto me-2 text-muted">${typePassed}/${typeChecks.length} passed</small>
-                        </button>
-                    </h2>
-                    <div id="collapse${accordionIndex}" class="accordion-collapse collapse ${accordionIndex === 0 ? 'show' : ''}" aria-labelledby="heading${accordionIndex}" data-bs-parent="#validationChecksAccordion">
-                        <div class="accordion-body p-0">
-                            <div class="list-group list-group-flush">`;
-
-            typeChecks.forEach(check => {
-                const icon = check.status === 'fail' ? '✗' : check.status === 'warning' ? '⚠' : '✓';
-                const statusColor = check.status === 'fail' ? 'danger' : check.status === 'warning' ? 'warning' : 'success';
-
-                accordionHTML += `
-                    <div class="list-group-item">
-                        <div class="d-flex align-items-start">
-                            <span class="badge bg-${statusColor} me-2 mt-1">${icon}</span>
-                            <div class="flex-grow-1">
-                                <div class="fw-bold">${escapeHtml(check.check_name)}</div>
-                                <div class="text-muted small">${escapeHtml(check.message)}</div>
-                                ${check.resolution ? `<div class="text-success small mt-1">
-                                    <strong>Fix:</strong> ${escapeHtml(check.resolution)}
-                                </div>` : ''}
-                            </div>
-                        </div>
-                    </div>`;
-            });
-
-            accordionHTML += `
-                            </div>
-                        </div>
+        // SIMPLE TEST MODAL - No API calls, just static content
+        ModalRenderer.show('packageValidationModal', {
+            title: '🧪 TEST: This is the Title',
+            body: `
+                <div style="padding: 2rem;">
+                    <h3>🎯 This is the Body Content</h3>
+                    <p>If you can see this, the ModalRenderer is working!</p>
+                    <div class="alert alert-info mt-3">
+                        <strong>Testing Modal System:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>✅ Modal template exists in modals.php</li>
+                            <li>✅ ModalRenderer.show() was called</li>
+                            <li>✅ This content was dynamically inserted</li>
+                            <li>✅ You should be able to close this modal</li>
+                        </ul>
                     </div>
-                </div>`;
-
-            accordionIndex++;
-        });
-
-        // Create Bootstrap modal HTML with accordion items INSIDE modal body
-        const modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.id = 'validationReportModal';
-        modal.setAttribute('tabindex', '-1');
-        modal.setAttribute('aria-labelledby', 'validationReportModalLabel');
-        modal.setAttribute('aria-hidden', 'true');
-
-        modal.innerHTML = `
-            <div class="modal-dialog modal-xl" style="max-width: 95vw; max-height: 95vh;">
-                <div class="modal-content" style="height: 95vh;">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="validationReportModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            <span>${pkg.validation_status === 'pending' ? '⏳ Validation In Progress' : '📋 Package Validation Report'}</span>
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" style="max-height: calc(95vh - 140px); overflow-y: auto;">
-                        <!-- Package Header -->
-                        <div class="mb-3">
-                            <h6 class="text-muted mb-1">Package Details</h6>
-                            <h4 class="mb-0">${escapeHtml(pkg.display_name)} <small class="text-muted">v${escapeHtml(pkg.version)}</small></h4>
-                        </div>
-
-                        ${pkg.validation_status === 'pending' ? `
-                        <div class="alert alert-info d-flex align-items-center mb-3">
-                            <span class="me-3" style="font-size: 1.5rem;">⏳</span>
-                            <div>
-                                <strong>Running Complete Validation...</strong>
-                                <div class="mt-1 small">
-                                    This is a comprehensive audit of the package.<br>
-                                    All ${summary.total_checks || 0} checks are being performed.
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        <!-- Validation Summary -->
-                        <div class="alert alert-${summaryClass === 'success' ? 'success' : summaryClass === 'failure' ? 'danger' : 'warning'} d-flex align-items-center mb-3">
-                            <span class="me-3" style="font-size: 1.5rem;">${summaryIcon}</span>
-                            <div class="flex-grow-1">
-                                <strong>${summaryText}</strong>
-                                <div class="mt-2 small">
-                                    <strong>Complete Audit:</strong> ${summary.total_checks || 0} checks performed<br>
-                                    <span class="badge bg-success me-1">${summary.passed || 0} passed</span>
-                                    <span class="badge bg-danger me-1">${summary.failed || 0} failed</span>
-                                    <span class="badge bg-warning text-dark">${summary.warnings || 0} warnings</span>
-                                    ${(summary.critical || 0) > 0 ? `<br><span class="text-danger fw-bold mt-1 d-inline-block">⚠️ ${summary.critical} critical issues</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Compatibility Checks -->
-                        <h6 class="mb-3">
-                            <i class="bi bi-list-check text-primary me-2"></i>
-                            All Compatibility Checks
-                            <small class="text-muted">(${checks.length} total)</small>
-                        </h6>
-
-                        <div class="accordion" id="validationChecksAccordion">
-                            ${accordionHTML}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle"></i> Close
-                        </button>
-                        ${pkg.can_install && !result.package.is_installed ?
-                `<button type="button" class="btn btn-primary" onclick="installPackage(${pkg.id}, '${escapeHtml(pkg.display_name)}'); bootstrap.Modal.getInstance(document.getElementById('validationReportModal')).hide();">
-                            <i class="bi bi-download"></i> Install Package
-                        </button>` : ''}
-                    </div>
+                    <p class="mt-3"><strong>Package ID:</strong> ${packageId}</p>
+                    <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
                 </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Show the modal using Bootstrap
-        const bsModal = new bootstrap.Modal(modal);
-        bsModal.show();
-
-        // Clean up when modal is hidden
-        modal.addEventListener('hidden.bs.modal', function () {
-            modal.remove();
+            `,
+            footer: `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Close Button Test
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-check-circle"></i> Another Close Test
+                </button>
+            `
         });
 
-        // Add hover animation for header close button
-        setTimeout(() => {
-            const headerClose = modal.querySelector('.modal-close-btn');
-            if (headerClose) {
-                headerClose.addEventListener('mouseenter', () => {
-                    headerClose.style.transform = 'translateY(-2px) scale(1.02)';
-                });
-                headerClose.addEventListener('mouseleave', () => {
-                    headerClose.style.transform = '';
-                });
-            }
-        }, 40);
+        console.log('🔍 TEST: ModalRenderer.show() completed successfully');
 
     } catch (error) {
-        showMessage('Error loading validation: ' + error.message, 'error');
+        console.error('❌ TEST: Error in showValidationDetails:', error);
+        alert('ERROR: ' + error.message);
     }
 }
 
@@ -4532,111 +4392,102 @@ async function dismissPackageRow(packageId, packageName, alertType, event) {
 // ============================================================================
 
 function showPackageDiscovery() {
-    const modal = document.createElement('div');
-    modal.className = 'modal fade package-discovery-modal';
-    modal.id = 'packageDiscoveryModal';
-    modal.setAttribute('tabindex', '-1');
-    modal.setAttribute('aria-labelledby', 'packageDiscoveryModalLabel');
-    modal.setAttribute('aria-hidden', 'true');
-
-    modal.innerHTML = `
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="packageDiscoveryModalLabel">
-                        <i class="bi bi-box-seam text-primary"></i> Browse Available Packages
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Compact Filters & Search -->
-                    <div class="package-filters mb-2" style="background: #f8f9fa; padding: 0.75rem; border-radius: 0.375rem;">
-                        <!-- Search Bar -->
-                        <div class="mb-2">
-                            <input
-                                type="text"
-                                id="packageSearchInput"
-                                class="form-control form-control-sm"
-                                placeholder="🔍 Search packages..."
-                                style="font-size: 0.875rem;">
-                        </div>
-                        <!-- Compact Tag Filters -->
-                        <div class="d-flex align-items-center justify-content-between" style="min-height: 28px;">
-                            <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                <small class="text-muted fw-bold" style="font-size: 0.75rem; white-space: nowrap;">Tags:</small>
-                                <div id="tagFilters" class="d-flex flex-wrap gap-1 flex-grow-1">
-                                    <small class="text-muted" style="font-size: 0.75rem;">Loading...</small>
-                                </div>
-                            </div>
-                            <button id="clearTagFilters" class="btn btn-sm btn-link text-decoration-none p-0 ms-2" style="font-size: 0.75rem; display: none; white-space: nowrap;">
-                                Clear All
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Results -->
-                    <div id="packageSearchResults" class="package-discovery-results">
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <div class="mt-2">Loading available packages...</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <div class="me-auto">
-                        <span id="selectedPackageCount" style="display: none;">
-                            <strong>0</strong> package(s) selected
-                        </span>
-                    </div>
-                    <button type="button" id="downloadSelectedBtn" class="btn btn-primary" style="display: none;">
-                        <i class="bi bi-download"></i> Download Selected (<span id="downloadCount">0</span>)
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Store packages globally for filtering
+    // Initialize global state
     window.discoveredPackages = [];
     window.selectedPackages = new Set();
 
-    // Add event listeners - query from modal since elements are inside it
-    modal.querySelector('#packageSearchInput').addEventListener('input', filterDiscoveredPackages);
-    modal.querySelector('#downloadSelectedBtn').addEventListener('click', downloadSelectedPackages);
+    // Build content HTML
+    const bodyHTML = buildPackageDiscoveryBodyHTML();
+    const footerHTML = buildPackageDiscoveryFooterHTML();
 
-    // Fix accessibility: Blur focused elements BEFORE modal hides (prevents aria-hidden warning)
-    modal.addEventListener('hide.bs.modal', function () {
-        // Blur any focused elements before Bootstrap sets aria-hidden
-        const focusedElement = document.activeElement;
-        if (focusedElement && modal.contains(focusedElement)) {
-            focusedElement.blur();
+    // Show modal using ModalRenderer
+    ModalRenderer.show('packageDiscoveryModal', {
+        title: '<i class="bi bi-box-seam text-primary"></i> Browse Available Packages',
+        body: bodyHTML,
+        footer: footerHTML,
+        onShow: () => {
+            // Attach event listeners after content is rendered
+            attachPackageDiscoveryListeners();
+            // Start loading packages
+            setTimeout(() => searchPackages(), 100);
+        },
+        onHide: () => {
+            // Cleanup global state
+            window.discoveredPackages = [];
+            window.selectedPackages = new Set();
         }
     });
+}
 
-    // Clean up after modal is fully hidden
-    modal.addEventListener('hidden.bs.modal', function () {
-        window.discoveredPackages = [];
-        window.selectedPackages = new Set();
-        setTimeout(() => modal.remove(), 100);
-    });
+// Build the modal body HTML
+function buildPackageDiscoveryBodyHTML() {
+    return `
+        <!-- Compact Filters & Search -->
+        <div class="package-filters mb-2" style="background: #f8f9fa; padding: 0.75rem; border-radius: 0.375rem;">
+            <!-- Search Bar -->
+            <div class="mb-2">
+                <input
+                    type="text"
+                    id="packageSearchInput"
+                    class="form-control form-control-sm"
+                    placeholder="🔍 Search packages..."
+                    style="font-size: 0.875rem;">
+            </div>
+            <!-- Compact Tag Filters -->
+            <div class="d-flex align-items-center justify-content-between" style="min-height: 28px;">
+                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                    <small class="text-muted fw-bold" style="font-size: 0.75rem; white-space: nowrap;">Tags:</small>
+                    <div id="tagFilters" class="d-flex flex-wrap gap-1 flex-grow-1">
+                        <small class="text-muted" style="font-size: 0.75rem;">Loading...</small>
+                    </div>
+                </div>
+                <button id="clearTagFilters" class="btn btn-sm btn-link text-decoration-none p-0 ms-2" style="font-size: 0.75rem; display: none; white-space: nowrap;">
+                    Clear All
+                </button>
+            </div>
+        </div>
 
-    // Show the modal using Bootstrap 5 modal
-    const bootstrapModal = new bootstrap.Modal(modal);
-    bootstrapModal.show();
+        <!-- Results -->
+        <div id="packageSearchResults" class="package-discovery-results">
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-2">Loading available packages...</div>
+            </div>
+        </div>
+    `;
+}
 
-    // Automatically search packages from the default repository
-    setTimeout(() => {
-        searchPackages();
-    }, 100);
+// Build the modal footer HTML
+function buildPackageDiscoveryFooterHTML() {
+    return `
+        <div class="me-auto">
+            <span id="selectedPackageCount" style="display: none;">
+                <strong>0</strong> package(s) selected
+            </span>
+        </div>
+        <button type="button" id="downloadSelectedBtn" class="btn btn-primary" style="display: none;">
+            <i class="bi bi-download"></i> Download Selected (<span id="downloadCount">0</span>)
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Close
+        </button>
+    `;
+}
+
+// Attach event listeners to modal elements
+function attachPackageDiscoveryListeners() {
+    const searchInput = document.getElementById('packageSearchInput');
+    const downloadBtn = document.getElementById('downloadSelectedBtn');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterDiscoveredPackages);
+    }
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', downloadSelectedPackages);
+    }
 }
 
 async function searchPackages() {
@@ -5274,8 +5125,7 @@ async function downloadSelectedPackages() {
         }
 
         // Close modal and refresh
-        const modal = bootstrap.Modal.getInstance(document.getElementById('packageDiscoveryModal'));
-        if (modal) modal.hide();
+        ModalRenderer.hide('packageDiscoveryModal');
 
         // Switch to Available Packages subtab and reload
         const availableSubtab = document.querySelector('#tab-packages .subtab-nav a[data-subtab="available-packages"]');
@@ -5321,11 +5171,14 @@ async function downloadPackageFromRepo(downloadUrl, packageName, silent = false)
                 showMessage(`Package "${packageName}" downloaded successfully! Check the Available Packages tab to install it.`, 'success');
 
                 // Close the discovery modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('packageDiscoveryModal'));
-                if (modal) modal.hide();
+                ModalRenderer.hide('packageDiscoveryModal');
 
-                // Refresh the available packages tab
-                loadAvailablePackages();
+                // Small delay to ensure filesystem/DB has updated
+                console.log('📦 Package downloaded, refreshing list in 500ms...');
+                setTimeout(() => {
+                    console.log('📦 Calling loadAvailablePackages() now...');
+                    loadAvailablePackages();
+                }, 500);
             }
             return true;
         } else {
