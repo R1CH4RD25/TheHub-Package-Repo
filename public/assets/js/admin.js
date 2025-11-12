@@ -3175,6 +3175,11 @@ async function loadAvailablePackages() {
         html += '<th>Actions</th>';
         html += '</tr></thead><tbody>';
 
+        // Count pending packages for batch validation button
+        const pendingPackages = availablePackages.filter(pkg =>
+            pkg.validation_status === 'pending' || !pkg.validation_status
+        );
+
         availablePackages.forEach(pkg => {
             const canInstall = pkg.can_install;
             // isInstalled is always false since we filtered them out
@@ -3233,6 +3238,20 @@ async function loadAvailablePackages() {
         });
 
         html += '</tbody></table>';
+
+        // Add batch validation button if there are pending packages
+        if (pendingPackages.length > 1) {
+            html += `
+                <div style="margin-top: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 0.375rem; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="color: #6c757d; font-size: 0.9rem;">
+                        <i class="bi bi-info-circle"></i> ${pendingPackages.length} packages need validation
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="validateAllPending()">
+                        <i class="bi bi-clipboard-check"></i> Validate All Pending (${pendingPackages.length})
+                    </button>
+                </div>
+            `;
+        }
 
         // Add "Search Repository" button after the table
         html += `
@@ -3435,6 +3454,99 @@ async function upgradePackageById(packageId, packageName) {
 
     } catch (error) {
         showMessage('Upgrade error: ' + error.message, 'error');
+    }
+}
+
+// Batch validate all pending packages
+async function validateAllPending() {
+    try {
+        // Fetch pending packages
+        const response = await fetch('/api/packages.php');
+        const result = await response.json();
+
+        if (!result.success) {
+            showMessage('Failed to load packages', 'error');
+            return;
+        }
+
+        const pendingPackages = result.packages.filter(pkg =>
+            !pkg.is_installed && (pkg.validation_status === 'pending' || !pkg.validation_status)
+        );
+
+        if (pendingPackages.length === 0) {
+            showMessage('No pending packages to validate', 'info');
+            return;
+        }
+
+        if (!confirm(`Validate ${pendingPackages.length} package${pendingPackages.length > 1 ? 's' : ''}?\n\nThis will run validation checks on all pending packages sequentially.`)) {
+            return;
+        }
+
+        // Show progress toast
+        if (window.notyf) {
+            window.notyf.open({
+                type: 'info',
+                message: `🔄 Validating ${pendingPackages.length} packages...`,
+                duration: 0, // Keep it open
+                dismissible: false
+            });
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+
+        // Validate each package sequentially
+        for (let i = 0; i < pendingPackages.length; i++) {
+            const pkg = pendingPackages[i];
+            console.log(`Validating ${i + 1}/${pendingPackages.length}: ${pkg.display_name}`);
+
+            try {
+                const formData = new FormData();
+                formData.append('csrf_token', window.csrfToken);
+
+                const validateResponse = await fetch(`/api/packages.php?action=validate&id=${pkg.id}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const validateResult = await validateResponse.json();
+
+                if (validateResult.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+
+                // Small delay between validations to avoid overwhelming the server
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+            } catch (error) {
+                console.error(`Failed to validate ${pkg.display_name}:`, error);
+                failCount++;
+            }
+        }
+
+        // Close progress toast
+        if (window.notyf) {
+            window.notyf.dismissAll();
+        }
+
+        // Show results
+        if (failCount === 0) {
+            showMessage(`✅ Successfully validated all ${successCount} packages!`, 'success');
+        } else if (successCount === 0) {
+            showMessage(`❌ Failed to validate ${failCount} packages`, 'error');
+        } else {
+            showMessage(`⚠️ Validated ${successCount} packages, ${failCount} failed`, 'warning');
+        }
+
+        // Reload packages list
+        await loadAvailablePackages();
+        checkPackageAlerts(false);
+
+    } catch (error) {
+        console.error('Batch validation error:', error);
+        showMessage('Batch validation failed: ' + error.message, 'error');
     }
 }
 
