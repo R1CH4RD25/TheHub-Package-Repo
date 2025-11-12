@@ -3555,7 +3555,11 @@ async function validatePackage(packageId, packageName) {
         // Header/footer close buttons - prevent closing during validation
         const closeButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close]');
 
+        console.log('🔒 Disabling close buttons. Found:', closeButtons.length);
+
         closeButtons.forEach(btn => {
+            console.log('  Disabling:', btn.className, 'has data-micromodal-close:', btn.hasAttribute('data-micromodal-close'));
+
             // Store the original close attribute so we can restore it
             if (btn.hasAttribute('data-micromodal-close')) {
                 btn.setAttribute('data-original-close', 'true');
@@ -3575,11 +3579,16 @@ async function validatePackage(packageId, packageName) {
             // Re-query buttons to catch any that were dynamically added/replaced
             const currentCloseButtons = modalElement.querySelectorAll('.modal__close, button[data-micromodal-close], button[data-original-close]');
 
+            console.log('🔓 Enabling close buttons. Found:', currentCloseButtons.length);
+
             currentCloseButtons.forEach(btn => {
+                console.log('  Button:', btn.className, 'has data-original-close:', btn.hasAttribute('data-original-close'));
+
                 // Restore the close attribute if it was originally disabled
                 if (btn.hasAttribute('data-original-close')) {
                     btn.setAttribute('data-micromodal-close', '');
                     btn.removeAttribute('data-original-close');
+                    console.log('  ✅ Restored data-micromodal-close attribute');
                 }
 
                 // Restore visual state (clear any disabled styling)
@@ -3588,7 +3597,9 @@ async function validatePackage(packageId, packageName) {
                 btn.title = '';
                 btn.disabled = false;
             });
-        };        // Reset progress bar to 0% at start
+        };
+
+        // Reset progress bar to 0% at start
         progressBar.style.width = '0%';
         progressBar.style.transition = 'width 0.5s ease';
         console.log('✅ Progress bar initialized at 0%');
