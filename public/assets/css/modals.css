@@ -110,7 +110,7 @@
 
 .modal__close:hover,
 .modal__close:focus {
-    transform: rotate(90deg) scale(1.15) !important;
+    transform: rotate(180deg) scale(1.15) !important;
     background: rgba(220, 53, 69, 0.1) !important;
     outline: none !important;
     color: #dc3545 !important;

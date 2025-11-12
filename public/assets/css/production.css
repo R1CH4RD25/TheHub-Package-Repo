@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 03:49:27 PM UTC 2025
+ * Generated: Wed Nov 12 03:50:15 PM UTC 2025
  * ============================================================================
  */
 
@@ -2272,7 +2272,7 @@ footer.footer {
 
 .modal__close:hover,
 .modal__close:focus {
-    transform: rotate(90deg) scale(1.15) !important;
+    transform: rotate(180deg) scale(1.15) !important;
     background: rgba(220, 53, 69, 0.1) !important;
     outline: none !important;
     color: #dc3545 !important;
