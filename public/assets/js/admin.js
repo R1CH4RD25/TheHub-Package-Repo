@@ -3386,15 +3386,15 @@ async function validatePackage(packageId, packageName) {
         // Create Bootstrap modal structure (matches Browse Available Packages)
         const modalHtml = `
             <div class="modal fade" id="validationModal" tabindex="-1" aria-labelledby="validationModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl" style="max-width: 90vw;">
-                    <div class="modal-content">
+                <div class="modal-dialog modal-xl" style="max-width: 95vw; max-height: 95vh;">
+                    <div class="modal-content" style="height: 95vh;">
                         <div class="modal-header">
                             <h5 class="modal-title" id="validationModalLabel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 <i class="bi bi-clipboard-check"></i> <span id="validationTitleText">Validating ${escapeHtml(packageName)}</span>
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div class="modal-body" style="max-height: calc(95vh - 140px); overflow-y: auto;">
                             <!-- Compact Progress Section -->
                             <div class="validation-progress-compact">
                                 <div class="progress-bar-wrapper">
