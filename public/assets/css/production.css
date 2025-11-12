@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 03:29:37 PM UTC 2025
+ * Generated: Wed Nov 12 03:31:59 PM UTC 2025
  * ============================================================================
  */
 
@@ -2224,7 +2224,7 @@ footer.footer {
 .modal__container.modal-wide {
     max-width: 90vw !important;
     width: 90vw !important;
-    max-height: 95vh !important;
+    max-height: 98vh !important;
 }
 
 /**
@@ -2275,6 +2275,13 @@ footer.footer {
     padding: 1.5rem;
     overflow-y: auto;
     max-height: calc(95vh - 140px);
+}
+
+/**
+ * Taller content for wide modals (e.g., package discovery)
+ */
+.modal-wide .modal__content {
+    max-height: calc(98vh - 140px);
 }
 
 /**
