@@ -255,7 +255,7 @@ table.dataTable tbody tr:hover {
                 <i class="bi bi-arrow-left"></i> Back
             </a>
             <?php if ($section['icon']): ?>
-            <div class="section-icon-large"><?= htmlspecialchars($section['icon']) ?></div>
+            <div class="section-icon-large"><i class="<?= htmlspecialchars($section['icon']) ?>"></i></div>
             <?php endif; ?>
             <div class="section-details">
                 <h1><?= htmlspecialchars($section['name']) ?></h1>
@@ -303,13 +303,13 @@ table.dataTable tbody tr:hover {
             <div class="filter-group">
                 <label>&nbsp;</label>
                 <button id="btn-apply-filters" class="btn btn-primary w-100">
-                    <i class="bi bi-funnel"></i> Apply Filters
+                    <i class="bi bi-funnel-fill"></i> Apply
                 </button>
             </div>
             <div class="filter-group">
                 <label>&nbsp;</label>
-                <button id="btn-clear-filters" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-x-circle"></i> Clear
+                <button id="btn-clear-filters" class="btn btn-secondary w-100">
+                    <i class="bi bi-x-circle-fill"></i> Clear
                 </button>
             </div>
         </div>
