@@ -6,8 +6,8 @@
 
 require_once __DIR__ . '/../src/bootstrap.php';
 
-use App\Invitation;
-use App\Auth;
+use Hub\Invitation;
+use Hub\Auth;
 
 // Check if token is provided
 if (!isset($_GET['token']) || empty($_GET['token'])) {
@@ -20,31 +20,32 @@ $token = $_GET['token'];
 
 try {
     // Validate invitation token
-    $invitation = Invitation::getByToken($token);
-    
+    $invitationService = new Invitation($db);
+    $invitation = $invitationService->getByToken($token);
+
     if (!$invitation) {
         throw new \Exception('Invalid or expired invitation');
     }
-    
+
     // Check if already accepted
     if ($invitation['accepted_at']) {
         throw new \Exception('This invitation has already been used');
     }
-    
+
     // Check if expired
     if (strtotime($invitation['expires_at']) < time()) {
         throw new \Exception('This invitation has expired');
     }
-    
+
     // Store invitation token in session for use after OAuth
     $_SESSION['invitation_token'] = $token;
     $_SESSION['invitation_email'] = $invitation['email'];
     $_SESSION['invitation_role'] = $invitation['role'];
-    
+
     // Redirect to Google OAuth login
     header('Location: /google_login.php?invitation=1');
     exit;
-    
+
 } catch (\Exception $e) {
     $error = $e->getMessage();
 }
@@ -56,7 +57,15 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invalid Invitation - Woodson ISD's The Hub</title>
     <link rel="icon" type="image/png" href="/assets/images/Cowboy_SM_favicon.png">
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <?php
+    // Load production CSS if available, otherwise fallback to style.css
+    $productionCss = __DIR__ . '/assets/css/production.min.css';
+    if (file_exists($productionCss)) {
+        echo '<link rel="stylesheet" href="/assets/css/production.min.css?v=' . filemtime($productionCss) . '">';
+    } else {
+        echo '<link rel="stylesheet" href="/assets/css/style.css">';
+    }
+    ?>
     <style>
         .error-container {
             max-width: 600px;
