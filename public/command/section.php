@@ -51,13 +51,32 @@ $pageTitle = 'Command Center - ' . $section['name'];
 <?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
 <style>
-/* Section View Styles */
+/* Command Center Layout Fix */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.navbar {
+    flex-shrink: 0;
+}
+
 .cc-section-container {
+    flex: 1 0 auto;
     max-width: 1600px;
     margin: 0 auto;
     padding: 20px;
+    width: 100%;
 }
 
+footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* Section View Styles */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -232,9 +251,12 @@ table.dataTable tbody tr:hover {
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
 <div class="cc-section-container">
-    <!-- Section Header -->
+    <!-- Section Header with Back Button -->
     <div class="section-header">
         <div class="section-info">
+            <a href="/command/" class="btn btn-outline-secondary me-3" title="Back to Section Selector">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
             <?php if ($section['icon']): ?>
             <div class="section-icon-large"><?= htmlspecialchars($section['icon']) ?></div>
             <?php endif; ?>
@@ -242,19 +264,13 @@ table.dataTable tbody tr:hover {
                 <h1><?= htmlspecialchars($section['name']) ?></h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/admin/">Admin</a></li>
+                        <li class="breadcrumb-item"><a href="/admin/">Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="/command/">Command Center</a></li>
                         <li class="breadcrumb-item active"><?= htmlspecialchars($section['name']) ?></li>
                     </ol>
                 </nav>
             </div>
         </div>
-        <div>
-            <a href="/command/index.php" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
-    </div>
 
     <!-- Filters -->
     <div class="filters-bar">
@@ -337,10 +353,6 @@ table.dataTable tbody tr:hover {
         </table>
     </div>
 </div>
-
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -527,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(err => alert('Network error: ' + err.message));
-    });
+    }
 });
 </script>
 

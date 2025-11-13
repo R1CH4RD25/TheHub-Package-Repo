@@ -70,13 +70,32 @@ $pageTitle = 'Command Center - Select Section';
 <?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
 <style>
-/* Professional Section Selector Styles */
+/* Command Center Layout Fix */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.navbar {
+    flex-shrink: 0;
+}
+
 .selector-container {
+    flex: 1 0 auto;
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
+    width: 100%;
 }
 
+footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* Professional Section Selector Styles */
 .selector-header {
     text-align: center;
     margin-bottom: 40px;

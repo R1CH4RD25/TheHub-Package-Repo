@@ -6,10 +6,9 @@
  * Allows status changes, assignment, and adding comments.
  */
 
-require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../../src/bootstrap.php';
 
 use Hub\Auth;
-use Hub\Layout;
 use Hub\Submission;
 use Hub\CommandCenter;
 
@@ -18,6 +17,8 @@ Auth::requireLogin();
 Auth::requireRole(['admin', 'super_admin']);
 
 $userId = $_SESSION['user_id'];
+$user = Auth::getCurrentUser();
+$userRole = Auth::getEffectiveRole();
 $submissionId = $_GET['id'] ?? null;
 
 if (!$submissionId) {
@@ -41,18 +42,43 @@ $history = $submission->getHistory($submissionId);
 $statuses = $cc->getStatuses($data['section_id']);
 
 $pageTitle = 'Submission ' . ($data['display_id'] ?? $data['id']);
-$layout = new Layout();
-$layout->header($pageTitle);
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?php Hub\Layout::renderHead($pageTitle, 'command'); ?>
+</head>
+<body>
+
+<?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
 <style>
-/* Submission Detail Styles */
+/* Command Center Layout Fix */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.navbar {
+    flex-shrink: 0;
+}
+
 .submission-container {
+    flex: 1 0 auto;
     max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
+    width: 100%;
 }
 
+footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* Submission Detail Styles */
 .submission-header {
     background: white;
     padding: 20px;
@@ -397,9 +423,9 @@ $layout->header($pageTitle);
                     <h2><i class="bi bi-file-text"></i> Submission Details</h2>
                 </div>
                 <div class="submission-data">
-                    <?php 
+                    <?php
                     $submissionData = $data['submission_data'] ?? [];
-                    if (empty($submissionData)): 
+                    if (empty($submissionData)):
                     ?>
                     <p class="text-muted">No submission data available.</p>
                     <?php else: ?>
@@ -407,7 +433,7 @@ $layout->header($pageTitle);
                         <div class="data-field">
                             <div class="data-field-label"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $key))) ?></div>
                             <div class="data-field-value">
-                                <?php 
+                                <?php
                                 if (is_array($value)) {
                                     echo htmlspecialchars(json_encode($value, JSON_PRETTY_PRINT));
                                 } else {
@@ -426,7 +452,7 @@ $layout->header($pageTitle);
                 <div class="card-header">
                     <h2><i class="bi bi-chat-dots"></i> Comments (<?= count($comments) ?>)</h2>
                 </div>
-                
+
                 <?php if (empty($comments)): ?>
                 <p class="text-muted">No comments yet.</p>
                 <?php else: ?>
@@ -452,7 +478,7 @@ $layout->header($pageTitle);
                 <div class="comment-form">
                     <form id="add-comment-form" onsubmit="addComment(event)">
                         <div class="mb-3">
-                            <textarea class="form-control" id="comment-text" rows="3" 
+                            <textarea class="form-control" id="comment-text" rows="3"
                                       placeholder="Add a comment..." required></textarea>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
@@ -478,7 +504,7 @@ $layout->header($pageTitle);
                 <div class="card-header">
                     <h2><i class="bi bi-paperclip"></i> Attachments (<?= count($attachments) ?>)</h2>
                 </div>
-                
+
                 <?php if (empty($attachments)): ?>
                 <p class="text-muted">No attachments.</p>
                 <?php else: ?>
@@ -497,7 +523,7 @@ $layout->header($pageTitle);
                                 <?= date('M j, Y', strtotime($attachment['created_at'])) ?>
                             </div>
                         </div>
-                        <a href="/uploads/<?= htmlspecialchars($attachment['file_path']) ?>" 
+                        <a href="/uploads/<?= htmlspecialchars($attachment['file_path']) ?>"
                            class="btn btn-sm btn-outline-primary" download>
                             <i class="bi bi-download"></i>
                         </a>
@@ -511,7 +537,7 @@ $layout->header($pageTitle);
                 <div class="card-header">
                     <h2><i class="bi bi-clock-history"></i> Activity History</h2>
                 </div>
-                
+
                 <?php if (empty($history)): ?>
                 <p class="text-muted">No activity history.</p>
                 <?php else: ?>
@@ -554,10 +580,10 @@ function assignTo() {
 
 function addComment(event) {
     event.preventDefault();
-    
+
     const commentText = document.getElementById('comment-text').value;
     const isInternal = document.getElementById('is-internal').checked;
-    
+
     fetch('/command/api/comments.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -579,4 +605,12 @@ function addComment(event) {
 }
 </script>
 
-<?php $layout->footer(); ?>
+    }
+}
+</script>
+
+<?php Hub\Layout::renderFooter($user, 'command'); ?>
+</body>
+</html>
+</body>
+</html>
