@@ -34,6 +34,10 @@ Automated workflows, approval processes, and task management.
 School district operations, facilities management, fleet tracking, and maintenance systems.
 - **[Vehicle Maintenance & Fleet Tracking](packages/operations/fleet/vehicle-maintenance/)** `v1.0.0` - Comprehensive fleet management system
 
+### 💰 [Finance](packages/finance/)
+Financial management, reimbursements, budgeting, and expense tracking.
+- **[Reimbursement Request & Fuel Tracking](packages/finance/reimbursement-request/)** `v1.0.0` - Unified monetary and fuel reimbursement system with workflow
+
 ### 👨‍🎓 [Student](packages/student/)
 Student-facing tools and resources.
 - **[Bullying Report](packages/student/safety/)** `v1.0.0` - Anonymous bullying incident reporting (also in Reporting category)

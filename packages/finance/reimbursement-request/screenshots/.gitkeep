@@ -1,0 +1,32 @@
+# Screenshots
+
+This directory will contain screenshots demonstrating the Reimbursement Request & Fuel Tracking package features.
+
+## Required Screenshots (Minimum 2)
+
+Please add at least 2 screenshots showing:
+1. **Monetary Request Form**: Submitting a reimbursement request with receipt upload
+2. **Fuel Trip Form**: Logging a fuel trip with gallon calculation
+3. **Admin Dashboard**: Supervisor/BM view of pending requests
+4. **Analytics Dashboard**: Spend by category and fuel trends charts
+5. **Workflow Visualization**: 6-state approval process diagram
+
+## Screenshot Guidelines
+
+- **Format**: PNG or JPG
+- **Resolution**: Minimum 1280x720
+- **Content**: Real or realistic test data (no sensitive information)
+- **Annotations**: Optional arrows/labels to highlight key features
+- **Naming Convention**: `01-monetary-request-form.png`, `02-fuel-trip-form.png`, etc.
+
+## Upload Instructions
+
+1. Capture screenshots of the package modules in action
+2. Save with descriptive names (e.g., `monetary-request-form.png`)
+3. Add to this directory
+4. Update README.md with screenshot references and descriptions
+5. Commit and push to repository
+
+---
+
+**Note:** Screenshots are required for package submission to the Package Repository. Update this file when screenshots are added.
