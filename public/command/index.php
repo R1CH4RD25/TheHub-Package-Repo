@@ -1,16 +1,16 @@
 <?php
 /**
- * Command Center - Dashboard
+ * Command Center - Section Selector
  *
- * Main dashboard showing overview stats, section list with counts,
- * and recent activity across all submissions.
+ * Professional interface for selecting which section/department to manage.
+ * Shows only sections the user has access to with real-time submission counts.
  */
 
 require_once __DIR__ . '/../../src/bootstrap.php';
 
 use Hub\Auth;
 use Hub\CommandCenter;
-use Hub\SectionRoleAccess;
+use Hub\Database;
 
 // Require login and admin/super_admin role
 Auth::requireLogin();
@@ -19,308 +19,242 @@ Auth::requireRole(['admin', 'super_admin']);
 $userId = $_SESSION['user_id'];
 $user = Auth::getCurrentUser();
 $userRole = Auth::getEffectiveRole();
+$isSuperAdmin = ($userRole === 'super_admin');
 
 $cc = new CommandCenter();
+$db = Database::getInstance();
 
-// Get dashboard data
-$stats = $cc->getDashboardStats();
-$sections = $cc->getSectionsWithCounts($userId);
-$recentActivity = $cc->getActivityFeed(15);
+// Get sections user has access to with submission counts
+if ($isSuperAdmin) {
+    // Super admins see all sections
+    $sections = $cc->getSectionsWithCounts();
+} else {
+    // Other admins see only their assigned sections
+    $sections = $cc->getSectionsWithCounts($userId);
+}
 
-$pageTitle = 'Command Center';
+// Get total stats across all accessible sections
+$totalSubmissions = 0;
+$totalPending = 0;
+$totalUrgent = 0;
+
+foreach ($sections as $section) {
+    $totalSubmissions += $section['submission_count'];
+    $totalPending += $section['pending_count'];
+
+    // Count urgent submissions for this section
+    $urgentCount = $db->fetchValue(
+        "SELECT COUNT(*) FROM section_submissions
+         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0 AND status_id = 1",
+        [$section['id']]
+    );
+    $totalUrgent += $urgentCount;
+}
+
+// Auto-redirect if user has access to only ONE section
+if (count($sections) === 1) {
+    header('Location: /command/section/' . $sections[0]['slug']);
+    exit;
+}
+
+$pageTitle = 'Command Center - Select Section';
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php Hub\Layout::renderHead($pageTitle . ' - Dashboard', 'command'); ?>
+    <?php Hub\Layout::renderHead($pageTitle, 'command'); ?>
 </head>
 <body>
 
 <?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
 <style>
-/* Command Center Professional Styles */
-.cc-container {
-    max-width: 1400px;
+/* Professional Section Selector Styles */
+.selector-container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
-.cc-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #e9ecef;
+.selector-header {
+    text-align: center;
+    margin-bottom: 40px;
 }
 
-.cc-header h1 {
-    margin: 0;
-    font-size: 28px;
+.selector-header h1 {
+    font-size: 32px;
     font-weight: 600;
     color: #2c3e50;
+    margin-bottom: 10px;
 }
 
-.cc-header .breadcrumb {
-    background: none;
-    padding: 0;
-    margin: 0;
-    font-size: 14px;
-}
-
-/* Stats Cards */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    border-left: 4px solid #3498db;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-}
-
-.stat-card.status {
-    border-left-color: #6c757d;
-}
-
-.stat-card.warning {
-    border-left-color: #f39c12;
-}
-
-.stat-card.success {
-    border-left-color: #27ae60;
-}
-
-.stat-card.info {
-    border-left-color: #3498db;
-}
-
-.stat-card .stat-value {
-    font-size: 36px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 10px 0 5px;
-}
-
-.stat-card .stat-label {
-    font-size: 14px;
+.selector-header p {
+    font-size: 16px;
     color: #7f8c8d;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.stat-card .stat-icon {
-    font-size: 24px;
-    opacity: 0.3;
-    float: right;
-}
-
-/* Status Breakdown */
-.status-breakdown {
+/* Summary Stats Bar */
+.summary-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
 }
 
-.status-item {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 6px;
+.summary-stat {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
     text-align: center;
-    border-left: 3px solid;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.status-item .status-count {
-    font-size: 24px;
+.summary-stat.pending {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.summary-stat.urgent {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.summary-stat .number {
+    font-size: 36px;
     font-weight: 700;
     margin-bottom: 5px;
 }
 
-.status-item .status-name {
-    font-size: 12px;
-    color: #6c757d;
+.summary-stat .label {
+    font-size: 14px;
+    opacity: 0.9;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Sections Grid */
-.sections-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.section-card {
+/* Professional Table Selector */
+.section-table {
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.section-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.section-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.section-table thead th {
+    padding: 18px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s;
+}
+
+.section-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.section-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.section-table tbody td {
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border-top: 4px solid #3498db;
-}
-
-.section-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.section-card.has-pending {
-    border-top-color: #e74c3c;
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
+    vertical-align: middle;
 }
 
 .section-icon {
-    font-size: 32px;
-    margin-right: 15px;
-    opacity: 0.8;
-}
-
-.section-title {
-    flex: 1;
-}
-
-.section-title h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
-}
-
-.section-title .section-slug {
-    font-size: 12px;
-    color: #95a5a6;
-    margin-top: 2px;
-}
-
-.section-counts {
-    display: flex;
-    gap: 20px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #ecf0f1;
-}
-
-.count-item {
-    flex: 1;
+    font-size: 24px;
+    width: 40px;
     text-align: center;
 }
 
-.count-item .count-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #3498db;
-}
-
-.count-item.pending .count-value {
-    color: #e74c3c;
-}
-
-.count-item .count-label {
-    font-size: 11px;
-    color: #7f8c8d;
-    text-transform: uppercase;
-    margin-top: 2px;
-}
-
-/* Activity Feed */
-.activity-feed {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-}
-
-.activity-feed h2 {
-    margin: 0 0 20px;
-    font-size: 20px;
+.section-name {
     font-weight: 600;
-    color: #2c3e50;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #ecf0f1;
-}
-
-.activity-item {
-    padding: 15px;
-    border-left: 3px solid #3498db;
-    background: #f8f9fa;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    transition: background 0.2s;
-}
-
-.activity-item:hover {
-    background: #ecf0f1;
-}
-
-.activity-item.critical {
-    border-left-color: #e74c3c;
-}
-
-.activity-item.warning {
-    border-left-color: #f39c12;
-}
-
-.activity-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.activity-user {
-    font-weight: 600;
+    font-size: 16px;
     color: #2c3e50;
 }
 
-.activity-time {
-    font-size: 12px;
-    color: #95a5a6;
-}
-
-.activity-details {
-    font-size: 14px;
-    color: #7f8c8d;
-}
-
-.activity-link {
-    margin-top: 8px;
-}
-
-.activity-link a {
+.section-slug {
     font-size: 13px;
-    color: #3498db;
+    color: #7f8c8d;
+    margin-top: 4px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 45px;
+}
+
+.badge.total {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge.pending {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.badge.urgent {
+    background: #ffebee;
+    color: #c62828;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.btn-enter {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-enter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    color: white;
     text-decoration: none;
 }
 
-.activity-link a:hover {
-    text-decoration: underline;
+.btn-enter i {
+    margin-left: 8px;
 }
 
-/* Empty State */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #95a5a6;
+    color: #7f8c8d;
 }
 
 .empty-state i {
@@ -330,178 +264,103 @@ $pageTitle = 'Command Center';
 }
 
 .empty-state h3 {
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 10px;
-    color: #7f8c8d;
 }
 
 .empty-state p {
-    font-size: 14px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .sections-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .cc-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
+    font-size: 16px;
 }
 </style>
 
-<div class="cc-container">
+<div class="selector-container">
     <!-- Header -->
-    <div class="cc-header">
-        <div>
-            <h1><i class="bi bi-command"></i> Command Center</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/admin/">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Command Center</li>
-                </ol>
-            </nav>
+    <div class="selector-header">
+        <h1><i class="bi bi-command"></i> Command Center</h1>
+        <p>Select a section to manage submissions, review reports, and track workflows</p>
+    </div>
+
+    <!-- Summary Stats -->
+    <?php if (!empty($sections)): ?>
+    <div class="summary-stats">
+        <div class="summary-stat">
+            <div class="number"><?php echo $totalSubmissions; ?></div>
+            <div class="label">Total Submissions</div>
         </div>
-        <div>
-            <a href="/command/search.php" class="btn btn-outline-primary">
-                <i class="bi bi-search"></i> Search All
-            </a>
+        <div class="summary-stat pending">
+            <div class="number"><?php echo $totalPending; ?></div>
+            <div class="label">Pending Review</div>
+        </div>
+        <div class="summary-stat urgent">
+            <div class="number"><?php echo $totalUrgent; ?></div>
+            <div class="label">Urgent Priority</div>
         </div>
     </div>
 
-    <!-- Overview Stats -->
-    <div class="stats-grid">
-        <div class="stat-card info">
-            <i class="bi bi-inbox-fill stat-icon"></i>
-            <div class="stat-label">Total Submissions</div>
-            <div class="stat-value"><?= number_format($stats['total']) ?></div>
-        </div>
-
-        <div class="stat-card warning">
-            <i class="bi bi-hourglass-split stat-icon"></i>
-            <div class="stat-label">Unassigned</div>
-            <div class="stat-value"><?= number_format($stats['unassigned']) ?></div>
-        </div>
-
-        <div class="stat-card success">
-            <i class="bi bi-calendar-week stat-icon"></i>
-            <div class="stat-label">Last 7 Days</div>
-            <div class="stat-value"><?= number_format($stats['recent_7_days']) ?></div>
-        </div>
-    </div>
-
-    <!-- Status Breakdown -->
-    <?php if (!empty($stats['by_status'])): ?>
-    <div class="stat-card">
-        <h3 style="margin: 0 0 15px; font-size: 16px; color: #7f8c8d;">By Status</h3>
-        <div class="status-breakdown">
-            <?php foreach ($stats['by_status'] as $status): ?>
-            <div class="status-item" style="border-left-color: <?= htmlspecialchars($status['status_color']) ?>">
-                <div class="status-count" style="color: <?= htmlspecialchars($status['status_color']) ?>">
-                    <?= number_format($status['count']) ?>
-                </div>
-                <div class="status-name"><?= htmlspecialchars($status['status_name']) ?></div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <!-- Sections Grid -->
-    <h2 style="margin: 40px 0 20px; font-size: 22px; font-weight: 600; color: #2c3e50;">
-        <i class="bi bi-folder-fill"></i> Active Sections
-    </h2>
-
-    <?php if (empty($sections)): ?>
-    <div class="empty-state">
-        <i class="bi bi-inbox"></i>
-        <h3>No Submissions Yet</h3>
-        <p>Sections will appear here once submissions are received.</p>
+    <!-- Section Table -->
+    <div class="section-table">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60px;"></th>
+                    <th>Section Name</th>
+                    <th style="text-align: center; width: 120px;">Total</th>
+                    <th style="text-align: center; width: 120px;">Pending</th>
+                    <th style="text-align: center; width: 120px;">Urgent</th>
+                    <th style="text-align: right; width: 150px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($sections as $section):
+                    // Get urgent count for this section
+                    $urgentCount = $db->fetchValue(
+                        "SELECT COUNT(*) FROM section_submissions
+                         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0 AND status_id = 1",
+                        [$section['id']]
+                    );
+                ?>
+                <tr>
+                    <td class="section-icon">
+                        <?php echo $section['icon'] ?: '📁'; ?>
+                    </td>
+                    <td>
+                        <div class="section-name"><?php echo htmlspecialchars($section['name']); ?></div>
+                        <div class="section-slug"><?php echo htmlspecialchars($section['slug']); ?></div>
+                    </td>
+                    <td style="text-align: center;">
+                        <span class="badge total"><?php echo $section['submission_count']; ?></span>
+                    </td>
+                    <td style="text-align: center;">
+                        <span class="badge pending"><?php echo $section['pending_count']; ?></span>
+                    </td>
+                    <td style="text-align: center;">
+                        <?php if ($urgentCount > 0): ?>
+                            <span class="badge urgent"><?php echo $urgentCount; ?></span>
+                        <?php else: ?>
+                            <span class="badge total">0</span>
+                        <?php endif; ?>
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="/command/section/<?php echo htmlspecialchars($section['slug']); ?>" class="btn-enter">
+                            Enter <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
     <?php else: ?>
-    <div class="sections-grid">
-        <?php foreach ($sections as $section): ?>
-        <div class="section-card <?= $section['pending_count'] > 0 ? 'has-pending' : '' ?>"
-             onclick="window.location.href='/command/section.php?slug=<?= urlencode($section['slug']) ?>'">
-            <div class="section-header">
-                <?php if ($section['icon']): ?>
-                <div class="section-icon"><?= htmlspecialchars($section['icon']) ?></div>
-                <?php endif; ?>
-                <div class="section-title">
-                    <h3><?= htmlspecialchars($section['name']) ?></h3>
-                    <div class="section-slug"><?= htmlspecialchars($section['slug']) ?></div>
-                </div>
-            </div>
-            <div class="section-counts">
-                <div class="count-item">
-                    <div class="count-value"><?= number_format($section['submission_count']) ?></div>
-                    <div class="count-label">Total</div>
-                </div>
-                <div class="count-item pending">
-                    <div class="count-value"><?= number_format($section['pending_count']) ?></div>
-                    <div class="count-label">Pending</div>
-                </div>
-            </div>
+    <!-- Empty State -->
+    <div class="section-table">
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>No Sections Assigned</h3>
+            <p>You don't have access to any sections yet. Contact your administrator to request access.</p>
         </div>
-        <?php endforeach; ?>
     </div>
     <?php endif; ?>
-
-    <!-- Recent Activity Feed -->
-    <h2 style="margin: 40px 0 20px; font-size: 22px; font-weight: 600; color: #2c3e50;">
-        <i class="bi bi-activity"></i> Recent Activity
-    </h2>
-
-    <div class="activity-feed">
-        <?php if (empty($recentActivity)): ?>
-        <div class="empty-state">
-            <i class="bi bi-clock-history"></i>
-            <h3>No Recent Activity</h3>
-            <p>Activity will appear here as submissions are processed.</p>
-        </div>
-        <?php else: ?>
-        <?php foreach ($recentActivity as $activity): ?>
-        <div class="activity-item <?= htmlspecialchars($activity['severity']) ?>">
-            <div class="activity-header">
-                <span class="activity-user">
-                    <i class="bi bi-person-fill"></i> <?= htmlspecialchars($activity['user_name']) ?>
-                </span>
-                <span class="activity-time">
-                    <i class="bi bi-clock"></i> <?= date('M j, Y g:i A', strtotime($activity['created_at'])) ?>
-                </span>
-            </div>
-            <div class="activity-details">
-                <strong><?= ucfirst(str_replace('_', ' ', $activity['action'])) ?></strong>
-                on <strong><?= htmlspecialchars($activity['display_id'] ?? 'submission') ?></strong>
-                in <?= htmlspecialchars($activity['section_name']) ?>
-                <?php if ($activity['notes']): ?>
-                <br><em><?= htmlspecialchars($activity['notes']) ?></em>
-                <?php endif; ?>
-            </div>
-            <div class="activity-link">
-                <a href="/command/submission.php?id=<?= $activity['submission_id'] ?>">
-                    View Submission <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-        <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
 </div>
-
-    });
-</script>
-
-        }
-    });
-</script>
 
 <?php Hub\Layout::renderFooter($user, 'command'); ?>
 </body>
