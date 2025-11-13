@@ -52,7 +52,7 @@ $pageTitle = 'Submission ' . ($data['display_id'] ?? $data['id']);
 
 <?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
-<style>
+<style data-cache-bust="<?= time() ?>">
 /* Command Center Layout Fix */
 body {
     display: flex;

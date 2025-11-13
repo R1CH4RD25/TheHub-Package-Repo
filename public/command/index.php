@@ -51,11 +51,14 @@ foreach ($sections as $section) {
     $totalUrgent += ($urgentResult['count'] ?? 0);
 }
 
-// Auto-redirect if user has access to only ONE section
+// DISABLED: Auto-redirect if user has access to only ONE section
+// (Keeping selector visible for easier navigation testing)
+/*
 if (count($sections) === 1) {
     header('Location: /command/section/' . $sections[0]['slug']);
     exit;
 }
+*/
 
 $pageTitle = 'Command Center - Select Section';
 
@@ -69,7 +72,7 @@ $pageTitle = 'Command Center - Select Section';
 
 <?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
-<style>
+<style data-cache-bust="<?= time() ?>">
 /* Command Center Layout Fix */
 body {
     display: flex;

@@ -50,7 +50,7 @@ $pageTitle = 'Command Center - ' . $section['name'];
 
 <?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
-<style>
+<style data-cache-bust="<?= time() ?>">
 /* Command Center Layout Fix */
 body {
     display: flex;
