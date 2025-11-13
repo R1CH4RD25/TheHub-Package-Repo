@@ -8,6 +8,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 use Hub\Invitation;
 use Hub\Auth;
+use Hub\Database;
 
 // Check if token is provided
 if (!isset($_GET['token']) || empty($_GET['token'])) {
@@ -20,6 +21,7 @@ $token = $_GET['token'];
 
 try {
     // Validate invitation token
+    $db = Database::getInstance();
     $invitationService = new Invitation($db);
     $invitation = $invitationService->getByToken($token);
 
