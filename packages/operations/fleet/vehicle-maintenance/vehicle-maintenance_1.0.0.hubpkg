@@ -1,0 +1,1338 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "id": "com.woodson.vehicle-maintenance",
+    "name": "vehicle-maintenance",
+    "namespace": "vm",
+    "display_name": "Vehicle Maintenance & Fleet Tracking",
+    "description": "District-wide vehicle maintenance, fueling, and trip category tracking with templates, notifications, and role-based control.",
+    "version": "1.0.0",
+    "author": "Woodson ISD Technology Department",
+    "author_email": "tech@woodsonisd.net",
+    "license": "Proprietary",
+    "category": "operations",
+    "tags": [
+      "fleet",
+      "vehicles",
+      "maintenance",
+      "fuel",
+      "school-operations"
+    ],
+    "icon": "fa-solid fa-truck-pickup",
+    "base_url": "/pkg/vm/",
+    "repository": "https://github.com/R1CH4RD25/TheHub",
+    "homepage": "https://github.com/R1CH4RD25/TheHub/tree/main/packages/local/vehicle-maintenance",
+    "support": "https://github.com/R1CH4RD25/TheHub/issues"
+  },
+  "compatibility": {
+    "hub_version": ">=1.0.0 <2.0.0",
+    "php_version": ">=8.0",
+    "mysql_version": ">=5.7",
+    "tested_up_to": "1.3.0"
+  },
+  "capabilities": [
+    "forms",
+    "tables",
+    "workflows",
+    "file-uploads",
+    "notifications",
+    "analytics"
+  ],
+  "settings": {
+    "allow_driver_logging": false,
+    "enable_departments": false,
+    "enable_campuses": false,
+    "maintenance_lead_days": 15,
+    "maintenance_lead_miles": 500,
+    "default_notification_channels": [
+      "email"
+    ]
+  },
+  "db": {
+    "entities": [
+      {
+        "name": "vm_vehicle",
+        "displayName": "Vehicle",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "unit_number VARCHAR(50)",
+          "vin VARCHAR(32)",
+          "license_plate VARCHAR(32)",
+          "year SMALLINT",
+          "make VARCHAR(100)",
+          "model VARCHAR(100)",
+          "department_id CHAR(26)",
+          "campus_id CHAR(26)",
+          "is_out_of_service BOOLEAN DEFAULT FALSE",
+          "out_of_service_reason TEXT",
+          "out_of_service_since DATE",
+          "current_odometer INT",
+          "notes TEXT",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_unit (unit_number)",
+          "INDEX idx_department (department_id)",
+          "INDEX idx_campus (campus_id)",
+          "INDEX idx_out_of_service (is_out_of_service)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (department_id) REFERENCES vm_department(id) ON DELETE SET NULL",
+          "FOREIGN KEY (campus_id) REFERENCES vm_campus(id) ON DELETE SET NULL"
+        ]
+      },
+      {
+        "name": "vm_department",
+        "displayName": "Department",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "code VARCHAR(20) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "description TEXT",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "UNIQUE INDEX uniq_code_tenant (tenant_id, code)"
+        ]
+      },
+      {
+        "name": "vm_campus",
+        "displayName": "Campus",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "code VARCHAR(20) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "description TEXT",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "UNIQUE INDEX uniq_code_tenant (tenant_id, code)"
+        ]
+      },
+      {
+        "name": "vm_trip_category",
+        "displayName": "Trip Category",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "code VARCHAR(20) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "description TEXT",
+          "sort_order INT DEFAULT 0",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "UNIQUE INDEX uniq_code_tenant (tenant_id, code)",
+          "INDEX idx_active (is_active, sort_order)"
+        ]
+      },
+      {
+        "name": "vm_fuel_log",
+        "displayName": "Fuel Log Entry",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "vehicle_id CHAR(26) NOT NULL",
+          "user_id CHAR(26) NOT NULL",
+          "event_date DATE NOT NULL",
+          "odometer INT NOT NULL",
+          "gallons DECIMAL(10,3) NOT NULL",
+          "fuel_type VARCHAR(50) NOT NULL",
+          "trip_category_id CHAR(26) NOT NULL",
+          "is_purchase BOOLEAN DEFAULT FALSE",
+          "vendor VARCHAR(255)",
+          "purchase_location VARCHAR(255)",
+          "cost_total DECIMAL(10,2)",
+          "price_per_gallon DECIMAL(10,4)",
+          "notes TEXT",
+          "receipt_file_id CHAR(26)",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_vehicle_date (vehicle_id, event_date)",
+          "INDEX idx_trip_category (trip_category_id)",
+          "INDEX idx_user (user_id)",
+          "INDEX idx_is_purchase (is_purchase)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (vehicle_id) REFERENCES vm_vehicle(id) ON DELETE RESTRICT",
+          "FOREIGN KEY (trip_category_id) REFERENCES vm_trip_category(id) ON DELETE RESTRICT"
+        ]
+      },
+      {
+        "name": "vm_maintenance_item",
+        "displayName": "Maintenance Item",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "code VARCHAR(50)",
+          "description TEXT",
+          "default_mileage_interval INT",
+          "default_time_interval_days INT",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_active (is_active)"
+        ]
+      },
+      {
+        "name": "vm_maintenance_template",
+        "displayName": "Maintenance Template",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "description TEXT",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_active (is_active)"
+        ]
+      },
+      {
+        "name": "vm_template_item",
+        "displayName": "Template Maintenance Item",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "template_id CHAR(26) NOT NULL",
+          "maintenance_item_id CHAR(26) NOT NULL",
+          "mileage_interval INT",
+          "time_interval_days INT",
+          "sort_order INT DEFAULT 0",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_template (template_id)",
+          "INDEX idx_item (maintenance_item_id)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (template_id) REFERENCES vm_maintenance_template(id) ON DELETE CASCADE",
+          "FOREIGN KEY (maintenance_item_id) REFERENCES vm_maintenance_item(id) ON DELETE RESTRICT"
+        ]
+      },
+      {
+        "name": "vm_vehicle_schedule_item",
+        "displayName": "Vehicle Maintenance Schedule Item",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "vehicle_id CHAR(26) NOT NULL",
+          "maintenance_item_id CHAR(26) NOT NULL",
+          "template_id CHAR(26)",
+          "mileage_interval INT",
+          "time_interval_days INT",
+          "last_service_date DATE",
+          "last_service_odometer INT",
+          "next_due_date DATE",
+          "next_due_odometer INT",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_vehicle (vehicle_id)",
+          "INDEX idx_item (maintenance_item_id)",
+          "INDEX idx_next_due (next_due_date, next_due_odometer)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (vehicle_id) REFERENCES vm_vehicle(id) ON DELETE RESTRICT",
+          "FOREIGN KEY (maintenance_item_id) REFERENCES vm_maintenance_item(id) ON DELETE RESTRICT",
+          "FOREIGN KEY (template_id) REFERENCES vm_maintenance_template(id) ON DELETE SET NULL"
+        ]
+      },
+      {
+        "name": "vm_maintenance_event",
+        "displayName": "Maintenance Event",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "vehicle_id CHAR(26) NOT NULL",
+          "maintenance_item_id CHAR(26) NOT NULL",
+          "schedule_item_id CHAR(26)",
+          "performed_by_user_id CHAR(26)",
+          "event_date DATE NOT NULL",
+          "odometer INT",
+          "vendor VARCHAR(255)",
+          "cost_parts DECIMAL(10,2)",
+          "cost_labor DECIMAL(10,2)",
+          "cost_total DECIMAL(10,2)",
+          "notes TEXT",
+          "invoice_file_id CHAR(26)",
+          "photos_json TEXT",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_vehicle_date (vehicle_id, event_date)",
+          "INDEX idx_item (maintenance_item_id)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (vehicle_id) REFERENCES vm_vehicle(id) ON DELETE RESTRICT",
+          "FOREIGN KEY (maintenance_item_id) REFERENCES vm_maintenance_item(id) ON DELETE RESTRICT",
+          "FOREIGN KEY (schedule_item_id) REFERENCES vm_vehicle_schedule_item(id) ON DELETE SET NULL"
+        ]
+      },
+      {
+        "name": "vm_vehicle_assignment",
+        "displayName": "Vehicle Assignment",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "vehicle_id CHAR(26) NOT NULL",
+          "user_id CHAR(26) NOT NULL",
+          "scope_role ENUM('vm_crew','vm_fm') NOT NULL",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_vehicle (vehicle_id)",
+          "INDEX idx_user (user_id)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (vehicle_id) REFERENCES vm_vehicle(id) ON DELETE CASCADE"
+        ]
+      },
+      {
+        "name": "vm_settings",
+        "displayName": "Vehicle Maintenance Settings",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "allow_driver_logging BOOLEAN DEFAULT FALSE",
+          "enable_departments BOOLEAN DEFAULT FALSE",
+          "enable_campuses BOOLEAN DEFAULT FALSE",
+          "maintenance_lead_days INT DEFAULT 15",
+          "maintenance_lead_miles INT DEFAULT 500",
+          "default_notification_channels VARCHAR(255)",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "UNIQUE INDEX uniq_tenant (tenant_id)"
+        ]
+      }
+    ],
+    "migrations": []
+  },
+  "modules": [
+    {
+      "type": "Dashboard",
+      "slug": "vm-dashboard",
+      "displayName": "Vehicle Maintenance Dashboard",
+      "entity": null,
+      "route": "/pkg/vm/dashboard",
+      "icon": "fa-solid fa-gauge-high",
+      "access": [
+        "vm_crew",
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ]
+    },
+    {
+      "type": "TableView",
+      "slug": "vehicles-table",
+      "displayName": "Vehicles",
+      "entity": "vm_vehicle",
+      "route": "/pkg/vm/vehicles",
+      "icon": "fa-solid fa-car-side",
+      "access": [
+        "vm_crew",
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ],
+      "columns": [
+        {
+          "key": "unit_number",
+          "label": "Unit",
+          "sortable": true
+        },
+        {
+          "key": "name",
+          "label": "Vehicle",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "key": "license_plate",
+          "label": "Plate",
+          "sortable": true
+        },
+        {
+          "key": "department_id",
+          "label": "Department",
+          "filterable": true
+        },
+        {
+          "key": "campus_id",
+          "label": "Campus",
+          "filterable": true
+        },
+        {
+          "key": "is_out_of_service",
+          "label": "Out of Service",
+          "badge": true
+        }
+      ],
+      "filters": [
+        {
+          "key": "department_id",
+          "type": "select",
+          "label": "Department"
+        },
+        {
+          "key": "campus_id",
+          "type": "select",
+          "label": "Campus"
+        },
+        {
+          "key": "is_out_of_service",
+          "type": "select",
+          "label": "Status"
+        }
+      ],
+      "defaultSort": {
+        "field": "unit_number",
+        "direction": "ASC"
+      },
+      "pagination": {
+        "enabled": true,
+        "perPage": 25,
+        "options": [
+          10,
+          25,
+          50,
+          100
+        ]
+      }
+    },
+    {
+      "type": "Form",
+      "slug": "vehicle-form",
+      "displayName": "Add / Edit Vehicle",
+      "entity": "vm_vehicle",
+      "route": "/pkg/vm/vehicle-form",
+      "icon": "fa-solid fa-plus",
+      "access": [
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ],
+      "fields": [
+        {
+          "key": "name",
+          "fieldType": "text",
+          "label": "Vehicle Name",
+          "required": true,
+          "maxLength": 255
+        },
+        {
+          "key": "unit_number",
+          "fieldType": "text",
+          "label": "Unit Number",
+          "required": false,
+          "maxLength": 50
+        },
+        {
+          "key": "vin",
+          "fieldType": "text",
+          "label": "VIN",
+          "required": false,
+          "maxLength": 32
+        },
+        {
+          "key": "license_plate",
+          "fieldType": "text",
+          "label": "License Plate",
+          "required": false,
+          "maxLength": 32
+        },
+        {
+          "key": "year",
+          "fieldType": "number",
+          "label": "Year",
+          "required": false,
+          "validation": {
+            "minValue": 1900,
+            "maxValue": 2100
+          }
+        },
+        {
+          "key": "make",
+          "fieldType": "text",
+          "label": "Make",
+          "required": false
+        },
+        {
+          "key": "model",
+          "fieldType": "text",
+          "label": "Model",
+          "required": false
+        },
+        {
+          "key": "department_id",
+          "fieldType": "select",
+          "label": "Department",
+          "required": false
+        },
+        {
+          "key": "campus_id",
+          "fieldType": "select",
+          "label": "Campus",
+          "required": false
+        },
+        {
+          "key": "is_out_of_service",
+          "fieldType": "checkbox",
+          "label": "Out of Service",
+          "required": false
+        },
+        {
+          "key": "out_of_service_reason",
+          "fieldType": "textarea",
+          "label": "Out of Service Reason",
+          "required": false
+        },
+        {
+          "key": "notes",
+          "fieldType": "textarea",
+          "label": "Notes",
+          "required": false
+        }
+      ]
+    },
+    {
+      "type": "Form",
+      "slug": "fuel-log-form",
+      "displayName": "Fuel & Trip Log",
+      "entity": "vm_fuel_log",
+      "route": "/pkg/vm/fuel-log",
+      "icon": "fa-solid fa-gas-pump",
+      "access": [
+        "vm_driver",
+        "vm_crew",
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ],
+      "fields": [
+        {
+          "key": "vehicle_id",
+          "fieldType": "select",
+          "label": "Vehicle",
+          "required": true
+        },
+        {
+          "key": "event_date",
+          "fieldType": "date",
+          "label": "Date",
+          "required": true
+        },
+        {
+          "key": "odometer",
+          "fieldType": "number",
+          "label": "Odometer",
+          "required": true,
+          "validation": {
+            "minValue": 0,
+            "maxValue": 999999
+          }
+        },
+        {
+          "key": "gallons",
+          "fieldType": "number",
+          "label": "Gallons",
+          "required": true,
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 9999
+          }
+        },
+        {
+          "key": "fuel_type",
+          "fieldType": "select",
+          "label": "Fuel Type",
+          "required": true,
+          "options": [
+            {
+              "value": "unleaded",
+              "label": "Unleaded"
+            },
+            {
+              "value": "diesel",
+              "label": "Diesel"
+            },
+            {
+              "value": "propane",
+              "label": "Propane"
+            },
+            {
+              "value": "other",
+              "label": "Other"
+            }
+          ]
+        },
+        {
+          "key": "trip_category_id",
+          "fieldType": "select",
+          "label": "Trip Category",
+          "required": true
+        },
+        {
+          "key": "is_purchase",
+          "fieldType": "checkbox",
+          "label": "Purchasing Fuel?",
+          "required": false,
+          "helpText": "Check this box if you purchased fuel (not from district tank)"
+        },
+        {
+          "key": "vendor",
+          "fieldType": "text",
+          "label": "Vendor",
+          "required": false,
+          "showIf": {
+            "is_purchase": true
+          }
+        },
+        {
+          "key": "purchase_location",
+          "fieldType": "text",
+          "label": "Purchase Location",
+          "required": false,
+          "showIf": {
+            "is_purchase": true
+          }
+        },
+        {
+          "key": "cost_total",
+          "fieldType": "number",
+          "label": "Total Cost",
+          "required": false,
+          "showIf": {
+            "is_purchase": true
+          },
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 999999.99
+          }
+        },
+        {
+          "key": "price_per_gallon",
+          "fieldType": "number",
+          "label": "Price per Gallon",
+          "required": false,
+          "showIf": {
+            "is_purchase": true
+          },
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 99.99
+          }
+        },
+        {
+          "key": "receipt_file_id",
+          "fieldType": "file",
+          "label": "Receipt Upload",
+          "required": false,
+          "validation": {
+            "maxSize": 5242880,
+            "allowedExtensions": [
+              "pdf",
+              "jpg",
+              "jpeg",
+              "png"
+            ],
+            "allowedMimeTypes": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          },
+          "showIf": {
+            "is_purchase": true
+          }
+        },
+        {
+          "key": "notes",
+          "fieldType": "textarea",
+          "label": "Notes",
+          "required": false
+        }
+      ],
+      "validation": {
+        "rateLimit": {
+          "perUser": 20,
+          "perMinute": 10,
+          "perHour": 60
+        }
+      }
+    },
+    {
+      "type": "TableView",
+      "slug": "fuel-log-table",
+      "displayName": "Fuel Logs",
+      "entity": "vm_fuel_log",
+      "route": "/pkg/vm/fuel-logs",
+      "icon": "fa-solid fa-table",
+      "access": [
+        "vm_crew",
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ],
+      "columns": [
+        {
+          "key": "event_date",
+          "label": "Date",
+          "sortable": true
+        },
+        {
+          "key": "vehicle_id",
+          "label": "Vehicle",
+          "filterable": true
+        },
+        {
+          "key": "odometer",
+          "label": "Odometer",
+          "sortable": true
+        },
+        {
+          "key": "gallons",
+          "label": "Gallons",
+          "sortable": true
+        },
+        {
+          "key": "fuel_type",
+          "label": "Fuel Type",
+          "filterable": true
+        },
+        {
+          "key": "trip_category_id",
+          "label": "Trip Category",
+          "filterable": true
+        },
+        {
+          "key": "is_purchase",
+          "label": "Purchase",
+          "badge": true
+        }
+      ],
+      "filters": [
+        {
+          "key": "vehicle_id",
+          "type": "select",
+          "label": "Vehicle"
+        },
+        {
+          "key": "trip_category_id",
+          "type": "select",
+          "label": "Trip Category"
+        },
+        {
+          "key": "event_date",
+          "type": "dateRange",
+          "label": "Date Range"
+        },
+        {
+          "key": "is_purchase",
+          "type": "select",
+          "label": "Purchase Only"
+        }
+      ],
+      "defaultSort": {
+        "field": "event_date",
+        "direction": "DESC"
+      },
+      "pagination": {
+        "enabled": true,
+        "perPage": 50,
+        "options": [
+          25,
+          50,
+          100
+        ]
+      }
+    },
+    {
+      "type": "Form",
+      "slug": "maintenance-event-form",
+      "displayName": "Maintenance Log",
+      "entity": "vm_maintenance_event",
+      "route": "/pkg/vm/maintenance-log",
+      "icon": "fa-solid fa-wrench",
+      "access": [
+        "vm_crew",
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ],
+      "fields": [
+        {
+          "key": "vehicle_id",
+          "fieldType": "select",
+          "label": "Vehicle",
+          "required": true
+        },
+        {
+          "key": "maintenance_item_id",
+          "fieldType": "select",
+          "label": "Maintenance Item",
+          "required": true
+        },
+        {
+          "key": "event_date",
+          "fieldType": "date",
+          "label": "Date",
+          "required": true
+        },
+        {
+          "key": "odometer",
+          "fieldType": "number",
+          "label": "Odometer",
+          "required": false,
+          "validation": {
+            "minValue": 0,
+            "maxValue": 999999
+          }
+        },
+        {
+          "key": "vendor",
+          "fieldType": "text",
+          "label": "Vendor",
+          "required": false
+        },
+        {
+          "key": "cost_parts",
+          "fieldType": "number",
+          "label": "Parts Cost",
+          "required": false,
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 999999.99
+          }
+        },
+        {
+          "key": "cost_labor",
+          "fieldType": "number",
+          "label": "Labor Cost",
+          "required": false,
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 999999.99
+          }
+        },
+        {
+          "key": "cost_total",
+          "fieldType": "number",
+          "label": "Total Cost",
+          "required": false,
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 999999.99
+          }
+        },
+        {
+          "key": "invoice_file_id",
+          "fieldType": "file",
+          "label": "Invoice Upload",
+          "required": false,
+          "validation": {
+            "maxSize": 5242880,
+            "allowedExtensions": [
+              "pdf",
+              "jpg",
+              "jpeg",
+              "png"
+            ],
+            "allowedMimeTypes": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          }
+        },
+        {
+          "key": "photos",
+          "fieldType": "file",
+          "label": "Photo Upload (Damage / Before & After)",
+          "helpText": "Upload photos of damage, repairs, or before/after images",
+          "required": false,
+          "validation": {
+            "maxSize": 10485760,
+            "allowedExtensions": [
+              "jpg",
+              "jpeg",
+              "png"
+            ],
+            "allowedMimeTypes": [
+              "image/jpeg",
+              "image/png"
+            ]
+          }
+        },
+        {
+          "key": "notes",
+          "fieldType": "textarea",
+          "label": "Notes",
+          "required": false
+        }
+      ],
+      "validation": {
+        "rateLimit": {
+          "perUser": 50,
+          "perMinute": 20,
+          "perHour": 200
+        }
+      }
+    },
+    {
+      "type": "TableView",
+      "slug": "maintenance-events-table",
+      "displayName": "Maintenance Records",
+      "entity": "vm_maintenance_event",
+      "route": "/pkg/vm/maintenance-logs",
+      "icon": "fa-solid fa-screwdriver-wrench",
+      "access": [
+        "vm_crew",
+        "vm_fm",
+        "vm_md",
+        "vm_admin"
+      ],
+      "columns": [
+        {
+          "key": "event_date",
+          "label": "Date",
+          "sortable": true
+        },
+        {
+          "key": "vehicle_id",
+          "label": "Vehicle",
+          "filterable": true
+        },
+        {
+          "key": "maintenance_item_id",
+          "label": "Item",
+          "filterable": true
+        },
+        {
+          "key": "odometer",
+          "label": "Odometer",
+          "sortable": true
+        },
+        {
+          "key": "cost_total",
+          "label": "Total Cost",
+          "sortable": true
+        }
+      ],
+      "filters": [
+        {
+          "key": "vehicle_id",
+          "type": "select",
+          "label": "Vehicle"
+        },
+        {
+          "key": "maintenance_item_id",
+          "type": "select",
+          "label": "Item"
+        },
+        {
+          "key": "event_date",
+          "type": "dateRange",
+          "label": "Date Range"
+        }
+      ],
+      "defaultSort": {
+        "field": "event_date",
+        "direction": "DESC"
+      },
+      "pagination": {
+        "enabled": true,
+        "perPage": 50,
+        "options": [
+          25,
+          50,
+          100
+        ]
+      }
+    },
+    {
+      "type": "TableView",
+      "slug": "trip-categories",
+      "displayName": "Trip Categories",
+      "entity": "vm_trip_category",
+      "route": "/pkg/vm/trip-categories",
+      "icon": "fa-solid fa-tags",
+      "access": [
+        "vm_md",
+        "vm_admin"
+      ],
+      "columns": [
+        {
+          "key": "code",
+          "label": "Code",
+          "sortable": true
+        },
+        {
+          "key": "name",
+          "label": "Name",
+          "sortable": true
+        },
+        {
+          "key": "description",
+          "label": "Description"
+        },
+        {
+          "key": "is_active",
+          "label": "Active",
+          "badge": true
+        }
+      ],
+      "filters": [
+        {
+          "key": "is_active",
+          "type": "select",
+          "label": "Active"
+        }
+      ]
+    },
+    {
+      "type": "TableView",
+      "slug": "maintenance-templates",
+      "displayName": "Maintenance Templates",
+      "entity": "vm_maintenance_template",
+      "route": "/pkg/vm/maintenance-templates",
+      "icon": "fa-solid fa-layer-group",
+      "access": [
+        "vm_md",
+        "vm_admin"
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "label": "Template Name",
+          "sortable": true
+        },
+        {
+          "key": "description",
+          "label": "Description"
+        },
+        {
+          "key": "is_active",
+          "label": "Active",
+          "badge": true
+        }
+      ]
+    },
+    {
+      "type": "Form",
+      "slug": "vm-settings-form",
+      "displayName": "Vehicle Maintenance Settings",
+      "entity": "vm_settings",
+      "route": "/pkg/vm/settings",
+      "icon": "fa-solid fa-gear",
+      "access": [
+        "vm_md",
+        "vm_admin"
+      ],
+      "fields": [
+        {
+          "key": "allow_driver_logging",
+          "fieldType": "checkbox",
+          "label": "Allow Drivers to Log Trips/Fuel",
+          "helpText": "When enabled, drivers can submit their own fuel and trip logs",
+          "required": false
+        },
+        {
+          "key": "enable_departments",
+          "fieldType": "checkbox",
+          "label": "Enable Departments",
+          "helpText": "Track vehicles by department (e.g., Transportation, Maintenance, Athletics)",
+          "required": false
+        },
+        {
+          "key": "enable_campuses",
+          "fieldType": "checkbox",
+          "label": "Enable Campuses",
+          "helpText": "Track vehicles by campus location",
+          "required": false
+        },
+        {
+          "key": "maintenance_lead_days",
+          "fieldType": "number",
+          "label": "Maintenance Lead Time (Days)",
+          "helpText": "How many days before scheduled maintenance to send reminders",
+          "required": true,
+          "validation": {
+            "minValue": 1,
+            "maxValue": 365
+          }
+        },
+        {
+          "key": "maintenance_lead_miles",
+          "fieldType": "number",
+          "label": "Maintenance Lead Distance (Miles)",
+          "helpText": "How many miles before scheduled maintenance to send reminders",
+          "required": true,
+          "validation": {
+            "minValue": 1,
+            "maxValue": 10000
+          }
+        }
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "name": "vehicle_id",
+      "type": "select",
+      "label": "Vehicle",
+      "required": true,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "trip_category_id",
+      "type": "select",
+      "label": "Trip Category",
+      "required": true,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "event_date",
+      "type": "date",
+      "label": "Date",
+      "required": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "odometer",
+      "type": "number",
+      "label": "Odometer",
+      "required": true,
+      "visible_in_list": false
+    },
+    {
+      "name": "gallons",
+      "type": "number",
+      "label": "Gallons",
+      "required": true,
+      "visible_in_list": false
+    },
+    {
+      "name": "is_purchase",
+      "type": "checkbox",
+      "label": "Purchasing Fuel?",
+      "required": false,
+      "visible_in_list": true
+    }
+  ],
+  "permissions": {
+    "roles": [
+      {
+        "key": "vm_driver",
+        "displayName": "Driver",
+        "description": "Can submit their own fuel/trip entries when driver logging is enabled."
+      },
+      {
+        "key": "vm_crew",
+        "displayName": "Maintenance Crew",
+        "description": "Can log fuel and maintenance events, and edit their own entries."
+      },
+      {
+        "key": "vm_fm",
+        "displayName": "Fleet Manager",
+        "description": "Can manage vehicles, schedules, and logs for assigned vehicles/campuses/departments."
+      },
+      {
+        "key": "vm_md",
+        "displayName": "Maintenance Director",
+        "description": "District-wide control of all vehicles, templates, categories, and settings."
+      },
+      {
+        "key": "vm_admin",
+        "displayName": "Vehicle Maintenance Admin",
+        "description": "Full control over this package, including assigning Maintenance Director role."
+      }
+    ],
+    "roleMatrix": {
+      "vm_driver": [
+        "module:fuel-log-form:create_own",
+        "module:fuel-log-table:read_own"
+      ],
+      "vm_crew": [
+        "module:fuel-log-form:create",
+        "module:fuel-log-table:read",
+        "module:maintenance-event-form:create",
+        "module:maintenance-events-table:read",
+        "entity:vm_fuel_log:update_own",
+        "entity:vm_maintenance_event:update_own"
+      ],
+      "vm_fm": [
+        "module:vehicles-table:read_scope",
+        "module:vehicle-form:update_scope",
+        "module:fuel-log-table:read_scope",
+        "module:maintenance-events-table:read_scope",
+        "module:maintenance-event-form:create_scope",
+        "module:maintenance-templates:read",
+        "module:vm-dashboard:read_scope"
+      ],
+      "vm_md": [
+        "module:*:read",
+        "module:*:create",
+        "module:*:update",
+        "module:*:delete"
+      ],
+      "vm_admin": [
+        "module:*:*",
+        "permissions:assign_vm_md"
+      ]
+    },
+    "defaultAccess": {
+      "staff": [
+        "vm_driver"
+      ],
+      "maintenance_crew": [
+        "vm_crew"
+      ],
+      "fleet_manager": [
+        "vm_fm"
+      ],
+      "maintenance_director": [
+        "vm_md"
+      ],
+      "admin": [
+        "vm_admin"
+      ],
+      "super_admin": [
+        "vm_admin"
+      ]
+    }
+  },
+  "menu_items": [
+    {
+      "label": "Dashboard",
+      "route": "/pkg/vm/dashboard",
+      "icon": "fa-solid fa-gauge-high",
+      "order": 1,
+      "minimum_role": "vm_crew"
+    },
+    {
+      "label": "Vehicles",
+      "route": "/pkg/vm/vehicles",
+      "icon": "fa-solid fa-car-side",
+      "order": 2,
+      "minimum_role": "vm_crew"
+    },
+    {
+      "label": "Fuel & Trip Log",
+      "route": "/pkg/vm/fuel-log",
+      "icon": "fa-solid fa-gas-pump",
+      "order": 3,
+      "minimum_role": "vm_driver"
+    },
+    {
+      "label": "Fuel Logs",
+      "route": "/pkg/vm/fuel-logs",
+      "icon": "fa-solid fa-table",
+      "order": 4,
+      "minimum_role": "vm_crew"
+    },
+    {
+      "label": "Maintenance Logs",
+      "route": "/pkg/vm/maintenance-logs",
+      "icon": "fa-solid fa-screwdriver-wrench",
+      "order": 5,
+      "minimum_role": "vm_crew"
+    },
+    {
+      "label": "Trip Categories",
+      "route": "/pkg/vm/trip-categories",
+      "icon": "fa-solid fa-tags",
+      "order": 6,
+      "minimum_role": "vm_md"
+    },
+    {
+      "label": "Maintenance Templates",
+      "route": "/pkg/vm/maintenance-templates",
+      "icon": "fa-solid fa-layer-group",
+      "order": 7,
+      "minimum_role": "vm_md"
+    },
+    {
+      "label": "Vehicle Maintenance Settings",
+      "route": "/pkg/vm/settings",
+      "icon": "fa-solid fa-gear",
+      "order": 8,
+      "minimum_role": "vm_md"
+    }
+  ]
+}
