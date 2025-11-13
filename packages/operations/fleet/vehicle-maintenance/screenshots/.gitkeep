@@ -1,0 +1,48 @@
+# Screenshots Directory
+
+This directory will contain package screenshots for the Package Specification documentation.
+
+## Required Screenshots (Minimum 2)
+
+Per PACKAGE_SPECIFICATION_V2.md Section 11.3, packages MUST include at least 2 screenshots:
+
+1. **Dashboard / Overview** - Main landing page or dashboard showing key features
+2. **Primary Form** - Example of main data entry form (Fuel Log or Maintenance Log)
+
+## Recommended Additional Screenshots
+
+3. **Table View** - Example of data tables (Vehicles, Fuel Logs, Maintenance Records)
+4. **Settings** - Package configuration screen
+5. **Mobile View** - Responsive layout on mobile devices (if applicable)
+
+## Screenshot Guidelines
+
+- **Format:** PNG or JPG
+- **Resolution:** 1920x1080 or higher (min 1280x720)
+- **File naming:** `01-dashboard.png`, `02-fuel-log-form.png`, `03-vehicles-table.png`, etc.
+- **Content:** Show real-ish data (no Lorem Ipsum), anonymized if necessary
+- **Annotations:** Optional arrows/highlights for key features
+
+## Status
+
+⚠️ **PLACEHOLDER** - Screenshots to be added after package installation and testing.
+
+To add screenshots:
+1. Install package in Hub
+2. Populate with sample data
+3. Take screenshots of key modules
+4. Save as PNG/JPG in this directory
+5. Update manifest.json if screenshot URLs needed
+6. Commit to repository
+
+## Example Filenames
+
+```
+screenshots/
+├── 01-vm-dashboard.png
+├── 02-fuel-log-form.png
+├── 03-vehicles-table.png
+├── 04-maintenance-log-form.png
+├── 05-maintenance-templates.png
+└── 06-settings.png
+```

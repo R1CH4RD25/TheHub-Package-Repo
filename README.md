@@ -30,20 +30,36 @@ URL management, short links, and redirect tools.
 Automated workflows, approval processes, and task management.
 - _No packages available yet_
 
+### 🏗️ [Operations](packages/operations/)
+School district operations, facilities management, fleet tracking, and maintenance systems.
+- **[Vehicle Maintenance & Fleet Tracking](packages/operations/fleet/vehicle-maintenance/)** `v1.0.0` - Comprehensive fleet management system
+
+### 👨‍🎓 [Student](packages/student/)
+Student-facing tools and resources.
+- **[Bullying Report](packages/student/safety/)** `v1.0.0` - Anonymous bullying incident reporting (also in Reporting category)
+
+
 ## 📂 Repository Structure
 
 ```
 packages/
-├── reporting/           # Incident reporting & compliance
-│   └── bullying-report/
-│       ├── 1.0.0/
-│       │   └── bullying-report_1.0.0.hubpkg
-│       ├── CHANGELOG.md
-│       └── README.md
 ├── analytics/          # Data visualization & dashboards
 ├── forms/              # Form builders & surveys
 ├── integrations/       # Third-party connectors
+├── operations/         # Fleet, facilities, operations management
+│   └── fleet/
+│       └── vehicle-maintenance/
+│           ├── manifest.json
+│           ├── README.md
+│           ├── CHANGELOG.md
+│           ├── LICENSE
+│           └── screenshots/
 ├── redirects/          # URL management tools
+├── reporting/          # Incident reporting & compliance
+│   └── bullying-report/
+├── student/            # Student-facing tools
+│   └── safety/
+│       └── bullying-report/
 └── workflows/          # Automation & approval systems
 ```
 
