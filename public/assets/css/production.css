@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Wed Nov 12 03:54:57 PM UTC 2025
+ * Generated: Thu Nov 13 07:33:31 PM UTC 2025
  * ============================================================================
  */
 
@@ -2187,7 +2187,8 @@ footer.footer {
 
 .modal.is-open {
     display: block;
-    z-index: 10050 !important; /* Above header (10002) but below SweetAlert/admin overlays (100000+) */
+    z-index: 10050 !important;
+    /* Above header (10002) but below SweetAlert/admin overlays (100000+) */
 }
 
 /**
@@ -2230,6 +2231,17 @@ footer.footer {
 }
 
 /**
+ * Compact modals - narrower, for validation progress
+ * MADE EVEN SMALLER: 55vw × 65vh for tight layout
+ */
+.modal__container.modal-compact {
+    max-width: 55vw !important;
+    width: 55vw !important;
+    max-height: 65vh !important;
+    min-height: 45vh !important;
+}
+
+/**
  * Modal header
  */
 .modal__header {
@@ -2241,11 +2253,22 @@ footer.footer {
     background: #f8f9fa;
 }
 
+/* Compact header for validation modal */
+.modal-compact .modal__header {
+    padding: 1rem 1.25rem;
+    /* Reduced padding */
+}
+
 .modal-title {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
     color: #212529;
+}
+
+/* Slightly smaller title for compact modals */
+.modal-compact .modal-title {
+    font-size: 1.1rem;
 }
 
 /**
@@ -2270,12 +2293,28 @@ footer.footer {
     height: 40px !important;
 }
 
-.modal__close:hover,
-.modal__close:focus {
+/* Only animate on HOVER, not on focus (prevents auto-focus animation) */
+.modal__close:hover {
     transform: rotate(180deg) scale(1.15) !important;
     background: rgba(220, 53, 69, 0.1) !important;
-    outline: none !important;
     color: #dc3545 !important;
+}
+
+/* Focus state: just outline, no rotation */
+.modal__close:focus {
+    outline: 2px solid rgba(196, 180, 84, 0.5) !important;
+    outline-offset: 2px !important;
+}
+
+/* Focus-visible (keyboard navigation) - show clear focus ring */
+.modal__close:focus-visible {
+    outline: 2px solid rgba(196, 180, 84, 0.8) !important;
+    outline-offset: 2px !important;
+}
+
+/* Remove focus outline when clicked (mouse users) */
+.modal__close:focus:not(:focus-visible) {
+    outline: none !important;
 }
 
 .modal__close svg {
@@ -2294,6 +2333,14 @@ footer.footer {
     overflow-y: auto;
     max-height: calc(95vh - 140px);
     min-height: calc(60vh - 140px);
+}
+
+/* Compact content for validation modal - less padding, more space */
+.modal-compact .modal__content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 /**
@@ -2323,8 +2370,13 @@ footer.footer {
  * Slide animation for modal appearance
  */
 @keyframes mmfadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes mmslideIn {
@@ -2332,6 +2384,7 @@ footer.footer {
         transform: translateY(15%);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -2363,8 +2416,13 @@ footer.footer {
 }
 
 @keyframes mmfadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
 @keyframes mmslideOut {
@@ -2372,6 +2430,7 @@ footer.footer {
         transform: translateY(0);
         opacity: 1;
     }
+
     to {
         transform: translateY(-10%);
         opacity: 0;
@@ -2399,7 +2458,8 @@ footer.footer {
    LEGACY BOOTSTRAP CLASSES (For Backwards Compatibility)
    ========================================================================== */
 
-/* Keep Bootstrap utility classes working inside modals */.modal-content {
+/* Keep Bootstrap utility classes working inside modals */
+.modal-content {
     background: white;
     margin: 0;
     padding: 2rem;
@@ -2774,6 +2834,11 @@ button[data-bs-dismiss="modal"] i {
         max-width: none;
         width: 100%;
     }
+
+    /* Taller cards on mobile (single column, more vertical space) */
+    #packageValidationModal .validation-card-body {
+        max-height: 500px;
+    }
 }
 
 /* Small Mobile - 375px and below */
@@ -2797,6 +2862,92 @@ button[data-bs-dismiss="modal"] i {
         margin-top: 1rem;
         padding-top: 0.75rem;
     }
+}
+
+/* Tablet - 2 columns, medium height */
+@media (min-width: 768px) and (max-width: 991px) {
+    #packageValidationModal .validation-card-body {
+        max-height: 380px;
+    }
+}
+
+/* Desktop - 3 columns, standard height */
+@media (min-width: 992px) {
+    #packageValidationModal .validation-card-body {
+        max-height: 420px;
+    }
+}
+
+/* ====================================
+   Compact Validation Report Styles
+   ==================================== */
+
+/* Compact check cards */
+#packageValidationModal .card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#packageValidationModal .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Card body with smart height (fits ~5-6 checks without scrollbar) */
+#packageValidationModal .validation-card-body {
+    max-height: 420px;
+    overflow: hidden;
+    /* Hide any overflow - no scrollbars! */
+}
+
+/* If a card has many checks, show scrollbar on hover */
+#packageValidationModal .card:hover .validation-card-body {
+    overflow-y: auto;
+}
+
+/* Smooth scrolling within cards (only visible on hover) */
+#packageValidationModal .validation-card-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Tighter spacing for check items */
+#packageValidationModal .card-body>div:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Badge sizing */
+#packageValidationModal .card-header .badge {
+    font-size: 0.75rem;
+}
+
+/* Compact alerts */
+#packageValidationModal .alert {
+    padding: 0.5rem 1rem;
+}
+
+/* Remove extra spacing */
+#packageValidationModal .row.g-3 {
+    margin-top: 0;
 }
 
 /* ========== ADMIN DASHBOARD LAYOUT ========== */
@@ -3792,8 +3943,15 @@ button[data-bs-dismiss="modal"] i {
 
 .toast.warning {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: var(--text-primary);
-    border-color: rgba(0, 0, 0, var(--shadow-light));
+    color: white;
+    /* Changed from var(--text-primary) for better readability */
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.toast.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .toast-icon {
@@ -3825,12 +3983,70 @@ button[data-bs-dismiss="modal"] i {
     background: rgba(255, 255, 255, 0.3);
 }
 
-.toast.warning .toast-close {
-    background: rgba(0, 0, 0, var(--shadow-light));
+/* ========================================
+   NUCLEAR OVERRIDE: Notyf Toast Colors
+   Force custom colors, ignore inline styles
+   ======================================== */
+
+/* SUCCESS - Green gradient */
+.notyf__toast--success,
+div.notyf__toast--success,
+.notyf .notyf__toast--success,
+[role="alert"].notyf__toast--success {
+    background: linear-gradient(135deg, #28a745 0%, #34d058 100%) !important;
+    background-color: #28a745 !important;
 }
 
-.toast.warning .toast-close:hover {
-    background: rgba(0, 0, 0, var(--shadow-medium));
+/* ERROR - Red gradient */
+.notyf__toast--error,
+div.notyf__toast--error,
+.notyf .notyf__toast--error,
+[role="alert"].notyf__toast--error {
+    background: linear-gradient(135deg, #dc3545 0%, #f44336 100%) !important;
+    background-color: #dc3545 !important;
+}
+
+/* WARNING - Orange gradient (NOT yellow!) */
+.notyf__toast--warning,
+.notyf__toast[class*="warning"],
+div.notyf__toast--warning,
+div.notyf__toast[class*="warning"],
+.notyf .notyf__toast--warning,
+.notyf__wrapper .notyf__toast--warning,
+[role="alert"].notyf__toast--warning,
+div[class*="notyf"][class*="warning"] {
+    background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%) !important;
+    background-color: #ff9800 !important;
+}
+
+/* INFO - Blue gradient */
+.notyf__toast--info,
+div.notyf__toast--info,
+.notyf .notyf__toast--info,
+[role="alert"].notyf__toast--info {
+    background: linear-gradient(135deg, #0288d1 0%, #03a9f4 100%) !important;
+    background-color: #0288d1 !important;
+}
+
+/* Force white text on ALL toast types */
+.notyf__toast .notyf__message,
+.notyf__toast .notyf__wrapper,
+.notyf__toast--success .notyf__message,
+.notyf__toast--error .notyf__message,
+.notyf__toast--warning .notyf__message,
+.notyf__toast--info .notyf__message,
+div[class*="notyf__toast"] * {
+    color: white !important;
+}
+
+/* Override icon colors */
+.notyf__toast .notyf__icon,
+.notyf__toast--warning .notyf__icon,
+.notyf__toast--success .notyf__icon,
+.notyf__toast--error .notyf__icon,
+.notyf__toast--info .notyf__icon {
+    color: white !important;
+    border-color: white !important;
 }
 
 /* Section Access Management */
@@ -5708,6 +5924,64 @@ textarea:focus {
     animation: badgePulse 2s ease-in-out infinite;
 }
 
+/* Sidebar Badge - Red Dot Variant (no number, just indicator) */
+.sidebar-badge.dot {
+    min-width: 8px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
+    animation: dotPulse 2s ease-in-out infinite;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Orange Dot Variant - for configuration/notifications (not errors) */
+.sidebar-badge.orange-dot {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5) !important;
+    animation: dotPulseOrange 2s ease-in-out infinite !important;
+    min-width: 8px !important;
+    max-width: 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    vertical-align: middle !important;
+    flex-shrink: 0;
+    margin-left: 6px !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+    font-size: 0 !important;
+    text-align: center;
+}
+
+/* Dot pulse animation (subtler than badge pulse) */
+@keyframes dotPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.3), 0 2px 8px rgba(255, 68, 68, 0.6);
+    }
+}
+
+/* Orange dot pulse animation */
+@keyframes dotPulseOrange {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5);
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3), 0 2px 8px rgba(249, 115, 22, 0.6);
+    }
+}
+
 /* Stats Cards - Count Up with Bounce */
 .stat-card {
     opacity: 0;
@@ -5841,24 +6115,24 @@ textarea:focus {
 
 /* Compact Progress */
 .validation-progress-compact {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
 }
 
 .progress-bar-wrapper {
     background: #e9ecef;
-    border-radius: 8px;
-    height: 8px;
+    border-radius: 6px;
+    height: 6px;
     overflow: hidden;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .progress-bar-wrapper .progress-bar {
     height: 100%;
     background: linear-gradient(90deg, #4CAF50, #81C784);
     transition: width 0.5s ease;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .validation-status {
@@ -5866,7 +6140,7 @@ textarea:focus {
     align-items: center;
     gap: 0.5rem;
     color: #495057;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
 }
 
@@ -5874,46 +6148,59 @@ textarea:focus {
     animation: spin 1s linear infinite;
 }
 
-/* Compact Checks Grid - 3 Columns */
+/* Compact Checks Grid - 4 Columns for better space usage */
 .validation-checks-compact {
-    padding: 1rem;
+    padding: 0.5rem;
     flex: 1;
     overflow-y: auto;
-    max-height: calc(85vh - 220px);
+    max-height: calc(65vh - 140px); /* Increased usable space */
 }
 
 .checks-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem; /* Slightly more breathing room */
 }
 
 .validation-check-checkbox {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 0.5rem; /* Tighter gap */
+    padding: 0.5rem 0.7rem; /* More compact padding */
     background: #f8f9fa;
-    border-radius: 8px;
+    border-radius: 6px; /* Smaller radius */
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
-    font-size: 0.85rem;
+    font-size: 0.85rem; /* Slightly smaller text */
+    cursor: default;
+    min-height: 38px; /* Shorter height */
 }
 
 .validation-check-checkbox .check-icon {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    width: 20px !important;
+    width: 20px !important; /* Smaller icon */
     height: 20px !important;
+    min-width: 20px !important;
     flex-shrink: 0;
+    border: 2px solid #ccc;
+    border-radius: 4px; /* Smaller radius */
+    background-color: transparent;
+    color: #ccc;
+    font-weight: bold;
+    font-size: 14px; /* Smaller icon font */
+    line-height: 1;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
 .validation-check-checkbox .check-label {
     flex: 1;
-    line-height: 1.3;
-    font-size: 0.85rem;
+    line-height: 1.2; /* Tighter line height */
+    font-size: 0.85rem; /* Match parent font size */
     color: #495057;
+    font-weight: 500;
 }
 
 /* Check status colors */
@@ -5929,7 +6216,7 @@ textarea:focus {
 
 /* Footer */
 .modal-footer {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem; /* More compact footer */
     background: #f8f9fa;
     border-top: 1px solid #e9ecef;
     display: flex;
