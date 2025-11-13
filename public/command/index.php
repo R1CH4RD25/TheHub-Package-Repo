@@ -499,6 +499,10 @@ $pageTitle = 'Command Center';
     });
 </script>
 
+        }
+    });
+</script>
+
 <?php Hub\Layout::renderFooter($user, 'command'); ?>
 </body>
 </html>
