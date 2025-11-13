@@ -247,9 +247,6 @@ table.dataTable tbody tr:hover {
 }
 </style>
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-
 <div class="cc-section-container">
     <!-- Section Header with Back Button -->
     <div class="section-header">
@@ -271,6 +268,7 @@ table.dataTable tbody tr:hover {
                 </nav>
             </div>
         </div>
+    </div>
 
     <!-- Filters -->
     <div class="filters-bar">
