@@ -6,10 +6,9 @@
  * and recent activity across all submissions.
  */
 
-require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../../src/bootstrap.php';
 
 use Hub\Auth;
-use Hub\Layout;
 use Hub\CommandCenter;
 use Hub\SectionRoleAccess;
 
@@ -18,10 +17,10 @@ Auth::requireLogin();
 Auth::requireRole(['admin', 'super_admin']);
 
 $userId = $_SESSION['user_id'];
+$user = Auth::getCurrentUser();
 $userRole = Auth::getEffectiveRole();
 
 $cc = new CommandCenter();
-$layout = new Layout();
 
 // Get dashboard data
 $stats = $cc->getDashboardStats();
@@ -29,8 +28,16 @@ $sections = $cc->getSectionsWithCounts($userId);
 $recentActivity = $cc->getActivityFeed(15);
 
 $pageTitle = 'Command Center';
-$layout->header($pageTitle);
+
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?php Hub\Layout::renderHead($pageTitle . ' - Dashboard', 'command'); ?>
+</head>
+<body>
+
+<?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
 <style>
 /* Command Center Professional Styles */
@@ -337,11 +344,11 @@ $layout->header($pageTitle);
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .sections-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .cc-header {
         flex-direction: column;
         align-items: flex-start;
@@ -357,7 +364,7 @@ $layout->header($pageTitle);
             <h1><i class="bi bi-command"></i> Command Center</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/admin/">Admin</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/">Dashboard</a></li>
                     <li class="breadcrumb-item active">Command Center</li>
                 </ol>
             </nav>
@@ -421,7 +428,7 @@ $layout->header($pageTitle);
     <?php else: ?>
     <div class="sections-grid">
         <?php foreach ($sections as $section): ?>
-        <div class="section-card <?= $section['pending_count'] > 0 ? 'has-pending' : '' ?>" 
+        <div class="section-card <?= $section['pending_count'] > 0 ? 'has-pending' : '' ?>"
              onclick="window.location.href='/command/section.php?slug=<?= urlencode($section['slug']) ?>'">
             <div class="section-header">
                 <?php if ($section['icon']): ?>
@@ -489,4 +496,9 @@ $layout->header($pageTitle);
     </div>
 </div>
 
-<?php $layout->footer(); ?>
+    });
+</script>
+
+<?php Hub\Layout::renderFooter($user, 'command'); ?>
+</body>
+</html>
