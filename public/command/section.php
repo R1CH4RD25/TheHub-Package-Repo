@@ -6,10 +6,9 @@
  * Supports filtering, sorting, bulk actions.
  */
 
-require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../../src/bootstrap.php';
 
 use Hub\Auth;
-use Hub\Layout;
 use Hub\CommandCenter;
 use Hub\Database;
 
@@ -18,6 +17,8 @@ Auth::requireLogin();
 Auth::requireRole(['admin', 'super_admin']);
 
 $userId = $_SESSION['user_id'];
+$user = Auth::getCurrentUser();
+$userRole = Auth::getEffectiveRole();
 $slug = $_GET['slug'] ?? null;
 
 if (!$slug) {
@@ -36,12 +37,18 @@ if (!$section) {
 }
 
 $cc = new CommandCenter();
-$layout = new Layout();
 $statuses = $cc->getStatuses($section['id']);
 
 $pageTitle = 'Command Center - ' . $section['name'];
-$layout->header($pageTitle);
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?php Hub\Layout::renderHead($pageTitle, 'command'); ?>
+</head>
+<body>
+
+<?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
 
 <style>
 /* Section View Styles */
@@ -339,7 +346,7 @@ table.dataTable tbody tr:hover {
 document.addEventListener('DOMContentLoaded', function() {
     const sectionId = <?= $section['id'] ?>;
     let selectedRows = new Set();
-    
+
     // Initialize DataTable
     const table = $('#submissions-table').DataTable({
         processing: true,
@@ -443,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#select-all').on('change', function() {
         const isChecked = $(this).prop('checked');
         $('.row-select').prop('checked', isChecked);
-        
+
         if (isChecked) {
             $('.row-select').each(function() {
                 selectedRows.add($(this).val());
@@ -451,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             selectedRows.clear();
         }
-        
+
         updateBulkActions();
     });
 
@@ -470,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateBulkActions() {
         const count = selectedRows.size;
         $('#selected-count').text(count);
-        
+
         if (count > 0) {
             $('#bulk-actions-bar').addClass('active');
         } else {
@@ -484,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!action || selectedRows.size === 0) return;
 
         const ids = Array.from(selectedRows);
-        
+
         if (action === 'delete') {
             if (confirm(`Delete ${ids.length} submission(s)?`)) {
                 applyBulkAction(action, ids);
@@ -520,8 +527,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(err => alert('Network error: ' + err.message));
-    }
+    });
 });
 </script>
 
-<?php $layout->footer(); ?>
+<?php Hub\Layout::renderFooter($user, 'command'); ?>
+</body>
+</html>
