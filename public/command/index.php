@@ -51,14 +51,12 @@ foreach ($sections as $section) {
     $totalUrgent += ($urgentResult['count'] ?? 0);
 }
 
-// DISABLED: Auto-redirect if user has access to only ONE section
-// (Keeping selector visible for easier navigation testing)
-/*
+// Auto-redirect if user has access to only ONE section
+// Improves UX by skipping selector for single-section users
 if (count($sections) === 1) {
     header('Location: /command/section/' . $sections[0]['slug']);
     exit;
 }
-*/
 
 $pageTitle = 'Command Center - Select Section';
 

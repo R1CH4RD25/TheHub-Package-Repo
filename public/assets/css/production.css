@@ -15,7 +15,7 @@
  * 7. admin-colors.css - Dashboard colors
  * 8. media.css       - Responsive/mobile
  *
- * Generated: Thu Nov 13 07:33:31 PM UTC 2025
+ * Generated: Thu Nov 13 10:27:43 PM UTC 2025
  * ============================================================================
  */
 
@@ -737,18 +737,21 @@ body {
 /* Navigation Links */
 .nav-links {
     display: flex;
-    align-items: center;
-    gap: 15px;
+    align-items: flex-end;
+    gap: 0;
+    height: 100%;
+    padding-bottom: 8px;
 }
 
 .nav-links>a {
     color: var(--header-text-color, white);
     text-decoration: none;
-    padding: 0.5rem 15px;
+    padding: 0.5rem 20px;
     border-right: 1px solid rgba(255, 255, 255, 0.3);
     transition: all 0.2s ease;
     font-weight: 500;
     font-size: 0.95rem;
+    text-align: center;
 }
 
 .nav-links>a:hover {
@@ -5952,7 +5955,6 @@ textarea:focus {
     vertical-align: middle !important;
     flex-shrink: 0;
     margin-left: 6px !important;
-    display: inline-block !important;
     line-height: 1 !important;
     font-size: 0 !important;
     text-align: center;
@@ -5960,10 +5962,13 @@ textarea:focus {
 
 /* Dot pulse animation (subtler than badge pulse) */
 @keyframes dotPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
     }
+
     50% {
         transform: scale(1.15);
         box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.3), 0 2px 8px rgba(255, 68, 68, 0.6);
@@ -5972,10 +5977,13 @@ textarea:focus {
 
 /* Orange dot pulse animation */
 @keyframes dotPulseOrange {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5);
     }
+
     50% {
         transform: scale(1.15);
         box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3), 0 2px 8px rgba(249, 115, 22, 0.6);
@@ -6153,43 +6161,53 @@ textarea:focus {
     padding: 0.5rem;
     flex: 1;
     overflow-y: auto;
-    max-height: calc(65vh - 140px); /* Increased usable space */
+    max-height: calc(65vh - 140px);
+    /* Increased usable space */
 }
 
 .checks-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.4rem; /* Slightly more breathing room */
+    gap: 0.4rem;
+    /* Slightly more breathing room */
 }
 
 .validation-check-checkbox {
     display: flex;
     align-items: center;
-    gap: 0.5rem; /* Tighter gap */
-    padding: 0.5rem 0.7rem; /* More compact padding */
+    gap: 0.5rem;
+    /* Tighter gap */
+    padding: 0.5rem 0.7rem;
+    /* More compact padding */
     background: #f8f9fa;
-    border-radius: 6px; /* Smaller radius */
+    border-radius: 6px;
+    /* Smaller radius */
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
-    font-size: 0.85rem; /* Slightly smaller text */
+    font-size: 0.85rem;
+    /* Slightly smaller text */
     cursor: default;
-    min-height: 38px; /* Shorter height */
+    min-height: 38px;
+    /* Shorter height */
 }
 
 .validation-check-checkbox .check-icon {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    width: 20px !important; /* Smaller icon */
+    width: 20px !important;
+    /* Smaller icon */
     height: 20px !important;
     min-width: 20px !important;
     flex-shrink: 0;
     border: 2px solid #ccc;
-    border-radius: 4px; /* Smaller radius */
+    border-radius: 4px;
+    /* Smaller radius */
     background-color: transparent;
     color: #ccc;
     font-weight: bold;
-    font-size: 14px; /* Smaller icon font */
+    font-size: 14px;
+    /* Smaller icon font */
     line-height: 1;
     text-align: center;
     transition: all 0.3s ease;
@@ -6197,8 +6215,10 @@ textarea:focus {
 
 .validation-check-checkbox .check-label {
     flex: 1;
-    line-height: 1.2; /* Tighter line height */
-    font-size: 0.85rem; /* Match parent font size */
+    line-height: 1.2;
+    /* Tighter line height */
+    font-size: 0.85rem;
+    /* Match parent font size */
     color: #495057;
     font-weight: 500;
 }
@@ -6216,7 +6236,8 @@ textarea:focus {
 
 /* Footer */
 .modal-footer {
-    padding: 0.75rem 1.25rem; /* More compact footer */
+    padding: 0.75rem 1.25rem;
+    /* More compact footer */
     background: #f8f9fa;
     border-top: 1px solid #e9ecef;
     display: flex;
@@ -6562,6 +6583,15 @@ input[type="checkbox"]:checked+label::before {
 .menu-group-items li a {
     padding: 10px 20px;
     font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* Prevent badge from wrapping alone */
+.menu-group-items li a .sidebar-badge {
+    flex-shrink: 0;
 }
 
 /* Menu spacer to push items to bottom */
