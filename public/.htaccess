@@ -11,6 +11,10 @@ RewriteRule ^$ hub.php [L]
 # Redirect index.php to root for clean URL
 RewriteRule ^index\.php$ / [R=301,L]
 
+# Command Center routes - must come before generic .php removal
+RewriteRule ^command/section/([a-z0-9-]+)$ command/section.php?slug=$1 [L,QSA]
+RewriteRule ^command/submission/([0-9]+)$ command/submission.php?id=$1 [L,QSA]
+
 # Redirect hub.php to root for clean URL (when accessed directly)
 RewriteCond %{THE_REQUEST} \s/hub\.php[\s?] [NC]
 RewriteRule ^hub\.php$ / [R=301,L]
@@ -20,7 +24,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [L]
 
-# Route all other non-existent requests through index.php  
+# Route all other non-existent requests through index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [L,QSA]
