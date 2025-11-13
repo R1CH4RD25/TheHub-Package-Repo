@@ -43,12 +43,12 @@ foreach ($sections as $section) {
     $totalPending += $section['pending_count'];
 
     // Count urgent submissions for this section
-    $urgentCount = $db->fetchValue(
-        "SELECT COUNT(*) FROM section_submissions
-         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0 AND status_id = 1",
+    $urgentResult = $db->fetchOne(
+        "SELECT COUNT(*) as count FROM section_submissions
+         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0",
         [$section['id']]
     );
-    $totalUrgent += $urgentCount;
+    $totalUrgent += ($urgentResult['count'] ?? 0);
 }
 
 // Auto-redirect if user has access to only ONE section
