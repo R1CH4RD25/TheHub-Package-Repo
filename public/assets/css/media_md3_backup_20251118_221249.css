@@ -1,0 +1,1308 @@
+/**
+ * PWA-Optimized Responsive Media Queries for The Hub
+ * Mobile-first approach with standardized breakpoints
+ */
+
+:root {
+    /* Spacing scale - PWA standard */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+
+    /* App bar heights - prevents layout shift */
+    --app-bar-height: 56px;
+    --app-bar-height-lg: 64px;
+
+    /* Safe area insets - iPhone notch support */
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-left: env(safe-area-inset-left);
+    --safe-right: env(safe-area-inset-right);
+
+    /* Material Design 3 Motion System - Google's official easing curves */
+    --motion-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+    /* Standard UI elements */
+    --motion-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+    /* Entering elements (smooth→slow) */
+    --motion-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
+    /* Exiting elements (slow→fast) */
+    --motion-sharp: cubic-bezier(0.4, 0.0, 0.6, 1);
+    /* Quick interactions */
+}
+
+/* PWA Touch enhancements */
+body {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+}
+
+/* Minimum touch target size - iOS/Android standard */
+button,
+a,
+.btn,
+.sidebar-menu a,
+.nav-link {
+    min-height: 48px;
+    min-width: 48px;
+}
+
+
+/* ==========================================================================
+   PWA BREAKPOINTS (Mobile-First)
+   - Extra Small: 0-360px     (iPhone SE, small phones)
+   - Small:       361-599px   (Standard phones)
+   - Medium:      600-899px   (Large phones, small tablets)
+   - Large:       900-1199px  (Tablets, small desktop)
+   - Extra Large: 1200px+     (Desktop)
+   ========================================================================== */
+
+/* ==========================================================================
+   Breakpoints:
+   - Mobile: up to 767px
+   - Tablet: 768px to 1024px
+   - Desktop: 1025px and up
+   ========================================================================== */
+
+
+/* ==========================================================================
+   TABLE CARD VIEW UTILITY - Reusable mobile table pattern
+   ========================================================================== */
+.table-card-view thead {
+    display: none;
+}
+
+.table-card-view tbody {
+    display: block;
+}
+
+.table-card-view tr {
+    display: block;
+    background: #fff;
+    margin-bottom: var(--space-4);
+    border-radius: 8px;
+    padding: var(--space-4);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table-card-view td {
+    display: block;
+    padding: var(--space-2) 0;
+    position: relative;
+    text-align: right;
+    border: none;
+}
+
+.table-card-view td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    font-weight: 600;
+    color: #666;
+}
+
+/* ==========================================================================
+   TABLET STYLES (768px - 1024px)
+   ========================================================================== */
+@media (max-width: 899px) {
+
+    /* Admin Sidebar - Collapse to hamburger */
+    .admin-container {
+        grid-template-columns: 1fr !important;
+        position: relative;
+    }
+
+    .admin-sidebar {
+        position: fixed;
+        transform: translateX(-100%);
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        z-index: 9999;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+        position: fixed;
+        will-change: transform;
+        position: fixed;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Hamburger Menu Button */
+    .hamburger-menu {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        position: fixed;
+        left: 15px;
+        top: 15px;
+        z-index: 10000;
+    }
+
+    .hamburger-menu span {
+        width: 30px;
+        height: 3px;
+        background: var(--header-text-color, #fff);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        transform-origin: center;
+    }
+
+    .hamburger-menu.active span:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+    }
+
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger-menu.active span:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+    }
+
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Admin Content - Full Width */
+    .admin-content {
+        margin-left: 0;
+        padding: 20px 15px;
+        width: 100%;
+    }
+
+    /* Navbar adjustments */
+    .navbar {
+        padding-left: 60px !important;
+    }
+
+    /* Color Grid - 2 columns on tablet */
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px;
+    }
+
+    /* Tables - Horizontal scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    /* Theme cards - Stack vertically */
+    #themesContainer .theme-card {
+        margin-bottom: 15px;
+    }
+
+    /* Forms - Full width inputs */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+    }
+
+    /* Modal styles moved to modals.css responsive section */
+}
+
+/* ==========================================================================
+   MOBILE STYLES (up to 767px)
+   ========================================================================== */
+@media (max-width: 599px) {
+
+    /* Typography - Scale down */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.3rem !important;
+    }
+
+    h3 {
+        font-size: 1.1rem !important;
+    }
+
+    h4 {
+        font-size: 1rem !important;
+    }
+
+    /* Navbar - Compact */
+    .navbar {
+        padding: 10px 15px 10px 60px !important;
+        height: auto !important;
+        min-height: 60px;
+    }
+
+    .nav-brand {
+        font-size: 1.1rem !important;
+    }
+
+    .nav-brand-title {
+        font-size: 1.1rem !important;
+    }
+
+    .nav-brand-subtitle {
+        font-size: 0.75rem !important;
+    }
+
+    /* Logo - Smaller on mobile */
+    .logo {
+        height: var(--logo-height-mobile, 50px) !important;
+        max-height: 50px !important;
+    }
+
+    /* Admin Sidebar - Full screen when open */
+    .admin-sidebar {
+        width: 100%;
+        left: -100%;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Sidebar Menu Items - Larger touch targets */
+    .sidebar-menu a {
+        padding: 15px 20px !important;
+        font-size: 1rem !important;
+    }
+
+    /* Admin Content - More padding */
+    .admin-content {
+        padding: 15px 10px !important;
+    }
+
+    /* Color Grid - Single column */
+    .color-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    /* Color Pairs - Stack vertically */
+    .color-pair {
+        flex-direction: column !important;
+        gap: 12px;
+    }
+
+    .color-pair .color-item {
+        width: 100%;
+    }
+
+    /* Color Inputs - Full width */
+    .color-input-group {
+        width: 100%;
+    }
+
+    .color-input-group input[type="color"] {
+        width: 60px !important;
+        height: 50px !important;
+    }
+
+    .color-input-group input[type="text"] {
+        flex: 1;
+        font-size: 1rem !important;
+    }
+
+    /* Buttons - Stack and full width */
+    .btn-group {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 12px 20px !important;
+        font-size: 1rem !important;
+    }
+
+    .btn-sm {
+        padding: 8px 16px !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Theme Cards - Full width buttons */
+    .theme-card .btn {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    /* Tables - Card view on mobile */
+    .table-responsive {
+        border: 0;
+    }
+
+    .table-responsive thead {
+        display: none;
+    }
+
+    .table-responsive tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-primary, #e5e7eb);
+        border-radius: 8px;
+        padding: 10px;
+        background: white;
+    }
+
+    .table-responsive td {
+        display: block;
+        text-align: right;
+        padding: 8px;
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+
+    .table-responsive td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    /* Forms - Stack labels */
+    .form-row {
+        flex-direction: column !important;
+    }
+
+    .form-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    /* Color Section Headers - Larger touch targets */
+    .color-section-header {
+        padding: 15px !important;
+        cursor: pointer;
+    }
+
+    .color-section-header h3 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Badges - Slightly larger */
+    .badge {
+        padding: 6px 12px !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Role Badge Preview - Full width */
+    .role-badge-preview {
+        padding: 8px 16px !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Modal - Full screen */
+    /* Modal styles moved to modals.css responsive section */
+
+    /* Tabs - Scrollable */
+    .tab-buttons {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        margin-bottom: 20px;
+    }
+
+    .tab-button {
+        padding: 10px 15px !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Cards - Full width */
+    .card {
+        margin-bottom: 15px;
+    }
+
+    /* Footer - Stack items */
+    .footer-content {
+        flex-direction: column !important;
+        text-align: center;
+        gap: 10px;
+    }
+
+    /* Search and Filter - Stack */
+    .filter-group {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+    }
+
+    /* Hub Tiles - Single column */
+    .hub-tiles,
+    .module-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+
+    /* Section Cards - Full width */
+    .section-card {
+        width: 100%;
+    }
+
+    /* Vehicle Cards - Full width */
+    .vehicle-card {
+        width: 100%;
+    }
+
+    /* Stats Cards - Stack */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Header Actions - Stack */
+    .header-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* Color Preview Swatches - Wrap */
+    .color-preview {
+        flex-wrap: wrap !important;
+    }
+}
+
+/* ==========================================================================
+   LANDSCAPE PHONE (up to 667px height)
+   ========================================================================== */
+@media (max-height: 667px) and (orientation: landscape) {
+    .admin-sidebar {
+        padding-top: 10px;
+    }
+
+    .sidebar-menu a {
+        padding: 10px 15px !important;
+    }
+
+    .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+}
+
+/* ==========================================================================
+   EXTRA SMALL DEVICES (up to 360px)
+   ========================================================================== */
+@media (max-width: 360px) {
+    .navbar {
+        padding-left: 50px !important;
+    }
+
+    .hamburger-menu {
+        left: 10px;
+        width: 25px;
+        height: 20px;
+    }
+
+    .hamburger-menu span {
+        width: 25px;
+        height: 2px;
+    }
+
+    .btn {
+        padding: 10px 15px !important;
+        font-size: 0.875rem !important;
+    }
+
+    h1 {
+        font-size: 1.3rem !important;
+    }
+
+    h2 {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* ==========================================================================
+   PRINT STYLES
+   ========================================================================== */
+@media print {
+
+    .admin-sidebar,
+    .hamburger-menu,
+    .navbar,
+    .footer,
+    .btn,
+    button {
+        display: none;
+    }
+
+    .admin-content {
+        margin: 0;
+        padding: 0;
+    }
+
+    .color-section-body {
+        display: block;
+    }
+
+    .collapsed {
+        display: block;
+    }
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+.mobile-only {
+    display: none;
+}
+
+.desktop-only {
+    display: block;
+}
+
+@media (max-width: 599px) {
+    .mobile-only {
+        display: block;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+}
+
+/* Hide scrollbar for mobile menu */
+.admin-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, #d1d5db);
+    border-radius: 3px;
+}
+
+
+/* ============================================================================
+   MEDIA QUERIES EXTRACTED FROM OTHER CSS FILES
+   ============================================================================ */
+
+
+/* ========== HEADER.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 599px) {
+    .navbar {
+        min-height: 70px;
+        max-height: 70px;
+        height: 70px;
+    }
+
+    .nav-content {
+        padding: 0 1rem;
+    }
+
+    .nav-brand img {
+        height: var(--logo-height-mobile, 45px) !important;
+    }
+
+    .nav-brand-title {
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+
+    .nav-brand-subtitle {
+        display: none;
+    }
+
+    .nav-user-info {
+        display: none;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100vh;
+        background: var(--header-bg-color, #2c2c2c);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        gap: 0;
+        z-index: 10001;
+        transition: left 0.3s ease;
+    }
+
+    .nav-links.active {
+        left: 0;
+    }
+
+    .nav-links>a {
+        width: 100%;
+        max-width: 400px;
+        padding: 1.25rem 2rem;
+        font-size: 1.25rem;
+        text-align: center;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        display: block;
+    }
+
+    .nav-links>a:last-of-type {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-links>a.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-bottom: 1px solid var(--primary-color, #C99700);
+    }
+
+    /* User dropdown in mobile menu */
+    .nav-links .nav-user-dropdown {
+        width: 100%;
+        max-width: 400px;
+        margin-top: 2rem;
+    }
+
+    .nav-links .nav-user-trigger {
+        width: 100%;
+        padding: 1rem 2rem;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
+    .mobile-menu {
+        display: block;
+    }
+}
+
+@media (max-width: 400px) {
+    .nav-brand-title {
+        font-size: 1.1rem;
+    }
+
+    .nav-brand img {
+        height: calc(var(--logo-height, 50px) * 0.8) !important;
+    }
+
+    .nav-links>a span {
+        display: none;
+    }
+}
+
+@media (max-width: 599px) {
+    .nav-user-info {
+        display: none;
+    }
+}
+
+
+/* ========== FOOTER.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 599px) {
+    .footer {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.75rem !important;
+        min-height: auto !important;
+        max-height: none !important;
+        height: auto !important;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-right {
+        gap: 0.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 400px) {
+    .footer {
+        font-size: 0.7rem !important;
+        padding: 0.5rem !important;
+    }
+
+    .footer-separator {
+        display: none;
+    }
+
+    .footer-left,
+    .footer-right {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+
+/* ========== MODALS.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 599px) {
+
+    /* Full-height modal on mobile */
+    .modal {
+        padding: 0;
+    }
+
+    .modal-dialog {
+        margin: 0;
+        min-height: 100vh;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .modal-content {
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+
+    .modal__container.modal-wide {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0;
+    }
+
+    .modal__container {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0;
+    }
+
+    .modal__header,
+    .modal__content,
+    .modal__footer {
+        padding: 1rem;
+    }
+
+    /* Ensure modal appears above mobile header */
+    .modal,
+    .modal.show {
+        z-index: 10100 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 10099 !important;
+    }
+}
+
+@media (max-width: 599px) {
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        padding: 1.5rem;
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding-right: 2rem;
+    }
+
+    .modal-close {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .modal-content {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 1rem;
+    }
+
+    .modal-header h2,
+    .modal-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .package-discovery-modal .modal-content {
+        max-width: none;
+        width: 100%;
+    }
+
+    /* Taller cards on mobile (single column, more vertical space) */
+    #packageValidationModal .validation-card-body {
+        max-height: 500px;
+    }
+}
+
+@media (max-width: 360px) {
+    .modal-content {
+        padding: 0.75rem;
+    }
+
+    .modal-header {
+        margin-bottom: 1rem;
+        padding-right: 1.5rem;
+    }
+
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .modal-actions {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 991px) {
+    #packageValidationModal .validation-card-body {
+        max-height: 380px;
+    }
+}
+
+@media (min-width: 900px) {
+    #packageValidationModal .validation-card-body {
+        max-height: 420px;
+    }
+}
+
+
+/* ========== DYNAMIC-SECTIONS.CSS - RESPONSIVE STYLES ========== */
+
+@media (min-width: 600px) {
+    .dynamic-form .checkbox-group {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .dynamic-form .checkbox-group {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 599px) {
+
+    .dynamic-form .radio-group .form-check,
+    .dynamic-form .checkbox-group .form-check,
+    .dynamic-form .form-check {
+        padding: 1rem 1rem 1rem 3.5rem !important;
+        min-height: 3.5rem !important;
+        display: flex;
+        align-items: center !important;
+        background-color: #fff !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 0.375rem !important;
+        margin-bottom: 0;
+    }
+
+    .dynamic-form .form-check-input {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+        left: 1rem !important;
+        position: absolute !important;
+        margin: 0;
+        padding: 0;
+        float: none !important;
+        flex-shrink: 0 !important;
+    }
+
+    .dynamic-form .form-check-label {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        padding-right: 0.5rem !important;
+        display: block;
+        width: auto !important;
+        flex: 1 !important;
+        margin: 0;
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 600px) {
+
+    .dynamic-form .radio-group .form-check,
+    .dynamic-form .checkbox-group .form-check,
+    .dynamic-form .form-check {
+        height: 3.5rem;
+        overflow: hidden;
+    }
+
+    .dynamic-form .form-check-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media (max-width: 992px) {
+    .dynamic-section {
+        padding: 1rem;
+    }
+
+    .dynamic-form {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 599px) {
+    .dynamic-section {
+        padding: 0.75rem;
+    }
+
+    .dynamic-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .dynamic-form .form-label {
+        font-size: 0.95rem;
+    }
+
+    .dynamic-form .form-control,
+    .dynamic-form .form-select {
+        font-size: 0.95rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .dynamic-form .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .dynamic-form .form-actions .btn {
+        width: 100%;
+        padding: 0.875rem;
+    }
+
+    .dynamic-section .card-header {
+        padding: 1rem;
+    }
+
+    .dynamic-section .card-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .dynamic-section .card-header .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .dynamic-section .card-header .btn-group .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .dynamic-section .card-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .dynamic-section .card-header i {
+        font-size: 1.2em;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+
+    .dynamic-form .form-control,
+    .dynamic-form .form-select {
+        background-color: #2b3035;
+        border-color: #495057;
+        color: #f8f9fa;
+    }
+
+    .dynamic-form .form-control:focus,
+    .dynamic-form .form-select:focus {
+        background-color: #2b3035;
+        border-color: var(--primary-color);
+    }
+}
+
+@media print {
+    .dynamic-form .form-actions {
+        display: none;
+    }
+
+    .dynamic-section .card-header .btn-group {
+        display: none;
+    }
+
+    .dynamic-section .card:last-child {
+        display: none;
+    }
+}
+
+
+/* ========== ADMIN-MODERN.CSS - RESPONSIVE STYLES ========== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (max-width: 599px) {
+    .nav-user-info {
+        display: none;
+    }
+
+    .nav-user-arrow {
+        display: none;
+    }
+
+    .nav-user-menu {
+        right: -10px;
+    }
+
+    .menu-group-header {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+}
+
+
+/* ========== STYLE.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 400px) {
+    .login-container {
+        padding: 1rem;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .logo h1 {
+        font-size: 1.75rem;
+    }
+
+    .logo h2 {
+        font-size: 1rem;
+    }
+
+    .google-login-btn {
+        font-size: 1rem;
+        padding: 0.875rem 1.5rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .nav-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--secondary-color);
+        flex-direction: column;
+        gap: 0;
+        padding: 1rem;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-user {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--secondary-light);
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .btn-logout {
+        margin-top: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .role-switcher {
+        flex-direction: column;
+        width: 100%;
+        padding: 1rem;
+        border-top: 1px solid var(--secondary-light);
+        border-bottom: 1px solid var(--secondary-light);
+    }
+
+    .role-select {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .form-container {
+        padding: 1rem;
+    }
+
+    .btn-fuel-submit {
+        font-size: 1.25rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .fuel-entry-container {
+        padding: 0.5rem;
+    }
+
+    .form-group label {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 1.1rem;
+        padding: 1rem;
+    }
+}
+
+
+/* ========== HUB.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 899px) {
+    .section-description {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 599px) {
+    .hub-header h1 {
+        font-size: 2rem;
+    }
+
+    .sections-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .section-description {
+        display: none;
+    }
+}
+
+
+/* ========== MODULES.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 599px) {
+    .modules-header h1 {
+        font-size: 2rem;
+    }
+
+    .modules-header p {
+        font-size: 1.1rem;
+    }
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .module-card {
+        padding: 2rem;
+    }
+
+    .module-icon {
+        font-size: 3rem;
+    }
+
+    .module-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* ========== MANAGEMENT.CSS - RESPONSIVE STYLES ========== */
+
+@media (max-width: 599px) {
+    .mgmt-summary-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .mgmt-filters-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mgmt-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md, 15px);
+    }
+}
