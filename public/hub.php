@@ -49,8 +49,8 @@ $db = Database::getInstance();
 // If user is super_admin or admin, they see everything
 if (in_array($userRole, ['super_admin', 'admin'])) {
     $sections = $db->fetchAll("
-        SELECT * FROM sections 
-        WHERE is_active = TRUE 
+        SELECT * FROM sections
+        WHERE is_active = TRUE
         AND section_type != 'hub'
         ORDER BY sort_order
     ");
@@ -81,7 +81,6 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
         })();
     </script>
     <?php Layout::renderHead($siteName . ' - ' . SiteSettings::get('organization_name', 'Your Organization'), 'hub'); ?>
-    <link rel="stylesheet" href="/assets/css/hub-modern.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <script>
@@ -110,7 +109,7 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
                 <h1><?php echo $hubTitle; ?></h1>
                 <p><?php echo $hubSubtitle; ?></p>
             </div>
-            
+
             <?php if (empty($sections)): ?>
                 <div class="no-sections">
                     <h3>No sections available</h3>
@@ -118,11 +117,11 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
                 </div>
             <?php else: ?>
                 <div class="sections-grid">
-                    <?php 
+                    <?php
                     $useCustomIcon = SiteSettings::get('hub_tile_icon_custom_enabled', '0') === '1';
                     $customIconPath = SiteSettings::get('hub_tile_icon_path', '/assets/images/branding/Branding_NoBG.png');
-                    
-                    foreach ($sections as $section): 
+
+                    foreach ($sections as $section):
                         // Determine icon to display
                         if ($useCustomIcon) {
                             $iconHtml = '<img src="' . e($customIconPath) . '" alt="Section Icon" style="width: 100%; height: 100%; object-fit: contain;">';
@@ -235,8 +234,8 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
             }, 500);
         }
     </script>
-    
-    <!-- SPA Navigation for smooth section transitions -->
-    <script src="/assets/js/spa-navigation.js?v=<?php echo time(); ?>"></script>
+
+    <!-- SPA Navigation DISABLED - Sections use full page loads -->
+    <!-- <script src="/assets/js/spa-navigation.js?v=<?php echo time(); ?>"></script> -->
 </body>
 </html>
