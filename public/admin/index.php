@@ -23,6 +23,10 @@ $canManageUsers = Auth::canManageUsers();
 // Onion Layer Access Control
 $canSeeUserManagement = in_array($userRole, ['super_admin', 'admin']);
 $canSeeSectionAccess = in_array($userRole, ['super_admin', 'admin']);
+
+// Get customizable branding
+$mgmtDisplayName = SiteSettings::get('cc_display_name', 'Management');
+$mgmtIcon = SiteSettings::get('cc_icon', 'bi-kanban');
 $canSeeManageSections = ($userRole === 'super_admin');
 $canSeeExport = in_array($userRole, ['super_admin', 'admin']);
 
@@ -53,23 +57,34 @@ $users = $userModel->getAll();
         <div class="admin-container">
             <div class="admin-sidebar">
                 <ul class="admin-menu">
-                    <?php if ($canSeeUserManagement): ?>
-                    <li><a href="#" data-tab="users" class="active"><i class="fas fa-users"></i> User Management</a></li>
+                    <?php if ($isSuperAdmin || $userRole === 'admin'): ?>
+                    <li>
+                        <a href="/command/" style="border-left: 4px solid var(--primary-color, #3498db);">
+                            <i class="<?= htmlspecialchars($mgmtIcon) ?>"></i> <?= htmlspecialchars($mgmtDisplayName) ?>
+                        </a>
+                    </li>
+                    <li style="margin: 0.5rem 0; border-bottom: 1px solid var(--border-secondary, #e5e7eb);"></li>
                     <?php endif; ?>
 
-                    <!-- Sections Group (Collapsible) -->
+                    <?php if ($canSeeUserManagement): ?>
+                    <li><a href="#" data-tab="users" class="active"><i class="fas fa-users"></i> User Management</a></li>
+                    <?php endif; ?>                    <!-- Packages Group (Collapsible) -->
                     <?php if ($canSeeSectionAccess || $canSeeManageSections || ($isSuperAdmin || in_array($userRole, ['admin']))): ?>
                     <li class="menu-group">
                         <div class="menu-group-header" onclick="toggleMenuGroup(this)">
-                            <span><i class="fas fa-th-list"></i> Sections</span>
+                            <span><i class="fas fa-th-list"></i> Packages</span>
                             <span class="menu-group-arrow">▼</span>
                         </div>
                         <ul class="menu-group-items">
                             <?php if ($canSeeSectionAccess || $canSeeManageSections): ?>
-                            <li><a href="#" data-tab="sections">Section Access & Management</a></li>
+                            <li><a href="#" data-tab="sections">Package Access & Management</a></li>
                             <?php endif; ?>
                             <?php if ($isSuperAdmin || in_array($userRole, ['admin'])): ?>
-                            <li><a href="#" data-tab="section-config">Section Configuration</a></li>
+                            <li>
+                                <a href="#" data-tab="section-config">
+                                    Package Configuration<span class="sidebar-badge orange-dot" id="sidebarConfigBadge" style="display: none;"></span>
+                                </a>
+                            </li>
                             <?php endif; ?>
                         </ul>
                     </li>
@@ -199,10 +214,10 @@ $users = $userModel->getAll();
                     </div><!-- end tab-content-scroll -->
                 </div><!-- end tab-users -->
 
-                <!-- Sections Tab (with sub-tabs) -->
+                <!-- Packages Tab (with sub-tabs) -->
                 <div id="tab-sections" class="admin-tab">
                     <div class="tab-header">
-                        <h1>Sections</h1>
+                        <h1>Packages</h1>
                         <div class="tab-actions">
                             <?php if ($canSeeSectionAccess): ?>
                             <button id="saveSectionAccessBtn" class="btn btn-primary" style="display: none;">Save All Changes</button>
@@ -217,20 +232,20 @@ $users = $userModel->getAll();
                         <!-- Sections Sub-tabs -->
                         <div class="user-subtabs">
                             <?php if ($canSeeSectionAccess): ?>
-                            <button class="subtab-btn active" data-subtab="section-access">Section Access</button>
+                            <button class="subtab-btn active" data-subtab="section-access">Package Access</button>
                             <?php endif; ?>
                             <?php if ($isSuperAdmin): ?>
-                            <button class="subtab-btn <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>" data-subtab="manage-sections">Manage Sections</button>
+                            <button class="subtab-btn <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>" data-subtab="manage-sections">Manage Packages</button>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Section Access Subtab -->
+                        <!-- Package Access Subtab -->
                         <?php if ($canSeeSectionAccess): ?>
                         <div id="subtab-section-access" class="user-subtab active">
                             <div class="section-access-container">
                                 <p class="info-text">
-                                    <strong>🔐 Role-Based Section Access:</strong> Grant access to entire <strong>roles</strong> instead of individual users.
-                                    Anyone with a checked role will automatically see that section. Super Admins always have access to everything.
+                                    <strong>🔐 Role-Based Package Access:</strong> Grant access to entire <strong>roles</strong> instead of individual users.
+                                    Anyone with a checked role will automatically see that package. Super Admins always have access to everything.
                                 </p>
 
                                 <div class="section-access-grid">
@@ -242,13 +257,13 @@ $users = $userModel->getAll();
                         </div>
                         <?php endif; ?>
 
-                        <!-- Manage Sections Subtab (Super Admin Only) -->
+                        <!-- Manage Packages Subtab (Super Admin Only) -->
                         <?php if ($isSuperAdmin): ?>
                         <div id="subtab-manage-sections" class="user-subtab <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>">
                             <div class="sections-management">
                                 <p class="info-text">
-                                    <strong>Future-Proofing:</strong> Create new sections seamlessly and toggle them on/off.
-                                    Inactive sections are hidden from ALL users, including admins.
+                                    <strong>Future-Proofing:</strong> Create new packages seamlessly and toggle them on/off.
+                                    Inactive packages are hidden from ALL users, including admins.
                                 </p>
 
                                 <div id="sectionsManagementTable">
@@ -260,7 +275,7 @@ $users = $userModel->getAll();
                     </div><!-- end tab-content-scroll -->
                 </div><!-- end tab-sections -->
 
-                <!-- Section Configuration Tab (Admin & Super Admin) -->
+                <!-- Package Configuration Tab (Admin & Super Admin) -->
                 <?php if ($isSuperAdmin || in_array($userRole, ['admin'])): ?>
                 <div id="tab-section-config" class="admin-tab">
                     <?php include __DIR__ . '/section-config-tab.php'; ?>
@@ -383,6 +398,7 @@ $users = $userModel->getAll();
                             <button class="subtab-btn" data-subtab="sidebar">Sidebar & Menu</button>
                             <button class="subtab-btn" data-subtab="colors">Color Scheme</button>
                             <button class="subtab-btn" data-subtab="themes">Themes</button>
+                            <button class="subtab-btn" data-subtab="command-center"><?= htmlspecialchars($mgmtDisplayName) ?></button>
                             <button class="subtab-btn" data-subtab="advanced">Advanced</button>
                         </div>
 
@@ -1585,6 +1601,134 @@ $users = $userModel->getAll();
                             </div>
                         </div><!-- end subtab-themes -->
 
+                        <!-- Management System Subtab -->
+                        <div id="subtab-command-center" class="user-subtab">
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                Customize how the Management system appears to users. Change the display name, icon, and description.
+                            </p>
+
+                            <div class="color-section">
+                                <div class="color-section-header" onclick="toggleColorSection(this)">
+                                    <h3>
+                                        Management System Branding
+                                        <span class="color-section-badge">3</span>
+                                    </h3>
+                                    <span class="color-section-toggle">▼</span>
+                                </div>
+                                <div class="color-section-body">
+                                    <div class="color-section-content">
+                                        <div class="settings-grid">
+                                            <div class="form-group">
+                                                <label for="cc_display_name">
+                                                    Display Name
+                                                    <span class="info-tooltip" title="The public-facing name shown in navigation and page titles">ⓘ</span>
+                                                </label>
+                                                <input type="text"
+                                                       id="cc_display_name"
+                                                       name="cc_display_name"
+                                                       value="<?php echo e(SiteSettings::get('cc_display_name', 'Management')); ?>"
+                                                       class="form-control"
+                                                       placeholder="e.g., Management, Administration, Command Center">
+                                                <small class="form-text text-muted">Examples: Management, Administration, Operations, Command Center</small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="cc_icon">
+                                                    Navigation Icon
+                                                    <span class="info-tooltip" title="Bootstrap icon class for navigation links">ⓘ</span>
+                                                </label>
+                                                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                                    <!-- Compact Live Preview -->
+                                                    <div style="width: 40px; height: 40px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; background: var(--card-bg); font-size: 20px; flex-shrink: 0;">
+                                                        <i id="icon-preview" class="<?php echo e(SiteSettings::get('cc_icon', 'bi-kanban')); ?>"></i>
+                                                    </div>
+
+                                                    <!-- Input Field -->
+                                                    <div style="flex: 1;">
+                                                        <input type="text"
+                                                               id="cc_icon"
+                                                               name="cc_icon"
+                                                               value="<?php echo e(SiteSettings::get('cc_icon', 'bi-kanban')); ?>"
+                                                               class="form-control"
+                                                               placeholder="e.g., bi-kanban, bi-gear, bi-building"
+                                                               oninput="updateIconPreview(this.value)">
+                                                    </div>
+
+                                                    <!-- Dropdown Toggle Button -->
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-secondary"
+                                                            onclick="toggleIconDropdown()"
+                                                            style="white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;">
+                                                        <i class="bi bi-grid-3x3-gap"></i>
+                                                        <span id="icon-dropdown-text">Browse Icons</span>
+                                                        <i id="icon-dropdown-arrow" class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                                                    </button>
+                                                </div>
+
+                                                <small class="form-text text-muted">
+                                                    Click "Browse Icons" to select from popular options, or
+                                                    <a href="https://icons.getbootstrap.com/" target="_blank">browse all Bootstrap Icons</a>
+                                                </small>
+
+                                                <!-- Collapsible Icon Selector -->
+                                                <div id="icon-selector-dropdown" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--hover-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); max-height: 200px; overflow-y: auto;">
+                                                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
+                                                        <?php
+                                                        $quickIcons = [
+                                                            ['icon' => 'bi-kanban', 'label' => 'Kanban'],
+                                                            ['icon' => 'bi-gear-fill', 'label' => 'Settings'],
+                                                            ['icon' => 'bi-building', 'label' => 'Building'],
+                                                            ['icon' => 'bi-clipboard-data', 'label' => 'Data'],
+                                                            ['icon' => 'bi-speedometer2', 'label' => 'Dashboard'],
+                                                            ['icon' => 'bi-list-check', 'label' => 'Checklist'],
+                                                            ['icon' => 'bi-folder', 'label' => 'Folder'],
+                                                            ['icon' => 'bi-graph-up', 'label' => 'Analytics'],
+                                                            ['icon' => 'bi-pencil-square', 'label' => 'Edit'],
+                                                            ['icon' => 'bi-shield-check', 'label' => 'Security'],
+                                                            ['icon' => 'bi-people', 'label' => 'People'],
+                                                            ['icon' => 'bi-file-earmark-text', 'label' => 'Document'],
+                                                            ['icon' => 'bi-briefcase', 'label' => 'Briefcase'],
+                                                            ['icon' => 'bi-box', 'label' => 'Box'],
+                                                            ['icon' => 'bi-calendar', 'label' => 'Calendar'],
+                                                            ['icon' => 'bi-chat', 'label' => 'Chat']
+                                                        ];
+                                                        foreach ($quickIcons as $qIcon): ?>
+                                                            <button type="button"
+                                                                    class="icon-selector-btn-compact"
+                                                                    onclick="selectIcon('<?php echo $qIcon['icon']; ?>')"
+                                                                    title="<?php echo $qIcon['label']; ?>">
+                                                                <i class="<?php echo $qIcon['icon']; ?>"></i>
+                                                                <span><?php echo $qIcon['label']; ?></span>
+                                                            </button>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group" style="grid-column: span 2;">
+                                                <label for="cc_description">
+                                                    Description
+                                                    <span class="info-tooltip" title="Brief description shown to users">ⓘ</span>
+                                                </label>
+                                                <textarea id="cc_description"
+                                                          name="cc_description"
+                                                          class="form-control"
+                                                          rows="3"
+                                                          placeholder="Brief description of what this system does..."><?php echo e(SiteSettings::get('cc_description', 'Centralized management system for tracking and processing submissions')); ?></textarea>
+                                                <small class="form-text text-muted">Optional: Shown in selector page and help documentation</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-actions">
+                                            <button type="button" class="btn btn-primary" onclick="saveCommandCenterSettings()">
+                                                <i class="bi bi-check-circle"></i> Save Command Center Settings
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- end subtab-command-center -->
+
                         <!-- Advanced Subtab -->
                         <div id="subtab-advanced" class="user-subtab">
 
@@ -2192,8 +2336,8 @@ $users = $userModel->getAll();
                                 <option value="">All Tables</option>
                                 <option value="users">Users</option>
                                 <option value="user_global_roles">User Roles</option>
-                                <option value="sections">Sections</option>
-                                <option value="section_access">Section Access</option>
+                                <option value="sections">Packages</option>
+                                <option value="section_access">Package Access</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin: 0;">
@@ -2287,6 +2431,7 @@ $users = $userModel->getAll();
             }
         });
     </script>
+    <script src="/assets/js/modal-renderer.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/admin.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/site-settings.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/section-config.js?v=<?php echo time(); ?>"></script>

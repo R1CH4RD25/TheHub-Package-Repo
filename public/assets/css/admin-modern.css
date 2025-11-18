@@ -631,6 +631,69 @@ textarea:focus {
     animation: badgePulse 2s ease-in-out infinite;
 }
 
+/* Sidebar Badge - Red Dot Variant (no number, just indicator) */
+.sidebar-badge.dot {
+    min-width: 8px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
+    animation: dotPulse 2s ease-in-out infinite;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Orange Dot Variant - for configuration/notifications (not errors) */
+.sidebar-badge.orange-dot {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5) !important;
+    animation: dotPulseOrange 2s ease-in-out infinite !important;
+    min-width: 8px !important;
+    max-width: 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    vertical-align: middle !important;
+    flex-shrink: 0;
+    margin-left: 6px !important;
+    line-height: 1 !important;
+    font-size: 0 !important;
+    text-align: center;
+}
+
+/* Dot pulse animation (subtler than badge pulse) */
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
+    }
+
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.3), 0 2px 8px rgba(255, 68, 68, 0.6);
+    }
+}
+
+/* Orange dot pulse animation */
+@keyframes dotPulseOrange {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5);
+    }
+
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3), 0 2px 8px rgba(249, 115, 22, 0.6);
+    }
+}
+
 /* Stats Cards - Count Up with Bounce */
 .stat-card {
     opacity: 0;
@@ -764,24 +827,24 @@ textarea:focus {
 
 /* Compact Progress */
 .validation-progress-compact {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
 }
 
 .progress-bar-wrapper {
     background: #e9ecef;
-    border-radius: 8px;
-    height: 8px;
+    border-radius: 6px;
+    height: 6px;
     overflow: hidden;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .progress-bar-wrapper .progress-bar {
     height: 100%;
     background: linear-gradient(90deg, #4CAF50, #81C784);
     transition: width 0.5s ease;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .validation-status {
@@ -789,7 +852,7 @@ textarea:focus {
     align-items: center;
     gap: 0.5rem;
     color: #495057;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
 }
 
@@ -797,30 +860,39 @@ textarea:focus {
     animation: spin 1s linear infinite;
 }
 
-/* Compact Checks Grid - 3 Columns */
+/* Compact Checks Grid - 4 Columns for better space usage */
 .validation-checks-compact {
-    padding: 1rem;
+    padding: 0.5rem;
     flex: 1;
     overflow-y: auto;
-    max-height: calc(85vh - 220px);
+    max-height: calc(65vh - 140px);
+    /* Increased usable space */
 }
 
 .checks-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+    /* Slightly more breathing room */
 }
 
 .validation-check-checkbox {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
+    /* Tighter gap */
+    padding: 0.5rem 0.7rem;
+    /* More compact padding */
     background: #f8f9fa;
-    border-radius: 8px;
+    border-radius: 6px;
+    /* Smaller radius */
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
     font-size: 0.85rem;
+    /* Slightly smaller text */
+    cursor: default;
+    min-height: 38px;
+    /* Shorter height */
 }
 
 .validation-check-checkbox .check-icon {
@@ -828,15 +900,31 @@ textarea:focus {
     align-items: center;
     justify-content: center;
     width: 20px !important;
+    /* Smaller icon */
     height: 20px !important;
+    min-width: 20px !important;
     flex-shrink: 0;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    /* Smaller radius */
+    background-color: transparent;
+    color: #ccc;
+    font-weight: bold;
+    font-size: 14px;
+    /* Smaller icon font */
+    line-height: 1;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
 .validation-check-checkbox .check-label {
     flex: 1;
-    line-height: 1.3;
+    line-height: 1.2;
+    /* Tighter line height */
     font-size: 0.85rem;
+    /* Match parent font size */
     color: #495057;
+    font-weight: 500;
 }
 
 /* Check status colors */
@@ -852,7 +940,8 @@ textarea:focus {
 
 /* Footer */
 .modal-footer {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem;
+    /* More compact footer */
     background: #f8f9fa;
     border-top: 1px solid #e9ecef;
     display: flex;
@@ -1198,6 +1287,15 @@ input[type="checkbox"]:checked+label::before {
 .menu-group-items li a {
     padding: 10px 20px;
     font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* Prevent badge from wrapping alone */
+.menu-group-items li a .sidebar-badge {
+    flex-shrink: 0;
 }
 
 /* Menu spacer to push items to bottom */
@@ -1473,4 +1571,104 @@ input[type="checkbox"]:checked+label::before {
 
 .nav-user-menu.show {
     z-index: 10002 !important;
+}
+
+/* ==========================================================================
+   ICON SELECTOR - Admin Settings
+   ========================================================================== */
+
+.icon-selector-btn {
+    transition: all 0.2s ease !important;
+}
+
+.icon-selector-btn:hover {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.icon-selector-btn:hover i {
+    color: white !important;
+}
+
+.icon-selector-btn:hover span {
+    color: white !important;
+}
+
+.icon-selector-btn:active {
+    transform: translateY(0) scale(0.95) !important;
+}
+
+/* Compact Icon Selector Buttons */
+.icon-selector-btn-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 60px;
+}
+
+.icon-selector-btn-compact i {
+    font-size: 18px;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.icon-selector-btn-compact span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.icon-selector-btn-compact:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.icon-selector-btn-compact:hover i {
+    color: white;
+}
+
+.icon-selector-btn-compact:hover span {
+    color: white;
+}
+
+.icon-selector-btn-compact:active {
+    transform: translateY(0) scale(0.95);
+}
+
+#icon-preview {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#icon-dropdown-arrow {
+    transition: transform 0.3s ease;
+}
+
+#icon-selector-dropdown {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
