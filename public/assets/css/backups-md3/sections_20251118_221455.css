@@ -1,0 +1,237 @@
+/**
+ * ============================================================================
+ * SECTIONS SELECTION PAGE STYLES
+ * ============================================================================
+ * All styles for section selection page (public/sections.php)
+ * Includes: section cards, grid layout, icons, hover effects
+ * ============================================================================
+ */
+
+/* Sections Grid - Staggered animation */
+.sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* Section Cards - Modern glassmorphism design */
+.section-card {
+    background: var(--hub-tile-bg, rgba(255, 255, 255, 0.95));
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--hub-tile-text, #333);
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+        0 4px 20px var(--hub-card-shadow, rgba(0, 0, 0, 0.08)),
+        0 0 0 1px var(--hub-card-border, rgba(0, 0, 0, 0.05));
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+    transform: translateY(30px);
+}
+
+/* Staggered animation for cards */
+.section-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.section-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.section-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.section-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.section-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.section-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.section-card:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.section-card:nth-child(8) {
+    animation-delay: 0.8s;
+}
+
+
+/* Gradient border on top */
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--gold-gradient, linear-gradient(90deg, #C99700 0%, #FFD700 100%));
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    border-radius: 20px 20px 0 0;
+}
+
+/* Animated background gradient */
+.section-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center,
+            var(--hub-card-glow-center, rgba(201, 151, 0, 0.03)) 0%,
+            var(--hub-card-glow-edge, rgba(255, 215, 0, 0.03)) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 20px;
+    z-index: 0;
+}
+
+/* Allow tooltip to be hovered without blocking card link */
+.section-title-tooltip {
+    pointer-events: auto;
+}
+
+.section-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow:
+        0 20px 40px color-mix(in srgb, var(--hub-card-hover-shadow, #c4b454) 20%, transparent),
+        0 0 0 2px var(--hub-card-hover-border, #d4c77a);
+}
+
+.section-card:hover::before {
+    transform: scaleX(1);
+    animation: gradientSlide 2s linear infinite;
+}
+
+
+.section-card:hover::after {
+    opacity: 1;
+}
+
+/* Section Icon - 3D tilt effect ready */
+.section-icon {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+    display: block;
+    position: relative;
+    z-index: 1;
+    color: var(--hub-icon-color, #C99700);
+    transition: transform 0.4s ease, color 0.3s ease;
+    filter: drop-shadow(0 4px 8px var(--hub-icon-shadow, rgba(0, 0, 0, 0.1)));
+}
+
+.section-card:hover .section-icon {
+    transform: scale(1.1) rotateZ(-5deg);
+    color: var(--hub-icon-hover-color, #FFD700);
+    animation: iconBounce 0.6s ease;
+}
+
+
+/* Section Title - Enhanced typography */
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--hub-tile-text, var(--text-primary, #333));
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+.section-card:hover .section-title {
+    color: var(--hub-card-hover-title, var(--primary-color, #C99700));
+    animation: titlePulse 0.6s ease;
+}
+
+
+/* Section Description */
+.section-description {
+    font-size: 0.95rem;
+    color: var(--hub-card-description, var(--text-muted, #666));
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.section-card:hover .section-description {
+    color: var(--hub-card-hover-description, rgba(255, 255, 255, 0.95)) !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+}
+
+/* Empty state */
+.no-sections {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--hub-no-sections-bg, white);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--hub-no-sections-shadow, rgba(0, 0, 0, 0.08));
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.no-sections h3 {
+    color: var(--primary-color, #C99700);
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.no-sections p {
+    color: var(--text-muted, #666);
+    font-size: 1.1rem;
+}
+
+.sections-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.section-card {
+    padding: 25px;
+}
+
+.section-icon {
+    font-size: 3.5rem;
+}
+
+.section-title {
+    color: var(--hub-tile-text, #fff);
+}
+
+.section-description {
+    color: var(--hub-card-description, #aaa);
+}
+
+
+/* Success state animation */
+.section-card.clicked {
+    animation: cardClick 0.3s ease;
+}
+
+/* Cards - Flip and Zoom In */
+.admin-card,
+.section-card,
+.package-card {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-15deg) scale(0.9);
+}
+
+.admin-card.animate-in,
+.section-card.animate-in,
+.package-card.animate-in {
+    animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

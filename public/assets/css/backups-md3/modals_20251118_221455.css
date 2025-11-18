@@ -1,0 +1,1006 @@
+/**
+ * ============================================================================
+ * MODAL STYLES - MICROMODAL EDITION
+ * ============================================================================
+ * Migrated from Bootstrap 5 to MicroModal.js (1.9KB gzipped)
+ * - No CSS conflicts with framework defaults
+ * - Full control over modal behavior and styling
+ * - Accessibility-first (WAI-ARIA compliant)
+ *
+ * Modals defined in: /public/admin/partials/modals.php
+ * MicroModal docs: https://micromodal.vercel.app/
+ * ============================================================================
+ */
+
+/* ==========================================================================
+   MICROMODAL BASE STRUCTURE
+   ========================================================================== */
+
+/**
+ * Modal container - Hidden by default
+ */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.modal.is-open,
+.modal.show {
+    display: block;
+    z-index: 10100 !important;
+    /* Above header (10002) and Bootstrap backdrop (1050) */
+}
+
+/* Bootstrap modal backdrop override */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10099 !important;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+/**
+ * Modal overlay - Semi-transparent backdrop
+ */
+.modal__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10099;
+}
+
+/* Bootstrap modal dialog centering - CRITICAL FOR PROPER DISPLAY */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+
+.modal-dialog {
+    position: relative;
+    width: auto;
+    max-width: 500px;
+    margin: 1.75rem auto;
+    pointer-events: none;
+    z-index: 10100;
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    outline: 0;
+}
+
+/**
+ * Modal container - The actual modal box
+ */
+.modal__container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    max-height: 95vh;
+    min-height: 60vh;
+    max-width: 600px;
+    width: 90%;
+}
+
+/**
+ * Wide modals - 90vw width + taller (our requirement!)
+ */
+.modal__container.modal-wide {
+    max-width: 90vw !important;
+    width: 90vw !important;
+    max-height: 98vh !important;
+    min-height: 90vh !important;
+}
+
+/**
+ * Compact modals - narrower, for validation progress
+ * MADE EVEN SMALLER: 55vw × 65vh for tight layout
+ */
+.modal__container.modal-compact {
+    max-width: 55vw !important;
+    width: 55vw !important;
+    max-height: 65vh !important;
+    min-height: 45vh !important;
+}
+
+/**
+ * Modal header
+ */
+.modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+/* Compact header for validation modal */
+.modal-compact .modal__header {
+    padding: 1rem 1.25rem;
+    /* Reduced padding */
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Slightly smaller title for compact modals */
+.modal-compact .modal-title {
+    font-size: 1.1rem;
+}
+
+/**
+ * Modal close button (X button) - Modern SVG icon with smooth animation
+ */
+.modal__close {
+    background: transparent !important;
+    border: none !important;
+    padding: 8px !important;
+    border-radius: 6px !important;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    cursor: pointer !important;
+    color: #6c757d !important;
+    transform: rotate(0deg) scale(1) !important;
+    outline: 0 !important;
+    margin-left: auto !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+/* Only animate on HOVER, not on focus (prevents auto-focus animation) */
+.modal__close:hover {
+    transform: rotate(180deg) scale(1.15) !important;
+    background: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+/* Focus state: just outline, no rotation */
+.modal__close:focus {
+    outline: 2px solid rgba(196, 180, 84, 0.5) !important;
+    outline-offset: 2px !important;
+}
+
+/* Focus-visible (keyboard navigation) - show clear focus ring */
+.modal__close:focus-visible {
+    outline: 2px solid rgba(196, 180, 84, 0.8) !important;
+    outline-offset: 2px !important;
+}
+
+/* Remove focus outline when clicked (mouse users) */
+.modal__close:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+.modal__close svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    pointer-events: none !important;
+}
+
+/**
+ * Modal content area
+ */
+.modal__content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: calc(95vh - 140px);
+    min-height: calc(60vh - 140px);
+}
+
+/* Compact content for validation modal - less padding, more space */
+.modal-compact .modal__content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/**
+ * Taller content for wide modals (e.g., package discovery)
+ */
+.modal-wide .modal__content {
+    max-height: calc(98vh - 140px);
+    min-height: calc(90vh - 140px);
+}
+
+/**
+ * Modal footer
+ */
+.modal__footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* ==========================================================================
+   MICROMODAL ANIMATIONS
+   ========================================================================== */
+
+/**
+ * Slide animation for modal appearance
+ */
+@keyframes mmfadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes mmslideIn {
+    from {
+        transform: translateY(15%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.micromodal-slide {
+    display: none;
+}
+
+.micromodal-slide.is-open {
+    display: block;
+}
+
+.micromodal-slide[aria-hidden="false"] .modal__overlay {
+    animation: mmfadeIn 0.3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.micromodal-slide[aria-hidden="false"] .modal__container {
+    animation: mmslideIn 0.3s cubic-bezier(0, 0, .2, 1);
+}
+
+.micromodal-slide[aria-hidden="true"] .modal__overlay {
+    animation: mmfadeOut 0.3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.micromodal-slide[aria-hidden="true"] .modal__container {
+    animation: mmslideOut 0.3s cubic-bezier(0, 0, .2, 1);
+}
+
+@keyframes mmfadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes mmslideOut {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(-10%);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* ==========================================================================
+   RESPONSIVE DESIGN - MOBILE MODALS
+   ========================================================================== */
+
+/* Media queries moved to media.css */
+
+/* ==========================================================================
+   LEGACY BOOTSTRAP CLASSES (For Backwards Compatibility)
+   ========================================================================== */
+
+/* Keep Bootstrap utility classes working inside modals */
+.modal-content {
+    background: white;
+    margin: 0;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, var(--shadow-heavy));
+    position: relative;
+}
+
+/* ==========================================================================
+   MODAL HEADER
+   ========================================================================== */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    padding-right: 2.5rem;
+}
+
+.modal-header h2,
+.modal-header h3 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* ==========================================================================
+   MODAL CLOSE BUTTON
+   ========================================================================== */
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 20px;
+    color: #666;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), color 0.3s ease;
+}
+
+.modal-close::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(211, 47, 47, 0.2);
+    border-radius: 4px;
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 0;
+}
+
+.modal-close i {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-close:hover {
+    transform: rotate(180deg) scale(1.2);
+    color: #dc3545;
+}
+
+.modal-close:hover::before {
+    transform: scale(1);
+}
+
+/* Alternative close button style */
+.modal-close-btn {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #374151;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* When used in modal header (not absolute positioned) */
+.modal-header .modal-close-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+}
+
+/* Bootstrap close button - fix offset from .btn i:last-child */
+.btn-close,
+button.btn-close {
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin: auto;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    line-height: 1;
+    font-size: 1.5rem;
+    color: #666;
+    border-radius: 4px;
+}
+
+.btn-close:hover,
+button.btn-close:hover {
+    opacity: 1;
+    background: rgba(220, 53, 69, 0.1);
+    transform: rotate(180deg);
+    color: #dc3545;
+}
+
+/* Fix icon offset in close buttons - override .btn i:last-child */
+.btn-close i,
+.modal-close i,
+.modal-close-btn i,
+button[data-bs-dismiss="modal"] i {
+    margin: 0 !important;
+    line-height: 1;
+    display: block;
+}
+
+/* ==========================================================================
+   MODAL BODY & CONTENT
+   ========================================================================== */
+
+.modal-body {
+    padding: 1rem 0;
+    color: var(--text-color);
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+/* ==========================================================================
+   MODAL FOOTER & ACTIONS
+   ========================================================================== */
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 2px solid #dee2e6;
+}
+
+.modal-actions button {
+    min-width: 100px;
+}
+
+.modal-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   MODAL OVERLAY
+   ========================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-modal-overlay);
+    z-index: 10000;
+    display: none;
+}
+
+.modal-overlay.show {
+    display: block;
+}
+
+.modal-overlay.hiding {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+/* ==========================================================================
+   SPECIFIC MODAL TYPES
+   ========================================================================== */
+
+/* Package Discovery Modal - Large, Centered, Full-Screen Experience */
+.package-discovery-modal {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.package-discovery-modal .modal-dialog {
+    max-width: 90vw;
+    width: 90vw;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.package-discovery-modal .modal-content {
+    max-width: 90vw;
+    width: 90vw;
+    height: 90vh;
+    max-height: 90vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.package-discovery-modal .modal-header {
+    flex-shrink: 0;
+    padding: 1.5rem 2rem 1rem 2rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.package-discovery-modal .modal-body {
+    flex: 1;
+    padding: 1rem 2rem 2rem 2rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+.package-discovery-modal .modal-footer {
+    flex-shrink: 0;
+    padding: 1rem 2rem;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+/* Validation Report Modal */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.validation-modal-header .btn-close {
+    margin: 0;
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+}
+
+/* ==========================================================================
+   MODAL ANIMATIONS
+   ========================================================================== */
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE - MOBILE & TABLET
+   ========================================================================== */
+
+/* Tablets (Portrait) - 768px and below */
+
+/* Media queries moved to media.css */
+
+/* Mobile Phones - 480px and below */
+
+/* Media queries moved to media.css */
+
+/* Small Mobile - 375px and below */
+
+/* Media queries moved to media.css */
+
+/* Tablet - 2 columns, medium height */
+
+/* Media queries moved to media.css */
+
+/* Desktop - 3 columns, standard height */
+
+/* Media queries moved to media.css */
+
+/* ====================================
+   Compact Validation Report Styles
+   ==================================== */
+
+/* Compact check cards */
+#packageValidationModal .card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#packageValidationModal .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Card body with smart height (fits ~5-6 checks without scrollbar) */
+#packageValidationModal .validation-card-body {
+    max-height: 420px;
+    overflow: hidden;
+    /* Hide any overflow - no scrollbars! */
+}
+
+/* If a card has many checks, show scrollbar on hover */
+#packageValidationModal .card:hover .validation-card-body {
+    overflow-y: auto;
+}
+
+/* Smooth scrolling within cards (only visible on hover) */
+#packageValidationModal .validation-card-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+#packageValidationModal .validation-card-body::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Tighter spacing for check items */
+#packageValidationModal .card-body>div:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Badge sizing */
+#packageValidationModal .card-header .badge {
+    font-size: 0.75rem;
+}
+
+/* Compact alerts */
+#packageValidationModal .alert {
+    padding: 0.5rem 1rem;
+}
+
+/* Remove extra spacing */
+#packageValidationModal .row.g-3 {
+    margin-top: 0;
+}
+
+/* ============================================================================
+   ADMIN VALIDATION MODAL STYLES (Migrated from admin-modern.css)
+   ============================================================================ */
+
+/* VALIDATION MODAL */
+/* ============================================================================
+   VALIDATION MODAL - COMPACT REDESIGN
+   ============================================================================ */
+
+/* Add blur effect to Bootstrap's modal backdrop */
+.modal-backdrop.show {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.modal-validation {
+    background: white;
+    border-radius: 16px;
+    max-width: 750px !important;
+    width: 95% !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: modalContentEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+/* Compact Header */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-close-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+    transform: scale(1.05);
+}
+
+/* Compact Progress */
+.validation-progress-compact {
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.progress-bar-wrapper {
+    background: #e9ecef;
+    border-radius: 6px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-wrapper .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #81C784);
+    transition: width 0.5s ease;
+    border-radius: 6px;
+}
+
+.validation-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.spin-icon {
+    animation: spin 1s linear infinite;
+}
+
+/* Compact Checks Grid - 4 Columns for better space usage */
+.validation-checks-compact {
+    padding: 0.5rem;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(65vh - 140px);
+    /* Increased usable space */
+}
+
+.checks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+    /* Slightly more breathing room */
+}
+
+.validation-check-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* Tighter gap */
+    padding: 0.5rem 0.7rem;
+    /* More compact padding */
+    background: #f8f9fa;
+    border-radius: 6px;
+    /* Smaller radius */
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    /* Slightly smaller text */
+    cursor: default;
+    min-height: 38px;
+    /* Shorter height */
+}
+
+.validation-check-checkbox .check-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 20px !important;
+    /* Smaller icon */
+    height: 20px !important;
+    min-width: 20px !important;
+    flex-shrink: 0;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    /* Smaller radius */
+    background-color: transparent;
+    color: #ccc;
+    font-weight: bold;
+    font-size: 14px;
+    /* Smaller icon font */
+    line-height: 1;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.validation-check-checkbox .check-label {
+    flex: 1;
+    line-height: 1.2;
+    /* Tighter line height */
+    font-size: 0.85rem;
+    /* Match parent font size */
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Check status colors */
+.validation-check-checkbox.check-pass {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.validation-check-checkbox.check-fail {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+
+/* Footer */
+.modal-footer {
+    padding: 0.75rem 1.25rem;
+    /* More compact footer */
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Responsive - 2 columns on smaller screens */
+
+/* MODAL BACKDROP */
+.modal-backdrop.show {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+/* MODAL FOOTER */
+.modal-footer {
+    padding: 0.75rem 1.25rem;
+    /* More compact footer */
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-radius: 0 0 16px 16px;
+}
+
+/* MODAL CLOSE */
+.modal-close-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+/* MODAL CLOSE */
+.modal-close-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+    transform: scale(1.05);
+}

@@ -1,0 +1,393 @@
+/**
+ * ============================================================================
+ * MANAGEMENT SYSTEM (formerly Command Center) - THEME-AWARE STYLES
+ * ============================================================================
+ * Professional management interface for tracking and processing submissions.
+ * 
+ * THEME INHERITANCE:
+ * - Uses CSS custom properties from site_settings
+ * - All colors/fonts/spacing inherit from admin theme
+ * - No hardcoded values - fully customizable via Admin Dashboard
+ * 
+ * PACKAGE DEVELOPERS:
+ * Copy this pattern for theme-aware styling:
+ * 1. Use var(--primary-color) instead of #667eea
+ * 2. Use var(--text-primary) instead of #2c3e50
+ * 3. Use var(--spacing-md) instead of 20px
+ * 4. Leverage existing .card, .btn classes from production.css
+ * 
+ * Generated: 2025-11-18
+ * ============================================================================
+ */
+
+/* ============================================================================
+   LAYOUT - Flexbox structure for proper footer positioning
+   ============================================================================ */
+.mgmt-container,
+.mgmt-section-container,
+.mgmt-submission-container {
+    flex: 1 0 auto;
+    max-width: var(--container-max-width, 1600px);
+    margin: 0 auto;
+    padding: var(--spacing-lg, 20px);
+    width: 100%;
+}
+
+/* ============================================================================
+   SELECTOR PAGE - Section chooser interface
+   ============================================================================ */
+.mgmt-selector-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl, 40px);
+}
+
+.mgmt-selector-header h1 {
+    font-size: var(--font-size-xxl, 32px);
+    font-weight: 600;
+    color: var(--text-primary, #2c3e50);
+    margin-bottom: var(--spacing-sm, 10px);
+}
+
+.mgmt-selector-header p {
+    font-size: var(--font-size-md, 16px);
+    color: var(--text-muted, #7f8c8d);
+}
+
+/* Summary Stats - Gradient cards with theme colors */
+.mgmt-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg, 20px);
+    margin-bottom: var(--spacing-xl, 40px);
+}
+
+.mgmt-summary-stat {
+    background: linear-gradient(135deg, var(--primary-color, #667eea) 0%, var(--accent-color, #764ba2) 100%);
+    color: white;
+    padding: var(--spacing-lg, 25px);
+    border-radius: var(--border-radius-lg, 12px);
+    text-align: center;
+    box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mgmt-summary-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg, 0 8px 16px rgba(0,0,0,0.15));
+}
+
+.mgmt-summary-stat.pending {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.mgmt-summary-stat.urgent {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.mgmt-summary-stat .number {
+    font-size: var(--font-size-xxxl, 36px);
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.mgmt-summary-stat .label {
+    font-size: var(--font-size-sm, 14px);
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Section Table - Professional data view */
+.mgmt-section-table {
+    background: var(--bg-card, white);
+    border-radius: var(--border-radius-lg, 12px);
+    box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.08));
+    overflow: hidden;
+}
+
+.mgmt-section-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mgmt-section-table thead {
+    background: linear-gradient(135deg, var(--primary-color, #667eea) 0%, var(--accent-color, #764ba2) 100%);
+    color: white;
+}
+
+.mgmt-section-table thead th {
+    padding: var(--spacing-md, 15px) var(--spacing-lg, 20px);
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--font-size-sm, 13px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mgmt-section-table tbody tr {
+    border-bottom: 1px solid var(--border-color, #f1f3f5);
+    transition: background-color 0.2s ease;
+}
+
+.mgmt-section-table tbody tr:hover {
+    background-color: var(--bg-hover, #f8f9fa);
+}
+
+.mgmt-section-table tbody td {
+    padding: var(--spacing-md, 15px) var(--spacing-lg, 20px);
+    color: var(--text-primary, #2c3e50);
+}
+
+/* Section badges */
+.mgmt-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--border-radius-pill, 12px);
+    font-size: var(--font-size-xs, 11px);
+    font-weight: 600;
+    margin: 0 4px;
+}
+
+.mgmt-badge.total {
+    background: var(--info-color, #3498db);
+    color: white;
+}
+
+.mgmt-badge.pending {
+    background: var(--warning-color, #f39c12);
+    color: white;
+}
+
+.mgmt-badge.urgent {
+    background: var(--danger-color, #e74c3c);
+    color: white;
+    animation: pulse-urgent 2s infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Empty state */
+.mgmt-empty-state {
+    text-align: center;
+    padding: var(--spacing-xxxl, 60px) var(--spacing-lg, 20px);
+    color: var(--text-muted, #95a5a6);
+}
+
+.mgmt-empty-state i {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg, 20px);
+    opacity: 0.3;
+}
+
+.mgmt-empty-state h3 {
+    font-size: var(--font-size-lg, 20px);
+    margin-bottom: var(--spacing-sm, 10px);
+    color: var(--text-secondary, #7f8c8d);
+}
+
+/* ============================================================================
+   SECTION PAGE - Submissions list with DataTables
+   ============================================================================ */
+.mgmt-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl, 30px);
+    padding: var(--spacing-lg, 20px);
+    background: var(--bg-card, white);
+    border-radius: var(--border-radius-md, 8px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+.mgmt-section-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 15px);
+}
+
+.mgmt-section-icon-large {
+    font-size: 48px;
+    opacity: 0.8;
+    color: var(--primary-color, #667eea);
+}
+
+.mgmt-section-details h1 {
+    margin: 0;
+    font-size: var(--font-size-xxl, 28px);
+    font-weight: 600;
+    color: var(--text-primary, #2c3e50);
+}
+
+.mgmt-section-subtitle {
+    font-size: var(--font-size-sm, 14px);
+    color: var(--text-muted, #7f8c8d);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* Filters bar */
+.mgmt-filters-bar {
+    background: var(--bg-card, white);
+    padding: var(--spacing-lg, 20px);
+    border-radius: var(--border-radius-md, 8px);
+    margin-bottom: var(--spacing-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+.mgmt-filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md, 15px);
+    align-items: end;
+}
+
+.mgmt-filter-group label {
+    display: block;
+    font-size: var(--font-size-xs, 13px);
+    font-weight: 600;
+    color: var(--text-secondary, #7f8c8d);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Bulk actions bar */
+.mgmt-bulk-actions {
+    display: none;
+    background: #fff3cd;
+    padding: var(--spacing-md, 15px) var(--spacing-lg, 20px);
+    border-radius: var(--border-radius-md, 8px);
+    margin-bottom: var(--spacing-lg, 20px);
+    border-left: 4px solid #ffc107;
+}
+
+.mgmt-bulk-actions.active {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 15px);
+}
+
+.mgmt-bulk-actions-label {
+    font-weight: 600;
+    color: #856404;
+}
+
+/* DataTables styling */
+.mgmt-table-container {
+    background: var(--bg-card, white);
+    border-radius: var(--border-radius-md, 8px);
+    padding: var(--spacing-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+table.mgmt-datatable {
+    border-collapse: collapse !important;
+    width: 100%;
+}
+
+table.mgmt-datatable thead th {
+    background: var(--bg-secondary, #f8f9fa);
+    color: var(--text-primary, #2c3e50);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--font-size-xs, 12px);
+    letter-spacing: 0.5px;
+    padding: var(--spacing-md, 15px) var(--spacing-sm, 10px);
+    border-bottom: 2px solid var(--border-color, #e9ecef);
+}
+
+table.mgmt-datatable tbody td {
+    padding: var(--spacing-sm, 12px) var(--spacing-sm, 10px);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color-light, #f1f3f5);
+}
+
+table.mgmt-datatable tbody tr:nth-child(even) {
+    background-color: var(--bg-alternate, rgba(0,0,0,0.02));
+}
+
+table.mgmt-datatable tbody tr:hover {
+    background: var(--bg-hover, #f8f9fa);
+}
+
+/* Status & Priority badges */
+.mgmt-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--border-radius-pill, 12px);
+    font-size: var(--font-size-xs, 11px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.mgmt-priority-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--border-radius-sm, 4px);
+    font-size: var(--font-size-xxs, 10px);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mgmt-priority-urgent { background: var(--danger-color, #e74c3c); color: white; }
+.mgmt-priority-high { background: var(--warning-color, #f39c12); color: white; }
+.mgmt-priority-normal { background: var(--info-color, #3498db); color: white; }
+.mgmt-priority-low { background: var(--muted-color, #95a5a6); color: white; }
+
+.mgmt-display-id {
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-weight: 600;
+    color: var(--text-primary, #2c3e50);
+}
+
+/* ============================================================================
+   SUBMISSION DETAIL PAGE
+   ============================================================================ */
+.mgmt-submission-header {
+    background: var(--bg-card, white);
+    padding: var(--spacing-lg, 20px);
+    border-radius: var(--border-radius-md, 8px);
+    margin-bottom: var(--spacing-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+.mgmt-submission-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-lg, 20px);
+}
+
+.mgmt-submission-title h1 {
+    margin: 0 0 var(--spacing-sm, 10px);
+    font-size: var(--font-size-xxxl, 32px);
+    font-weight: 700;
+    color: var(--text-primary, #2c3e50);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+/* Media queries moved to media.css */
+
+/* ============================================================================
+   ANIMATION & TRANSITIONS
+   ============================================================================ */
+.mgmt-section-table tbody tr,
+.mgmt-card,
+.mgmt-summary-stat {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects */
+.mgmt-card:hover,
+.mgmt-section-table tbody tr:hover {
+    box-shadow: var(--shadow-lg, 0 8px 16px rgba(0,0,0,0.1));
+}

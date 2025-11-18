@@ -1,0 +1,70 @@
+/* ==========================================================================
+   FOOTER STYLES
+   Shared across Hub and Dashboard pages
+   ========================================================================== */
+
+/* Footer Container */
+footer.footer {
+    grid-row: 3 !important;
+    background: var(--footer-bg-color, #F3F4F6) !important;
+    border-top: 1px solid var(--border-primary, #e0e0e0) !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 2rem !important;
+    font-size: var(--footer-text-size, 0.875rem) !important;
+    color: var(--footer-text-color, #6B7280) !important;
+    min-height: var(--footer-height, 40px) !important;
+    max-height: var(--footer-height, 40px) !important;
+    height: var(--footer-height, 40px) !important;
+    overflow: hidden !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Footer Content Layout */
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Footer Sections */
+.footer .footer-left,
+.footer .footer-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+}
+
+/* Footer Separator */
+.footer-separator {
+    color: var(--text-disabled, #9CA3AF);
+    user-select: none;
+}
+
+/* Footer Links */
+.footer-right strong {
+    color: var(--primary-color, #C99700);
+    font-weight: 600;
+}
+
+.footer-content a {
+    color: var(--footer-text-color, #6B7280);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+    color: var(--primary-color, #C99700);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Media queries moved to media.css */
+
+/* Media queries moved to media.css */
