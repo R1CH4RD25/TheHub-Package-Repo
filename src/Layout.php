@@ -601,20 +601,35 @@ class Layout
                 },
 
                 showLoading(title = 'Processing...') {
+                    console.log('🔄 TheHub.showLoading() called with title:', title);
+                    console.log('   - Swal exists?', typeof Swal !== 'undefined');
                     if (typeof Swal !== 'undefined') {
+                        console.log('✅ Calling Swal.fire() to show loading modal');
                         Swal.fire({
                             title,
                             allowOutsideClick: false,
                             allowEscapeKey: false,
                             showConfirmButton: false,
-                            didOpen: () => { Swal.showLoading(); }
+                            didOpen: () => {
+                                console.log('✅ Swal modal opened, calling Swal.showLoading()');
+                                Swal.showLoading();
+                            }
                         });
+                        console.log('✅ Swal.fire() completed');
+                    } else {
+                        console.log('❌ Swal not available, cannot show loading modal');
                     }
                 },
 
                 closeLoading() {
+                    console.log('🚪 TheHub.closeLoading() called');
+                    console.log('   - Swal exists?', typeof Swal !== 'undefined');
                     if (typeof Swal !== 'undefined') {
+                        console.log('✅ Calling Swal.close()');
                         Swal.close();
+                        console.log('✅ Swal.close() completed');
+                    } else {
+                        console.log('❌ Swal not available, cannot close loading modal');
                     }
                 }
             };
