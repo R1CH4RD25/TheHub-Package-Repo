@@ -10,7 +10,7 @@ class Layout
 {
     /**
      * Render the page header/navbar
-     * 
+     *
      * @param array $user Current user data
      * @param string $userRole User's effective role
      * @param string $pageType 'hub' or 'dashboard'
@@ -19,20 +19,20 @@ class Layout
     public static function renderHeader($user, $userRole, $pageType = 'hub', $options = [])
     {
         $showDashboardLink = in_array($userRole, ['super_admin', 'admin']);
-        
+
         // Determine subtitle based on page type
         if ($pageType === 'dashboard') {
             $subtitle = 'Admin Dashboard';
         } else {
             $subtitle = SiteSettings::get('navbar_subtitle', SiteSettings::get('site_name', 'The Hub'));
         }
-        
+
         ?>
         <!-- Header -->
         <nav class="navbar">
             <div class="nav-content">
                 <a href="/" class="nav-brand">
-                    <img src="<?php echo e(SiteSettings::get('logo_path', '/assets/images/branding/Branding_NoBG.png')); ?>" 
+                    <img src="<?php echo e(SiteSettings::get('logo_path', '/assets/images/branding/Branding_NoBG.png')); ?>"
                          alt="<?php echo e(SiteSettings::get('organization_name', 'Your Organization')); ?>">
                     <div class="nav-brand-text">
                         <div class="nav-brand-title"><?php echo e(SiteSettings::get('organization_name', 'Your Organization')); ?></div>
@@ -41,18 +41,52 @@ class Layout
                         <?php endif; ?>
                     </div>
                 </a>
-                
+
                 <?php if ($pageType === 'dashboard'): ?>
                     <button class="nav-toggle" id="navToggle">☰</button>
                 <?php endif; ?>
-                
-                <div class="nav-links" id="navLinks">
-                    <?php if ($pageType === 'hub' && $showDashboardLink): ?>
-                        <a href="/admin/">Dashboard</a>
-                    <?php elseif ($pageType === 'dashboard'): ?>
-                        <a href="/">Back to The Hub</a>
-                    <?php endif; ?>
-                    
+
+                                <div class="nav-links" id="navLinks">
+                    <?php
+                    // Always show The Hub link
+                    $siteName = SiteSettings::get('site_name', 'The Hub');
+                    if ($pageType !== 'hub') {
+                        echo '<a href="/">' . e($siteName) . '</a>';
+                    }
+
+                    // Check if user has Management System access
+                    $showManagement = false;
+                    if (isset($user['id'])) {
+                        try {
+                            // Check if Module class exists and user has command access
+                            if (class_exists('\Hub\Module')) {
+                                $moduleClass = new \Hub\Module();
+                                $showManagement = $moduleClass->hasAccess($user['id'], 'command') ||
+                                                in_array($userRole, ['super_admin', 'admin']);
+                            } else {
+                                // Fallback: Show for admin/super_admin only
+                                $showManagement = in_array($userRole, ['super_admin', 'admin']);
+                            }
+                        } catch (Exception $e) {
+                            // Silently fail and show for admin/super_admin only
+                            $showManagement = in_array($userRole, ['super_admin', 'admin']);
+                        }
+                    }
+
+                    // Show Management link if user has access
+                    if ($showManagement && $pageType !== 'command') {
+                        $mgmtName = SiteSettings::get('cc_display_name', 'Management');
+                        $mgmtIcon = SiteSettings::get('cc_icon', 'bi-kanban');
+                        echo '<a href="/command/"><i class="' . e($mgmtIcon) . '"></i> ' . e($mgmtName) . '</a>';
+                    }
+
+                    // Show Dashboard link if user is admin or super_admin
+                    if ($showDashboardLink && $pageType !== 'dashboard') {
+                        echo '<a href="/admin/"><i class="bi bi-speedometer2"></i> Dashboard</a>';
+                    }
+                    ?>
+
+
                     <!-- User Profile Dropdown -->
                     <div class="nav-user-dropdown">
                         <button class="nav-user-trigger" onclick="toggleUserDropdown(event)">
@@ -67,7 +101,7 @@ class Layout
                             </div>
                             <span class="nav-user-arrow">▼</span>
                         </button>
-                        
+
                         <div class="nav-user-menu" id="userDropdownMenu">
                             <a href="/profile.php" class="user-menu-item">
                                 <span class="user-menu-icon"><i class="fas fa-user"></i></span>
@@ -84,12 +118,12 @@ class Layout
                             </a>
                         </div>
                     </div>
-                    
+
                     <?php if ($pageType === 'dashboard' && !empty($options['mobileMenuItems'])): ?>
                         <!-- Mobile Admin Menu (only visible on mobile) -->
                         <div class="mobile-admin-menu">
                             <?php foreach ($options['mobileMenuItems'] as $item): ?>
-                                <a href="#" data-tab="<?php echo e($item['tab']); ?>" 
+                                <a href="#" data-tab="<?php echo e($item['tab']); ?>"
                                    class="mobile-tab-link <?php echo $item['active'] ? 'active' : ''; ?>">
                                     <?php echo e($item['label']); ?>
                                 </a>
@@ -99,7 +133,7 @@ class Layout
                 </div>
             </div>
         </nav>
-        
+
         <?php
         // Show maintenance mode banner for admins
         if (($_ENV['MAINTENANCE_MODE'] ?? 'false') === 'true'):
@@ -128,7 +162,7 @@ class Layout
             🔧 <strong>MAINTENANCE MODE ACTIVE</strong> - The system is currently unavailable to regular users. Click here to disable.
         </a>
         <?php endif; ?>
-        
+
         <script>
         // Toggle user dropdown menu (global function)
         function toggleUserDropdown(event) {
@@ -138,7 +172,7 @@ class Layout
                 menu.classList.toggle('show');
             }
         }
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.nav-user-dropdown');
@@ -150,10 +184,10 @@ class Layout
         </script>
         <?php
     }
-    
+
     /**
      * Render the page footer
-     * 
+     *
      * @param array $user Current user data
      * @param string $pageType 'hub' or 'dashboard'
      */
@@ -161,10 +195,10 @@ class Layout
     {
         $siteName = SiteSettings::get('site_name', 'The Hub');
         $pageLabel = ($pageType === 'dashboard') ? 'Admin Dashboard' : $siteName;
-        
+
         ?>
         <!-- Footer -->
-        <footer class="admin-footer">
+        <footer class="footer">
             <div class="footer-content">
                 <div class="footer-left">
                     <span>&copy; <?php echo date('Y'); ?> <span id="footerOrganizationName"><?php echo e(SiteSettings::get('organization_name', 'Your Organization')); ?></span></span>
@@ -188,193 +222,153 @@ class Layout
                 </div>
             </div>
         </footer>
-        
-        <?php 
+
+        <?php
         // Auto-initialize modern frontend libraries
-        self::renderModernInit(); 
+        self::renderModernInit();
         ?>
         <?php
     }
-    
+
     /**
      * Get modern frontend library includes
-     * 
+     *
      * @param bool $useLocalBundle Use local webpack bundle instead of CDN
      * @return string HTML link/script tags for modern libraries
      */
-    public static function getModernLibraries($useLocalBundle = false)
+    /**
+     * Get smart-loaded libraries based on page type
+     * Only loads what's actually needed instead of 59 libraries on every page
+     *
+     * @param string $pageType 'hub', 'dashboard', 'section', or 'login'
+     * @return string HTML for library includes
+     */
+    public static function getModernLibraries($pageType = 'hub')
     {
         $libraries = [];
-        
-        if ($useLocalBundle && file_exists(__DIR__ . '/../public/assets/dist/vendor.bundle.js')) {
-            // Use local webpack bundle (faster, self-hosted)
-            $libraries[] = "<script src=\"/assets/dist/vendor.bundle.js\"></script>";
-            $libraries[] = "<script src=\"/assets/dist/app.bundle.js\"></script>";
-        } else {
-            // Use CDN fallback (always available)
-            // Bootstrap 5.3.3
-            $libraries[] = "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH\" crossorigin=\"anonymous\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\" integrity=\"sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz\" crossorigin=\"anonymous\"></script>";
-            
-            // Bootstrap Icons 1.11.3
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">";
-            
-            // FontAwesome 6.5.1
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css\" integrity=\"sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\">";
-            
-            // Alpine.js 3.14.1
-            $libraries[] = "<script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js\"></script>";
-            
-            // HTMX 1.9.12
-            $libraries[] = "<script src=\"https://unpkg.com/htmx.org@1.9.12\"></script>";
-            
-            // SweetAlert2 11.10.8
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js\"></script>";
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.min.css\">";
-            
-            // AOS (Animate On Scroll) 2.3.4
-            $libraries[] = "<link href=\"https://unpkg.com/aos@2.3.4/dist/aos.css\" rel=\"stylesheet\">";
-            $libraries[] = "<script src=\"https://unpkg.com/aos@2.3.4/dist/aos.js\"></script>";
-            
-            // Chart.js 4.4.2
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js\"></script>";
-            
-            // ApexCharts 3.48.0
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/apexcharts@3.48.0/dist/apexcharts.min.js\"></script>";
-            
-            // Flatpickr 4.6.13
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js\"></script>";
-            
-            // Tom Select 2.3.1
-            $libraries[] = "<link href=\"https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css\" rel=\"stylesheet\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js\"></script>";
-            
-            // Notyf 3.10.0
+
+        // ===== CORE LIBRARIES (Always Loaded) =====
+        // Bootstrap 5.3.3 - Used everywhere for layout/modals/forms
+        $libraries[] = "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH\" crossorigin=\"anonymous\">";
+        $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\" integrity=\"sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz\" crossorigin=\"anonymous\"></script>";
+
+        // Bootstrap Icons 1.11.3 - Icons throughout app
+        $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">";
+
+        // FontAwesome 6.5.1 - Additional icons
+        $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css\" integrity=\"sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\">";
+
+        // SweetAlert2 11.10.8 - Confirmations/alerts everywhere
+        $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js\"></script>";
+        $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.min.css\">";
+
+        // MicroModal.js 0.4.10 - Lightweight, accessible modals (1.9KB gzipped)
+        $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/micromodal@0.4.10/dist/micromodal.min.js\"></script>";
+
+        // Axios 1.6.8 - All AJAX requests
+        $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js\"></script>";
+
+        // AOS (Animate On Scroll) 2.3.4 - Lightweight animations
+        $libraries[] = "<link href=\"https://unpkg.com/aos@2.3.4/dist/aos.css\" rel=\"stylesheet\">";
+        $libraries[] = "<script src=\"https://unpkg.com/aos@2.3.4/dist/aos.js\"></script>";
+
+        // Alpine.js 3.14.1 - Reactive components (lightweight, 15KB)
+        $libraries[] = "<script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js\"></script>";
+
+        // HTMX 1.9.12 - Dynamic HTML updates (lightweight, 14KB)
+        $libraries[] = "<script src=\"https://unpkg.com/htmx.org@1.9.12\"></script>";
+
+        // ===== PAGE-SPECIFIC LIBRARIES =====
+        if ($pageType === 'dashboard' || $pageType === 'command') {
+            // Admin Dashboard & Command Center Libraries
             $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css\">";
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js\"></script>";
-            
-            // Axios 1.6.8
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js\"></script>";
-            
-            // Day.js 1.11.10
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js\"></script>";
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js\"></script>";
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/relativeTime.js\"></script>";
-            
-            // Lodash 4.17.21
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js\"></script>";
-            
-            // Tippy.js 6.3.7
-            $libraries[] = "<script src=\"https://unpkg.com/@popperjs/core@2\"></script>";
-            $libraries[] = "<script src=\"https://unpkg.com/tippy.js@6\"></script>";
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://unpkg.com/tippy.js@6/dist/tippy.css\">";
-            
-            // ===== BONUS MODERN LIBRARIES =====
-            
-            // Sortable.js 1.15.2 - Drag & drop reordering
+
+            // jQuery (required for DataTables)
+            $libraries[] = "<script src=\"https://code.jquery.com/jquery-3.7.1.min.js\" integrity=\"sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=\" crossorigin=\"anonymous\"></script>";
+
+            // DataTables (for Command Center)
+            if ($pageType === 'command') {
+                $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css\">";
+                $libraries[] = "<script src=\"https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js\"></script>";
+                $libraries[] = "<script src=\"https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js\"></script>";
+            }
+
+            // Charts (lazy-load via data-requires="chart")
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js\"></script>";
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/apexcharts@3.48.0/dist/apexcharts.min.js\"></script>";
+
+            // Date pickers (lazy-load via data-requires=\"datepicker\")
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css\">";
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js\"></script>";
+
+            // File uploads (lazy-load via data-requires=\"upload\")
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone.css\">";
+            $libraries[] = "<script src=\"https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone-min.js\"></script>";
+
+            // Multi-select dropdowns (lazy-load via data-requires=\"multiselect\")
+            $libraries[] = "<link href=\"https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css\" rel=\"stylesheet\">";
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js\"></script>";
+
+            // Sortable tables/lists (lazy-load via data-requires=\"sortable\")
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js\"></script>";
-            
-            // Cleave.js 1.6.0 - Input formatting (phone, credit card, dates)
+
+            // Input formatting (lazy-load via data-requires=\"format\")
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js\"></script>";
-            
-            // Animate.css 4.1.1 - CSS animation library
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css\">";
-            
-            // Pace.js 1.2.4 - Automatic page loading progress bar
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js\"></script>";
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.css\">";
-            
-            // NProgress 0.2.0 - Slim progress bar (alternative to Pace)
-            $libraries[] = "<script src=\"https://unpkg.com/nprogress@0.2.0/nprogress.js\"></script>";
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://unpkg.com/nprogress@0.2.0/nprogress.css\">";
-            
-            // Particles.js 2.0.0 - Animated particle backgrounds
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js\"></script>";
-            
-            // Typed.js 2.1.0 - Typing animation
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/typed.js@2.1.0/dist/typed.umd.js\"></script>";
-            
-            // CountUp.js 2.8.0 - Number animations
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.min.js\"></script>";
-            
-            // Vanilla Tilt 1.8.1 - 3D tilt effect on hover
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js\"></script>";
-            
-            // Prism.js 1.29.0 - Syntax highlighting for code blocks
+
+            // Code highlighting (lazy-load via data-requires=\"code\")
             $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css\">";
             $libraries[] = "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js\"></script>";
             $libraries[] = "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js\"></script>";
-            
-            // Dropzone.js 6.0.0 - Drag & drop file uploads
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone.css\">";
-            $libraries[] = "<script src=\"https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone-min.js\"></script>";
-            
-            // Masonry 4.2.2 - Pinterest-style grid layouts
-            $libraries[] = "<script src=\"https://unpkg.com/masonry-layout@4.2.2/dist/masonry.pkgd.min.js\"></script>";
-            
-            // ImagesLoaded 5.0.0 - Detect when images are loaded
-            $libraries[] = "<script src=\"https://unpkg.com/imagesloaded@5.0.0/imagesloaded.pkgd.min.js\"></script>";
-            
-            // Micromodal 0.4.10 - Accessible modal dialogs
-            $libraries[] = "<script src=\"https://unpkg.com/micromodal@0.4.10/dist/micromodal.min.js\"></script>";
-            
-            // A11y Dialog 8.0.3 - Accessible dialog component
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/a11y-dialog@8.0.3/dist/a11y-dialog.min.js\"></script>";
-            
-            // Choices.js 10.2.0 - Select boxes & multi-select (lighter alternative to Tom Select)
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js\"></script>";
-            
-            // Driver.js 1.3.1 - Feature tours & highlights
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js\"></script>";
-            
-            // Shepherd.js 11.2.0 - User onboarding tours
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/shepherd.js@11.2.0/dist/css/shepherd.css\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/shepherd.js@11.2.0/dist/js/shepherd.min.js\"></script>";
-            
-            // ===== MOBILE-SPECIFIC LIBRARIES =====
-            
-            // Hammer.js 2.0.8 - Touch gestures (swipe, pinch, tap, etc.)
+
+            // Tooltips (lazy-load via data-requires=\"tooltip\")
+            $libraries[] = "<script src=\"https://unpkg.com/@popperjs/core@2\"></script>";
+            $libraries[] = "<script src=\"https://unpkg.com/tippy.js@6\"></script>";
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://unpkg.com/tippy.js@6/dist/tippy.css\">";
+
+            // Progress bars for async operations
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js\"></script>";
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.css\">";
+            $libraries[] = "<script src=\"https://unpkg.com/nprogress@0.2.0/nprogress.js\"></script>";
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://unpkg.com/nprogress@0.2.0/nprogress.css\">";
+
+            // Animation library for transitions
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css\">";
+
+        } elseif ($pageType === 'hub') {
+            // Hub Landing Page Libraries
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js\"></script>";
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js\"></script>";
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css\">";
+
+        } elseif ($pageType === 'login') {
+            // Login Page Libraries (minimal)
+            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js\"></script>";
+            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css\">";
+        }
+
+        // ===== MOBILE-OPTIMIZED LIBRARIES (Load only on mobile) =====
+        // Detect mobile via user agent (simple check)
+        $isMobile = isset($_SERVER['HTTP_USER_AGENT']) &&
+                    preg_match('/(android|iphone|ipad|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
+
+        if ($isMobile) {
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js\"></script>";
-            
-            // Swiper 11.0.5 - Mobile touch slider/carousel
             $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css\">";
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js\"></script>";
-            
-            // PulltoRefresh.js 0.1.22 - Pull to refresh for mobile
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/pulltorefreshjs@0.1.22/dist/index.umd.js\"></script>";
-            
-            // FastClick 1.0.6 - Eliminate 300ms tap delay on mobile
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js\"></script>";
-            
-            // iNoBounce 0.2.0 - Disable iOS rubber band scrolling
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/inobounce@0.2.0/inobounce.min.js\"></script>";
-            
-            // Mobile Detect (via CDN) - Detect mobile devices
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js\"></script>";
-            
-            // PhotoSwipe 5.4.3 - Mobile-friendly image gallery
-            $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/photoswipe@5.4.3/dist/photoswipe.css\">";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/photoswipe@5.4.3/dist/umd/photoswipe.umd.min.js\"></script>";
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/photoswipe@5.4.3/dist/umd/photoswipe-lightbox.umd.min.js\"></script>";
-            
-            // Lottie 5.12.2 - Render animations (mobile-optimized)
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js\"></script>";
-            
-            // QRCode.js 1.0.0 - Generate QR codes
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js\"></script>";
-            
-            // Vibrant.js 1.0.0 - Extract colors from images
-            $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/node-vibrant@3.2.1-alpha.1/dist/vibrant.min.js\"></script>";
         }
-        
+
         return implode("\n    ", $libraries);
     }
-    
+
     /**
      * Get common CSS includes for both Hub and Dashboard
-     * 
+     *
      * @param string $pageType 'hub' or 'dashboard'
      * @return string HTML link tags for stylesheets
      */
@@ -382,67 +376,76 @@ class Layout
     {
         // Check if production mode is enabled
         $useProduction = defined('CSS_PRODUCTION_MODE') && CSS_PRODUCTION_MODE === true;
-        
+
         if ($useProduction) {
             // Use single combined production.css file (minified if available)
             $versionFile = __DIR__ . '/../public/assets/css/version.txt';
             $version = file_exists($versionFile) ? trim(file_get_contents($versionFile)) : time();
-            
+
             // Use minified version if it exists, otherwise fall back to unminified
             $minifiedPath = __DIR__ . '/../public/assets/css/production.min.css';
             $cssFile = file_exists($minifiedPath) ? 'production.min.css' : 'production.css';
-            
+
             $stylesheets = [];
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/api/theme-css.php?v={$version}\">";
+            // Load production CSS first (with default CSS variables)
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/{$cssFile}?v={$version}\">";
-            
+            // Then load theme CSS to override defaults with database values
+            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/api/theme-css.php?v={$version}\">";
+
             return implode("\n    ", $stylesheets);
         }
-        
+
         // Development mode - individual files for easier debugging
         $timestamp = time();
         $stylesheets = [];
-        
-        // Common stylesheets for all pages
+
+        // Common stylesheets for all pages (load static CSS first)
         $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/style.css?v={$timestamp}\">";
-        $stylesheets[] = "<link rel=\"stylesheet\" href=\"/api/theme-css.php?v={$timestamp}\">";
         $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/header.css?v={$timestamp}\">";
         $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/footer.css?v={$timestamp}\">";
-        
+
         // Page-specific stylesheets
-        if ($pageType === 'dashboard') {
+        if ($pageType === 'dashboard' || $pageType === 'command') {
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin.css?v={$timestamp}\">";
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-theme.css?v={$timestamp}\">";
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-colors.css?v={$timestamp}\">";
+
+            // Management System (Command Center) specific styles
+            if ($pageType === 'command') {
+                $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/management.css?v={$timestamp}\">";
+            }
         } elseif ($pageType === 'hub') {
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub.css?v={$timestamp}\">";
             $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub-modern.css?v={$timestamp}\">";
         }
-        
-        // Media queries last
+
+        // Media queries
         $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/media.css?v={$timestamp}\">";
-        
+
+        // Theme CSS LAST to override all defaults
+        $stylesheets[] = "<link rel=\"stylesheet\" href=\"/api/theme-css.php?v={$timestamp}\">";
+
         return implode("\n    ", $stylesheets);
     }
-    
+
     /**
      * Get the page-specific inline styles
-     * 
+     *
      * @param string $pageType 'hub' or 'dashboard'
      * @return string CSS style block
      */
     public static function getInlineStyles($pageType = 'hub')
     {
+        // CSS variables now loaded via /api/theme-css.php link tag
+        // Only output dynamic styles that can't be in external CSS
         ob_start();
         ?>
         <style>
-            <?php echo SiteSettings::getCSSVariables(); ?>
-            
             /* Logo glow effects (dynamic, not in static CSS) */
             .nav-brand img {
                 <?php echo SiteSettings::getLogoGlowCSS(); ?>
             }
-            
+
             @media (max-width: 768px) {
                 .nav-brand img {
                     <?php echo SiteSettings::getMobileLogoGlowCSS(); ?>
@@ -452,10 +455,10 @@ class Layout
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Render the complete HTML head section
-     * 
+     *
      * @param string $pageTitle Page title
      * @param string $pageType 'hub' or 'dashboard'
      * @param bool $useModernLibraries Include modern frontend libraries (default: true)
@@ -470,13 +473,13 @@ class Layout
         <link rel="icon" type="image/png" href="<?php echo e(SiteSettings::get('favicon_path', '/assets/images/Cowboy_SM_favicon.png')); ?>">
         <?php echo SiteSettings::getGoogleFontsLink(); ?>
         <?php if ($useModernLibraries): ?>
-        <?php echo self::getModernLibraries(); ?>
+        <?php echo self::getModernLibraries($pageType); ?>
         <?php endif; ?>
         <?php echo self::getStylesheets($pageType); ?>
         <?php echo self::getInlineStyles($pageType); ?>
         <?php
     }
-    
+
     /**
      * Initialize modern frontend libraries with JavaScript
      * Call this just before closing </body> tag
@@ -490,7 +493,7 @@ class Layout
             // CDN mode - initialize components manually
             window.TheHub = {
                 version: '2.0.0',
-                
+
                 init() {
                     this.initNotifications();
                     this.initTooltips();
@@ -498,7 +501,7 @@ class Layout
                     this.initAxios();
                     console.log('🚀 The Hub initialized (CDN mode)');
                 },
-                
+
                 initNotifications() {
                     if (typeof Notyf !== 'undefined') {
                         this.notyf = new Notyf({
@@ -529,14 +532,14 @@ class Layout
                         });
                     }
                 },
-                
+
                 initTooltips() {
                     if (typeof bootstrap !== 'undefined') {
                         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
                         [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
                     }
                 },
-                
+
                 initAnimations() {
                     if (typeof AOS !== 'undefined') {
                         AOS.init({
@@ -547,7 +550,7 @@ class Layout
                         });
                     }
                 },
-                
+
                 initAxios() {
                     if (typeof axios !== 'undefined') {
                         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -566,7 +569,7 @@ class Layout
                         );
                     }
                 },
-                
+
                 notify(message, type = 'success') {
                     if (this.notyf) {
                         this.notyf.open({ type, message });
@@ -576,7 +579,7 @@ class Layout
                         alert(message);
                     }
                 },
-                
+
                 async confirm(title, text, confirmText = 'Confirm') {
                     if (typeof Swal !== 'undefined') {
                         const result = await Swal.fire({
@@ -596,7 +599,7 @@ class Layout
                     }
                     return confirm(text);
                 },
-                
+
                 showLoading(title = 'Processing...') {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
@@ -608,14 +611,14 @@ class Layout
                         });
                     }
                 },
-                
+
                 closeLoading() {
                     if (typeof Swal !== 'undefined') {
                         Swal.close();
                     }
                 }
             };
-            
+
             // Initialize when ready
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => window.TheHub.init());
