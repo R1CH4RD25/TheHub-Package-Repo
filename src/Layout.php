@@ -42,17 +42,18 @@ class Layout
                     </div>
                 </a>
 
-                <?php if ($pageType === 'dashboard'): ?>
-                    <button class="nav-toggle" id="navToggle">☰</button>
-                <?php endif; ?>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
 
                                 <div class="nav-links" id="navLinks">
                     <?php
-                    // Always show The Hub link
+                    // Always show The Hub link (static menu - always visible)
                     $siteName = SiteSettings::get('site_name', 'The Hub');
-                    if ($pageType !== 'hub') {
-                        echo '<a href="/">' . e($siteName) . '</a>';
-                    }
+                    $isOnHub = ($pageType === 'hub');
+                    echo '<a href="/"' . ($isOnHub ? ' class="active"' : '') . '>' . e($siteName) . '</a>';
 
                     // Check if user has Management System access
                     $showManagement = false;
@@ -73,28 +74,32 @@ class Layout
                         }
                     }
 
-                    // Show Management link if user has access
-                    if ($showManagement && $pageType !== 'command') {
+                    // Show Management link if user has access (static menu - always visible)
+                    if ($showManagement) {
                         $mgmtName = SiteSettings::get('cc_display_name', 'Management');
                         $mgmtIcon = SiteSettings::get('cc_icon', 'bi-kanban');
-                        echo '<a href="/command/"><i class="' . e($mgmtIcon) . '"></i> ' . e($mgmtName) . '</a>';
+                        $isOnCommand = ($pageType === 'command');
+                        echo '<a href="/command/"' . ($isOnCommand ? ' class="active"' : '') . '><i class="' . \Hub\Helpers::safeIconClass($mgmtIcon) . '"></i> ' . e($mgmtName) . '</a>';
                     }
 
-                    // Show Dashboard link if user is admin or super_admin
-                    if ($showDashboardLink && $pageType !== 'dashboard') {
-                        echo '<a href="/admin/"><i class="bi bi-speedometer2"></i> Dashboard</a>';
+                    // Show Admin Dashboard link if user is admin or super_admin (static menu - always visible)
+                    if ($showDashboardLink) {
+                        $isOnDashboard = ($pageType === 'dashboard');
+                        echo '<a href="/admin/"' . ($isOnDashboard ? ' class="active"' : '') . '><i class="bi bi-speedometer2"></i> Admin Dashboard</a>';
                     }
                     ?>
 
 
                     <!-- User Profile Dropdown -->
                     <div class="nav-user-dropdown">
-                        <button class="nav-user-trigger" onclick="toggleUserDropdown(event)">
-                            <?php if (!empty($user['picture'])): ?>
-                                <img src="<?php echo e($user['picture']); ?>" alt="<?php echo e($user['name']); ?>" class="nav-user-avatar">
-                            <?php else: ?>
-                                <img src="/assets/images/default-avatar.svg" alt="Default Avatar" class="nav-user-avatar">
-                            <?php endif; ?>
+                        <button class="nav-user-trigger"
+                                id="userDropdownTrigger"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="userDropdownMenu">
+                            <img src="<?php echo \Hub\Helpers::safeAvatarUrl($user['picture'] ?? null); ?>"
+                                 alt="<?php echo e($user['name']); ?>"
+                                 class="nav-user-avatar">
                             <div class="nav-user-info">
                                 <div class="nav-user-name"><?php echo e($user['name']); ?></div>
                                 <div class="nav-user-role"><?php echo ucfirst(str_replace('_', ' ', $userRole)); ?></div>
@@ -102,8 +107,11 @@ class Layout
                             <span class="nav-user-arrow">▼</span>
                         </button>
 
-                        <div class="nav-user-menu" id="userDropdownMenu">
-                            <a href="/profile.php" class="user-menu-item">
+                        <div class="nav-user-menu"
+                             id="userDropdownMenu"
+                             role="menu"
+                             aria-labelledby="userDropdownTrigger">
+                            <a href="/profile.php" class="user-menu-item" role="menuitem">
                                 <span class="user-menu-icon"><i class="fas fa-user"></i></span>
                                 <span>My Profile</span>
                             </a>
@@ -138,49 +146,86 @@ class Layout
         // Show maintenance mode banner for admins
         if (($_ENV['MAINTENANCE_MODE'] ?? 'false') === 'true'):
         ?>
-        <a href="/admin/#settings-advanced" class="maintenance-banner" onclick="
-            localStorage.setItem('openAdvancedSection', 'app');
-            if (window.location.pathname === '/admin/' || window.location.pathname === '/admin/index.php') {
-                setTimeout(() => {
-                    const advancedTab = document.querySelector('[data-tab=settings]');
-                    if (advancedTab) advancedTab.click();
-                    setTimeout(() => {
-                        const advancedSubtab = document.querySelector('[data-subtab=advanced]');
-                        if (advancedSubtab) advancedSubtab.click();
-                        setTimeout(() => {
-                            const appSection = document.querySelector('[data-section=app]');
-                            if (appSection && appSection.classList.contains('collapsed')) {
-                                appSection.previousElementSibling.click();
-                            }
-                            document.getElementById('maintenanceMode')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
-                    }, 300);
-                }, 100);
-                return false;
-            }
-        ">
+        <a href="/admin/#settings-advanced"
+           class="maintenance-banner"
+           id="maintenanceBanner">
             🔧 <strong>MAINTENANCE MODE ACTIVE</strong> - The system is currently unavailable to regular users. Click here to disable.
         </a>
         <?php endif; ?>
 
-        <script>
-        // Toggle user dropdown menu (global function)
-        function toggleUserDropdown(event) {
-            event.stopPropagation();
-            const menu = document.getElementById('userDropdownMenu');
-            if (menu) {
-                menu.classList.toggle('show');
-            }
+        <script nonce="<?php echo CSP_NONCE; ?>">
+        // User dropdown menu toggle with ARIA support
+        const userDropdownTrigger = document.getElementById('userDropdownTrigger');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+        if (userDropdownTrigger && userDropdownMenu) {
+            userDropdownTrigger.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const isExpanded = userDropdownMenu.classList.toggle('show');
+                userDropdownTrigger.setAttribute('aria-expanded', isExpanded);
+            });
         }
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.nav-user-dropdown');
-            const menu = document.getElementById('userDropdownMenu');
-            if (dropdown && menu && !dropdown.contains(event.target)) {
-                menu.classList.remove('show');
+            if (dropdown && userDropdownMenu && !dropdown.contains(event.target)) {
+                userDropdownMenu.classList.remove('show');
+                if (userDropdownTrigger) {
+                    userDropdownTrigger.setAttribute('aria-expanded', 'false');
+                }
             }
         });
+
+        // Maintenance banner navigation (if present)
+        const maintenanceBanner = document.getElementById('maintenanceBanner');
+        if (maintenanceBanner) {
+            maintenanceBanner.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.setItem('openAdvancedSection', 'app');
+                if (window.location.pathname === '/admin/' || window.location.pathname === '/admin/index.php') {
+                    setTimeout(() => {
+                        const advancedTab = document.querySelector('[data-tab=settings]');
+                        if (advancedTab) advancedTab.click();
+                        setTimeout(() => {
+                            const advancedSubtab = document.querySelector('[data-subtab=advanced]');
+                            if (advancedSubtab) advancedSubtab.click();
+                            setTimeout(() => {
+                                const appSection = document.querySelector('[data-section=app]');
+                                if (appSection && appSection.classList.contains('collapsed')) {
+                                    appSection.previousElementSibling.click();
+                                }
+                                document.getElementById('maintenanceMode')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                        }, 300);
+                    }, 100);
+                    return false;
+                } else {
+                    window.location.href = '/admin/#settings-advanced';
+                }
+            });
+        }
+
+        // Mobile menu toggle with CSS-based body lock (safer than inline styles)
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', function() {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                document.body.classList.toggle('nav-open');
+            });
+
+            // Close mobile menu when clicking a link
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    navToggle.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    document.body.classList.remove('nav-open');
+                });
+            });
+        }
         </script>
         <?php
     }
@@ -277,6 +322,9 @@ class Layout
 
         // HTMX 1.9.12 - Dynamic HTML updates (lightweight, 14KB)
         $libraries[] = "<script src=\"https://unpkg.com/htmx.org@1.9.12\"></script>";
+
+        // Typed.js 2.1.0 - Typewriter effect (login page)
+        $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/typed.js@2.1.0/dist/typed.umd.js\"></script>";
 
         // ===== PAGE-SPECIFIC LIBRARIES =====
         if ($pageType === 'dashboard' || $pageType === 'command') {
@@ -469,6 +517,7 @@ class Layout
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="<?php echo e($_SESSION['csrf_token'] ?? ''); ?>">
+        <meta name="csp-nonce" content="<?php echo CSP_NONCE; ?>">
         <title><?php echo e($pageTitle); ?></title>
         <link rel="icon" type="image/png" href="<?php echo e(SiteSettings::get('favicon_path', '/assets/images/Cowboy_SM_favicon.png')); ?>">
         <?php echo SiteSettings::getGoogleFontsLink(); ?>
@@ -487,7 +536,7 @@ class Layout
     public static function renderModernInit()
     {
         ?>
-        <script>
+        <script nonce="<?php echo CSP_NONCE; ?>">
         // Initialize The Hub modern components
         if (typeof window.TheHub === 'undefined') {
             // CDN mode - initialize components manually
@@ -544,7 +593,7 @@ class Layout
                     if (typeof AOS !== 'undefined') {
                         AOS.init({
                             duration: 800,
-                            easing: 'ease-in-out',
+                            easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)', // MD3 motion-standard
                             once: true,
                             offset: 100
                         });
