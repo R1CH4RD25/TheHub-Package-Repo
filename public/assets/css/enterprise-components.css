@@ -439,6 +439,89 @@
     font-size: 12px;
 }
 
+/* Filter chips (.nd-chip) - Interactive filters */
+.admin-root .nd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-base);
+    background: var(--gray-50);
+    color: var(--gray-700);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+.admin-root .nd-chip:hover {
+    background: var(--gray-200);
+    border-color: var(--gray-400);
+}
+.admin-root .nd-chip.active {
+    background: var(--ms-blue);
+    color: var(--gray-50);
+    border-color: var(--ms-blue);
+}
+.admin-root .nd-chip i {
+    font-size: 12px;
+}
+
+/* Status pills (.nd-pill) - Read-only status indicators */
+.admin-root .nd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 4px var(--space-3);
+    border-radius: 12px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+}
+.admin-root .nd-pill.pill-success {
+    background: var(--success-light, #E8F5E9);
+    color: var(--success);
+}
+.admin-root .nd-pill.pill-warning {
+    background: var(--warning-light, #FFF4E5);
+    color: var(--warning);
+}
+.admin-root .nd-pill.pill-error {
+    background: var(--error-light, #FFEBEE);
+    color: var(--error);
+}
+.admin-root .nd-pill.pill-info {
+    background: var(--info-light, #E3F2FD);
+    color: var(--ms-blue);
+}
+.admin-root .nd-pill.pill-neutral {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+.admin-root .nd-pill i {
+    font-size: 11px;
+}
+
+/* Table toolbar with filter chips */
+.admin-root .table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) 0;
+    margin-bottom: var(--space-3);
+    gap: var(--space-3);
+}
+.admin-root .toolbar-left {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+.admin-root .toolbar-right {
+    display: flex;
+    gap: var(--space-2);
+}
+
 /* ========== 6. ICON BUTTONS ========== */
 .admin-root .btn-icon {
     width: 32px;
@@ -706,6 +789,45 @@
     color: var(--gray-600);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* ========== 8. ENTERPRISE SUBTABS ========== */
+.admin-root .user-subtabs {
+    display: flex;
+    gap: var(--space-1);
+    padding: 0 var(--space-4);
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-300);
+    flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.admin-root .subtab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: none;
+    background: transparent;
+    color: var(--gray-700);
+    font-size: var(--text-md);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    position: relative;
+}
+.admin-root .subtab-btn:hover {
+    color: var(--gray-900);
+    background: var(--gray-200);
+}
+.admin-root .subtab-btn.active {
+    color: var(--ms-blue);
+    border-bottom-color: var(--ms-blue);
+}
+.admin-root .subtab-btn i {
+    font-size: 14px;
 }
 
 /* ========== 9. LOADING STATES ========== */
