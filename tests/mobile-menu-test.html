@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Menu Safety Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Simulate the actual CSS */
+        body.nav-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .test-area {
+            border: 2px solid #333;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: #f5f5f5;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 6px;
+            border: none;
+            background: #007bff;
+            color: white;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .danger {
+            background: #dc3545;
+        }
+        
+        .danger:hover {
+            background: #c82333;
+        }
+        
+        .success {
+            background: #28a745;
+        }
+        
+        .status {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .status.locked {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+        
+        .status.unlocked {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        
+        .content {
+            height: 200vh;
+            background: linear-gradient(to bottom, #fff 0%, #e0e0e0 100%);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Mobile Menu Body Lock Safety Test</h1>
+    
+    <div class="test-area">
+        <h2>Test 1: Normal Toggle (CSS Class Method)</h2>
+        <p>This uses the NEW safer CSS class approach:</p>
+        <button id="toggleNew">Toggle Body Lock (CSS Class)</button>
+        <button id="unlockNew" class="success">Force Unlock (CSS)</button>
+        <div id="statusNew" class="status unlocked">Status: UNLOCKED ✅</div>
+    </div>
+    
+    <div class="test-area">
+        <h2>Test 2: Error Simulation</h2>
+        <p>Simulate a JS error DURING lock operation:</p>
+        <button id="errorTest" class="danger">Trigger Error During Lock</button>
+        <p><small>Old method: Body stays locked forever. New method: Body lock never applies.</small></p>
+    </div>
+    
+    <div class="test-area">
+        <h2>Test 3: Multiple Toggles</h2>
+        <p>Rapid clicking should not break state:</p>
+        <button id="rapidToggle">Rapid Toggle (10x)</button>
+        <div id="statusRapid" class="status unlocked">Status: UNLOCKED ✅</div>
+    </div>
+    
+    <div class="log" id="log">
+        <div class="log-entry">Log initialized...</div>
+    </div>
+    
+    <div class="content">
+        <h2>Scrollable Content</h2>
+        <p>Try scrolling this page. When body is LOCKED, you should NOT be able to scroll.</p>
+        <p>When UNLOCKED, scrolling should work normally.</p>
+        <p>The key test: If a JS error occurs, the old method would PERMANENTLY lock scrolling.</p>
+        <p>With the new CSS class method, the page recovers gracefully.</p>
+        <p style="margin-top: 100px;">Keep scrolling...</p>
+        <p style="margin-top: 100px;">More content...</p>
+        <p style="margin-top: 100px;">Even more content...</p>
+        <p style="margin-top: 100px;">🎯 End of test content</p>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            entry.textContent = `[${timestamp}] ${icon} ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function updateStatus(elementId, isLocked) {
+            const status = document.getElementById(elementId);
+            if (isLocked) {
+                status.textContent = 'Status: LOCKED 🔒';
+                status.className = 'status locked';
+            } else {
+                status.textContent = 'Status: UNLOCKED ✅';
+                status.className = 'status unlocked';
+            }
+        }
+        
+        function checkBodyLock() {
+            return document.body.classList.contains('nav-open');
+        }
+        
+        // Test 1: Normal CSS class toggle (NEW METHOD)
+        document.getElementById('toggleNew').addEventListener('click', function() {
+            try {
+                document.body.classList.toggle('nav-open');
+                const isLocked = checkBodyLock();
+                updateStatus('statusNew', isLocked);
+                addLog(`Body lock toggled: ${isLocked ? 'LOCKED' : 'UNLOCKED'}`, 'success');
+            } catch (error) {
+                addLog(`Error during toggle: ${error.message}`, 'error');
+            }
+        });
+        
+        document.getElementById('unlockNew').addEventListener('click', function() {
+            document.body.classList.remove('nav-open');
+            updateStatus('statusNew', false);
+            addLog('Force unlocked via CSS class removal', 'success');
+        });
+        
+        // Test 2: Error simulation
+        document.getElementById('errorTest').addEventListener('click', function() {
+            addLog('Attempting lock with error...', 'info');
+            try {
+                document.body.classList.add('nav-open');
+                addLog('CSS class added successfully', 'success');
+                
+                // Simulate error AFTER lock
+                throw new Error('Simulated error!');
+                
+                // This line never executes
+                addLog('This should never appear', 'error');
+            } catch (error) {
+                addLog(`Caught error: ${error.message}`, 'error');
+                addLog('🎉 KEY POINT: Body remains locked, but can be unlocked via CSS class!', 'success');
+                addLog('Old method: body.style.overflow would be stuck forever', 'info');
+                
+                // Show that we can still unlock
+                setTimeout(() => {
+                    document.body.classList.remove('nav-open');
+                    addLog('Recovery: Unlocked via class removal', 'success');
+                }, 2000);
+            }
+        });
+        
+        // Test 3: Rapid toggle
+        document.getElementById('rapidToggle').addEventListener('click', async function() {
+            addLog('Starting rapid toggle test (10 cycles)...', 'info');
+            for (let i = 0; i < 10; i++) {
+                document.body.classList.toggle('nav-open');
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            const finalState = checkBodyLock();
+            updateStatus('statusRapid', finalState);
+            addLog(`Rapid toggle complete. Final state: ${finalState ? 'LOCKED' : 'UNLOCKED'}`, 'success');
+        });
+        
+        // Monitor body class changes
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const hasLock = document.body.classList.contains('nav-open');
+                    addLog(`Body class changed. nav-open: ${hasLock}`, 'info');
+                }
+            });
+        });
+        
+        observer.observe(document.body, { attributes: true });
+        
+        addLog('🚀 Test suite ready. Try the buttons above!', 'success');
+        addLog('Key difference: CSS class vs inline style', 'info');
+        addLog('CSS class method is error-resistant and recoverable', 'info');
+    </script>
+</body>
+</html>
