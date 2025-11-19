@@ -37,100 +37,107 @@ $users = $userModel->getAll();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php Layout::renderHead('Admin Dashboard - ' . SiteSettings::get('organization_name', 'Your Organization') . "'s " . SiteSettings::get('site_name', 'The Hub'), 'dashboard'); ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - <?= SiteSettings::get('organization_name', 'Your Organization') ?>'s <?= SiteSettings::get('site_name', 'The Hub') ?></title>
+
+    <!-- ✅ ENTERPRISE ADMIN BUNDLE (Microsoft 365 Style) -->
+    <link rel="stylesheet" href="/assets/css/admin-bundle.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
 </head>
-<body>
-    <!-- Hamburger Menu Button (Mobile/Tablet) -->
-    <button class="hamburger-menu" aria-label="Toggle menu" style="display: none;">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+<body class="admin-root">
+    <div class="admin-shell">
 
-    <!-- Sidebar Overlay (Mobile/Tablet) -->
-    <div class="sidebar-overlay"></div>
-
-    <div class="page-wrapper">
-        <?php include __DIR__ . '/../partials/header.php'; ?>
-
-        <!-- Content -->
-        <div class="admin-container">
-            <div class="admin-sidebar">
-                <ul class="admin-menu">
-                    <?php if ($isSuperAdmin || $userRole === 'admin'): ?>
-                    <li>
-                        <a href="/command/" style="border-left: 4px solid var(--primary-color, #3498db);">
-                            <i class="<?= htmlspecialchars($mgmtIcon) ?>"></i> <?= htmlspecialchars($mgmtDisplayName) ?>
-                        </a>
-                    </li>
-                    <li style="margin: 0.5rem 0; border-bottom: 1px solid var(--border-secondary, #e5e7eb);"></li>
-                    <?php endif; ?>
-
-                    <?php if ($canSeeUserManagement): ?>
-                    <li><a href="#" data-tab="users" class="active"><i class="fas fa-users"></i> User Management</a></li>
-                    <?php endif; ?>                    <!-- Packages Group (Collapsible) -->
-                    <?php if ($canSeeSectionAccess || $canSeeManageSections || ($isSuperAdmin || in_array($userRole, ['admin']))): ?>
-                    <li class="menu-group">
-                        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
-                            <span><i class="fas fa-th-list"></i> Packages</span>
-                            <span class="menu-group-arrow">▼</span>
-                        </div>
-                        <ul class="menu-group-items">
-                            <?php if ($canSeeSectionAccess || $canSeeManageSections): ?>
-                            <li><a href="#" data-tab="sections">Package Access & Management</a></li>
-                            <?php endif; ?>
-                            <?php if ($isSuperAdmin || in_array($userRole, ['admin'])): ?>
-                            <li>
-                                <a href="#" data-tab="section-config">
-                                    Package Configuration<span class="sidebar-badge orange-dot" id="sidebarConfigBadge" style="display: none;"></span>
-                                </a>
-                            </li>
-                            <?php endif; ?>
-                        </ul>
-                    </li>
-                    <?php endif; ?>
-
-                    <!-- Configuration Group (Collapsible) -->
-                    <?php if ($isSuperAdmin): ?>
-                    <li class="menu-group">
-                        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
-                            <span><i class="fas fa-cog"></i> Configuration</span>
-                            <span class="menu-group-arrow">▼</span>
-                        </div>
-                        <ul class="menu-group-items">
-                            <li>
-                                <a href="#" data-tab="packages">
-                                    Package Manager
-                                    <span class="sidebar-badge" id="sidebarPackageBadge" style="display: none;"></span>
-                                </a>
-                            </li>
-                            <li><a href="#" data-tab="site-settings">Site Settings</a></li>
-                        </ul>
-                    </li>
-                    <?php endif; ?>
-
-                    <!-- Spacer to push bottom items down -->
-                    <li class="menu-spacer"></li>
-
-                    <!-- Bottom Items -->
-                    <?php if ($isSuperAdmin): ?>
-                    <li><a href="#" data-tab="logs"><i class="fas fa-chart-line"></i> Activity Logs</a></li>
-                    <?php endif; ?>
-                    <?php if ($canSeeExport): ?>
-                    <li><a href="#" data-tab="export"><i class="fas fa-download"></i> Export Data</a></li>
-                    <?php endif; ?>
-                </ul>
+    <div class="admin-shell">
+        <!-- Left Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span class="sidebar-title">Admin</span>
             </div>
 
-            <div class="admin-content">
-                <!-- Users Tab (with sub-tabs) -->
-                <div id="tab-users" class="admin-tab active">
-                    <div class="tab-header">
+            <nav class="admin-nav">
+                <?php if ($isSuperAdmin || $userRole === 'admin'): ?>
+                <a href="/command/" class="admin-nav-link">
+                    <i class="<?= htmlspecialchars($mgmtIcon) ?>"></i>
+                    <span><?= htmlspecialchars($mgmtDisplayName) ?></span>
+                </a>
+                <?php endif; ?>
+
+                <?php if ($canSeeUserManagement): ?>
+                <a href="#" data-tab="users" class="admin-nav-link active">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </a>
+                <?php endif; ?>
+
+                <?php if ($canSeeSectionAccess || $canSeeManageSections || ($isSuperAdmin || in_array($userRole, ['admin']))): ?>
+                <a href="#" data-tab="packages" class="admin-nav-link">
+                    <i class="fas fa-box"></i>
+                    <span>Package Management</span>
+                    <span class="sidebar-badge" id="sidebarConfigBadge" style="display: none;"></span>
+                </a>
+                <?php endif; ?>
+
+                <?php if ($isSuperAdmin): ?>
+                <a href="#" data-tab="site-settings" class="admin-nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Site Settings</span>
+                </a>
+                <a href="#" data-tab="logs" class="admin-nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Activity Logs</span>
+                </a>
+                <?php endif; ?>
+
+                <?php if ($canSeeExport): ?>
+                <a href="#" data-tab="export" class="admin-nav-link">
+                    <i class="fas fa-download"></i>
+                    <span>Export Data</span>
+                </a>
+                <?php endif; ?>
+            </nav>
+        </aside>
+
+        <!-- Top Header Bar -->
+        <header class="admin-header">
+            <div class="breadcrumb">
+                <a href="/hub.php">Home</a>
+                <span>/</span>
+                <span>Admin Dashboard</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <div class="user-avatar" title="<?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?>">
+                    <?= strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)) ?>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="admin-main">
+        <!-- Main Content Area -->
+        <main class="admin-main">
+            <!-- Users Tab (with sub-tabs) -->
+            <div id="tab-users" class="admin-tab active">
+                <div class="nd-page-header">
+                    <div>
                         <h1>User Management</h1>
-                        <div class="tab-actions">
-                            <button id="sendInvitation" class="btn btn-primary">Send Invitation</button>
-                        </div>
+                        <p class="text-muted">Manage users, invitations, and roles</p>
                     </div>
+                    <button id="sendInvitation" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Send Invitation
+                    </button>
+                </div>
 
                     <div class="tab-content-scroll">
                         <!-- User Sub-tabs -->
@@ -214,73 +221,69 @@ $users = $userModel->getAll();
                     </div><!-- end tab-content-scroll -->
                 </div><!-- end tab-users -->
 
-                <!-- Packages Tab (with sub-tabs) -->
-                <div id="tab-sections" class="admin-tab">
+                <!-- Package Management Tab (Unified - 3 Subtabs) -->
+                <div id="tab-packages" class="admin-tab">
                     <div class="tab-header">
-                        <h1>Packages</h1>
+                        <h1>Package Management</h1>
                         <div class="tab-actions">
-                            <?php if ($canSeeSectionAccess): ?>
-                            <button id="saveSectionAccessBtn" class="btn btn-primary" style="display: none;">Save All Changes</button>
-                            <?php endif; ?>
+                            <button id="savePackageConfigBtn" class="btn btn-primary" style="display: none;">
+                                <i class="fas fa-save"></i> Save Configuration
+                            </button>
+                            <button id="savePackagePermissionsBtn" class="btn btn-primary" style="display: none;">
+                                <i class="fas fa-save"></i> Save Permissions
+                            </button>
                             <?php if ($isSuperAdmin): ?>
-                            <button id="addSection" class="btn btn-primary" style="<?php echo $canSeeSectionAccess ? 'display: none;' : ''; ?>">+ Add New Section</button>
+                            <button id="addSection" class="btn btn-primary" style="display: none;">
+                                <i class="fas fa-plus"></i> Add New Package
+                            </button>
                             <?php endif; ?>
                         </div>
                     </div>
 
                     <div class="tab-content-scroll">
-                        <!-- Sections Sub-tabs -->
+                        <!-- Package Management Sub-tabs -->
                         <div class="user-subtabs">
-                            <?php if ($canSeeSectionAccess): ?>
-                            <button class="subtab-btn active" data-subtab="section-access">Package Access</button>
-                            <?php endif; ?>
+                            <button class="subtab-btn active" data-subtab="package-config">
+                                <i class="fas fa-cog"></i> Configuration
+                            </button>
+                            <button class="subtab-btn" data-subtab="package-permissions">
+                                <i class="fas fa-user-shield"></i> Permissions
+                            </button>
                             <?php if ($isSuperAdmin): ?>
-                            <button class="subtab-btn <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>" data-subtab="manage-sections">Manage Packages</button>
+                            <button class="subtab-btn" data-subtab="package-library">
+                                <i class="fas fa-box"></i> Package Library
+                            </button>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Package Access Subtab -->
-                        <?php if ($canSeeSectionAccess): ?>
-                        <div id="subtab-section-access" class="user-subtab active">
-                            <div class="section-access-container">
-                                <p class="info-text">
-                                    <strong>🔐 Role-Based Package Access:</strong> Grant access to entire <strong>roles</strong> instead of individual users.
-                                    Anyone with a checked role will automatically see that package. Super Admins always have access to everything.
-                                </p>
-
-                                <div class="section-access-grid">
-                                    <div id="sectionAccessTable">
-                                        Loading...
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Configuration Subtab -->
+                        <div id="subtab-package-config" class="user-subtab active">
+                            <?php include __DIR__ . '/package-config-subtab.php'; ?>
                         </div>
-                        <?php endif; ?>
 
-                        <!-- Manage Packages Subtab (Super Admin Only) -->
+                        <!-- Permissions Subtab -->
+                        <div id="subtab-package-permissions" class="user-subtab">
+                            <?php include __DIR__ . '/package-permissions-subtab.php'; ?>
+                        </div>
+
+                        <!-- Package Library Subtab (Super Admin Only) -->
                         <?php if ($isSuperAdmin): ?>
-                        <div id="subtab-manage-sections" class="user-subtab <?php echo !$canSeeSectionAccess ? 'active' : ''; ?>">
-                            <div class="sections-management">
-                                <p class="info-text">
-                                    <strong>Future-Proofing:</strong> Create new packages seamlessly and toggle them on/off.
-                                    Inactive packages are hidden from ALL users, including admins.
-                                </p>
-
-                                <div id="sectionsManagementTable">
-                                    Loading...
-                                </div>
-                            </div>
+                        <div id="subtab-package-library" class="user-subtab">
+                            <?php include __DIR__ . '/package-library-subtab.php'; ?>
                         </div>
                         <?php endif; ?>
                     </div><!-- end tab-content-scroll -->
-                </div><!-- end tab-sections -->
+                </div><!-- end tab-packages -->
 
-                <!-- Package Configuration Tab (Admin & Super Admin) -->
-                <?php if ($isSuperAdmin || in_array($userRole, ['admin'])): ?>
-                <div id="tab-section-config" class="admin-tab">
-                    <?php include __DIR__ . '/section-config-tab.php'; ?>
+                <!-- DEPRECATED: Old sections tab (kept temporarily for migration) -->
+                <div id="tab-sections" class="admin-tab" style="display: none;">
+                    <!-- Legacy code preserved for reference during migration -->
                 </div>
-                <?php endif; ?>
+
+                <!-- DEPRECATED: Old config tab (kept temporarily for migration) -->
+                <div id="tab-section-config" class="admin-tab" style="display: none;">
+                    <!-- Legacy code preserved for reference during migration -->
+                </div>
 
                 <!-- Package Manager Tab (Super Admin Only) -->
                 <?php if ($isSuperAdmin): ?>
@@ -2363,15 +2366,15 @@ $users = $userModel->getAll();
                 </div><!-- end tab-content-scroll -->
             </div><!-- end tab-logs -->
             <?php endif; ?>
-        </div><!-- end admin-content -->
-    </div><!-- end admin-container -->
-
-        <?php include __DIR__ . '/../partials/footer.php'; ?>
-    </div><!-- end page-wrapper -->
+        </main><!-- end admin-main -->
+    </div><!-- end admin-shell -->
 
     <?php include __DIR__ . '/partials/modals.php'; ?>
+    <?php include __DIR__ . '/partials/package-setup-wizard.php'; ?>
+    <?php include __DIR__ . '/partials/capability-preview-modal.php'; ?>
 
-    <script>
+
+    <script nonce="<?php echo CSP_NONCE; ?>">
         window.isSuperAdmin = <?php echo $isSuperAdmin ? 'true' : 'false'; ?>;
         window.canManageUsers = <?php echo $canManageUsers ? 'true' : 'false'; ?>;
         window.userRole = '<?php echo $user['role']; ?>';
