@@ -3,8 +3,11 @@
  * ENTERPRISE COMPONENTS LIBRARY
  * ============================================================================
  * Reusable UI components inspired by Microsoft 365 & Google Workspace
- * 
+ *
+ * SCOPE: All components scoped to .admin-root to prevent conflicts with The Hub
+ *
  * Components:
+ * 0. Admin Shell Layout (Master Container)
  * 1. Dashboard Metrics Cards
  * 2. Command Bar (Action Toolbar)
  * 3. Enterprise Data Tables
@@ -16,16 +19,179 @@
  * ============================================================================
  */
 
+/* ========== 0. ADMIN SHELL LAYOUT (MASTER CONTAINER) ========== */
+
+.admin-shell {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 100vh;
+    background: var(--gray-50);
+}
+
+.admin-sidebar {
+    grid-row: 1 / span 2;
+    /* Full height */
+    background: var(--gray-900);
+    color: white;
+    padding: var(--space-3);
+    overflow-y: auto;
+}
+
+.admin-header {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--gray-300);
+    background: var(--gray-50);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.admin-main {
+    grid-column: 2;
+    padding: var(--space-4);
+    overflow: auto;
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Admin Header Components */
+.admin-header .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.admin-header .breadcrumb a {
+    color: var(--ms-blue);
+    text-decoration: none;
+}
+
+.admin-header .breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.admin-header .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.admin-header .search-input {
+    width: 240px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-base);
+    font-size: var(--text-sm);
+    background: var(--gray-50);
+}
+
+.admin-header .search-input:focus {
+    outline: none;
+    border-color: var(--ms-blue);
+}
+
+/* Admin Navigation Links */
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-base);
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-md);
+    transition: all var(--transition-fast);
+}
+
+.admin-nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.admin-nav-link.active {
+    background: var(--nd-gold);
+    color: white;
+}
+
+.admin-nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+}
+
+/* Page Header Component */.admin-root .nd-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-6);
+}
+.admin-root .nd-page-header h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+}
+.admin-root .nd-page-header p {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Responsive Admin Shell */
+@media (max-width: 768px) {
+    .admin-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .admin-sidebar {
+        grid-row: 1;
+        padding: var(--space-2);
+    }
+
+    .admin-header {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .admin-main {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    .admin-nav {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .admin-nav-link span {
+        display: none;
+    }
+}
+
 /* ========== 1. DASHBOARD METRICS CARDS ========== */
 
-.metrics-grid {
+.admin-root .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: var(--space-6);
     margin-bottom: var(--space-6);
 }
-
-.metric-card {
+.admin-root .metric-card {
     display: flex;
     gap: var(--space-4);
     background: var(--gray-50);
@@ -34,12 +200,10 @@
     padding: var(--space-4);
     transition: box-shadow var(--transition-base);
 }
-
-.metric-card:hover {
+.admin-root .metric-card:hover {
     box-shadow: var(--elevation-2);
 }
-
-.metric-icon {
+.admin-root .metric-icon {
     width: 48px;
     height: 48px;
     display: flex;
@@ -51,62 +215,51 @@
     color: var(--ms-blue);
     flex-shrink: 0;
 }
-
-.metric-icon.gold {
+.admin-root .metric-icon.gold {
     background: var(--warning-light);
     color: var(--nd-gold);
 }
-
-.metric-icon.success {
+.admin-root .metric-icon.success {
     background: var(--success-light);
     color: var(--success);
 }
-
-.metric-icon.error {
+.admin-root .metric-icon.error {
     background: var(--error-light);
     color: var(--error);
 }
-
-.metric-content {
+.admin-root .metric-content {
     flex: 1;
     min-width: 0;
 }
-
-.metric-value {
+.admin-root .metric-value {
     font-size: var(--text-3xl);
     font-weight: var(--font-semibold);
     color: var(--gray-900);
     line-height: var(--leading-tight);
     margin-bottom: var(--space-1);
 }
-
-.metric-label {
+.admin-root .metric-label {
     font-size: var(--text-sm);
     color: var(--gray-700);
     margin-bottom: var(--space-2);
 }
-
-.metric-change {
+.admin-root .metric-change {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
 }
-
-.metric-change.success {
+.admin-root .metric-change.success {
     color: var(--success);
 }
-
-.metric-change.error {
+.admin-root .metric-change.error {
     color: var(--error);
 }
-
-.metric-change i {
+.admin-root .metric-change i {
     font-size: 11px;
     margin-right: var(--space-1);
 }
 
 /* ========== 2. COMMAND BAR (ACTION TOOLBAR) ========== */
-
-.command-bar {
+.admin-root .command-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -118,76 +271,65 @@
     top: 0;
     z-index: var(--z-sticky);
 }
-
-.command-bar-left {
+.admin-root .command-bar-left {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
 }
-
-.command-bar-title {
+.admin-root .command-bar-title {
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
     color: var(--gray-900);
     line-height: var(--leading-tight);
     margin: 0;
 }
-
-.command-bar-right {
+.admin-root .command-bar-right {
     display: flex;
     gap: var(--space-2);
     align-items: center;
 }
 
 /* ========== 3. BREADCRUMBS ========== */
-
-.breadcrumb {
+.admin-root .breadcrumb {
     font-size: var(--text-sm);
     color: var(--gray-600);
     display: flex;
     align-items: center;
     gap: var(--space-2);
 }
-
-.breadcrumb a {
+.admin-root .breadcrumb a {
     color: var(--ms-blue);
     text-decoration: none;
     transition: color var(--transition-fast);
 }
-
-.breadcrumb a:hover {
+.admin-root .breadcrumb a:hover {
     text-decoration: underline;
     color: var(--ms-blue-hover);
 }
-
-.breadcrumb-sep {
+.admin-root .breadcrumb-sep {
     color: var(--gray-500);
 }
 
 /* ========== 4. ENTERPRISE DATA TABLES ========== */
-
-.data-table-container {
+.admin-root .data-table-container {
     background: var(--gray-50);
     border: 1px solid var(--gray-300);
     border-radius: var(--radius-base);
     overflow-x: auto;
     overflow-y: visible;
 }
-
-.data-table {
+.admin-root .data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: var(--text-base);
 }
-
-.data-table thead {
+.admin-root .data-table thead {
     background: var(--gray-100);
     position: sticky;
     top: 0;
     z-index: var(--z-base);
 }
-
-.data-table th {
+.admin-root .data-table th {
     padding: var(--space-3) var(--space-4);
     text-align: left;
     font-weight: var(--font-semibold);
@@ -196,64 +338,52 @@
     white-space: nowrap;
     font-size: var(--text-base);
 }
-
-.data-table th.sortable {
+.admin-root .data-table th.sortable {
     cursor: pointer;
     user-select: none;
     transition: background var(--transition-fast);
 }
-
-.data-table th.sortable:hover {
+.admin-root .data-table th.sortable:hover {
     background: var(--gray-200);
 }
-
-.data-table th i {
+.admin-root .data-table th i {
     margin-left: var(--space-1);
     font-size: 12px;
     color: var(--gray-600);
 }
-
-.data-table tbody tr {
+.admin-root .data-table tbody tr {
     border-bottom: 1px solid var(--gray-300);
     transition: background var(--transition-fast);
 }
-
-.data-table tbody tr:hover {
+.admin-root .data-table tbody tr:hover {
     background: var(--gray-200);
 }
-
-.data-table tbody tr:last-child {
+.admin-root .data-table tbody tr:last-child {
     border-bottom: none;
 }
-
-.data-table tbody tr.selected {
+.admin-root .data-table tbody tr.selected {
     background: var(--ms-blue-light);
 }
-
-.data-table td {
+.admin-root .data-table td {
     padding: var(--space-3) var(--space-4);
     color: var(--gray-800);
     height: var(--table-row-height);
     vertical-align: middle;
 }
-
-.data-table td.text-muted {
+.admin-root .data-table td.text-muted {
     color: var(--gray-600);
 }
-
-.data-table .table-actions {
+.admin-root .data-table .table-actions {
     width: 100px;
     text-align: right;
 }
 
-/* User cell with avatar */
-.user-cell {
+/* User cell with avatar */.admin-root .user-cell {
     display: flex;
     align-items: center;
     gap: var(--space-3);
 }
-
-.user-avatar {
+.admin-root .user-avatar {
     width: 32px;
     height: 32px;
     border-radius: var(--radius-full);
@@ -266,14 +396,12 @@
     font-weight: var(--font-semibold);
     flex-shrink: 0;
 }
-
-.user-avatar.gold {
+.admin-root .user-avatar.gold {
     background: var(--nd-gold);
 }
 
 /* ========== 5. CHIPS/TAGS ========== */
-
-.chip {
+.admin-root .chip {
     display: inline-flex;
     align-items: center;
     padding: var(--space-1) var(--space-3);
@@ -283,44 +411,36 @@
     white-space: nowrap;
     gap: var(--space-2);
 }
-
-.chip-admin {
+.admin-root .chip-admin {
     background: var(--warning-light);
     color: var(--nd-gold-dark);
 }
-
-.chip-teacher {
+.admin-root .chip-teacher {
     background: var(--info-light);
     color: var(--ms-blue);
 }
-
-.chip-staff {
+.admin-root .chip-staff {
     background: var(--gray-200);
     color: var(--gray-700);
 }
-
-.chip-success {
+.admin-root .chip-success {
     background: var(--success-light);
     color: var(--success);
 }
-
-.chip-error {
+.admin-root .chip-error {
     background: var(--error-light);
     color: var(--error);
 }
-
-.chip-warning {
+.admin-root .chip-warning {
     background: var(--warning-light);
     color: var(--warning);
 }
-
-.chip i {
+.admin-root .chip i {
     font-size: 12px;
 }
 
 /* ========== 6. ICON BUTTONS ========== */
-
-.btn-icon {
+.admin-root .btn-icon {
     width: 32px;
     height: 32px;
     display: inline-flex;
@@ -334,28 +454,23 @@
     transition: all var(--transition-fast);
     flex-shrink: 0;
 }
-
-.btn-icon:hover {
+.admin-root .btn-icon:hover {
     background: var(--gray-200);
     color: var(--gray-900);
 }
-
-.btn-icon:active {
+.admin-root .btn-icon:active {
     transform: scale(0.92);
 }
-
-.btn-icon:disabled {
+.admin-root .btn-icon:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
-
-.btn-icon.danger:hover {
+.admin-root .btn-icon.danger:hover {
     background: var(--error-light);
     color: var(--error);
 }
 
-/* Command button variant (with border) */
-.btn-command {
+/* Command button variant (with border) */.admin-root .btn-command {
     width: 32px;
     height: 32px;
     display: inline-flex;
@@ -368,19 +483,16 @@
     cursor: pointer;
     transition: all var(--transition-base);
 }
-
-.btn-command:hover {
+.admin-root .btn-command:hover {
     background: var(--gray-200);
     border-color: var(--gray-500);
 }
-
-.btn-command:active {
+.admin-root .btn-command:active {
     transform: scale(0.95);
 }
 
 /* ========== 7. BUTTONS (PRIMARY, SECONDARY, TERTIARY) ========== */
-
-.btn {
+.admin-root .btn {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -396,110 +508,91 @@
     transition: all var(--transition-base);
     white-space: nowrap;
 }
-
-.btn:disabled {
+.admin-root .btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     pointer-events: none;
 }
-
-.btn i {
+.admin-root .btn i {
     font-size: 14px;
 }
 
-/* Primary button (Microsoft Blue) */
-.btn-primary {
+/* Primary button (Microsoft Blue) */.admin-root .btn-primary {
     background: var(--ms-blue);
     color: var(--gray-50);
     border-color: var(--ms-blue);
 }
-
-.btn-primary:hover {
+.admin-root .btn-primary:hover {
     background: var(--ms-blue-hover);
     border-color: var(--ms-blue-hover);
 }
-
-.btn-primary:active {
+.admin-root .btn-primary:active {
     background: var(--ms-blue-pressed);
     transform: scale(0.98);
 }
 
-/* Secondary button (Outline) */
-.btn-secondary {
+/* Secondary button (Outline) */.admin-root .btn-secondary {
     background: var(--gray-50);
     color: var(--gray-800);
     border-color: var(--gray-400);
 }
-
-.btn-secondary:hover {
+.admin-root .btn-secondary:hover {
     background: var(--gray-200);
     border-color: var(--gray-500);
 }
-
-.btn-secondary:active {
+.admin-root .btn-secondary:active {
     background: var(--gray-300);
     transform: scale(0.98);
 }
 
-/* Tertiary button (Ghost) */
-.btn-tertiary {
+/* Tertiary button (Ghost) */.admin-root .btn-tertiary {
     background: transparent;
     color: var(--gray-800);
     border-color: transparent;
 }
-
-.btn-tertiary:hover {
+.admin-root .btn-tertiary:hover {
     background: var(--gray-200);
 }
-
-.btn-tertiary:active {
+.admin-root .btn-tertiary:active {
     background: var(--gray-300);
     transform: scale(0.98);
 }
 
-/* Gold accent button (Notre Dame branding) */
-.btn-gold {
+/* Gold accent button (Notre Dame branding) */.admin-root .btn-gold {
     background: var(--nd-gold);
     color: var(--gray-50);
     border-color: var(--nd-gold);
 }
-
-.btn-gold:hover {
+.admin-root .btn-gold:hover {
     background: var(--nd-gold-dark);
     border-color: var(--nd-gold-dark);
 }
 
-/* Danger button */
-.btn-danger {
+/* Danger button */.admin-root .btn-danger {
     background: var(--error);
     color: var(--gray-50);
     border-color: var(--error);
 }
-
-.btn-danger:hover {
+.admin-root .btn-danger:hover {
     background: #B91C1C;
     border-color: #B91C1C;
 }
 
-/* Success button */
-.btn-success {
+/* Success button */.admin-root .btn-success {
     background: var(--success);
     color: var(--gray-50);
     border-color: var(--success);
 }
-
-.btn-success:hover {
+.admin-root .btn-success:hover {
     background: #047857;
     border-color: #047857;
 }
 
-/* Button sizes */
-.btn-sm {
+/* Button sizes */.admin-root .btn-sm {
     padding: var(--space-1) var(--space-3);
     font-size: var(--text-sm);
 }
-
-.btn-lg {
+.admin-root .btn-lg {
     padding: var(--space-3) var(--space-6);
     font-size: var(--text-lg);
 }
@@ -515,8 +608,7 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-.sidebar-header {
+.admin-root .sidebar-header {
     display: flex;
     align-items: center;
     gap: var(--space-3);
@@ -524,8 +616,7 @@
     border-bottom: 1px solid var(--gray-300);
     flex-shrink: 0;
 }
-
-.sidebar-logo {
+.admin-root .sidebar-logo {
     width: 40px;
     height: 40px;
     background: var(--nd-gold);
@@ -537,24 +628,20 @@
     font-size: 20px;
     flex-shrink: 0;
 }
-
-.sidebar-title {
+.admin-root .sidebar-title {
     font-size: var(--text-lg);
     font-weight: var(--font-semibold);
     color: var(--gray-900);
 }
-
-.sidebar-menu {
+.admin-root .sidebar-menu {
     list-style: none;
     padding: var(--space-2);
     margin: 0;
 }
-
-.sidebar-menu li {
+.admin-root .sidebar-menu li {
     margin-bottom: var(--space-1);
 }
-
-.sidebar-item {
+.admin-root .sidebar-item {
     display: flex;
     align-items: center;
     gap: var(--space-3);
@@ -566,16 +653,13 @@
     transition: background var(--transition-fast);
     position: relative;
 }
-
-.sidebar-item:hover {
+.admin-root .sidebar-item:hover {
     background: var(--gray-200);
 }
-
-.sidebar-item.active {
+.admin-root .sidebar-item.active {
     background: var(--gray-300);
 }
-
-.sidebar-item.active::before {
+.admin-root .sidebar-item.active::before {
     content: '';
     position: absolute;
     left: 0;
@@ -584,24 +668,20 @@
     width: 3px;
     background: var(--nd-gold);
 }
-
-.sidebar-item i {
+.admin-root .sidebar-item i {
     width: 20px;
     text-align: center;
     color: var(--gray-700);
     flex-shrink: 0;
     font-size: 16px;
 }
-
-.sidebar-item.active i {
+.admin-root .sidebar-item.active i {
     color: var(--nd-gold);
 }
-
-.sidebar-label {
+.admin-root .sidebar-label {
     flex: 1;
 }
-
-.sidebar-badge {
+.admin-root .sidebar-badge {
     background: var(--ms-blue);
     color: var(--gray-50);
     font-size: var(--text-xs);
@@ -611,18 +691,15 @@
     min-width: 20px;
     text-align: center;
 }
-
-.sidebar-badge.gold {
+.admin-root .sidebar-badge.gold {
     background: var(--nd-gold);
 }
-
-.sidebar-divider {
+.admin-root .sidebar-divider {
     height: 1px;
     background: var(--gray-300);
     margin: var(--space-2) 0;
 }
-
-.sidebar-group-header {
+.admin-root .sidebar-group-header {
     padding: var(--space-4) var(--space-3) var(--space-2);
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
@@ -632,14 +709,11 @@
 }
 
 /* ========== 9. LOADING STATES ========== */
-
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--gray-200) 25%,
-        var(--gray-300) 50%,
-        var(--gray-200) 75%
-    );
+.admin-root .skeleton {
+    background: linear-gradient(90deg,
+            var(--gray-200) 25%,
+            var(--gray-300) 50%,
+            var(--gray-200) 75%);
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s infinite ease-in-out;
     border-radius: var(--radius-base);
@@ -649,12 +723,12 @@
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }
 }
-
-.spinner {
+.admin-root .spinner {
     width: 24px;
     height: 24px;
     border: 3px solid var(--gray-300);
@@ -670,8 +744,7 @@
 }
 
 /* ========== 10. ALERTS/NOTIFICATIONS ========== */
-
-.alert {
+.admin-root .alert {
     display: flex;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
@@ -679,39 +752,33 @@
     font-size: var(--text-md);
     line-height: var(--leading-snug);
 }
-
-.alert i {
+.admin-root .alert i {
     flex-shrink: 0;
     font-size: 18px;
 }
-
-.alert-success {
+.admin-root .alert-success {
     background: var(--success-light);
     color: var(--success);
     border-left: 4px solid var(--success);
 }
-
-.alert-warning {
+.admin-root .alert-warning {
     background: var(--warning-light);
     color: var(--warning);
     border-left: 4px solid var(--warning);
 }
-
-.alert-error {
+.admin-root .alert-error {
     background: var(--error-light);
     color: var(--error);
     border-left: 4px solid var(--error);
 }
-
-.alert-info {
+.admin-root .alert-info {
     background: var(--info-light);
     color: var(--ms-blue);
     border-left: 4px solid var(--ms-blue);
 }
 
 /* ========== 11. EMPTY STATES ========== */
-
-.empty-state {
+.admin-root .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -719,21 +786,18 @@
     padding: var(--space-16);
     text-align: center;
 }
-
-.empty-state-icon {
+.admin-root .empty-state-icon {
     font-size: 64px;
     color: var(--gray-400);
     margin-bottom: var(--space-4);
 }
-
-.empty-state-title {
+.admin-root .empty-state-title {
     font-size: var(--text-xl);
     font-weight: var(--font-semibold);
     color: var(--gray-800);
     margin-bottom: var(--space-2);
 }
-
-.empty-state-description {
+.admin-root .empty-state-description {
     font-size: var(--text-md);
     color: var(--gray-600);
     margin-bottom: var(--space-6);

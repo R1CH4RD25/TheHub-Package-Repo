@@ -1,0 +1,33 @@
+/**
+ * ============================================================================
+ * ADMIN BUNDLE - Enterprise Console Only
+ * ============================================================================
+ * 
+ * This bundle is loaded ONLY on admin/management pages.
+ * Do NOT load on Hub/frontend pages (use hub-bundle.css instead).
+ * 
+ * Design: Microsoft 365 & Google Workspace inspired
+ * Philosophy: Professional, data-dense, information-first
+ * 
+ * Scope: All styles scoped to .admin-root to prevent conflicts
+ * 
+ * Usage:
+ *   <body class="admin-root">
+ *     <div class="admin-shell">
+ *       ...
+ *     </div>
+ *   </body>
+ * 
+ * Date: November 19, 2025
+ * Version: 1.0.0
+ * ============================================================================
+ */
+
+/* Foundation: Design tokens (colors, typography, spacing, shadows) */
+@import url('enterprise-design-system.css');
+
+/* Components: Reusable UI elements (tables, cards, buttons, nav) */
+@import url('enterprise-components.css');
+
+/* Admin-specific overrides can be added below */
+/* Example: Command Center widgets, admin-only patterns */

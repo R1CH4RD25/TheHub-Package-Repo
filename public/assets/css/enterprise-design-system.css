@@ -3,10 +3,10 @@
  * ENTERPRISE DESIGN SYSTEM - FOUNDATION
  * ============================================================================
  * Microsoft 365 & Google Workspace inspired admin interface
- * 
+ *
  * Philosophy: Professional, data-dense, information-first
  * Target: World-class enterprise console experience
- * 
+ *
  * Design Tokens: Colors, Typography, Spacing, Shadows
  * ============================================================================
  */
@@ -17,25 +17,35 @@
     --nd-gold-light: #FFD700;
     --nd-gold-dark: #A07800;
     --nd-black: #000000;
-    
+
     /* ========== MICROSOFT NEUTRAL GRAY SCALE ========== */
-    --gray-900: #1A1A1A;  /* Deepest black */
-    --gray-800: #323130;  /* Primary text (Microsoft standard) */
-    --gray-700: #605E5C;  /* Secondary text */
-    --gray-600: #8A8886;  /* Muted text */
-    --gray-500: #A19F9D;  /* Disabled text */
-    --gray-400: #C8C6C4;  /* Borders (medium) */
-    --gray-300: #EDEBE9;  /* Dividers (light) */
-    --gray-200: #F3F2F1;  /* Hover backgrounds */
-    --gray-100: #FAF9F8;  /* Subtle backgrounds */
-    --gray-50:  #FFFFFF;  /* Pure white */
-    
+    --gray-900: #1A1A1A;
+    /* Deepest black */
+    --gray-800: #323130;
+    /* Primary text (Microsoft standard) */
+    --gray-700: #605E5C;
+    /* Secondary text */
+    --gray-600: #8A8886;
+    /* Muted text */
+    --gray-500: #A19F9D;
+    /* Disabled text */
+    --gray-400: #C8C6C4;
+    /* Borders (medium) */
+    --gray-300: #EDEBE9;
+    /* Dividers (light) */
+    --gray-200: #F3F2F1;
+    /* Hover backgrounds */
+    --gray-100: #FAF9F8;
+    /* Subtle backgrounds */
+    --gray-50: #FFFFFF;
+    /* Pure white */
+
     /* ========== MICROSOFT BLUE (INTERACTIVE ELEMENTS) ========== */
     --ms-blue: #0078D4;
     --ms-blue-hover: #106EBE;
     --ms-blue-pressed: #005A9E;
     --ms-blue-light: #E3F2FD;
-    
+
     /* ========== SEMANTIC COLORS ========== */
     --success: #107C10;
     --success-light: #E8F5E9;
@@ -45,30 +55,41 @@
     --error-light: #FFEBEE;
     --info: #0078D4;
     --info-light: #E3F2FD;
-    
+
     /* ========== ELEVATION SHADOWS (MINIMAL) ========== */
     --elevation-0: none;
     --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.05);
     --elevation-2: 0 2px 8px rgba(0, 0, 0, 0.08);
     --elevation-3: 0 4px 16px rgba(0, 0, 0, 0.12);
     --elevation-modal: 0 8px 32px rgba(0, 0, 0, 0.16);
-    
+
     /* ========== SPACING SCALE (8px GRID) ========== */
-    --space-1: 4px;   /* 0.5 unit */
-    --space-2: 8px;   /* 1 unit (base) */
-    --space-3: 12px;  /* 1.5 units */
-    --space-4: 16px;  /* 2 units */
-    --space-5: 20px;  /* 2.5 units */
-    --space-6: 24px;  /* 3 units */
-    --space-7: 28px;  /* 3.5 units */
-    --space-8: 32px;  /* 4 units */
-    --space-10: 40px; /* 5 units */
-    --space-12: 48px; /* 6 units */
-    --space-16: 64px; /* 8 units */
-    
+    --space-1: 4px;
+    /* 0.5 unit */
+    --space-2: 8px;
+    /* 1 unit (base) */
+    --space-3: 12px;
+    /* 1.5 units */
+    --space-4: 16px;
+    /* 2 units */
+    --space-5: 20px;
+    /* 2.5 units */
+    --space-6: 24px;
+    /* 3 units */
+    --space-7: 28px;
+    /* 3.5 units */
+    --space-8: 32px;
+    /* 4 units */
+    --space-10: 40px;
+    /* 5 units */
+    --space-12: 48px;
+    /* 6 units */
+    --space-16: 64px;
+    /* 8 units */
+
     /* ========== TYPOGRAPHY SCALE ========== */
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    
+
     /* Font Sizes */
     --text-xs: 12px;
     --text-sm: 13px;
@@ -79,19 +100,19 @@
     --text-2xl: 28px;
     --text-3xl: 32px;
     --text-4xl: 42px;
-    
+
     /* Font Weights */
     --font-normal: 400;
     --font-medium: 500;
     --font-semibold: 600;
     --font-bold: 700;
-    
+
     /* Line Heights */
     --leading-tight: 1.2;
     --leading-snug: 1.4;
     --leading-normal: 1.6;
     --leading-relaxed: 1.8;
-    
+
     /* ========== BORDER RADIUS ========== */
     --radius-none: 0;
     --radius-sm: 2px;
@@ -99,12 +120,12 @@
     --radius-md: 6px;
     --radius-lg: 8px;
     --radius-full: 9999px;
-    
+
     /* ========== TRANSITION TIMING ========== */
     --transition-fast: 150ms cubic-bezier(0.4, 0.0, 0.2, 1);
     --transition-base: 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
     --transition-slow: 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
-    
+
     /* ========== Z-INDEX SCALE ========== */
     --z-base: 1;
     --z-dropdown: 10;
@@ -113,7 +134,7 @@
     --z-modal-backdrop: 40;
     --z-modal: 50;
     --z-toast: 60;
-    
+
     /* ========== COMPONENT SIZES ========== */
     --sidebar-width: 280px;
     --sidebar-collapsed: 64px;
@@ -121,7 +142,7 @@
     --footer-height: 40px;
     --command-bar-height: 64px;
     --table-row-height: 48px;
-    
+
     /* ========== LEGACY VARIABLE MAPPING (BACKWARD COMPATIBILITY) ========== */
     /* Map old variables to new system */
     --primary-color: var(--nd-gold);
@@ -147,115 +168,315 @@
 }
 
 html {
-    font-size: 16px; /* Base for rem calculations */
+    font-size: 16px;
+    /* Base for rem calculations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+/* ========== ADMIN ROOT SCOPING ========== */
+/* All enterprise admin styles are scoped to .admin-root class */
+/* This prevents bleeding into The Hub (frontend) pages */
+
+.admin-root {
     font-family: var(--font-family);
     font-size: var(--text-md);
     line-height: var(--leading-normal);
     color: var(--gray-800);
     background: var(--gray-100);
-    overflow-x: hidden;
+}
+
+.admin-root main {
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    padding: var(--page-gutter-y) var(--page-gutter-x);
 }
 
 /* ========== TYPOGRAPHY UTILITIES ========== */
 
-.text-xs { font-size: var(--text-xs); }
-.text-sm { font-size: var(--text-sm); }
-.text-base { font-size: var(--text-base); }
-.text-md { font-size: var(--text-md); }
-.text-lg { font-size: var(--text-lg); }
-.text-xl { font-size: var(--text-xl); }
-.text-2xl { font-size: var(--text-2xl); }
-.text-3xl { font-size: var(--text-3xl); }
+.text-xs {
+    font-size: var(--text-xs);
+}
 
-.font-normal { font-weight: var(--font-normal); }
-.font-medium { font-weight: var(--font-medium); }
-.font-semibold { font-weight: var(--font-semibold); }
-.font-bold { font-weight: var(--font-bold); }
+.text-sm {
+    font-size: var(--text-sm);
+}
 
-.text-primary { color: var(--gray-800); }
-.text-secondary { color: var(--gray-700); }
-.text-muted { color: var(--gray-600); }
-.text-disabled { color: var(--gray-500); }
-.text-inverse { color: var(--gray-50); }
+.text-base {
+    font-size: var(--text-base);
+}
+
+.text-md {
+    font-size: var(--text-md);
+}
+
+.text-lg {
+    font-size: var(--text-lg);
+}
+
+.text-xl {
+    font-size: var(--text-xl);
+}
+
+.text-2xl {
+    font-size: var(--text-2xl);
+}
+
+.text-3xl {
+    font-size: var(--text-3xl);
+}
+
+.font-normal {
+    font-weight: var(--font-normal);
+}
+
+.font-medium {
+    font-weight: var(--font-medium);
+}
+
+.font-semibold {
+    font-weight: var(--font-semibold);
+}
+
+.font-bold {
+    font-weight: var(--font-bold);
+}
+
+.text-primary {
+    color: var(--gray-800);
+}
+
+.text-secondary {
+    color: var(--gray-700);
+}
+
+.text-muted {
+    color: var(--gray-600);
+}
+
+.text-disabled {
+    color: var(--gray-500);
+}
+
+.text-inverse {
+    color: var(--gray-50);
+}
 
 /* ========== SPACING UTILITIES ========== */
 
-.p-1 { padding: var(--space-1); }
-.p-2 { padding: var(--space-2); }
-.p-3 { padding: var(--space-3); }
-.p-4 { padding: var(--space-4); }
-.p-6 { padding: var(--space-6); }
-.p-8 { padding: var(--space-8); }
+.p-1 {
+    padding: var(--space-1);
+}
 
-.m-1 { margin: var(--space-1); }
-.m-2 { margin: var(--space-2); }
-.m-3 { margin: var(--space-3); }
-.m-4 { margin: var(--space-4); }
-.m-6 { margin: var(--space-6); }
-.m-8 { margin: var(--space-8); }
+.p-2 {
+    padding: var(--space-2);
+}
 
-.gap-2 { gap: var(--space-2); }
-.gap-3 { gap: var(--space-3); }
-.gap-4 { gap: var(--space-4); }
-.gap-6 { gap: var(--space-6); }
+.p-3 {
+    padding: var(--space-3);
+}
+
+.p-4 {
+    padding: var(--space-4);
+}
+
+.p-6 {
+    padding: var(--space-6);
+}
+
+.p-8 {
+    padding: var(--space-8);
+}
+
+.m-1 {
+    margin: var(--space-1);
+}
+
+.m-2 {
+    margin: var(--space-2);
+}
+
+.m-3 {
+    margin: var(--space-3);
+}
+
+.m-4 {
+    margin: var(--space-4);
+}
+
+.m-6 {
+    margin: var(--space-6);
+}
+
+.m-8 {
+    margin: var(--space-8);
+}
+
+.gap-2 {
+    gap: var(--space-2);
+}
+
+.gap-3 {
+    gap: var(--space-3);
+}
+
+.gap-4 {
+    gap: var(--space-4);
+}
+
+.gap-6 {
+    gap: var(--space-6);
+}
 
 /* ========== LAYOUT UTILITIES ========== */
 
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.flex-1 { flex: 1; }
+.flex {
+    display: flex;
+}
 
-.grid { display: grid; }
+.flex-col {
+    flex-direction: column;
+}
 
-.hidden { display: none; }
-.block { display: block; }
-.inline-block { display: inline-block; }
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.grid {
+    display: grid;
+}
+
+.hidden {
+    display: none;
+}
+
+.block {
+    display: block;
+}
+
+.inline-block {
+    display: inline-block;
+}
 
 /* ========== BORDER UTILITIES ========== */
 
-.border { border: 1px solid var(--gray-300); }
-.border-t { border-top: 1px solid var(--gray-300); }
-.border-b { border-bottom: 1px solid var(--gray-300); }
-.border-l { border-left: 1px solid var(--gray-300); }
-.border-r { border-right: 1px solid var(--gray-300); }
+.border {
+    border: 1px solid var(--gray-300);
+}
 
-.rounded { border-radius: var(--radius-base); }
-.rounded-md { border-radius: var(--radius-md); }
-.rounded-lg { border-radius: var(--radius-lg); }
-.rounded-full { border-radius: var(--radius-full); }
+.border-t {
+    border-top: 1px solid var(--gray-300);
+}
+
+.border-b {
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.border-l {
+    border-left: 1px solid var(--gray-300);
+}
+
+.border-r {
+    border-right: 1px solid var(--gray-300);
+}
+
+.rounded {
+    border-radius: var(--radius-base);
+}
+
+.rounded-md {
+    border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+    border-radius: var(--radius-lg);
+}
+
+.rounded-full {
+    border-radius: var(--radius-full);
+}
 
 /* ========== SHADOW UTILITIES ========== */
 
-.shadow-none { box-shadow: var(--elevation-0); }
-.shadow-sm { box-shadow: var(--elevation-1); }
-.shadow { box-shadow: var(--elevation-2); }
-.shadow-lg { box-shadow: var(--elevation-3); }
-.shadow-modal { box-shadow: var(--elevation-modal); }
+.shadow-none {
+    box-shadow: var(--elevation-0);
+}
+
+.shadow-sm {
+    box-shadow: var(--elevation-1);
+}
+
+.shadow {
+    box-shadow: var(--elevation-2);
+}
+
+.shadow-lg {
+    box-shadow: var(--elevation-3);
+}
+
+.shadow-modal {
+    box-shadow: var(--elevation-modal);
+}
 
 /* ========== BACKGROUND UTILITIES ========== */
 
-.bg-white { background: var(--gray-50); }
-.bg-gray-100 { background: var(--gray-100); }
-.bg-gray-200 { background: var(--gray-200); }
-.bg-blue { background: var(--ms-blue); }
-.bg-gold { background: var(--nd-gold); }
-.bg-success { background: var(--success-light); }
-.bg-warning { background: var(--warning-light); }
-.bg-error { background: var(--error-light); }
+.bg-white {
+    background: var(--gray-50);
+}
+
+.bg-gray-100 {
+    background: var(--gray-100);
+}
+
+.bg-gray-200 {
+    background: var(--gray-200);
+}
+
+.bg-blue {
+    background: var(--ms-blue);
+}
+
+.bg-gold {
+    background: var(--nd-gold);
+}
+
+.bg-success {
+    background: var(--success-light);
+}
+
+.bg-warning {
+    background: var(--warning-light);
+}
+
+.bg-error {
+    background: var(--error-light);
+}
 
 /* ========== TRANSITION UTILITIES ========== */
 
-.transition-fast { transition: all var(--transition-fast); }
-.transition { transition: all var(--transition-base); }
-.transition-slow { transition: all var(--transition-slow); }
+.transition-fast {
+    transition: all var(--transition-fast);
+}
+
+.transition {
+    transition: all var(--transition-base);
+}
+
+.transition-slow {
+    transition: all var(--transition-slow);
+}
 
 /* ========== FOCUS STYLES (ACCESSIBILITY) ========== */
 
@@ -280,12 +501,12 @@ body {
         box-shadow: none !important;
         text-shadow: none !important;
     }
-    
+
     body {
         background: white;
         color: black;
     }
-    
+
     .no-print {
         display: none !important;
     }
@@ -294,6 +515,7 @@ body {
 /* ========== REDUCED MOTION (ACCESSIBILITY) ========== */
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {

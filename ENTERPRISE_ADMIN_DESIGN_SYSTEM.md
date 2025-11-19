@@ -8,9 +8,54 @@
 
 ---
 
-## 🎯 Two-Tier Design Strategy
+## 🏗️ Admin Root & Naming Conventions
 
-### Critical Architectural Decision
+### Critical Implementation Rule
+
+**All enterprise admin pages MUST live under `.admin-root` class:**
+
+```html
+<!-- Admin/Management pages -->
+<body class="admin-root">
+  <div class="admin-shell">
+    <!-- Enterprise design applies here -->
+  </div>
+</body>
+
+<!-- The Hub (Frontend) pages -->
+<body class="hub-root">
+  <!-- PWA design applies here -->
+</body>
+```
+
+### Component Naming Convention
+
+**Prefix system ensures zero conflicts:**
+
+- **`nd-*`** - Notre Dame / generic reusable enterprise components
+  - `nd-card`, `nd-pill`, `nd-chip`, `nd-nav-tabs`
+  - Used across all admin/management screens
+  - Scoped to `.admin-root` for isolation
+
+- **`hub-*`** - The Hub frontend components
+  - `hub-tile`, `hub-card`, `hub-section`
+  - Used in student/teacher/parent-facing pages
+  - Scoped to `.hub-root`
+
+- **`cmd-*`** - Command Center specific (optional future layer)
+  - `cmd-dashboard`, `cmd-widget`
+  - For specialized management dashboards
+
+### Why This Matters
+
+1. **Zero CSS Conflicts**: `.admin-root` scoping prevents enterprise styles from bleeding into The Hub
+2. **Clear Ownership**: Prefixes make component purpose obvious
+3. **Independent Evolution**: Admin and frontend can evolve separately
+4. **Performance**: Load only relevant CSS per context
+
+---
+
+## 🎯 Two-Tier Design Strategy### Critical Architectural Decision
 
 **The Hub uses a dual-design approach:**
 
@@ -139,6 +184,66 @@
 ---
 
 ## 📐 Layout Architecture
+
+### Admin Shell (Master Layout)
+
+**All admin pages use this container structure:**
+
+```html
+<body class="admin-root">
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <!-- Left navigation -->
+    </aside>
+    <header class="admin-header">
+      <!-- Top bar: breadcrumbs, search, profile -->
+    </header>
+    <main class="admin-main">
+      <!-- Scrollable content area -->
+    </main>
+  </div>
+</body>
+```
+
+**CSS Grid Layout:**
+```css
+.admin-shell {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 100vh;
+    background: var(--gray-50);
+}
+
+.admin-sidebar {
+    grid-row: 1 / span 2; /* Full height */
+    background: var(--gray-900);
+    color: white;
+    padding: var(--space-3);
+    overflow-y: auto;
+}
+
+.admin-header {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.admin-main {
+    grid-column: 2;
+    padding: var(--space-4);
+    overflow: auto;
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+}
+```
 
 ### Sidebar (Left Rail Navigation)
 ```
@@ -747,6 +852,148 @@ Typography:
     letter-spacing: 0.5px;
 }
 ```
+
+---
+
+## 📖 Worked Example: Package Management Screen
+
+**This is the canonical reference for all future admin screens.**
+
+### Layout Structure
+
+```html
+<body class="admin-root">
+  <div class="admin-shell">
+    <!-- Left Sidebar -->
+    <aside class="admin-sidebar">
+      <nav class="admin-nav">
+        <a href="#" class="admin-nav-link active">
+          <i class="fas fa-box"></i>
+          <span>Packages</span>
+        </a>
+        <a href="#" class="admin-nav-link">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Top Header -->
+    <header class="admin-header">
+      <div class="breadcrumb">
+        <a href="/admin">Admin</a>
+        <span>/</span>
+        <span>Package Management</span>
+      </div>
+      <div class="header-actions">
+        <input type="search" class="search-input" placeholder="Search packages...">
+        <button class="btn-icon">
+          <i class="fas fa-bell"></i>
+        </button>
+        <div class="user-avatar">RS</div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Page Header -->
+      <div class="nd-page-header">
+        <div>
+          <h1>Package Management</h1>
+          <p class="text-muted">Manage installed packages and permissions</p>
+        </div>
+        <button class="btn btn-primary">
+          <i class="fas fa-plus"></i> Install Package
+        </button>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="nd-chip active">All (24)</div>
+          <div class="nd-chip">Active (18)</div>
+          <div class="nd-chip">Inactive (6)</div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-icon" title="Filter">
+            <i class="fas fa-filter"></i>
+          </button>
+          <button class="btn-icon" title="Export">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th class="sortable">Package Name</th>
+              <th class="sortable">Version</th>
+              <th>Status</th>
+              <th>Installed</th>
+              <th class="table-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openDrawer('help-desk')">
+              <td><input type="checkbox"></td>
+              <td>
+                <div class="package-cell">
+                  <i class="fas fa-headset"></i>
+                  <span class="font-medium">Help Desk</span>
+                </div>
+              </td>
+              <td class="text-muted">1.2.0</td>
+              <td><span class="nd-pill pill-success">Active</span></td>
+              <td class="text-muted">Oct 15, 2025</td>
+              <td class="table-actions">
+                <button class="btn-icon" title="Configure">
+                  <i class="fas fa-cog"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Right-Side Detail Drawer -->
+  <div class="side-drawer" id="packageDrawer">
+    <div class="drawer-overlay" onclick="closeDrawer()"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h2>Help Desk</h2>
+        <button class="btn-icon" onclick="closeDrawer()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="drawer-body">
+        <!-- Package details, permissions, settings -->
+      </div>
+    </div>
+  </div>
+</body>
+```
+
+### Components Used
+
+1. **Admin Shell**: `.admin-shell` (grid layout)
+2. **Page Header**: `.nd-page-header` (title + actions)
+3. **Filter Toolbar**: `.table-toolbar` with `.nd-chip` filters
+4. **Data Table**: `.data-table` with sortable headers
+5. **Pills**: `.nd-pill` for status indicators
+6. **Drawer**: `.side-drawer` for detail view
+
+### Responsive Behavior
+
+- **1440px+**: Full layout with wide table
+- **1366px**: Toolbar wraps, drawer at 40vw
+- **< 1024px**: Drawer goes full-width
+- **< 768px**: Sidebar collapses to hamburger menu
 
 ---
 
