@@ -1,0 +1,27 @@
+/**
+ * ============================================================================
+ * HUB BUNDLE - PWA Frontend
+ * ============================================================================
+ * Mobile-first, friendly interface
+ * Scope: .hub-root
+ * ============================================================================
+ */
+
+/* Base styles */
+@import url('style.css');
+
+/* Layout components */
+@import url('header.css');
+@import url('footer.css');
+
+/* Page-specific */
+@import url('login.css');
+@import url('hub.css');
+@import url('sections.css');
+@import url('modules.css');
+
+/* Modals */
+@import url('modals.css');
+
+/* Responsive/Mobile */
+@import url('media.css');

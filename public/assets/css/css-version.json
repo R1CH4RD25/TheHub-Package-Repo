@@ -1,0 +1,18 @@
+{
+  "version": "1763586579",
+  "timestamp": "2025-11-19T21:09:39+00:00",
+  "bundles": {
+    "admin": {
+      "dev": "admin-bundle.css",
+      "min": "admin-bundle.min.css?v=1763586579"
+    },
+    "mgmt": {
+      "dev": "mgmt-bundle.css",
+      "min": "mgmt-bundle.min.css?v=1763586579"
+    },
+    "hub": {
+      "dev": "hub-bundle.css",
+      "min": "hub-bundle.min.css?v=1763586579"
+    }
+  }
+}
