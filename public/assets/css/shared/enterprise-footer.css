@@ -1,0 +1,61 @@
+/**
+ * ============================================================================
+ * ENTERPRISE FOOTER - Shared Component
+ * ============================================================================
+ * Footer for Management Console and Admin Dashboard
+ * ============================================================================
+ */
+
+.enterprise-footer {
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-300);
+    padding: var(--space-4) var(--space-6);
+    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+
+.enterprise-footer .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--page-max-width, 1600px);
+    margin: 0 auto;
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.enterprise-footer .footer-left,
+.enterprise-footer .footer-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.enterprise-footer .footer-separator {
+    color: var(--gray-400);
+    user-select: none;
+}
+
+.enterprise-footer strong {
+    color: var(--gray-800);
+    font-weight: var(--font-semibold);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .enterprise-footer .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+    
+    .enterprise-footer .footer-left,
+    .enterprise-footer .footer-right {
+        width: 100%;
+    }
+}
