@@ -1,0 +1,741 @@
+/**
+ * ============================================================================
+ * ENTERPRISE COMPONENTS LIBRARY
+ * ============================================================================
+ * Reusable UI components inspired by Microsoft 365 & Google Workspace
+ * 
+ * Components:
+ * 1. Dashboard Metrics Cards
+ * 2. Command Bar (Action Toolbar)
+ * 3. Enterprise Data Tables
+ * 4. Sidebar Navigation
+ * 5. Chips/Tags
+ * 6. Icon Buttons
+ * 7. Buttons (Primary, Secondary, Tertiary)
+ * 8. Breadcrumbs
+ * ============================================================================
+ */
+
+/* ========== 1. DASHBOARD METRICS CARDS ========== */
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.metric-card {
+    display: flex;
+    gap: var(--space-4);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-base);
+    padding: var(--space-4);
+    transition: box-shadow var(--transition-base);
+}
+
+.metric-card:hover {
+    box-shadow: var(--elevation-2);
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    font-size: 20px;
+    color: var(--ms-blue);
+    flex-shrink: 0;
+}
+
+.metric-icon.gold {
+    background: var(--warning-light);
+    color: var(--nd-gold);
+}
+
+.metric-icon.success {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.metric-icon.error {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+.metric-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.metric-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-1);
+}
+
+.metric-label {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    margin-bottom: var(--space-2);
+}
+
+.metric-change {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.metric-change.success {
+    color: var(--success);
+}
+
+.metric-change.error {
+    color: var(--error);
+}
+
+.metric-change i {
+    font-size: 11px;
+    margin-right: var(--space-1);
+}
+
+/* ========== 2. COMMAND BAR (ACTION TOOLBAR) ========== */
+
+.command-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--command-bar-height);
+    padding: 0 var(--space-8);
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-300);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+}
+
+.command-bar-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.command-bar-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    line-height: var(--leading-tight);
+    margin: 0;
+}
+
+.command-bar-right {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+/* ========== 3. BREADCRUMBS ========== */
+
+.breadcrumb {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.breadcrumb a {
+    color: var(--ms-blue);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+    color: var(--ms-blue-hover);
+}
+
+.breadcrumb-sep {
+    color: var(--gray-500);
+}
+
+/* ========== 4. ENTERPRISE DATA TABLES ========== */
+
+.data-table-container {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-base);
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-base);
+}
+
+.data-table thead {
+    background: var(--gray-100);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-base);
+}
+
+.data-table th {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    font-weight: var(--font-semibold);
+    color: var(--gray-800);
+    border-bottom: 2px solid var(--gray-400);
+    white-space: nowrap;
+    font-size: var(--text-base);
+}
+
+.data-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition-fast);
+}
+
+.data-table th.sortable:hover {
+    background: var(--gray-200);
+}
+
+.data-table th i {
+    margin-left: var(--space-1);
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--gray-300);
+    transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+    background: var(--gray-200);
+}
+
+.data-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.data-table tbody tr.selected {
+    background: var(--ms-blue-light);
+}
+
+.data-table td {
+    padding: var(--space-3) var(--space-4);
+    color: var(--gray-800);
+    height: var(--table-row-height);
+    vertical-align: middle;
+}
+
+.data-table td.text-muted {
+    color: var(--gray-600);
+}
+
+.data-table .table-actions {
+    width: 100px;
+    text-align: right;
+}
+
+/* User cell with avatar */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--ms-blue);
+    color: var(--gray-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    flex-shrink: 0;
+}
+
+.user-avatar.gold {
+    background: var(--nd-gold);
+}
+
+/* ========== 5. CHIPS/TAGS ========== */
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-3);
+    border-radius: 12px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    gap: var(--space-2);
+}
+
+.chip-admin {
+    background: var(--warning-light);
+    color: var(--nd-gold-dark);
+}
+
+.chip-teacher {
+    background: var(--info-light);
+    color: var(--ms-blue);
+}
+
+.chip-staff {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.chip-success {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.chip-error {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+.chip-warning {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.chip i {
+    font-size: 12px;
+}
+
+/* ========== 6. ICON BUTTONS ========== */
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-base);
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    background: var(--gray-200);
+    color: var(--gray-900);
+}
+
+.btn-icon:active {
+    transform: scale(0.92);
+}
+
+.btn-icon:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-icon.danger:hover {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+/* Command button variant (with border) */
+.btn-command {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--gray-400);
+    border-radius: var(--radius-base);
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btn-command:hover {
+    background: var(--gray-200);
+    border-color: var(--gray-500);
+}
+
+.btn-command:active {
+    transform: scale(0.95);
+}
+
+/* ========== 7. BUTTONS (PRIMARY, SECONDARY, TERTIARY) ========== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-base);
+    font-size: var(--text-md);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family);
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn i {
+    font-size: 14px;
+}
+
+/* Primary button (Microsoft Blue) */
+.btn-primary {
+    background: var(--ms-blue);
+    color: var(--gray-50);
+    border-color: var(--ms-blue);
+}
+
+.btn-primary:hover {
+    background: var(--ms-blue-hover);
+    border-color: var(--ms-blue-hover);
+}
+
+.btn-primary:active {
+    background: var(--ms-blue-pressed);
+    transform: scale(0.98);
+}
+
+/* Secondary button (Outline) */
+.btn-secondary {
+    background: var(--gray-50);
+    color: var(--gray-800);
+    border-color: var(--gray-400);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-200);
+    border-color: var(--gray-500);
+}
+
+.btn-secondary:active {
+    background: var(--gray-300);
+    transform: scale(0.98);
+}
+
+/* Tertiary button (Ghost) */
+.btn-tertiary {
+    background: transparent;
+    color: var(--gray-800);
+    border-color: transparent;
+}
+
+.btn-tertiary:hover {
+    background: var(--gray-200);
+}
+
+.btn-tertiary:active {
+    background: var(--gray-300);
+    transform: scale(0.98);
+}
+
+/* Gold accent button (Notre Dame branding) */
+.btn-gold {
+    background: var(--nd-gold);
+    color: var(--gray-50);
+    border-color: var(--nd-gold);
+}
+
+.btn-gold:hover {
+    background: var(--nd-gold-dark);
+    border-color: var(--nd-gold-dark);
+}
+
+/* Danger button */
+.btn-danger {
+    background: var(--error);
+    color: var(--gray-50);
+    border-color: var(--error);
+}
+
+.btn-danger:hover {
+    background: #B91C1C;
+    border-color: #B91C1C;
+}
+
+/* Success button */
+.btn-success {
+    background: var(--success);
+    color: var(--gray-50);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background: #047857;
+    border-color: #047857;
+}
+
+/* Button sizes */
+.btn-sm {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+}
+
+.btn-lg {
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--text-lg);
+}
+
+/* ========== 8. SIDEBAR NAVIGATION ========== */
+
+.admin-sidebar {
+    width: var(--sidebar-width);
+    background: var(--gray-50);
+    border-right: 1px solid var(--gray-300);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-300);
+    flex-shrink: 0;
+}
+
+.sidebar-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--nd-gold);
+    border-radius: var(--radius-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-50);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: var(--space-2);
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: var(--space-1);
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-base);
+    text-decoration: none;
+    color: var(--gray-800);
+    font-size: var(--text-md);
+    transition: background var(--transition-fast);
+    position: relative;
+}
+
+.sidebar-item:hover {
+    background: var(--gray-200);
+}
+
+.sidebar-item.active {
+    background: var(--gray-300);
+}
+
+.sidebar-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--nd-gold);
+}
+
+.sidebar-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--gray-700);
+    flex-shrink: 0;
+    font-size: 16px;
+}
+
+.sidebar-item.active i {
+    color: var(--nd-gold);
+}
+
+.sidebar-label {
+    flex: 1;
+}
+
+.sidebar-badge {
+    background: var(--ms-blue);
+    color: var(--gray-50);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    padding: 2px var(--space-2);
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.sidebar-badge.gold {
+    background: var(--nd-gold);
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: var(--gray-300);
+    margin: var(--space-2) 0;
+}
+
+.sidebar-group-header {
+    padding: var(--space-4) var(--space-3) var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========== 9. LOADING STATES ========== */
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--gray-200) 25%,
+        var(--gray-300) 50%,
+        var(--gray-200) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    border-radius: var(--radius-base);
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gray-300);
+    border-top-color: var(--ms-blue);
+    border-radius: var(--radius-full);
+    animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== 10. ALERTS/NOTIFICATIONS ========== */
+
+.alert {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-base);
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+}
+
+.alert i {
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.alert-success {
+    background: var(--success-light);
+    color: var(--success);
+    border-left: 4px solid var(--success);
+}
+
+.alert-warning {
+    background: var(--warning-light);
+    color: var(--warning);
+    border-left: 4px solid var(--warning);
+}
+
+.alert-error {
+    background: var(--error-light);
+    color: var(--error);
+    border-left: 4px solid var(--error);
+}
+
+.alert-info {
+    background: var(--info-light);
+    color: var(--ms-blue);
+    border-left: 4px solid var(--ms-blue);
+}
+
+/* ========== 11. EMPTY STATES ========== */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16);
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    color: var(--gray-400);
+    margin-bottom: var(--space-4);
+}
+
+.empty-state-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-800);
+    margin-bottom: var(--space-2);
+}
+
+.empty-state-description {
+    font-size: var(--text-md);
+    color: var(--gray-600);
+    margin-bottom: var(--space-6);
+    max-width: 480px;
+}
