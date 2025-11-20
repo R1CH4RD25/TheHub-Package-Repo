@@ -1,0 +1,965 @@
+/* ==========================================================================
+   HEADER / NAVBAR STYLES
+   Shared across Hub and Dashboard pages
+   ========================================================================== */
+
+/* Navbar Container */
+.navbar {
+    background: var(--header-bg-color, var(--navbar-color, var(--secondary-color))) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, var(--shadow-heavy, 0.15));
+    padding: 0;
+    margin: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10000;
+    grid-row: 1;
+    overflow: visible;
+    /* Allow dropdown menu to show */
+    min-height: var(--header-height, 80px);
+    max-height: var(--header-height, 80px);
+    height: var(--header-height, 80px);
+}
+
+/* Nav Content Wrapper */
+.nav-content {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 10001;
+}
+
+/* Brand/Logo Section */
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--header-text-color, white);
+    text-decoration: none !important;
+    transition: opacity 0.2s ease;
+}
+
+.nav-brand:hover {
+    opacity: 0.9;
+}
+
+.nav-brand img {
+    height: var(--logo-height, 50px) !important;
+    width: auto;
+}
+
+.nav-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-brand-title {
+    font-size: var(--header-title-font-size, 1.3rem);
+    font-weight: 700;
+    color: var(--header-text-color, white);
+    font-family: var(--header-title-font, 'Roboto', sans-serif);
+    line-height: 1.2;
+}
+
+.nav-brand-subtitle {
+    font-size: var(--header-subtitle-font-size, 0.85rem);
+    color: var(--header-subtitle-color, var(--primary-color, #007bff));
+    font-weight: 500;
+    opacity: 0.8;
+    font-family: var(--header-subtitle-font, 'Roboto', sans-serif);
+    line-height: 1.2;
+}
+
+/* Navigation Links */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-links>a {
+    color: var(--header-text-color, white);
+    text-decoration: none;
+    padding: 0.5rem 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.nav-links>a:hover {
+    opacity: 0.8;
+}
+
+.nav-links>a:last-of-type {
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Mobile Toggle Button */
+.nav-toggle {
+    display: none;
+    background: var(--primary-color, #007bff);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.nav-toggle:hover {
+    opacity: 0.9;
+}
+
+/* User Profile Section */
+.nav-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 15px;
+    color: var(--header-text-color, white);
+}
+
+.nav-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color, #007bff);
+}
+
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.nav-user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--header-text-color, white);
+}
+
+.nav-user-role {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    color: var(--header-text-color, white);
+    text-transform: capitalize;
+}
+
+/* ==========================================================================
+   MOBILE MENU (Dashboard only)
+   ========================================================================== */
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+.mobile-menu-overlay.active {
+    display: block;
+}
+
+/* Mobile menu container */
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--header-height, 80px);
+    left: 0;
+    width: 250px;
+    height: calc(100vh - var(--header-height, 80px));
+    background: white;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 10000;
+    overflow-y: auto;
+}
+
+.mobile-menu.active {
+    transform: translateX(0);
+}
+
+.mobile-menu-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mobile-menu-items li {
+    border-bottom: 1px solid var(--border-primary, #e0e0e0);
+}
+
+.mobile-menu-items a {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    color: var(--text-primary, #333);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.mobile-menu-items a:hover,
+.mobile-menu-items a.active {
+    background: var(--background-color, #f5f5f5);
+    color: var(--primary-color, #007bff);
+}
+
+.mobile-menu-items i {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .nav-content {
+        padding: 0 1rem;
+    }
+
+    .nav-brand-subtitle {
+        display: none;
+    }
+
+    .nav-user-info {
+        display: none;
+    }
+
+    .nav-links>a {
+        padding: 0.5rem 10px;
+        font-size: 0.9rem;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .mobile-menu {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-brand-title {
+        font-size: 1.1rem;
+    }
+
+    .nav-brand img {
+        height: calc(var(--logo-height, 50px) * 0.8) !important;
+    }
+
+    .nav-links>a span {
+        display: none;
+    }
+}
+
+
+/* ========== MODERN HEADER ENHANCEMENTS ========== */
+
+/* ==========================================================================
+   HEADER / NAVBAR - MODERN UNIFIED STYLES
+   Used by both Hub and Dashboard pages
+   ========================================================================== */
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 10002 !important; /* Above nav-content (10001) */
+}
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+.nav-user-arrow {
+    display: none !important;
+}
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show ~ .nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu - Base Styles */
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: -10px;
+    margin-top: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 10002;
+    overflow: hidden;
+}
+
+/* Dropdown Menu - Visible State */
+.nav-user-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    z-index: 10002 !important;
+}
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+.user-menu-icon i {
+    width: 16px;
+    text-align: center;
+}
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+/* User Info Display */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+/* ==========================================================================
+   NAVBAR OVERFLOW FIX
+   Fix navbar overflow clipping dropdown - allow visible overflow
+   ========================================================================== */
+
+.navbar {
+    overflow: visible !important;
+}
+/* ==========================================================================
+   MOBILE RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+}
+/* ==========================================================================
+   FOOTER STYLES
+   Shared across Hub and Dashboard pages
+   ========================================================================== */
+
+/* Footer Container */
+.admin-footer {
+    grid-row: 3;
+    background: var(--footer-bg-color, #F3F4F6);
+    border-top: 1px solid var(--border-primary, #e0e0e0);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    font-size: var(--footer-text-size, 0.875rem);
+    color: var(--footer-text-color, #6B7280);
+    min-height: var(--footer-height, 40px);
+    max-height: var(--footer-height, 40px);
+    height: var(--footer-height, 40px);
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+/* Footer Content Layout */
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Footer Sections */
+.footer-left,
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Footer Separator */
+.footer-separator {
+    color: var(--text-disabled, #9CA3AF);
+    user-select: none;
+}
+
+/* Footer Links */
+.footer-right strong {
+    color: var(--primary-color, #C99700);
+    font-weight: 600;
+}
+
+.footer-content a {
+    color: var(--footer-text-color, #6B7280);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+    color: var(--primary-color, #C99700);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .admin-footer {
+        padding: 0 1rem;
+        font-size: 0.75rem;
+        min-height: auto;
+        height: auto;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: center;
+        padding: 0.5rem 0;
+    }
+    
+    .footer-left,
+    .footer-right {
+        gap: 0.5rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-footer {
+        font-size: 0.7rem;
+    }
+    
+    .footer-separator {
+        display: none;
+    }
+    
+    .footer-left,
+    .footer-right {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+/**
+ * ============================================================================
+ * LOGIN PAGE STYLES
+ * ============================================================================
+ * All styles specific to the login page (public/login.php)
+ * Includes: login container, auth cards, OAuth buttons, animations
+ * ============================================================================
+ */
+
+/* ==========================================================================
+   MODERN LOGIN PAGE - Theme-aware with animations
+   ========================================================================== */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--secondary-color, #000000);
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Subtle static background pattern */
+.login-page::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(201, 151, 0, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(201, 151, 0, 0.08) 0%, transparent 30%);
+    z-index: 0;
+}
+
+/* Remove floating animation - too distracting */
+.login-page::after {
+    display: none;
+}
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+    animation: slideInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+}
+
+/* Login Card - Glassmorphism */
+.login-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(201, 151, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Remove pulsing animation */
+.login-card::before {
+    display: none;
+}
+
+}
+
+/* Login Content */
+.login-content {
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 1s ease-out 0.6s both;
+}
+
+/* Login Note */
+.login-note {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #666;
+    font-size: 0.95rem;
+    animation: fadeIn 1s ease-out 0.8s both;
+}
+
+}
+
+/* Loading State */
+.login-card.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.login-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color, #C99700);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.login-card {
+    padding: 2rem 1.5rem;
+        border-radius: 20px;
+}
+
+.login-note {
+    color: #aaa;
+}
+
+/* ==========================================================================
+   MODERN LOGIN PAGE - Theme-aware with animations
+   ========================================================================== */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--secondary-color, #000000);
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Subtle static background pattern */
+.login-page::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(201, 151, 0, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(201, 151, 0, 0.08) 0%, transparent 30%);
+    z-index: 0;
+}
+
+/* Remove floating animation - too distracting */
+.login-page::after {
+    display: none;
+}
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+    animation: slideInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(60px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Login Card - Glassmorphism */
+.login-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(201, 151, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Remove pulsing animation */
+.login-card::before {
+    display: none;
+}
+
+/* Logo Section */
+.logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.logo img {
+    max-width: 200px;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.logo img:hover {
+    transform: scale(1.02);
+}
+
+.logo h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color, #C99700);
+    animation: fadeInDown 0.8s ease-out 0.2s both;
+}
+
+.logo h2 {
+    font-size: 1.2rem;
+    color: #666;
+    font-weight: 400;
+    animation: fadeInDown 0.8s ease-out 0.4s both;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Login Content */
+.login-content {
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 1s ease-out 0.6s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Google Login Button - Modern Design */
+.google-login-btn,
+.microsoft-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem 2rem;
+    background: white;
+    color: #444;
+    border: 2px solid #dadce0;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.google-login-btn::before,
+.microsoft-login-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(201, 151, 0, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease, height 0.5s ease;
+}
+
+.google-login-btn:hover::before,
+.microsoft-login-btn:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+.google-login-btn:hover,
+.microsoft-login-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    border-color: var(--primary-color, #C99700);
+    box-shadow: 
+        0 15px 35px rgba(201, 151, 0, 0.3),
+        0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.google-login-btn:active,
+.microsoft-login-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.google-icon,
+.microsoft-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.google-login-btn:hover .google-icon,
+.microsoft-login-btn:hover .microsoft-icon {
+    transform: rotate(360deg) scale(1.1);
+}
+
+/* Microsoft button specific styling */
+.microsoft-login-btn {
+    margin-top: 1rem;
+    background: #2f2f2f;
+    color: white;
+    border-color: #2f2f2f;
+}
+
+.microsoft-login-btn:hover {
+    background: #000;
+    border-color: var(--primary-color, #C99700);
+}
+
+/* Login Note */
+.login-note {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #666;
+    font-size: 0.95rem;
+    animation: fadeIn 1s ease-out 0.8s both;
+}
+
+/* Error Message */
+.error-message {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    animation: shake 0.5s ease-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Success Message */
+.success-message {
+    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(64, 192, 87, 0.3);
+    animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading State */
+.login-card.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.login-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color, #C99700);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-container {
+        max-width: 90%;
+        padding: 1rem;
+    }
+    
+    .login-card {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .logo h1 {
+        font-size: 1.5rem;
+    }
+    
+    .logo h2 {
+        font-size: 1rem;
+    }
+    
+    .logo img {
+        max-width: 150px;
+    }
+    
+    .google-login-btn,
+    .microsoft-login-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Accessibility: Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .login-card {
+        background: rgba(30, 30, 30, 0.95);
+        color: white;
+    }
+    
+    .logo h2 {
+        color: #aaa;
+    }
+    
+    .login-note {
+        color: #aaa;
+    }
+}
