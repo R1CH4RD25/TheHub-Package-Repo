@@ -1,0 +1,27 @@
+/**
+ * Admin Dashboard Responsive Styles
+ * Mobile-first media queries for admin console
+ */
+
+@media (max-width: 1024px) {
+    /* Admin Sidebar - Collapse to hamburger */
+    .admin-container {
+        grid-template-columns: 1fr !important;
+        position: relative;
+    }
+
+@media (max-height: 667px) and (orientation: landscape) {
+    .admin-sidebar {
+        padding-top: 10px;
+    }
+
+@media print {
+    .admin-sidebar,
+    .hamburger-menu,
+    .navbar,
+    .footer,
+    .btn,
+    button {
+        display: none !important;
+    }
+

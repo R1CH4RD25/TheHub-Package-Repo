@@ -1,0 +1,374 @@
+/**
+ * Shared Responsive Styles
+ * Mobile-first media queries for common components (navbar, footer, modals)
+ */
+
+ * Responsive Media Queries for The Hub
+ * Mobile-first approach with breakpoints for phone, tablet, and desktop
+ */
+   Breakpoints:
+   - Mobile: up to 767px
+   - Tablet: 768px to 1024px
+   - Desktop: 1025px and up
+   ========================================================================== */
+   TABLET STYLES (768px - 1024px)
+   ========================================================================== */
+    .admin-sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        z-index: 9999;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .admin-sidebar.open {
+        left: 0;
+    }
+    .hamburger-menu {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        position: fixed;
+        left: 15px;
+        top: 15px;
+        z-index: 10000;
+    }
+    .hamburger-menu span {
+        width: 30px;
+        height: 3px;
+        background: var(--header-text-color, #fff);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        transform-origin: center;
+    }
+    .hamburger-menu.active span:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+    }
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-menu.active span:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+    }
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+    .admin-content {
+        margin-left: 0 !important;
+        padding: 20px 15px;
+        width: 100%;
+    }
+    .navbar {
+        padding-left: 60px !important;
+    }
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px;
+    }
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    table {
+        min-width: 600px;
+    }
+    #themesContainer .theme-card {
+        margin-bottom: 15px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100% !important;
+    }
+    .modal-content {
+        width: 90%;
+        max-width: 600px;
+        margin: 10% auto;
+    }
+}
+   MOBILE STYLES (up to 767px)
+   ========================================================================== */
+@media (max-width: 767px) {
+    /* Typography - Scale down */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.3rem !important;
+    }
+    h3 {
+        font-size: 1.1rem !important;
+    }
+    h4 {
+        font-size: 1rem !important;
+    }
+    .navbar {
+        padding: 10px 15px 10px 60px !important;
+        height: auto !important;
+        min-height: 60px;
+    }
+    .nav-brand {
+        font-size: 1.1rem !important;
+    }
+    .nav-brand-title {
+        font-size: 1.1rem !important;
+    }
+    .nav-brand-subtitle {
+        font-size: 0.75rem !important;
+    }
+    .logo {
+        height: var(--logo-height-mobile, 50px) !important;
+        max-height: 50px !important;
+    }
+    .admin-sidebar {
+        width: 100% !important;
+        left: -100%;
+    }
+    .admin-sidebar.open {
+        left: 0;
+    }
+    .sidebar-menu a {
+        padding: 15px 20px !important;
+        font-size: 1rem !important;
+    }
+    .admin-content {
+        padding: 15px 10px !important;
+    }
+    .color-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+    .color-pair {
+        flex-direction: column !important;
+        gap: 12px;
+    }
+    .color-pair .color-item {
+        width: 100% !important;
+    }
+    .color-input-group {
+        width: 100% !important;
+    }
+    .color-input-group input[type="color"] {
+        width: 60px !important;
+        height: 50px !important;
+    }
+    .color-input-group input[type="text"] {
+        flex: 1;
+        font-size: 1rem !important;
+    }
+    .btn-group {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+    .btn {
+        width: 100% !important;
+        padding: 12px 20px !important;
+        font-size: 1rem !important;
+    }
+    .btn-sm {
+        padding: 8px 16px !important;
+        font-size: 0.875rem !important;
+    }
+    .theme-card .btn {
+        width: 100% !important;
+        margin-bottom: 8px;
+    }
+    .table-responsive {
+        border: 0;
+    }
+    .table-responsive thead {
+        display: none;
+    }
+    .table-responsive tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-primary, #e5e7eb);
+        border-radius: 8px;
+        padding: 10px;
+        background: white;
+    }
+    .table-responsive td {
+        display: block;
+        text-align: right;
+        padding: 8px;
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+    .table-responsive td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+    .form-row {
+        flex-direction: column !important;
+    }
+    .form-group {
+        width: 100% !important;
+        margin-bottom: 15px;
+    }
+    .color-section-header {
+        padding: 15px !important;
+        cursor: pointer;
+    }
+    .color-section-header h3 {
+        font-size: 1.1rem !important;
+    }
+    .badge {
+        padding: 6px 12px !important;
+        font-size: 0.875rem !important;
+    }
+    .role-badge-preview {
+        padding: 8px 16px !important;
+        font-size: 0.875rem !important;
+    }
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .tab-buttons {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        margin-bottom: 20px;
+    }
+    .tab-button {
+        padding: 10px 15px !important;
+        font-size: 0.875rem !important;
+    }
+    .card {
+        margin-bottom: 15px;
+    }
+    .footer-content {
+        flex-direction: column !important;
+        text-align: center;
+        gap: 10px;
+    }
+    .filter-group {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+    .filter-group input,
+    .filter-group select {
+        width: 100% !important;
+    }
+    .hub-tiles,
+    .module-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+    .section-card {
+        width: 100% !important;
+    }
+    .vehicle-card {
+        width: 100% !important;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .header-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .color-preview {
+        flex-wrap: wrap !important;
+    }
+}
+   LANDSCAPE PHONE (up to 667px height)
+   ========================================================================== */
+    .sidebar-menu a {
+        padding: 10px 15px !important;
+    }
+    .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+}
+   EXTRA SMALL DEVICES (up to 360px)
+   ========================================================================== */
+@media (max-width: 360px) {
+    .navbar {
+        padding-left: 50px !important;
+    }
+
+    .hamburger-menu {
+        left: 10px;
+        width: 25px;
+        height: 20px;
+    }
+    .hamburger-menu span {
+        width: 25px;
+        height: 2px;
+    }
+    .btn {
+        padding: 10px 15px !important;
+        font-size: 0.875rem !important;
+    }
+    h1 {
+        font-size: 1.3rem !important;
+    }
+    h2 {
+        font-size: 1.1rem !important;
+    }
+}
+   PRINT STYLES
+   ========================================================================== */
+    .admin-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .color-section-body {
+        display: block !important;
+    }
+    .collapsed {
+        display: block !important;
+    }
+}
+   UTILITY CLASSES
+   ========================================================================== */
+.mobile-only {
+    display: none !important;
+}
+.desktop-only {
+    display: block !important;
+}
+@media (max-width: 767px) {
+    .mobile-only {
+        display: block !important;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+}
+.admin-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+.admin-sidebar::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, #d1d5db);
+    border-radius: 3px;
+}
