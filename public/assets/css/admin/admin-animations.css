@@ -1,0 +1,1674 @@
+/* ==========================================================================
+   MODERN ADMIN DASHBOARD ANIMATIONS
+   Unique, top-notch animations for tables, tabs, and UI elements
+   ========================================================================== */
+
+/* Tab Content - Slide and Scale from Side */
+.admin-tab {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.95);
+    transition: none;
+}
+
+.admin-tab.active {
+    animation: slideScaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideScaleIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
+.data-table tbody tr {
+    opacity: 0;
+    transform: translateY(-15px);
+}
+
+.data-table tbody tr.animate-in {
+    animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes accordionDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Table Headers - Clean (removed shimmer) */
+.data-table thead {
+    position: relative;
+}
+
+/* Cards - Flip and Zoom In */
+.admin-card,
+.section-card,
+.package-card {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-15deg) scale(0.9);
+}
+
+.admin-card.animate-in,
+.section-card.animate-in,
+.package-card.animate-in {
+    animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes flipZoomIn {
+    0% {
+        opacity: 0;
+        transform: perspective(1000px) rotateX(-15deg) scale(0.9);
+    }
+
+    60% {
+        transform: perspective(1000px) rotateX(5deg) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(1000px) rotateX(0deg) scale(1);
+    }
+}
+
+/* Buttons - Ripple Expand on Hover */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Sidebar Menu - Drop Down and Bounce (falling effect) - SLOWER */
+.admin-menu li {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.3);
+}
+
+.admin-menu li.animate-in {
+    animation: dropBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Stagger delays using nth-child for sidebar */
+.admin-menu li:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.admin-menu li:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.admin-menu li:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.admin-menu li:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.admin-menu li:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.admin-menu li:nth-child(6) {
+    animation-delay: 0.5s;
+}
+
+.admin-menu li:nth-child(7) {
+    animation-delay: 0.6s;
+}
+
+.admin-menu li:nth-child(8) {
+    animation-delay: 0.7s;
+}
+
+@keyframes dropBounce {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.3);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateY(10px) scale(1.1);
+    }
+
+    80% {
+        transform: translateY(-5px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Sidebar Active Item - Simple highlight (no glow) */
+.admin-menu li a.active {
+    position: relative;
+    border-left: 3px solid var(--primary-color);
+    background: rgba(201, 151, 0, 0.05);
+}
+
+/* Input Focus - Expand Border */
+input:focus,
+textarea:focus,
+select:focus {
+    animation: expandBorder 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes expandBorder {
+    0% {
+        border-width: 1px;
+    }
+
+    50% {
+        border-width: 3px;
+    }
+
+    100% {
+        border-width: 2px;
+    }
+}
+
+/* ========== MODAL STYLES MOVED TO modals.css ========== */
+/* All modal-related styles have been centralized in modals.css
+   This includes: .modal, .modal-overlay, .modal-content, .modal-close-btn,
+   .modal-footer, and all modal animations */
+
+@keyframes modalExit {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+}
+
+@keyframes modalOverlayFadeOut {
+    0% {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+
+    100% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+}
+
+/* ============================================================================
+   FORM VALIDATION & INPUT ANIMATIONS
+   ============================================================================ */
+
+/* Input Focus Animations */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+    animation: inputFocusGlow 0.3s ease-out;
+    box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.15);
+}
+
+@keyframes inputFocusGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(201, 151, 0, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(201, 151, 0, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.15);
+    }
+}
+
+/* Validation States */
+.form-group input.valid,
+.form-group select.valid,
+.form-group textarea.valid {
+    border-color: #10b981;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px 20px;
+    padding-right: 40px;
+    animation: validPulse 0.4s ease-out;
+}
+
+.form-group input.invalid,
+.form-group select.invalid,
+.form-group textarea.invalid {
+    border-color: #ef4444;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px 20px;
+    padding-right: 40px;
+    animation: invalidShake 0.5s ease-out;
+}
+
+@keyframes validPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+@keyframes invalidShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-8px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(8px);
+    }
+}
+
+/* Error Messages */
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: errorSlideDown 0.3s ease-out;
+}
+
+.error-message::before {
+    content: "⚠";
+    font-size: 1rem;
+}
+
+@keyframes errorSlideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 50px;
+    }
+}
+
+/* Success Messages */
+.success-message {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: successSlideDown 0.3s ease-out;
+}
+
+.success-message::before {
+    content: "✓";
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+@keyframes successSlideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 50px;
+    }
+}
+
+/* Alerts/Notifications - Enhanced Slide from Right */
+.alert,
+.notification,
+.toast-message {
+    animation: slideRightBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes slideRightBounce {
+    0% {
+        opacity: 0;
+        transform: translateX(100%) scale(0.9);
+    }
+
+    60% {
+        transform: translateX(-15px) scale(1.02);
+    }
+
+    80% {
+        transform: translateX(5px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* ============================================================================
+   BUTTON STATES & LOADING ANIMATIONS
+   ============================================================================ */
+
+/* Button Loading State */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: buttonSpin 0.6s linear infinite;
+}
+
+@keyframes buttonSpin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Button Success State */
+.btn.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    animation: buttonSuccess 0.6s ease-out;
+}
+
+@keyframes buttonSuccess {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Button Pulse Animation (for install/action buttons) */
+@keyframes buttonPulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+    }
+}
+
+/* Button Error State */
+.btn.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    animation: buttonError 0.5s ease-out;
+}
+
+@keyframes buttonError {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+/* Loading Skeleton - Shimmer Wave */
+.skeleton {
+    background: linear-gradient(90deg,
+            #f0f0f0 25%,
+            #e0e0e0 50%,
+            #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonWave 1.5s infinite;
+}
+
+@keyframes skeletonWave {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Tab Subtabs - Slide Up Stack */
+.subtab-btn {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.subtab-btn.animate-in {
+    animation: slideUpStack 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideUpStack {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subtab-btn.active {
+    position: relative;
+}
+
+.subtab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    animation: expandLine 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes expandLine {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+/* Notification Badges for Tabs */
+.notification-badge {
+    display: inline-block;
+    min-width: 20px;
+    height: 20px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 68, 68, 0.6);
+    }
+}
+
+/* Sidebar Badge (for Package Manager) */
+.sidebar-badge {
+    display: inline-block;
+    min-width: 18px;
+    height: 18px;
+    padding: 2px 5px;
+    margin-left: 8px;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 9px;
+    line-height: 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(255, 68, 68, 0.5);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+/* Sidebar Badge - Red Dot Variant (no number, just indicator) */
+.sidebar-badge.dot {
+    min-width: 8px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
+    animation: dotPulse 2s ease-in-out infinite;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Orange Dot Variant - for configuration/notifications (not errors) */
+.sidebar-badge.orange-dot {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5) !important;
+    animation: dotPulseOrange 2s ease-in-out infinite !important;
+    min-width: 8px !important;
+    max-width: 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    vertical-align: middle !important;
+    flex-shrink: 0;
+    margin-left: 6px !important;
+    line-height: 1 !important;
+    font-size: 0 !important;
+    text-align: center;
+}
+
+/* Dot pulse animation (subtler than badge pulse) */
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2), 0 2px 6px rgba(255, 68, 68, 0.5);
+    }
+
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.3), 0 2px 8px rgba(255, 68, 68, 0.6);
+    }
+}
+
+/* Orange dot pulse animation */
+@keyframes dotPulseOrange {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(249, 115, 22, 0.5);
+    }
+
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3), 0 2px 8px rgba(249, 115, 22, 0.6);
+    }
+}
+
+/* Stats Cards - Count Up with Bounce */
+.stat-card {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+}
+
+.stat-card.animate-in {
+    animation: bounceUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes bounceUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+
+    60% {
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Search Bar - Glow Pulse on Focus */
+.search-input:focus {
+    animation: glowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(201, 151, 0, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(201, 151, 0, 0.5);
+    }
+}
+
+/* Dropdown Menu - Fan Out */
+.dropdown-menu {
+    opacity: 0;
+    transform-origin: top;
+    transform: scaleY(0);
+}
+
+.dropdown-menu.show {
+    animation: fanOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fanOut {
+    0% {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+/* ============================================================================
+   VALIDATION MODAL - COMPACT REDESIGN
+   ============================================================================ */
+
+/* Add blur effect to Bootstrap's modal backdrop */
+.modal-backdrop.show {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.modal-validation {
+    background: white;
+    border-radius: 16px;
+    max-width: 750px !important;
+    width: 95% !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: modalContentEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+/* Compact Header */
+.validation-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.validation-modal-header .validation-report-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-close-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+    transform: scale(1.05);
+}
+
+/* Compact Progress */
+.validation-progress-compact {
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.progress-bar-wrapper {
+    background: #e9ecef;
+    border-radius: 6px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-wrapper .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #81C784);
+    transition: width 0.5s ease;
+    border-radius: 6px;
+}
+
+.validation-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.spin-icon {
+    animation: spin 1s linear infinite;
+}
+
+/* Compact Checks Grid - 4 Columns for better space usage */
+.validation-checks-compact {
+    padding: 0.5rem;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(65vh - 140px);
+    /* Increased usable space */
+}
+
+.checks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+    /* Slightly more breathing room */
+}
+
+.validation-check-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* Tighter gap */
+    padding: 0.5rem 0.7rem;
+    /* More compact padding */
+    background: #f8f9fa;
+    border-radius: 6px;
+    /* Smaller radius */
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    /* Slightly smaller text */
+    cursor: default;
+    min-height: 38px;
+    /* Shorter height */
+}
+
+.validation-check-checkbox .check-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 20px !important;
+    /* Smaller icon */
+    height: 20px !important;
+    min-width: 20px !important;
+    flex-shrink: 0;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    /* Smaller radius */
+    background-color: transparent;
+    color: #ccc;
+    font-weight: bold;
+    font-size: 14px;
+    /* Smaller icon font */
+    line-height: 1;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.validation-check-checkbox .check-label {
+    flex: 1;
+    line-height: 1.2;
+    /* Tighter line height */
+    font-size: 0.85rem;
+    /* Match parent font size */
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Check status colors */
+.validation-check-checkbox.check-pass {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.validation-check-checkbox.check-fail {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+
+/* Footer */
+.modal-footer {
+    padding: 0.75rem 1.25rem;
+    /* More compact footer */
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Responsive - 2 columns on smaller screens */
+@media (max-width: 768px) {
+    .checks-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .checks-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Validation checks animation */
+.checks-grid>div {
+    animation: checkSlideIn 0.3s ease-out backwards;
+}
+
+.checks-grid>div:nth-child(3n+1) {
+    animation-delay: calc(var(--index, 0) * 0.05s);
+}
+
+.checks-grid>div:nth-child(3n+2) {
+    animation-delay: calc(var(--index, 0) * 0.05s + 0.025s);
+}
+
+.checks-grid>div:nth-child(3n) {
+    animation-delay: calc(var(--index, 0) * 0.05s + 0.05s);
+}
+
+@keyframes checkSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Validation check status updates */
+.validation-checks-list .check-status {
+    transition: all 0.3s ease-out;
+}
+
+.validation-checks-list .check-status.updating {
+    animation: statusPulse 0.5s ease-out;
+}
+
+@keyframes statusPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Checkbox/Toggle - Bounce Check */
+input[type="checkbox"]:checked+label::before {
+    animation: bounceCheck 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bounceCheck {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Pagination - Ripple Highlight */
+.pagination .page-item.active {
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination .page-item.active::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(201, 151, 0, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: rippleHighlight 0.6s ease-out;
+}
+
+@keyframes rippleHighlight {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+
+    100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+    }
+}
+
+/* Stagger Delay Classes for Sequential Animations */
+.delay-1 {
+    animation-delay: 0.05s;
+}
+
+.delay-2 {
+    animation-delay: 0.1s;
+}
+
+.delay-3 {
+    animation-delay: 0.15s;
+}
+
+.delay-4 {
+    animation-delay: 0.2s;
+}
+
+.delay-5 {
+    animation-delay: 0.25s;
+}
+
+.delay-6 {
+    animation-delay: 0.3s;
+}
+
+.delay-7 {
+    animation-delay: 0.35s;
+}
+
+.delay-8 {
+    animation-delay: 0.4s;
+}
+
+.delay-9 {
+    animation-delay: 0.45s;
+}
+
+.delay-10 {
+    animation-delay: 0.5s;
+}
+
+/* Package Row Highlight Animation */
+@keyframes rowHighlight {
+    0% {
+        background-color: #d4edda;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+    }
+
+    50% {
+        background-color: #d4edda;
+        box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.2);
+    }
+
+    100% {
+        background-color: transparent;
+        box-shadow: none;
+    }
+}
+
+/* ============================================================================
+   PACKAGE ALERTS SYSTEM
+   ============================================================================ */
+
+#packageAlertsContainer {
+    padding: 0 1.5rem;
+    margin-top: 1rem;
+}
+
+.package-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.package-alert.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.package-alert.hiding {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #fffbea 100%);
+    border-left-color: #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #e8f5f7 100%);
+    border-left-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.alert-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.alert-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.alert-dismiss {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.alert-dismiss:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
+}
+
+.alert-dismiss i {
+    font-size: 0.9rem;
+}
+
+/* Responsive: Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================================================
+   COLLAPSIBLE MENU GROUPS
+   ========================================================================== */
+
+.admin-menu .menu-group {
+    margin: 0;
+}
+
+.menu-group-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: var(--primary-text, #333);
+    background: var(--secondary-bg, #f5f5f5);
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.menu-group-header:hover {
+    background: var(--hover-bg, #e8e8e8);
+}
+
+.menu-group-arrow {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.menu-group.collapsed .menu-group-arrow {
+    transform: rotate(-90deg);
+}
+
+.menu-group-items {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0;
+    opacity: 0;
+}
+
+.menu-group-items li {
+    margin: 0;
+}
+
+.menu-group-items li a {
+    padding: 10px 20px;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* Prevent badge from wrapping alone */
+.menu-group-items li a .sidebar-badge {
+    flex-shrink: 0;
+}
+
+/* Menu spacer to push items to bottom */
+.menu-spacer {
+    flex: 1;
+    min-height: 20px;
+}
+
+/* Make sidebar flex column to support spacer */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-user-arrow {
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show~.nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+}
+
+.nav-user-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+
+/* Adjust nav-user-profile to work with dropdown */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.nav-user-name {
+    font-weight: 600;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-role {
+    font-size: 0.85em;
+    color: var(--secondary-text, #666);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+    }
+
+    .nav-user-arrow {
+        display: none;
+    }
+
+    .nav-user-menu {
+        right: -10px;
+    }
+
+    .menu-group-header {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+}
+
+
+/* Override nav-user-name to match header subtitle color */
+.nav-user-name {
+    font-weight: 600;
+    color: var(--header-subtitle-color, var(--primary-color, #007bff));
+}
+
+
+/* Hide the user dropdown arrow */
+.nav-user-arrow {
+    display: none !important;
+}
+
+/* Increase z-index for user dropdown menu */
+.nav-user-menu {
+    z-index: 9999 !important;
+}
+
+
+/* Icon spacing and sizing for sidebar and dropdown */
+.menu-group-header i,
+.admin-menu>li>a i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.user-menu-icon i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Force dropdown above all content with fixed positioning */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10000;
+}
+
+.nav-user-menu {
+    position: fixed !important;
+    z-index: 10001 !important;
+}
+
+/* Start menu groups collapsed by default and implement accordion behavior */
+.menu-group {
+    margin-bottom: 0;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0 !important;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.menu-group:not(.collapsed) .menu-group-items {
+    max-height: 500px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Fix dropdown positioning - use absolute but with higher z-index */
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 999999 !important;
+}
+
+.nav-user-dropdown {
+    z-index: 999998;
+}
+
+/*
+   Z-INDEX HIERARCHY FIX
+   Proper stacking order for dropdowns above header content
+*/
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10002;
+    /* Above nav-content (10001) */
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 10003 !important;
+    /* Above dropdown trigger */
+}
+
+/* Ensure dropdown visibility when shown */
+.nav-user-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+}
+
+/* FINAL z-index fix - ensure dropdown is absolutely on top */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 100000 !important;
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 100001 !important;
+}
+
+.nav-user-menu.show {
+    z-index: 100001 !important;
+}
+
+/* Fix navbar overflow clipping dropdown - allow visible overflow */
+.navbar {
+    overflow: visible !important;
+}
+
+/* Clean z-index hierarchy for dropdown */
+.nav-user-dropdown {
+    position: relative;
+    z-index: 10002 !important;
+    /* Above nav-content (10001) */
+}
+
+.nav-user-menu {
+    position: absolute !important;
+    z-index: 10002 !important;
+    /* Same as parent, positioned correctly */
+}
+
+.nav-user-menu.show {
+    z-index: 10002 !important;
+}
+
+/* ==========================================================================
+   ICON SELECTOR - Admin Settings
+   ========================================================================== */
+
+.icon-selector-btn {
+    transition: all 0.2s ease !important;
+}
+
+.icon-selector-btn:hover {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.icon-selector-btn:hover i {
+    color: white !important;
+}
+
+.icon-selector-btn:hover span {
+    color: white !important;
+}
+
+.icon-selector-btn:active {
+    transform: translateY(0) scale(0.95) !important;
+}
+
+/* Compact Icon Selector Buttons */
+.icon-selector-btn-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 60px;
+}
+
+.icon-selector-btn-compact i {
+    font-size: 18px;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.icon-selector-btn-compact span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.icon-selector-btn-compact:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.icon-selector-btn-compact:hover i {
+    color: white;
+}
+
+.icon-selector-btn-compact:hover span {
+    color: white;
+}
+
+.icon-selector-btn-compact:active {
+    transform: translateY(0) scale(0.95);
+}
+
+#icon-preview {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#icon-dropdown-arrow {
+    transition: transform 0.3s ease;
+}
+
+#icon-selector-dropdown {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
