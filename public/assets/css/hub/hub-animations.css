@@ -1,0 +1,1065 @@
+/* ==========================================================================
+   MODERN HUB STYLES - Enhanced with animations and effects
+   ========================================================================== */
+
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+    position: relative;
+}
+
+/* Header first-load animation - only on initial page load */
+.navbar {
+    transform-origin: top;
+}
+
+/* Animate only if not already shown in this session */
+html:not(.animations-played) .navbar {
+    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+html.animations-played .navbar {
+    opacity: 1;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Footer first-load animation */
+html:not(.animations-played) .admin-footer,
+html:not(.animations-played) footer {
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+html.animations-played .admin-footer,
+html.animations-played footer {
+    opacity: 1;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animated particle background - fully customizable via Site Settings */
+.hub-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: var(--hub-particle-display, block);
+    /* Use color-mix to add opacity to hex colors from settings */
+    background:
+        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
+            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%),
+        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
+            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%);
+    filter: blur(var(--hub-particle-blur, 150px));
+    z-index: 0;
+    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
+}
+
+@keyframes backgroundPulse {
+
+    0%,
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* Hub Container */
+.hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hub Header - Enhanced with animations */
+.hub-header {
+    text-align: center;
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hub-header-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    line-height: 1;
+    animation: bounceIn 1s ease-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.hub-header h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--hub-title-color, #000);
+    font-weight: 800;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+.hub-header p {
+    font-size: 1.2rem;
+    color: var(--hub-subtitle-color, #666);
+    animation: slideInLeft 0.8s ease-out 0.4s both;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Sections Grid - Staggered animation */
+.sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* Section Cards - Modern glassmorphism design */
+.section-card {
+    background: var(--hub-tile-bg, rgba(255, 255, 255, 0.95));
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--hub-tile-text, #333);
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+        0 4px 20px var(--hub-card-shadow, rgba(0, 0, 0, 0.08)),
+        0 0 0 1px var(--hub-card-border, rgba(0, 0, 0, 0.05));
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+    transform: translateY(30px);
+}
+
+/* Staggered animation for cards */
+.section-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.section-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.section-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.section-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.section-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.section-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.section-card:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.section-card:nth-child(8) {
+    animation-delay: 0.8s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Gradient border on top */
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--gold-gradient, linear-gradient(90deg, #C99700 0%, #FFD700 100%));
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    border-radius: 20px 20px 0 0;
+}
+
+/* Animated background gradient */
+.section-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center,
+            var(--hub-card-glow-center, rgba(201, 151, 0, 0.03)) 0%,
+            var(--hub-card-glow-edge, rgba(255, 215, 0, 0.03)) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 20px;
+    z-index: 0;
+}
+
+/* Allow tooltip to be hovered without blocking card link */
+.section-title-tooltip {
+    pointer-events: auto;
+}
+
+.section-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow:
+        0 20px 40px color-mix(in srgb, var(--hub-card-hover-shadow, #c4b454) 20%, transparent),
+        0 0 0 2px var(--hub-card-hover-border, #d4c77a);
+}
+
+.section-card:hover::before {
+    transform: scaleX(1);
+    animation: gradientSlide 2s linear infinite;
+}
+
+@keyframes gradientSlide {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+.section-card:hover::after {
+    opacity: 1;
+}
+
+/* Section Icon - 3D tilt effect ready */
+.section-icon {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+    display: block;
+    position: relative;
+    z-index: 1;
+    color: var(--hub-icon-color, #C99700);
+    transition: transform 0.4s ease, color 0.3s ease;
+    filter: drop-shadow(0 4px 8px var(--hub-icon-shadow, rgba(0, 0, 0, 0.1)));
+}
+
+.section-card:hover .section-icon {
+    transform: scale(1.1) rotateZ(-5deg);
+    color: var(--hub-icon-hover-color, #FFD700);
+    animation: iconBounce 0.6s ease;
+}
+
+@keyframes iconBounce {
+
+    0%,
+    100% {
+        transform: scale(1.1) rotateZ(-5deg);
+    }
+
+    50% {
+        transform: scale(1.2) rotateZ(5deg);
+    }
+}
+
+/* Section Title - Enhanced typography */
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--hub-tile-text, var(--text-primary, #333));
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+.section-card:hover .section-title {
+    color: var(--hub-card-hover-title, var(--primary-color, #C99700));
+    animation: titlePulse 0.6s ease;
+}
+
+@keyframes titlePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Section Description */
+.section-description {
+    font-size: 0.95rem;
+    color: var(--hub-card-description, var(--text-muted, #666));
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.section-card:hover .section-description {
+    color: var(--hub-card-hover-description, rgba(255, 255, 255, 0.95)) !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+}
+
+/* Empty state */
+.no-sections {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--hub-no-sections-bg, white);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--hub-no-sections-shadow, rgba(0, 0, 0, 0.08));
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.no-sections h3 {
+    color: var(--primary-color, #C99700);
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.no-sections p {
+    color: var(--text-muted, #666);
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hub-header h1 {
+        font-size: 2rem;
+    }
+
+    .hub-header p {
+        font-size: 1rem;
+    }
+
+    .sections-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .section-card {
+        padding: 25px;
+    }
+
+    .section-icon {
+        font-size: 3.5rem;
+    }
+}
+
+/* Dark mode support */
+/* Dark mode support - respects Site Settings theme variables */
+@media (prefers-color-scheme: dark) {
+    .section-card {
+        /* Use the theme variable, fallback to dark if not set */
+        background: var(--hub-tile-bg, rgba(30, 30, 30, 0.95));
+        color: var(--hub-tile-text, #fff);
+    }
+
+    .section-title {
+        color: var(--hub-tile-text, #fff);
+    }
+
+    .section-description {
+        color: var(--hub-card-description, #aaa);
+    }
+}
+
+/* Loading animation (can be triggered via JS) */
+.hub-loading {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Add pulse effect to cards on page load */
+@keyframes cardPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Success state animation */
+.section-card.clicked {
+    animation: cardClick 0.3s ease;
+}
+
+@keyframes cardClick {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.95);
+    }
+}
+
+.menu-group.collapsed .menu-group-arrow {
+    transform: rotate(-90deg);
+}
+
+.menu-group-items {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.menu-group.collapsed .menu-group-items {
+    max-height: 0;
+    opacity: 0;
+}
+
+.menu-group-items li {
+    margin: 0;
+}
+
+.menu-group-items li a {
+    padding: 10px 20px;
+    font-size: 0.95em;
+}
+
+/* Menu spacer to push items to bottom */
+.menu-spacer {
+    flex: 1;
+    min-height: 20px;
+}
+
+/* Make sidebar flex column to support spacer */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ==========================================================================
+   USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.nav-user-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-user-arrow {
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-dropdown.active .nav-user-arrow,
+.nav-user-menu.show~.nav-user-trigger .nav-user-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+}
+
+.nav-user-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--primary-text, #333);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.user-menu-item:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+
+.user-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.user-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.user-menu-icon {
+    font-size: 1.2em;
+    width: 24px;
+    text-align: center;
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-color, #e0e0e0);
+    margin: 5px 0;
+}
+
+/* Adjust nav-user-profile to work with dropdown */
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.nav-user-name {
+    font-weight: 600;
+    color: var(--primary-text, #333);
+}
+
+.nav-user-role {
+    font-size: 0.85em;
+    color: var(--secondary-text, #666);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .nav-user-info {
+        display: none;
+    }
+
+    .nav-user-arrow {
+        display: none;
+    }
+
+    .nav-user-menu {
+        right: -10px;
+    }
+
+    .menu-group-header {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+}
+
+
+/* Override nav-user-name to match header subtitle color */
+.nav-user-name {
+    font-weight: 600;
+    color: var(--header-subtitle-color, var(--primary-color, #007bff));
+}
+
+
+/* Hide the user dropdown arrow */
+.nav-user-arrow {
+    display: none !important;
+}
+
+/* Increase z-index for user dropdown menu */
+.nav-user-menu {
+    z-index: 9999 !important;
+}
+
+
+/* Icon spacing and sizing for sidebar and dropdown */
+.menu-group-header i,
+.admin-menu>li>a i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+/* ==========================================================================
+   MODERN MODULES PAGE - Enhanced with cutting-edge animations
+   ========================================================================== */
+
+.modules-page {
+    min-height: 100vh;
+    background: var(--secondary-color, #000000);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated background particles */
+.modules-page::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
+        radial-gradient(circle at 50% 50%, rgba(201, 151, 0, 0.03) 0%, transparent 30%);
+    animation: particleFloat 20s ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.modules-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Modules Header - Enhanced */
+.modules-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modules-header h1 {
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.modules-header p {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    animation: slideInLeft 0.8s ease-out 0.4s both;
+}
+
+/* Modules Grid - Staggered animations */
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+/* Module Cards - Glassmorphism with 3D effects */
+.module-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.2),
+        0 0 0 1px rgba(255,255,255,0.3);
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px) rotateX(10deg);
+    animation: cardEntrance 0.6s ease-out forwards;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+/* Staggered card animations */
+.module-card:nth-child(1) { animation-delay: 0.1s; }
+.module-card:nth-child(2) { animation-delay: 0.2s; }
+.module-card:nth-child(3) { animation-delay: 0.3s; }
+.module-card:nth-child(4) { animation-delay: 0.4s; }
+.module-card:nth-child(5) { animation-delay: 0.5s; }
+.module-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes cardEntrance {
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+    }
+}
+
+/* Shimmer effect on cards */
+.module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.module-card:hover::before {
+    left: 100%;
+}
+
+/* Gradient border animation */
+.module-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        135deg,
+        var(--primary-color, #C99700),
+        var(--primary-dark, #A07800),
+        #FFD700,
+        var(--primary-color, #C99700)
+    );
+    background-size: 300% 300%;
+    border-radius: 24px;
+    z-index: -1;
+    opacity: 0;
+    animation: gradientRotate 4s linear infinite;
+    transition: opacity 0.3s ease;
+}
+
+@keyframes gradientRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.module-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 
+        0 20px 60px rgba(0,0,0,0.3),
+        0 0 0 1px rgba(102, 126, 234, 0.5);
+}
+
+.module-card:hover::after {
+    opacity: 1;
+}
+
+/* Module Icon - Enhanced with 3D effects */
+.module-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s ease;
+    display: inline-block;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+}
+
+.module-card:hover .module-icon {
+    transform: scale(1.2) rotateY(360deg);
+    filter: drop-shadow(0 8px 20px rgba(201, 151, 0, 0.4));
+}
+
+/* Module Title - Gradient text on hover */
+.module-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--secondary-color, #2c3e50);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.module-card:hover .module-title {
+    color: var(--primary-color, #C99700);
+    transform: translateX(5px);
+}
+
+/* Module Description */
+.module-description {
+    color: #666;
+    line-height: 1.8;
+    flex: 1;
+    margin-bottom: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.module-card:hover .module-description {
+    color: #444;
+}
+
+/* Module Role Badge - Animated */
+.module-role {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--gold-gradient, linear-gradient(135deg, #C99700 0%, #FFD700 100%));
+    color: var(--secondary-color, #000);
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    box-shadow: 0 4px 12px rgba(201, 151, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-role::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.module-card:hover .module-role {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.5);
+}
+
+.module-card:hover .module-role::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Empty state - Enhanced */
+.modules-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modules-empty-state p:first-of-type {
+    font-size: 1.3rem;
+    color: var(--primary-color, #C99700);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.modules-empty-state p:last-of-type {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modules-header h1 {
+        font-size: 2rem;
+    }
+
+    .modules-header p {
+        font-size: 1.1rem;
+    }
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .module-card {
+        padding: 2rem;
+    }
+
+    .module-icon {
+        font-size: 3rem;
+    }
+
+    .module-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* Loading state */
+.modules-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.modules-loading::after {
+    content: '';
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Click ripple effect */
+.module-card.clicked {
+    animation: cardClick 0.4s ease;
+}
+
+@keyframes cardClick {
+    0% { transform: translateY(-12px) scale(1.03); }
+    50% { transform: translateY(-8px) scale(0.98); }
+    100% { transform: translateY(-12px) scale(1.03); }
+}
+
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
