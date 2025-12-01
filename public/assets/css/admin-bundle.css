@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Mon Dec  1 06:24:34 PM UTC 2025
+ * Generated: Mon Dec  1 06:29:23 PM UTC 2025
  */
 
 
@@ -2096,6 +2096,7 @@ html {
 
 .enterprise-footer {
     grid-column: 1 / -1;
+    grid-row: 3;
     /* Span both columns */
     background: var(--footer-bg-color, #F3F4F6);
     border-top: 1px solid var(--border-primary, #e0e0e0);
