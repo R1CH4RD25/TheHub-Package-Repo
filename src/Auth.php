@@ -407,12 +407,26 @@ class Auth
         // Prevents session fixation attacks
         session_regenerate_id(true);
 
+        // Store in PHP session (for legacy hub/modules)
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['email'] = $user['email'];
         $_SESSION['name'] = $user['name'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['picture'] = $user['picture'] ?? null;
         $_SESSION['logged_in'] = true;
+
+        // ALSO store in Laravel session format (for /admin routes)
+        // Laravel's middleware will read this
+        if (isset($GLOBALS['laravelApp'])) {
+            $laravelSession = $GLOBALS['laravelApp']->make('session');
+            $laravelSession->put('user_id', $user['id']);
+            $laravelSession->put('email', $user['email']);
+            $laravelSession->put('name', $user['name']);
+            $laravelSession->put('role', $user['role']);
+            $laravelSession->put('picture', $user['picture'] ?? null);
+            $laravelSession->put('logged_in', true);
+            $laravelSession->save();
+        }
 
         // Audit log - successful login
         try {
@@ -463,7 +477,7 @@ class Auth
 
         $db = Database::getInstance();
         $dbUser = $db->fetchOne(
-            "SELECT id, email, name, role, is_active FROM users WHERE id = ?",
+            "SELECT id, email, name, role, picture, is_active FROM users WHERE id = ?",
             [$_SESSION['user_id']]
         );
 
