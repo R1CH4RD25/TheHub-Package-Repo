@@ -51,6 +51,12 @@ $users = $userModel->getAll();
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- Notyf - Toast Notifications -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
+    <!-- SweetAlert2 - Beautiful Modals -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
 </head>
@@ -2486,6 +2492,30 @@ $users = $userModel->getAll();
             }
         });
     </script>
+    <!-- Notyf - Toast Notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+    <!-- SweetAlert2 - Beautiful Modals -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Fix Bootstrap Modal ARIA-hidden warning -->
+    <script nonce="<?php echo CSP_NONCE; ?>">
+        // Prevent ARIA-hidden warning on Bootstrap modals
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix all modals on show
+            document.querySelectorAll('.modal').forEach(function(modal) {
+                modal.addEventListener('show.bs.modal', function() {
+                    // Remove aria-hidden when modal shows
+                    this.removeAttribute('aria-hidden');
+                });
+                modal.addEventListener('hide.bs.modal', function() {
+                    // Restore aria-hidden when modal hides
+                    this.setAttribute('aria-hidden', 'true');
+                });
+            });
+        });
+    </script>
+
     <script src="/assets/js/modal-renderer.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/admin.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/site-settings.js?v=<?php echo time(); ?>"></script>
