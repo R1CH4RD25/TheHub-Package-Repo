@@ -1,1 +1,3 @@
-# Keep this directory
+# Sessions directory - PHP session storage
+# This directory is used by src/Auth.php for session_save_path()
+# Must be writable by web server (chmod 777 or www-data ownership)
