@@ -16,9 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
         ]);
-        
-        // Disable Laravel's session middleware - we use PHP sessions
-        $middleware->remove(\Illuminate\Session\Middleware\StartSession::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
