@@ -142,25 +142,14 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
     </div><!-- end page-wrapper -->
 
     <script>
-        // Initialize AOS (Animate On Scroll) if available
-        if (typeof AOS !== 'undefined') {
-            AOS.init({
-                duration: 800,
-                easing: 'ease-out',
-                once: true,
-                offset: 100
-            });
-        }
-
+        // AOS animations DISABLED (causing glitchy appearance)
+        
         // Add click animation to section cards
         document.querySelectorAll('.section-card').forEach(card => {
             card.addEventListener('click', function(e) {
                 this.classList.add('clicked');
                 setTimeout(() => this.classList.remove('clicked'), 300);
             });
-
-            // Add data-aos attributes for scroll animations
-            card.setAttribute('data-aos', 'fade-up');
         });
 
         // Initialize Vanilla Tilt for 3D card effect (if available)

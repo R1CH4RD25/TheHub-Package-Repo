@@ -27,13 +27,13 @@ class Layout
             $subtitle = SiteSettings::get('navbar_subtitle', SiteSettings::get('site_name', 'The Hub'));
         }
 
-        ?>
+?>
         <!-- Header -->
         <nav class="navbar">
             <div class="nav-content">
                 <a href="/" class="nav-brand">
                     <img src="<?php echo e(SiteSettings::get('logo_path', '/assets/images/branding/Branding_NoBG.png')); ?>"
-                         alt="<?php echo e(SiteSettings::get('organization_name', 'Your Organization')); ?>">
+                        alt="<?php echo e(SiteSettings::get('organization_name', 'Your Organization')); ?>">
                     <div class="nav-brand-text">
                         <div class="nav-brand-title"><?php echo e(SiteSettings::get('organization_name', 'Your Organization')); ?></div>
                         <?php if (SiteSettings::get('header_show_subtitle', '1') === '1' || SiteSettings::get('header_show_subtitle', '1') === true): ?>
@@ -48,7 +48,7 @@ class Layout
                     <span></span>
                 </button>
 
-                                <div class="nav-links" id="navLinks">
+                <div class="nav-links" id="navLinks">
                     <?php
                     // Always show The Hub link (static menu - always visible)
                     $siteName = SiteSettings::get('site_name', 'The Hub');
@@ -63,7 +63,7 @@ class Layout
                             if (class_exists('\Hub\Module')) {
                                 $moduleClass = new \Hub\Module();
                                 $showManagement = $moduleClass->hasAccess($user['id'], 'command') ||
-                                                in_array($userRole, ['super_admin', 'admin']);
+                                    in_array($userRole, ['super_admin', 'admin']);
                             } else {
                                 // Fallback: Show for admin/super_admin only
                                 $showManagement = in_array($userRole, ['super_admin', 'admin']);
@@ -79,7 +79,7 @@ class Layout
                         $mgmtName = SiteSettings::get('cc_display_name', 'Management');
                         $mgmtIcon = SiteSettings::get('cc_icon', 'bi-kanban');
                         $isOnCommand = ($pageType === 'command');
-                        echo '<a href="/command/"' . ($isOnCommand ? ' class="active"' : '') . '><i class="' . \Hub\Helpers::safeIconClass($mgmtIcon) . '"></i> ' . e($mgmtName) . '</a>';
+                        echo '<a href="/management/"' . ($isOnCommand ? ' class="active"' : '') . '><i class="' . \Hub\Helpers::safeIconClass($mgmtIcon) . '"></i> ' . e($mgmtName) . '</a>';
                     }
 
                     // Show Admin Dashboard link if user is admin or super_admin (static menu - always visible)
@@ -89,50 +89,14 @@ class Layout
                     }
                     ?>
 
-
-                    <!-- User Profile Dropdown -->
-                    <div class="nav-user-dropdown">
-                        <button class="nav-user-trigger"
-                                id="userDropdownTrigger"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-controls="userDropdownMenu">
-                            <img src="<?php echo \Hub\Helpers::safeAvatarUrl($user['picture'] ?? null); ?>"
-                                 alt="<?php echo e($user['name']); ?>"
-                                 class="nav-user-avatar">
-                            <div class="nav-user-info">
-                                <div class="nav-user-name"><?php echo e($user['name']); ?></div>
-                                <div class="nav-user-role"><?php echo ucfirst(str_replace('_', ' ', $userRole)); ?></div>
-                            </div>
-                            <span class="nav-user-arrow">▼</span>
-                        </button>
-
-                        <div class="nav-user-menu"
-                             id="userDropdownMenu"
-                             role="menu"
-                             aria-labelledby="userDropdownTrigger">
-                            <a href="/profile.php" class="user-menu-item" role="menuitem">
-                                <span class="user-menu-icon"><i class="fas fa-user"></i></span>
-                                <span>My Profile</span>
-                            </a>
-                            <a href="/profile.php?tab=contact" class="user-menu-item">
-                                <span class="user-menu-icon"><i class="fas fa-envelope"></i></span>
-                                <span>Contact Preferences</span>
-                            </a>
-                            <div class="user-menu-divider"></div>
-                            <a href="/logout.php" class="user-menu-item">
-                                <span class="user-menu-icon"><i class="fas fa-sign-out-alt"></i></span>
-                                <span>Logout</span>
-                            </a>
-                        </div>
-                    </div>
+                    <?php self::renderUserProfile($user, $userRole); ?>
 
                     <?php if ($pageType === 'dashboard' && !empty($options['mobileMenuItems'])): ?>
                         <!-- Mobile Admin Menu (only visible on mobile) -->
                         <div class="mobile-admin-menu">
                             <?php foreach ($options['mobileMenuItems'] as $item): ?>
                                 <a href="#" data-tab="<?php echo e($item['tab']); ?>"
-                                   class="mobile-tab-link <?php echo $item['active'] ? 'active' : ''; ?>">
+                                    class="mobile-tab-link <?php echo $item['active'] ? 'active' : ''; ?>">
                                     <?php echo e($item['label']); ?>
                                 </a>
                             <?php endforeach; ?>
@@ -146,88 +110,91 @@ class Layout
         // Show maintenance mode banner for admins
         if (($_ENV['MAINTENANCE_MODE'] ?? 'false') === 'true'):
         ?>
-        <a href="/admin/#settings-advanced"
-           class="maintenance-banner"
-           id="maintenanceBanner">
-            🔧 <strong>MAINTENANCE MODE ACTIVE</strong> - The system is currently unavailable to regular users. Click here to disable.
-        </a>
+            <a href="/admin/#settings-advanced"
+                class="maintenance-banner"
+                id="maintenanceBanner">
+                🔧 <strong>MAINTENANCE MODE ACTIVE</strong> - The system is currently unavailable to regular users. Click here to disable.
+            </a>
         <?php endif; ?>
 
         <script nonce="<?php echo CSP_NONCE; ?>">
-        // User dropdown menu toggle with ARIA support
-        const userDropdownTrigger = document.getElementById('userDropdownTrigger');
-        const userDropdownMenu = document.getElementById('userDropdownMenu');
+            // User dropdown menu toggle with ARIA support
+            const userDropdownTrigger = document.getElementById('userDropdownTrigger');
+            const userDropdownMenu = document.getElementById('userDropdownMenu');
 
-        if (userDropdownTrigger && userDropdownMenu) {
-            userDropdownTrigger.addEventListener('click', function(event) {
-                event.stopPropagation();
-                const isExpanded = userDropdownMenu.classList.toggle('show');
-                userDropdownTrigger.setAttribute('aria-expanded', isExpanded);
-            });
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('.nav-user-dropdown');
-            if (dropdown && userDropdownMenu && !dropdown.contains(event.target)) {
-                userDropdownMenu.classList.remove('show');
-                if (userDropdownTrigger) {
-                    userDropdownTrigger.setAttribute('aria-expanded', 'false');
-                }
-            }
-        });
-
-        // Maintenance banner navigation (if present)
-        const maintenanceBanner = document.getElementById('maintenanceBanner');
-        if (maintenanceBanner) {
-            maintenanceBanner.addEventListener('click', function(e) {
-                e.preventDefault();
-                localStorage.setItem('openAdvancedSection', 'app');
-                if (window.location.pathname === '/admin/' || window.location.pathname === '/admin/index.php') {
-                    setTimeout(() => {
-                        const advancedTab = document.querySelector('[data-tab=settings]');
-                        if (advancedTab) advancedTab.click();
-                        setTimeout(() => {
-                            const advancedSubtab = document.querySelector('[data-subtab=advanced]');
-                            if (advancedSubtab) advancedSubtab.click();
-                            setTimeout(() => {
-                                const appSection = document.querySelector('[data-section=app]');
-                                if (appSection && appSection.classList.contains('collapsed')) {
-                                    appSection.previousElementSibling.click();
-                                }
-                                document.getElementById('maintenanceMode')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }, 300);
-                        }, 300);
-                    }, 100);
-                    return false;
-                } else {
-                    window.location.href = '/admin/#settings-advanced';
-                }
-            });
-        }
-
-        // Mobile menu toggle with CSS-based body lock (safer than inline styles)
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-
-        if (navToggle && navLinks) {
-            navToggle.addEventListener('click', function() {
-                navToggle.classList.toggle('active');
-                navLinks.classList.toggle('active');
-                document.body.classList.toggle('nav-open');
-            });
-
-            // Close mobile menu when clicking a link
-            navLinks.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function() {
-                    navToggle.classList.remove('active');
-                    navLinks.classList.remove('active');
-                    document.body.classList.remove('nav-open');
+            if (userDropdownTrigger && userDropdownMenu) {
+                userDropdownTrigger.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const isExpanded = userDropdownMenu.classList.toggle('show');
+                    userDropdownTrigger.setAttribute('aria-expanded', isExpanded);
                 });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const dropdown = document.querySelector('.nav-user-dropdown');
+                if (dropdown && userDropdownMenu && !dropdown.contains(event.target)) {
+                    userDropdownMenu.classList.remove('show');
+                    if (userDropdownTrigger) {
+                        userDropdownTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                }
             });
-        }
+
+            // Maintenance banner navigation (if present)
+            const maintenanceBanner = document.getElementById('maintenanceBanner');
+            if (maintenanceBanner) {
+                maintenanceBanner.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.setItem('openAdvancedSection', 'app');
+                    if (window.location.pathname === '/admin/' || window.location.pathname === '/admin/index.php') {
+                        setTimeout(() => {
+                            const advancedTab = document.querySelector('[data-tab=settings]');
+                            if (advancedTab) advancedTab.click();
+                            setTimeout(() => {
+                                const advancedSubtab = document.querySelector('[data-subtab=advanced]');
+                                if (advancedSubtab) advancedSubtab.click();
+                                setTimeout(() => {
+                                    const appSection = document.querySelector('[data-section=app]');
+                                    if (appSection && appSection.classList.contains('collapsed')) {
+                                        appSection.previousElementSibling.click();
+                                    }
+                                    document.getElementById('maintenanceMode')?.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'center'
+                                    });
+                                }, 300);
+                            }, 300);
+                        }, 100);
+                        return false;
+                    } else {
+                        window.location.href = '/admin/#settings-advanced';
+                    }
+                });
+            }
+
+            // Mobile menu toggle with CSS-based body lock (safer than inline styles)
+            const navToggle = document.getElementById('navToggle');
+            const navLinks = document.getElementById('navLinks');
+
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', function() {
+                    navToggle.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                    document.body.classList.toggle('nav-open');
+                });
+
+                // Close mobile menu when clicking a link
+                navLinks.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', function() {
+                        navToggle.classList.remove('active');
+                        navLinks.classList.remove('active');
+                        document.body.classList.remove('nav-open');
+                    });
+                });
+            }
         </script>
-        <?php
+    <?php
     }
 
     /**
@@ -241,7 +208,7 @@ class Layout
         $siteName = SiteSettings::get('site_name', 'The Hub');
         $pageLabel = ($pageType === 'dashboard') ? 'Admin Dashboard' : $siteName;
 
-        ?>
+    ?>
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-content">
@@ -272,7 +239,7 @@ class Layout
         // Auto-initialize modern frontend libraries
         self::renderModernInit();
         ?>
-        <?php
+    <?php
     }
 
     /**
@@ -313,9 +280,9 @@ class Layout
         // Axios 1.6.8 - All AJAX requests
         $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js\"></script>";
 
-        // AOS (Animate On Scroll) 2.3.4 - Lightweight animations
-        $libraries[] = "<link href=\"https://unpkg.com/aos@2.3.4/dist/aos.css\" rel=\"stylesheet\">";
-        $libraries[] = "<script src=\"https://unpkg.com/aos@2.3.4/dist/aos.js\"></script>";
+        // AOS (Animate On Scroll) - DISABLED (causing animation conflicts)
+        // $libraries[] = "<link href=\"https://unpkg.com/aos@2.3.4/dist/aos.css\" rel=\"stylesheet\">";
+        // $libraries[] = "<script src=\"https://unpkg.com/aos@2.3.4/dist/aos.js\"></script>";
 
         // Alpine.js 3.14.1 - Reactive components (lightweight, 15KB)
         $libraries[] = "<script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js\"></script>";
@@ -385,13 +352,11 @@ class Layout
 
             // Animation library for transitions
             $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css\">";
-
         } elseif ($pageType === 'hub') {
             // Hub Landing Page Libraries
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js\"></script>";
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js\"></script>";
             $libraries[] = "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css\">";
-
         } elseif ($pageType === 'login') {
             // Login Page Libraries (minimal)
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js\"></script>";
@@ -401,7 +366,7 @@ class Layout
         // ===== MOBILE-OPTIMIZED LIBRARIES (Load only on mobile) =====
         // Detect mobile via user agent (simple check)
         $isMobile = isset($_SERVER['HTTP_USER_AGENT']) &&
-                    preg_match('/(android|iphone|ipad|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
+            preg_match('/(android|iphone|ipad|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
 
         if ($isMobile) {
             $libraries[] = "<script src=\"https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js\"></script>";
@@ -424,51 +389,35 @@ class Layout
     {
         // Check if production mode is enabled
         $useProduction = defined('CSS_PRODUCTION_MODE') && CSS_PRODUCTION_MODE === true;
-
-        if ($useProduction) {
-            // Use single combined production.css file (minified if available)
-            $versionFile = __DIR__ . '/../public/assets/css/version.txt';
-            $version = file_exists($versionFile) ? trim(file_get_contents($versionFile)) : time();
-
-            // Use minified version if it exists, otherwise fall back to unminified
-            $minifiedPath = __DIR__ . '/../public/assets/css/production.min.css';
-            $cssFile = file_exists($minifiedPath) ? 'production.min.css' : 'production.css';
-
-            $stylesheets = [];
-            // Load production CSS first (with default CSS variables)
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/{$cssFile}?v={$version}\">";
-            // Then load theme CSS to override defaults with database values
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/api/theme-css.php?v={$version}\">";
-
-            return implode("\n    ", $stylesheets);
-        }
-
-        // Development mode - individual files for easier debugging
         $timestamp = time();
         $stylesheets = [];
 
-        // Common stylesheets for all pages (load static CSS first)
-        $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/style.css?v={$timestamp}\">";
-        $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/header.css?v={$timestamp}\">";
-        $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/footer.css?v={$timestamp}\">";
-
-        // Page-specific stylesheets
-        if ($pageType === 'dashboard' || $pageType === 'command') {
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin.css?v={$timestamp}\">";
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-theme.css?v={$timestamp}\">";
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-colors.css?v={$timestamp}\">";
-
-            // Management System (Command Center) specific styles
-            if ($pageType === 'command') {
-                $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/management.css?v={$timestamp}\">";
+        if ($useProduction) {
+            // Production mode - use minified bundles with version from css-version.json
+            $versionFile = __DIR__ . '/../public/assets/css/css-version.json';
+            if (file_exists($versionFile)) {
+                $versionData = json_decode(file_get_contents($versionFile), true);
+                $version = $versionData['version'] ?? $timestamp;
+            } else {
+                $version = $timestamp;
             }
-        } elseif ($pageType === 'hub') {
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub.css?v={$timestamp}\">";
-            $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub-modern.css?v={$timestamp}\">";
-        }
 
-        // Media queries
-        $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/media.css?v={$timestamp}\">";
+            // Admin and management use the same bundle
+            if ($pageType === 'admin' || $pageType === 'dashboard' || $pageType === 'management' || $pageType === 'command') {
+                $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-bundle.min.css?v={$version}\">";
+            } else {
+                // Default to hub bundle
+                $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub-bundle.min.css?v={$version}\">";
+            }
+        } else {
+            // Development mode - use concatenated bundles (run ./build-css-bundles.sh to rebuild)
+            if ($pageType === 'admin' || $pageType === 'dashboard' || $pageType === 'management' || $pageType === 'command') {
+                $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/admin-bundle.css?v={$timestamp}\">";
+            } else {
+                // Default to hub bundle
+                $stylesheets[] = "<link rel=\"stylesheet\" href=\"/assets/css/hub-bundle.css?v={$timestamp}\">";
+            }
+        }
 
         // Theme CSS LAST to override all defaults
         $stylesheets[] = "<link rel=\"stylesheet\" href=\"/api/theme-css.php?v={$timestamp}\">";
@@ -487,7 +436,7 @@ class Layout
         // CSS variables now loaded via /api/theme-css.php link tag
         // Only output dynamic styles that can't be in external CSS
         ob_start();
-        ?>
+    ?>
         <style>
             /* Logo glow effects (dynamic, not in static CSS) */
             .nav-brand img {
@@ -500,7 +449,7 @@ class Layout
                 }
             }
         </style>
-        <?php
+    <?php
         return ob_get_clean();
     }
 
@@ -513,7 +462,7 @@ class Layout
      */
     public static function renderHead($pageTitle, $pageType = 'hub', $useModernLibraries = true)
     {
-        ?>
+    ?>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="<?php echo e($_SESSION['csrf_token'] ?? ''); ?>">
@@ -522,11 +471,11 @@ class Layout
         <link rel="icon" type="image/png" href="<?php echo e(SiteSettings::get('favicon_path', '/assets/images/Cowboy_SM_favicon.png')); ?>">
         <?php echo SiteSettings::getGoogleFontsLink(); ?>
         <?php if ($useModernLibraries): ?>
-        <?php echo self::getModernLibraries($pageType); ?>
+            <?php echo self::getModernLibraries($pageType); ?>
         <?php endif; ?>
         <?php echo self::getStylesheets($pageType); ?>
         <?php echo self::getInlineStyles($pageType); ?>
-        <?php
+    <?php
     }
 
     /**
@@ -535,162 +484,200 @@ class Layout
      */
     public static function renderModernInit()
     {
-        ?>
+    ?>
         <script nonce="<?php echo CSP_NONCE; ?>">
-        // Initialize The Hub modern components
-        if (typeof window.TheHub === 'undefined') {
-            // CDN mode - initialize components manually
-            window.TheHub = {
-                version: '2.0.0',
+            // Initialize The Hub modern components
+            if (typeof window.TheHub === 'undefined') {
+                // CDN mode - initialize components manually
+                window.TheHub = {
+                    version: '2.0.0',
 
-                init() {
-                    this.initNotifications();
-                    this.initTooltips();
-                    this.initAnimations();
-                    this.initAxios();
-                    console.log('🚀 The Hub initialized (CDN mode)');
-                },
+                    init() {
+                        this.initNotifications();
+                        this.initTooltips();
+                        this.initAnimations();
+                        this.initAxios();
+                        console.log('🚀 The Hub initialized (CDN mode)');
+                    },
 
-                initNotifications() {
-                    if (typeof Notyf !== 'undefined') {
-                        this.notyf = new Notyf({
-                            duration: 4000,
-                            position: { x: 'right', y: 'top' },
-                            types: [
-                                {
-                                    type: 'success',
-                                    background: '#28a745',
-                                    icon: { className: 'bi bi-check-circle-fill', tagName: 'i' }
+                    initNotifications() {
+                        if (typeof Notyf !== 'undefined') {
+                            this.notyf = new Notyf({
+                                duration: 4000,
+                                position: {
+                                    x: 'right',
+                                    y: 'top'
                                 },
-                                {
-                                    type: 'error',
-                                    background: '#dc3545',
-                                    icon: { className: 'bi bi-exclamation-triangle-fill', tagName: 'i' }
-                                },
-                                {
-                                    type: 'warning',
-                                    background: '#ffc107',
-                                    icon: { className: 'bi bi-exclamation-circle-fill', tagName: 'i' }
-                                },
-                                {
-                                    type: 'info',
-                                    background: '#17a2b8',
-                                    icon: { className: 'bi bi-info-circle-fill', tagName: 'i' }
-                                }
-                            ]
-                        });
-                    }
-                },
-
-                initTooltips() {
-                    if (typeof bootstrap !== 'undefined') {
-                        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                        [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-                    }
-                },
-
-                initAnimations() {
-                    if (typeof AOS !== 'undefined') {
-                        AOS.init({
-                            duration: 800,
-                            easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)', // MD3 motion-standard
-                            once: true,
-                            offset: 100
-                        });
-                    }
-                },
-
-                initAxios() {
-                    if (typeof axios !== 'undefined') {
-                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                        if (csrfToken) {
-                            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+                                types: [{
+                                        type: 'success',
+                                        background: '#28a745',
+                                        icon: {
+                                            className: 'bi bi-check-circle-fill',
+                                            tagName: 'i'
+                                        }
+                                    },
+                                    {
+                                        type: 'error',
+                                        background: '#dc3545',
+                                        icon: {
+                                            className: 'bi bi-exclamation-triangle-fill',
+                                            tagName: 'i'
+                                        }
+                                    },
+                                    {
+                                        type: 'warning',
+                                        background: '#ffc107',
+                                        icon: {
+                                            className: 'bi bi-exclamation-circle-fill',
+                                            tagName: 'i'
+                                        }
+                                    },
+                                    {
+                                        type: 'info',
+                                        background: '#17a2b8',
+                                        icon: {
+                                            className: 'bi bi-info-circle-fill',
+                                            tagName: 'i'
+                                        }
+                                    }
+                                ]
+                            });
                         }
-                        axios.defaults.headers.common['Content-Type'] = 'application/json';
-                        axios.interceptors.response.use(
-                            response => response,
-                            error => {
-                                if (error.response?.status === 401) {
-                                    window.location.href = '/login.php';
+                    },
+
+                    initTooltips() {
+                        if (typeof bootstrap !== 'undefined') {
+                            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                            [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+                        }
+                    },
+
+                    initAnimations() {
+                        if (typeof AOS !== 'undefined') {
+                            AOS.init({
+                                duration: 800,
+                                easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)', // MD3 motion-standard
+                                once: true,
+                                offset: 100
+                            });
+                        }
+                    },
+
+                    initAxios() {
+                        if (typeof axios !== 'undefined') {
+                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                            if (csrfToken) {
+                                axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+                            }
+                            axios.defaults.headers.common['Content-Type'] = 'application/json';
+                            axios.interceptors.response.use(
+                                response => response,
+                                error => {
+                                    if (error.response?.status === 401) {
+                                        window.location.href = '/login.php';
+                                    }
+                                    return Promise.reject(error);
                                 }
-                                return Promise.reject(error);
-                            }
-                        );
-                    }
-                },
+                            );
+                        }
+                    },
 
-                notify(message, type = 'success') {
-                    if (this.notyf) {
-                        this.notyf.open({ type, message });
-                    } else if (typeof Swal !== 'undefined') {
-                        Swal.fire({ icon: type, text: message, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
-                    } else {
-                        alert(message);
-                    }
-                },
+                    notify(message, type = 'success') {
+                        if (this.notyf) {
+                            this.notyf.open({
+                                type,
+                                message
+                            });
+                        } else if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: type,
+                                text: message,
+                                toast: true,
+                                position: 'top-end',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            alert(message);
+                        }
+                    },
 
-                async confirm(title, text, confirmText = 'Confirm') {
-                    if (typeof Swal !== 'undefined') {
-                        const result = await Swal.fire({
-                            title,
-                            text,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: confirmText,
-                            cancelButtonText: 'Cancel',
-                            customClass: {
-                                confirmButton: 'btn btn-primary me-2',
-                                cancelButton: 'btn btn-secondary'
-                            },
-                            buttonsStyling: false
-                        });
-                        return result.isConfirmed;
-                    }
-                    return confirm(text);
-                },
+                    async confirm(title, text, confirmText = 'Confirm') {
+                        if (typeof Swal !== 'undefined') {
+                            const result = await Swal.fire({
+                                title,
+                                text,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: confirmText,
+                                cancelButtonText: 'Cancel',
+                                customClass: {
+                                    confirmButton: 'btn btn-primary me-2',
+                                    cancelButton: 'btn btn-secondary'
+                                },
+                                buttonsStyling: false
+                            });
+                            return result.isConfirmed;
+                        }
+                        return confirm(text);
+                    },
 
-                showLoading(title = 'Processing...') {
-                    console.log('🔄 TheHub.showLoading() called with title:', title);
-                    console.log('   - Swal exists?', typeof Swal !== 'undefined');
-                    if (typeof Swal !== 'undefined') {
-                        console.log('✅ Calling Swal.fire() to show loading modal');
-                        Swal.fire({
-                            title,
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                console.log('✅ Swal modal opened, calling Swal.showLoading()');
-                                Swal.showLoading();
-                            }
-                        });
-                        console.log('✅ Swal.fire() completed');
-                    } else {
-                        console.log('❌ Swal not available, cannot show loading modal');
-                    }
-                },
+                    showLoading(title = 'Processing...') {
+                        console.log('🔄 TheHub.showLoading() called with title:', title);
+                        console.log('   - Swal exists?', typeof Swal !== 'undefined');
+                        if (typeof Swal !== 'undefined') {
+                            console.log('✅ Calling Swal.fire() to show loading modal');
+                            Swal.fire({
+                                title,
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    console.log('✅ Swal modal opened, calling Swal.showLoading()');
+                                    Swal.showLoading();
+                                }
+                            });
+                            console.log('✅ Swal.fire() completed');
+                        } else {
+                            console.log('❌ Swal not available, cannot show loading modal');
+                        }
+                    },
 
-                closeLoading() {
-                    console.log('🚪 TheHub.closeLoading() called');
-                    console.log('   - Swal exists?', typeof Swal !== 'undefined');
-                    if (typeof Swal !== 'undefined') {
-                        console.log('✅ Calling Swal.close()');
-                        Swal.close();
-                        console.log('✅ Swal.close() completed');
-                    } else {
-                        console.log('❌ Swal not available, cannot close loading modal');
+                    closeLoading() {
+                        console.log('🚪 TheHub.closeLoading() called');
+                        console.log('   - Swal exists?', typeof Swal !== 'undefined');
+                        if (typeof Swal !== 'undefined') {
+                            console.log('✅ Calling Swal.close()');
+                            Swal.close();
+                            console.log('✅ Swal.close() completed');
+                        } else {
+                            console.log('❌ Swal not available, cannot close loading modal');
+                        }
                     }
+                };
+
+                // Initialize when ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', () => window.TheHub.init());
+                } else {
+                    window.TheHub.init();
                 }
-            };
-
-            // Initialize when ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => window.TheHub.init());
-            } else {
-                window.TheHub.init();
             }
-        }
         </script>
-        <?php
+<?php
+    }
+
+    /**
+     * Render User Profile Dropdown Component (Shared across Hub/Management/Admin)
+     * Wrapper method that delegates to standalone component
+     *
+     * @param array $user Current user data with keys: id, name, picture, role
+     * @param string $userRole User's effective role (handles "view as" mode)
+     * @return void Outputs HTML directly
+     */
+    public static function renderUserProfile($user, $userRole)
+    {
+        // Component is autoloaded via PSR-4, no need for require_once
+        \Hub\Components\UserProfileDropdown::render($user, $userRole);
     }
 }
