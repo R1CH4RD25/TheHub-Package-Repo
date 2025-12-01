@@ -18,36 +18,22 @@ class Authenticate
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        // Laravel admin routes should use BOTH Laravel AND PHP sessions
-        // Check Laravel session first, then fall back to PHP session
-        
-        $user = null;
-        
-        // Try Laravel session (for admin routes)
-        if ($request->session()->has('user')) {
-            $user = $request->session()->get('user');
-        }
-        
-        // Fall back to PHP session (for legacy hub/modules)
-        if (!$user) {
-            // Start PHP session if not already started
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            
-            // Get user from PHP session via Auth class
-            $user = Auth::getCurrentUser();
-            
-            // If found in PHP session, copy to Laravel session for future requests
-            if ($user) {
-                $request->session()->put('user', $user);
-                $request->session()->save();
-            }
-        }
+        // Check if user is logged in via PHP session
+        // Auth.php stores: $_SESSION['user_id'], $_SESSION['email'], $_SESSION['role'], etc.
+        $isLoggedIn = $request->session()->get('logged_in') ?? $_SESSION['logged_in'] ?? false;
 
-        if (!$user) {
+        if (!$isLoggedIn) {
             return new RedirectResponse('/login.php');
         }
+
+        // Build user array from session keys (matches Auth.php format)
+        $user = [
+            'id' => $request->session()->get('user_id') ?? $_SESSION['user_id'] ?? null,
+            'email' => $request->session()->get('email') ?? $_SESSION['email'] ?? null,
+            'name' => $request->session()->get('name') ?? $_SESSION['name'] ?? null,
+            'role' => $request->session()->get('role') ?? $_SESSION['role'] ?? 'user',
+            'picture' => $request->session()->get('picture') ?? $_SESSION['picture'] ?? null,
+        ];
 
         // Check role-based access if roles are specified
         if (!empty($roles) && !in_array($user['role'], $roles)) {
