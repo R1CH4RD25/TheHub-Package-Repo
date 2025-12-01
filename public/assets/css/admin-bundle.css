@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Mon Dec  1 06:23:46 PM UTC 2025
+ * Generated: Mon Dec  1 06:24:34 PM UTC 2025
  */
 
 
@@ -3363,13 +3363,7 @@ html {
     transform: translateY(-1px);
 }
 
-/* Button icon spacing - center text properly */
-.btn i {
-    margin-right: 6px;
-    vertical-align: middle;
-}
-
-/* Specific overrides for first/last icons */
+/* Button icon spacing - only add margin when there's text */
 .btn i:first-child:not(:only-child) {
     margin-left: 0;
     margin-right: 6px;
