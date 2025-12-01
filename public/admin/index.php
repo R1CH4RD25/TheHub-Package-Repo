@@ -78,7 +78,9 @@ $users = $userModel->getAll();
                 'id' => 'users',
                 'label' => 'User Management',
                 'icon' => 'fas fa-users',
-                'type' => 'tab',
+                'type' => 'link',
+                'url' => '#',
+                'data_tab' => 'users',
                 'active' => true
             ];
         }
@@ -89,32 +91,43 @@ $users = $userModel->getAll();
                 'id' => 'packages',
                 'label' => 'Package Management',
                 'icon' => 'fas fa-box',
-                'type' => 'tab',
+                'type' => 'link',
+                'url' => '#',
+                'data_tab' => 'packages',
                 'badge_id' => 'sidebarConfigBadge'
+            ];
+        }
+
+        // Super Admin Only - Package Manager
+        if ($isSuperAdmin) {
+            $navItems[] = [
+                'id' => 'package-manager',
+                'label' => 'Package Manager',
+                'icon' => 'fas fa-cube',
+                'type' => 'link',
+                'url' => '#',
+                'data_tab' => 'package-manager'
             ];
         }
 
         // Site Settings
         if ($isSuperAdmin) {
             $navItems[] = [
-                'id' => 'package-manager',
-                'label' => 'Package Manager',
-                'icon' => 'fas fa-cube',
-                'type' => 'tab'
-            ];
-            
-            $navItems[] = [
                 'id' => 'site-settings',
                 'label' => 'Site Settings',
                 'icon' => 'fas fa-cog',
-                'type' => 'tab'
+                'type' => 'link',
+                'url' => '#',
+                'data_tab' => 'site-settings'
             ];
 
             $navItems[] = [
                 'id' => 'logs',
                 'label' => 'Activity Logs',
                 'icon' => 'fas fa-chart-line',
-                'type' => 'tab'
+                'type' => 'link',
+                'url' => '#',
+                'data_tab' => 'logs'
             ];
         }
 
@@ -124,7 +137,9 @@ $users = $userModel->getAll();
                 'id' => 'export',
                 'label' => 'Export Data',
                 'icon' => 'fas fa-download',
-                'type' => 'tab'
+                'type' => 'link',
+                'url' => '#',
+                'data_tab' => 'export'
             ];
         }
 
