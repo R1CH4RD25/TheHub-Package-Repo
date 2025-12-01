@@ -69,31 +69,11 @@ if (in_array($userRole, ['super_admin', 'admin'])) {
 
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="animations-played">
 <head>
-    <script>
-        // Run IMMEDIATELY before any CSS loads
-        (function() {
-            var animationsPlayed = sessionStorage.getItem('hub-animations-played');
-            if (animationsPlayed === 'true') {
-                document.documentElement.classList.add('animations-played');
-            }
-        })();
-    </script>
     <?php Layout::renderHead($siteName . ' - ' . SiteSettings::get('organization_name', 'Your Organization'), 'hub'); ?>
 </head>
 <body>
-    <script>
-        // Mark animations as played after they complete
-        if (sessionStorage.getItem('hub-animations-played') !== 'true') {
-            setTimeout(function() {
-                sessionStorage.setItem('hub-animations-played', 'true');
-                document.body.classList.add('animations-played');
-            }, 1000);
-        } else {
-            document.body.classList.add('animations-played');
-        }
-    </script>
     <div class="page-wrapper hub-page">
         <?php include __DIR__ . '/partials/header.php'; ?>
 
