@@ -26,7 +26,8 @@ require __DIR__ . '/../src/bootstrap.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 /** @var Application $app */
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+// bootstrap.php already loaded the app into $GLOBALS['laravelApp']
+$app = $GLOBALS['laravelApp'];
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
