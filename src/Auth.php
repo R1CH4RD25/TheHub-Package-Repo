@@ -415,19 +415,6 @@ class Auth
         $_SESSION['picture'] = $user['picture'] ?? null;
         $_SESSION['logged_in'] = true;
 
-        // ALSO store in Laravel session format (for /admin routes)
-        // Laravel's middleware will read this
-        if (isset($GLOBALS['laravelApp'])) {
-            $laravelSession = $GLOBALS['laravelApp']->make('session');
-            $laravelSession->put('user_id', $user['id']);
-            $laravelSession->put('email', $user['email']);
-            $laravelSession->put('name', $user['name']);
-            $laravelSession->put('role', $user['role']);
-            $laravelSession->put('picture', $user['picture'] ?? null);
-            $laravelSession->put('logged_in', true);
-            $laravelSession->save();
-        }
-
         // Audit log - successful login
         try {
             $logger = new AuditLogger();
