@@ -52,7 +52,7 @@
         elseif (strpos($currentPath, '/admin/logs') !== false) $activeItem = 'logs';
         elseif (strpos($currentPath, '/admin/export') !== false) $activeItem = 'export';
         
-        // Render Enterprise Sidebar (with header at bottom)
+        // Render Enterprise Sidebar
         \Hub\Components\EnterpriseSidebar::render($user, $userRole, [
             'context' => 'admin',
             'title' => 'Admin',
@@ -61,19 +61,22 @@
             'nav_items' => $navItems,
             'active_item' => $activeItem
         ]);
+
+        // Render Enterprise Header
+        \Hub\Components\EnterpriseHeader::render($user, $userRole, [
+            'context' => 'admin',
+            'breadcrumbs' => [
+                ['label' => 'Home', 'url' => '/hub.php'],
+                ['label' => 'Admin']
+            ],
+            'show_notifications' => true
+        ]);
         ?>
 
         <!-- Main Content Area -->
         <main class="admin-main">
             @yield('content')
         </main>
-
-        <?php
-        // Render Enterprise Footer
-        \Hub\Components\EnterpriseFooter::render([
-            'context' => 'admin'
-        ]);
-        ?>
     </div>
 
     <!-- jQuery -->

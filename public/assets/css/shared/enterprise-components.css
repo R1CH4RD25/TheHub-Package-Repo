@@ -24,7 +24,7 @@
 .admin-shell {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     min-height: 100vh;
     background: var(--gray-50);
 }
@@ -38,10 +38,26 @@
     overflow-y: auto;
 }
 
-.admin-main {
+.admin-header {
     grid-column: 2;
     grid-row: 1;
-    padding: var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-300);
+    background: var(--gray-50);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 72px;
+    box-sizing: border-box;
+}
+
+.admin-main {
+    grid-column: 2;
+    grid-row: 2;
+    padding: var(--space-4);
     overflow: auto;
     display: flex;
     flex-direction: column;
@@ -52,7 +68,7 @@
 
 .admin-footer {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     display: flex;
     align-items: center;
     justify-content: space-between;

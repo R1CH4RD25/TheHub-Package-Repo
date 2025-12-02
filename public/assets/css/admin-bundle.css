@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 01:55:20 PM UTC 2025
+ * Generated: Tue Dec  2 02:39:31 PM UTC 2025
  */
 
 
@@ -555,7 +555,7 @@ html {
 .admin-shell {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     min-height: 100vh;
     background: var(--gray-50);
 }
@@ -569,10 +569,26 @@ html {
     overflow-y: auto;
 }
 
-.admin-main {
+.admin-header {
     grid-column: 2;
     grid-row: 1;
-    padding: var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-300);
+    background: var(--gray-50);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 72px;
+    box-sizing: border-box;
+}
+
+.admin-main {
+    grid-column: 2;
+    grid-row: 2;
+    padding: var(--space-4);
     overflow: auto;
     display: flex;
     flex-direction: column;
@@ -583,7 +599,7 @@ html {
 
 .admin-footer {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1910,20 +1926,25 @@ html {
 .sidebar-footer-content {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
 }
 
-.sidebar-footer-title {
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
-    color: var(--gray-900);
-    margin: 0;
-}
-
-.sidebar-footer-desc {
+.footer-info {
     font-size: var(--text-xs);
     color: var(--gray-600);
-    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.footer-separator {
+    color: var(--gray-400);
+}
+
+.footer-version {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    font-weight: var(--font-medium);
 }
 
 /* Hide footer text when collapsed */
