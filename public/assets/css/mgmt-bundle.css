@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:15:37 PM UTC 2025
+ * Generated: Tue Dec  2 05:16:54 PM UTC 2025
  */
 
 
@@ -2413,7 +2413,7 @@ html {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0;
+    padding: 1.5rem;
     background: var(--bg-secondary);
     min-width: 0;
 }
