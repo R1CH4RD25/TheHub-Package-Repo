@@ -1,124 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') - The Hub</title>
+@extends('layouts.enterprise')
 
-    <!-- Enterprise Admin Bundle (Microsoft 365 Style) -->
-    <link rel="stylesheet" href="/assets/css/admin-bundle.css">
+@php
+// Admin context configuration
+$context = 'admin';
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+// Build admin nav items
+$navItems = [
+    ['type' => 'link', 'id' => 'home', 'label' => 'Home', 'url' => '/admin/', 'icon' => 'fas fa-home'],
+    ['type' => 'link', 'id' => 'users', 'label' => 'Users', 'url' => '/admin/users', 'icon' => 'fas fa-users'],
+    ['type' => 'link', 'id' => 'packages', 'label' => 'Packages', 'url' => '/admin/packages', 'icon' => 'fas fa-box'],
+    ['type' => 'link', 'id' => 'settings', 'label' => 'Settings', 'url' => '/admin/settings', 'icon' => 'fas fa-cog'],
+    ['type' => 'link', 'id' => 'logs', 'label' => 'Activity Logs', 'url' => '/admin/logs', 'icon' => 'fas fa-list-alt'],
+    ['type' => 'link', 'id' => 'export', 'label' => 'Export Data', 'url' => '/admin/export', 'icon' => 'fas fa-download'],
+];
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+// Determine active item based on current route
+$currentPath = $_SERVER['REQUEST_URI'] ?? '/admin/';
+$activeItem = 'home'; // default
+if (strpos($currentPath, '/admin/users') !== false) $activeItem = 'users';
+elseif (strpos($currentPath, '/admin/packages') !== false) $activeItem = 'packages';
+elseif (strpos($currentPath, '/admin/settings') !== false) $activeItem = 'settings';
+elseif (strpos($currentPath, '/admin/logs') !== false) $activeItem = 'logs';
+elseif (strpos($currentPath, '/admin/export') !== false) $activeItem = 'export';
 
-    <!-- Notyf - Toast Notifications -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+// Sidebar configuration
+$sidebarTitle = 'Admin';
+$sidebarIcon = 'fas fa-shield-alt';
+$logoUrl = '/admin/';
 
-    <!-- SweetAlert2 - Beautiful Modals -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+// Breadcrumbs
+$breadcrumbs = [
+    ['label' => 'Home', 'url' => '/hub.php'],
+    ['label' => 'Admin']
+];
+@endphp
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
-
-    @stack('styles')
-</head>
-
-<body class="admin-root">
-    <div class="admin-shell">
-        <?php
-        // Get user from request (injected by middleware)
-        $user = request()->attributes->get('user');
-        $userRole = $user['role'] ?? 'user';
-        
-        // Build admin nav items
-        $navItems = [
-            ['type' => 'link', 'id' => 'home', 'label' => 'Home', 'url' => '/admin/', 'icon' => 'fas fa-home'],
-            ['type' => 'link', 'id' => 'users', 'label' => 'Users', 'url' => '/admin/users', 'icon' => 'fas fa-users'],
-            ['type' => 'link', 'id' => 'packages', 'label' => 'Packages', 'url' => '/admin/packages', 'icon' => 'fas fa-box'],
-            ['type' => 'link', 'id' => 'settings', 'label' => 'Settings', 'url' => '/admin/settings', 'icon' => 'fas fa-cog'],
-            ['type' => 'link', 'id' => 'logs', 'label' => 'Activity Logs', 'url' => '/admin/logs', 'icon' => 'fas fa-list-alt'],
-            ['type' => 'link', 'id' => 'export', 'label' => 'Export Data', 'url' => '/admin/export', 'icon' => 'fas fa-download'],
-        ];
-        
-        // Determine active item based on current route
-        $currentPath = $_SERVER['REQUEST_URI'] ?? '/admin/';
-        $activeItem = 'home'; // default
-        if (strpos($currentPath, '/admin/users') !== false) $activeItem = 'users';
-        elseif (strpos($currentPath, '/admin/packages') !== false) $activeItem = 'packages';
-        elseif (strpos($currentPath, '/admin/settings') !== false) $activeItem = 'settings';
-        elseif (strpos($currentPath, '/admin/logs') !== false) $activeItem = 'logs';
-        elseif (strpos($currentPath, '/admin/export') !== false) $activeItem = 'export';
-        
-        // Render Enterprise Sidebar
-        \Hub\Components\EnterpriseSidebar::render($user, $userRole, [
-            'context' => 'admin',
-            'title' => 'Admin',
-            'icon' => 'fas fa-shield-alt',
-            'logo_url' => '/admin/',
-            'nav_items' => $navItems,
-            'active_item' => $activeItem
-        ]);
-
-        // Render Enterprise Header
-        \Hub\Components\EnterpriseHeader::render($user, $userRole, [
-            'context' => 'admin',
-            'breadcrumbs' => [
-                ['label' => 'Home', 'url' => '/hub.php'],
-                ['label' => 'Admin']
-            ],
-            'show_notifications' => true
-        ]);
-        ?>
-
-        <!-- Main Content Area -->
-        <main class="admin-main">
-            @yield('content')
-        </main>
-    </div>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <!-- Notyf -->
-    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-
-    <!-- Initialize Notyf -->
-    <script>
-        const notyf = new Notyf({
-            duration: 3000,
-            position: {
-                x: 'right',
-                y: 'top',
-            },
-            types: [
-                {
-                    type: 'success',
-                    background: '#10b981',
-                    icon: {
-                        className: 'fas fa-check-circle',
-                        tagName: 'i',
-                        color: 'white'
-                    }
-                },
-                {
-                    type: 'error',
-                    background: '#ef4444',
-                    icon: {
-                        className: 'fas fa-exclamation-triangle',
-                        tagName: 'i',
-                        color: 'white'
-                    }
-                }
-            ]
-        });
-    </script>
-
-    @stack('scripts')
-</body>
-</html>
