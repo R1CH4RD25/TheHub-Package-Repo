@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:54:12 PM UTC 2025
+ * Generated: Tue Dec  2 08:57:11 PM UTC 2025
  */
 
 
@@ -2539,6 +2539,20 @@ html {
     min-height: 0;
 }
 
+/* Muted state for entire panel content when "all roles" selected */
+.panel-content.muted {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.panel-content.muted:hover {
+    opacity: 0.8;
+}
+
+.panel-content.muted * {
+    pointer-events: none;
+}
+
 .role-selection-mode {
     display: flex;
     flex-direction: column;
@@ -2586,29 +2600,8 @@ html {
     border-color: var(--primary-color);
 }
 
-/* Muted state for role search when "all roles" selected */
-.role-search.muted {
-    opacity: 0.5;
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-.role-search.muted:hover {
-    opacity: 0.8;
-}
-
 .role-tree {
     font-size: 0.8125rem;
-}
-
-/* Muted state when "all roles" radio is selected */
-.role-tree.muted {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-.role-tree.muted .role-item {
-    color: var(--gray-500);
 }
 
 .role-item {
