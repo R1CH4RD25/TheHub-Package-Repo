@@ -326,13 +326,11 @@
 
 .role-tree.muted {
     opacity: 0.5;
-    pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
 .role-tree.muted:hover {
     opacity: 1;
-    pointer-events: auto;
 }
 
 .role-item {

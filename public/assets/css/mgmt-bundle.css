@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 09:09:56 PM UTC 2025
+ * Generated: Tue Dec  2 09:14:07 PM UTC 2025
  */
 
 
@@ -2605,13 +2605,11 @@ html {
 
 .role-tree.muted {
     opacity: 0.5;
-    pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
 .role-tree.muted:hover {
     opacity: 1;
-    pointer-events: auto;
 }
 
 .role-item {
