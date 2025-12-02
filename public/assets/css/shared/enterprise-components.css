@@ -56,7 +56,7 @@
 .admin-main {
     grid-column: 2;
     grid-row: 2;
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     overflow: auto;
     display: flex;
     flex-direction: column;
