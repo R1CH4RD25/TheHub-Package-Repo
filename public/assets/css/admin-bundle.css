@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:00:39 PM UTC 2025
+ * Generated: Tue Dec  2 05:02:44 PM UTC 2025
  */
 
 
@@ -2364,6 +2364,7 @@ html {
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
+    align-items: center;
 }
 
 /* Individual tab containers */
@@ -2372,6 +2373,7 @@ html {
     flex-direction: column;
     height: 100%;
     width: 100%;
+    max-width: 1400px;
     overflow: hidden;
     position: relative;
     z-index: 1;
