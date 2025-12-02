@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\{
+    DashboardController,
     ExportController,
     UserController,
     PackageController,
@@ -32,10 +33,8 @@ Route::get('/laravel/health', function () {
 // Admin routes (Laravel migration proof-of-concept)
 // Requires authentication: admin, super_admin
 Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function () {
-    // Admin Dashboard - redirect to users
-    Route::get('/', function () {
-        return redirect('/admin/users');
-    })->name('admin.dashboard');
+    // Admin Dashboard - shows overview with links to all sections
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     
     // Users Management
     Route::get('/users', [UserController::class, 'index'])->name('admin.users');
