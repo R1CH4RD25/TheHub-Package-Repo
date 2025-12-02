@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:34:53 PM UTC 2025
+ * Generated: Tue Dec  2 08:35:48 PM UTC 2025
  */
 
 
@@ -2478,6 +2478,7 @@ html {
     grid-template-columns: 280px 1fr;
     min-height: 600px;
     gap: 0;
+    transition: grid-template-columns 0.3s ease;
 }
 
 /* Role Filter Panel - Left Sidebar */
