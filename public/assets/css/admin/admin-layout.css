@@ -364,7 +364,7 @@
     height: 32px;
     border-radius: var(--radius-full);
     object-fit: cover;
-    border: 2px solid var(--gray-200);
+    border: 2px solid var(--primary-color);
 }
 
 .nav-user-info {
