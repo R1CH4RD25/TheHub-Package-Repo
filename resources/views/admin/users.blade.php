@@ -318,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const roleSearch = document.querySelector('.role-search');
     const roleTree = document.querySelector('.role-tree');
     const roleModeRadios = document.querySelectorAll('input[name="roleMode"]');
+    let lastSelectedRole = null; // Remember the last selected role
     
     roleModeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
@@ -325,12 +326,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mute the search and tree when "all roles" is selected
                 if (roleSearch) roleSearch.classList.add('muted');
                 if (roleTree) roleTree.classList.add('muted');
+                // Remove active state from all role items but remember which was selected
+                const activeItem = document.querySelector('.role-item.active');
+                if (activeItem) {
+                    lastSelectedRole = activeItem;
+                    activeItem.classList.remove('active');
+                }
                 // Show all users
                 renderUsersTable(allUsers, 'usersTable');
             } else {
                 // Unmute the search and tree when "selected roles" is chosen
                 if (roleSearch) roleSearch.classList.remove('muted');
                 if (roleTree) roleTree.classList.remove('muted');
+                // Restore the previously selected role if any
+                if (lastSelectedRole) {
+                    lastSelectedRole.classList.add('active');
+                    // Re-trigger the filter for that role
+                    lastSelectedRole.click();
+                }
             }
         });
     });
