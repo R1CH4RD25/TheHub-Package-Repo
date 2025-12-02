@@ -616,10 +616,28 @@ function bulkSuspendUsers(userIds) {
         confirmButtonText: 'Yes, suspend them'
     }).then((result) => {
         if (result.isConfirmed) {
-            // TODO: Implement bulk suspend API
-            notyf.success(`Suspended ${userIds.length} user(s)`);
-            document.getElementById('actionPanel').classList.remove('active');
-            loadActiveUsers();
+            // Call API for each user
+            const promises = userIds.map(userId => 
+                fetch(`/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ action: 'deactivate' })
+                }).then(r => r.json())
+            );
+            
+            Promise.all(promises)
+                .then(() => {
+                    notyf.success(`Suspended ${userIds.length} user(s)`);
+                    document.getElementById('actionPanel').classList.remove('active');
+                    loadActiveUsers();
+                })
+                .catch(err => {
+                    notyf.error('Failed to suspend users');
+                    console.error(err);
+                });
         }
     });
 }
@@ -634,10 +652,28 @@ function bulkActivateUsers(userIds) {
         confirmButtonText: 'Yes, activate them'
     }).then((result) => {
         if (result.isConfirmed) {
-            // TODO: Implement bulk activate API
-            notyf.success(`Activated ${userIds.length} user(s)`);
-            document.getElementById('actionPanel').classList.remove('active');
-            loadActiveUsers();
+            // Call API for each user
+            const promises = userIds.map(userId => 
+                fetch(`/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ action: 'reactivate' })
+                }).then(r => r.json())
+            );
+            
+            Promise.all(promises)
+                .then(() => {
+                    notyf.success(`Activated ${userIds.length} user(s)`);
+                    document.getElementById('actionPanel').classList.remove('active');
+                    loadActiveUsers();
+                })
+                .catch(err => {
+                    notyf.error('Failed to activate users');
+                    console.error(err);
+                });
         }
     });
 }
