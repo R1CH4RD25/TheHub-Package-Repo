@@ -309,18 +309,30 @@
     font-size: 0.8125rem;
 }
 
+/* Muted state when "all roles" radio is selected */
+.role-tree.muted {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.role-tree.muted .role-item {
+    color: var(--gray-500);
+}
+
 .role-item {
     display: flex;
     align-items: center;
     padding: 0.5rem 0.75rem;
     cursor: pointer;
     border-radius: 4px;
-    transition: background 0.15s;
+    transition: all 0.15s;
     user-select: none;
+    color: var(--gray-700);
 }
 
 .role-item:hover {
     background: var(--gray-100);
+    color: var(--gray-900);
 }
 
 .role-item.active {

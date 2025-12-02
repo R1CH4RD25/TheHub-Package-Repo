@@ -31,7 +31,7 @@
                 <!-- Left Sidebar - Role Filter Panel -->
                 <div class="role-filter-panel">
                     <div class="panel-header">
-                        <h3>All roles</h3>
+                        <h3>&nbsp;</h3>
                         <button class="collapse-btn" title="Collapse">
                             <i class="fas fa-chevron-left"></i>
                         </button>
@@ -59,11 +59,6 @@
                         <!-- Role Tree -->
                         <div class="role-tree">
                             <div class="role-category">
-                                <div class="role-item active" data-role="all">
-                                    <i class="fas fa-chevron-down toggle-icon"></i>
-                                    <span class="role-name">All Roles</span>
-                                </div>
-                                
                                 <!-- Administration -->
                                 <div class="role-group">
                                     <div class="role-item parent" data-role="administration">
@@ -318,6 +313,29 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.toggle('expanded', !isExpanded);
         });
     });
+    
+    // Handle role selection mode (all vs selected)
+    const roleTree = document.querySelector('.role-tree');
+    const roleModeRadios = document.querySelectorAll('input[name="roleMode"]');
+    
+    roleModeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'all') {
+                // Mute the role tree when "all roles" is selected
+                roleTree.classList.add('muted');
+                // Show all users
+                renderUsersTable(allUsers, 'usersTable');
+            } else {
+                // Unmute the role tree when "selected roles" is chosen
+                roleTree.classList.remove('muted');
+            }
+        });
+    });
+    
+    // Initialize as muted since "all" is checked by default
+    if (roleTree) {
+        roleTree.classList.add('muted');
+    }
 
     // Handle role selection
     document.querySelectorAll('.role-item').forEach(item => {
