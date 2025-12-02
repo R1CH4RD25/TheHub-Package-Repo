@@ -103,7 +103,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 2rem;
+    padding: 0;
     background: var(--bg-secondary);
     min-width: 0;
 }
