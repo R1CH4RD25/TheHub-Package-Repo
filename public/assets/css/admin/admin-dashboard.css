@@ -373,13 +373,6 @@
     font-weight: normal;
 }
 
-.panel-footer {
-    padding: 1rem;
-    border-top: 1px solid var(--gray-300);
-    margin-top: auto;
-    flex-shrink: 0;
-}
-
 .manage-link {
     display: flex;
     align-items: center;
@@ -393,6 +386,14 @@
 
 .manage-link:hover {
     text-decoration: underline;
+}
+
+/* Manage Footer (Google-style bottom link) */
+.manage-footer {
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--gray-300);
+    background: white;
+    margin-top: 1rem;
 }
 
 /* Users Content Area */

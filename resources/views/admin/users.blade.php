@@ -120,13 +120,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Manage Roles Link -->
-                        <div class="panel-footer">
-                            <a href="#" class="manage-link">
-                                <i class="fas fa-cog"></i> MANAGE ROLE HIERARCHY
-                            </a>
-                        </div>
                     </div>
                 </div>
 
@@ -207,6 +200,13 @@
             </div>
                 </div> <!-- .users-content -->
             </div> <!-- .users-layout -->
+
+            <!-- Bottom Manage Link (Google-style) -->
+            <div class="manage-footer">
+                <a href="#" class="manage-link">
+                    <i class="fas fa-cog"></i> MANAGE ROLE HIERARCHY
+                </a>
+            </div>
         </div> <!-- #subtab-active-users -->
 
         <!-- Pending Users Subtab -->

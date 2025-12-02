@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:43:11 PM UTC 2025
+ * Generated: Tue Dec  2 08:48:27 PM UTC 2025
  */
 
 
@@ -2652,13 +2652,6 @@ html {
     font-weight: normal;
 }
 
-.panel-footer {
-    padding: 1rem;
-    border-top: 1px solid var(--gray-300);
-    margin-top: auto;
-    flex-shrink: 0;
-}
-
 .manage-link {
     display: flex;
     align-items: center;
@@ -2672,6 +2665,14 @@ html {
 
 .manage-link:hover {
     text-decoration: underline;
+}
+
+/* Manage Footer (Google-style bottom link) */
+.manage-footer {
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--gray-300);
+    background: white;
+    margin-top: 1rem;
 }
 
 /* Users Content Area */
