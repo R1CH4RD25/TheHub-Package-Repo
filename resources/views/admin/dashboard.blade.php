@@ -3,150 +3,171 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<div class="admin-content-wrapper">
-    <div class="admin-header">
-        <div>
-            <h1 class="admin-title">Admin Dashboard</h1>
-            <p class="admin-subtitle">Manage your site from here</p>
+<!-- Page Header -->
+<div class="nd-page-header">
+    <div>
+        <h1>Admin Dashboard</h1>
+        <p>Centralized administration and system management</p>
+    </div>
+</div>
+
+<!-- Overview Metrics -->
+<div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: var(--space-8);">
+    <div class="metric-card">
+        <div class="metric-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="metric-content">
+            <div class="metric-value">5</div>
+            <div class="metric-label">Admin Modules</div>
         </div>
     </div>
 
-    <div class="dashboard-cards">
-        <div class="dashboard-card">
-            <div class="card-icon card-icon-blue">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="card-content">
-                <h3>User Management</h3>
-                <p>Manage users, roles, and invitations</p>
-                <a href="{{ route('admin.users') }}" class="card-link">Go to Users <i class="fas fa-arrow-right"></i></a>
-            </div>
+    <div class="metric-card">
+        <div class="metric-icon gold">
+            <i class="fas fa-shield-alt"></i>
         </div>
-
-        <div class="dashboard-card">
-            <div class="card-icon card-icon-purple">
-                <i class="fas fa-box"></i>
-            </div>
-            <div class="card-content">
-                <h3>Package Management</h3>
-                <p>Upload, install, and manage packages</p>
-                <a href="{{ route('admin.packages') }}" class="card-link">Go to Packages <i class="fas fa-arrow-right"></i></a>
-            </div>
+        <div class="metric-content">
+            <div class="metric-value">Active</div>
+            <div class="metric-label">System Status</div>
         </div>
+    </div>
 
-        <div class="dashboard-card">
-            <div class="card-icon card-icon-orange">
-                <i class="fas fa-cog"></i>
-            </div>
-            <div class="card-content">
-                <h3>Site Settings</h3>
-                <p>Configure site-wide settings and branding</p>
-                <a href="{{ route('admin.settings') }}" class="card-link">Go to Settings <i class="fas fa-arrow-right"></i></a>
-            </div>
+    <div class="metric-card">
+        <div class="metric-icon" style="background: var(--primary-light); color: var(--primary);">
+            <i class="fas fa-cogs"></i>
         </div>
-
-        <div class="dashboard-card">
-            <div class="card-icon card-icon-green">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="card-content">
-                <h3>Activity Logs</h3>
-                <p>View audit logs and system activity</p>
-                <a href="{{ route('admin.logs') }}" class="card-link">Go to Logs <i class="fas fa-arrow-right"></i></a>
-            </div>
+        <div class="metric-content">
+            <div class="metric-value">Ready</div>
+            <div class="metric-label">Configuration</div>
         </div>
+    </div>
 
-        <div class="dashboard-card">
-            <div class="card-icon card-icon-teal">
-                <i class="fas fa-file-export"></i>
-            </div>
-            <div class="card-content">
-                <h3>Data Export</h3>
-                <p>Export reports and data</p>
-                <a href="{{ route('admin.export') }}" class="card-link">Go to Export <i class="fas fa-arrow-right"></i></a>
-            </div>
+    <div class="metric-card">
+        <div class="metric-icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="metric-content">
+            <div class="metric-value">Online</div>
+            <div class="metric-label">Services</div>
         </div>
     </div>
 </div>
 
-<style>
-.dashboard-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
+<!-- Admin Modules Grid -->
+<div>
+    <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--gray-900); margin: 0 0 var(--space-1) 0;">
+        Administration Modules
+    </h2>
+    <p style="font-size: var(--text-sm); color: var(--gray-600); margin: 0 0 var(--space-4) 0;">
+        Select a module to manage system settings and resources
+    </p>
 
-.dashboard-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid #e5e7eb;
-    transition: all 0.2s;
-    display: flex;
-    gap: 1rem;
-}
+    <div class="mgmt-modules-grid">
+        <!-- User Management Module -->
+        <a href="{{ route('admin.users') }}" class="mgmt-module-card">
+            <div class="module-header">
+                <div class="module-icon blue">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>User Management</h3>
+            </div>
+            <p class="module-description">Manage users, roles, permissions, and invitations</p>
+            <div class="module-stats">
+                <div class="stat">
+                    <i class="fas fa-user"></i>
+                    <span>Manage Users</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-envelope"></i>
+                    <span>Send Invitations</span>
+                </div>
+            </div>
+        </a>
 
-.dashboard-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
+        <!-- Package Management Module -->
+        <a href="{{ route('admin.packages') }}" class="mgmt-module-card">
+            <div class="module-header">
+                <div class="module-icon purple">
+                    <i class="fas fa-box"></i>
+                </div>
+                <h3>Package Management</h3>
+            </div>
+            <p class="module-description">Upload, install, and manage system packages</p>
+            <div class="module-stats">
+                <div class="stat">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Packages</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-download"></i>
+                    <span>Install & Update</span>
+                </div>
+            </div>
+        </a>
 
-.card-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
+        <!-- Site Settings Module -->
+        <a href="{{ route('admin.settings') }}" class="mgmt-module-card">
+            <div class="module-header">
+                <div class="module-icon orange">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <h3>Site Settings</h3>
+            </div>
+            <p class="module-description">Configure site-wide settings and branding</p>
+            <div class="module-stats">
+                <div class="stat">
+                    <i class="fas fa-palette"></i>
+                    <span>Branding</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Configuration</span>
+                </div>
+            </div>
+        </a>
 
-.card-icon-blue { background: #dbeafe; color: #1e40af; }
-.card-icon-purple { background: #ede9fe; color: #6d28d9; }
-.card-icon-orange { background: #fed7aa; color: #c2410c; }
-.card-icon-green { background: #d1fae5; color: #065f46; }
-.card-icon-teal { background: #ccfbf1; color: #115e59; }
+        <!-- Activity Logs Module -->
+        <a href="{{ route('admin.logs') }}" class="mgmt-module-card">
+            <div class="module-header">
+                <div class="module-icon green">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Activity Logs</h3>
+            </div>
+            <p class="module-description">View audit logs and system activity</p>
+            <div class="module-stats">
+                <div class="stat">
+                    <i class="fas fa-history"></i>
+                    <span>Audit Trail</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-eye"></i>
+                    <span>Monitor Activity</span>
+                </div>
+            </div>
+        </a>
 
-.card-content {
-    flex: 1;
-}
-
-.card-content h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #111827;
-}
-
-.card-content p {
-    margin: 0 0 1rem 0;
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.card-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #2563eb;
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.card-link:hover {
-    color: #1d4ed8;
-}
-
-.card-link i {
-    font-size: 0.75rem;
-    transition: transform 0.2s;
-}
-
-.card-link:hover i {
-    transform: translateX(4px);
-}
-</style>
+        <!-- Data Export Module -->
+        <a href="{{ route('admin.export') }}" class="mgmt-module-card">
+            <div class="module-header">
+                <div class="module-icon teal">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <h3>Data Export</h3>
+            </div>
+            <p class="module-description">Export reports and system data</p>
+            <div class="module-stats">
+                <div class="stat">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Excel Reports</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-download"></i>
+                    <span>Download Data</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
 @endsection
