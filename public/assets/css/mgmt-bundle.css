@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 03:26:25 PM UTC 2025
+ * Generated: Tue Dec  2 03:29:19 PM UTC 2025
  */
 
 
@@ -1767,7 +1767,9 @@ html {
     margin: 0;
 }
 
+/* Hide logo and title link when collapsed */
 .admin-sidebar.collapsed .sidebar-header a {
+    display: none;
 }
 
 .sidebar-header a {
