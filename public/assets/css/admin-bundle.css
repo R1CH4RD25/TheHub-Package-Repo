@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:33:06 PM UTC 2025
+ * Generated: Tue Dec  2 08:34:53 PM UTC 2025
  */
 
 
@@ -2668,10 +2668,9 @@ html {
 .expand-roles-btn {
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 64px;
+    top: 10px;
+    width: 28px;
+    height: 56px;
     background: white;
     border: 1px solid var(--gray-300);
     border-left: none;
@@ -2693,7 +2692,7 @@ html {
 }
 
 .expand-roles-btn i {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 /* User avatar in table */
