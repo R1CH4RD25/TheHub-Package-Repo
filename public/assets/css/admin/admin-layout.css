@@ -176,19 +176,16 @@
     flex: 1;
 }
 
-/* Collapsed state for nav links */
+/* Collapsed state for nav links - icons stay in place */
 .admin-sidebar.collapsed .admin-nav,
 .mgmt-sidebar.collapsed .mgmt-nav {
-    align-items: center;
+    /* Remove centering alignment */
 }
 
 .admin-sidebar.collapsed .admin-nav-link,
 .mgmt-sidebar.collapsed .mgmt-nav-link {
-    justify-content: center;
-    padding: var(--space-2);
-    width: 40px;
-    height: 40px;
-    position: relative;
+    /* Don't center or resize - let icons stay in original position */
+    padding: var(--space-2) var(--space-3);
 }
 
 /* Hide text and badges when collapsed - same as sidebar header */
