@@ -73,16 +73,6 @@
                 <h3>User Management</h3>
             </div>
             <p class="module-description">Manage users, roles, permissions, and invitations</p>
-            <div class="module-stats">
-                <div class="stat">
-                    <i class="fas fa-user"></i>
-                    <span>Manage Users</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-envelope"></i>
-                    <span>Send Invitations</span>
-                </div>
-            </div>
         </a>
 
         <!-- Package Management Module -->
@@ -94,16 +84,6 @@
                 <h3>Package Management</h3>
             </div>
             <p class="module-description">Upload, install, and manage system packages</p>
-            <div class="module-stats">
-                <div class="stat">
-                    <i class="fas fa-upload"></i>
-                    <span>Upload Packages</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-download"></i>
-                    <span>Install & Update</span>
-                </div>
-            </div>
         </a>
 
         <!-- Site Settings Module -->
@@ -115,16 +95,6 @@
                 <h3>Site Settings</h3>
             </div>
             <p class="module-description">Configure site-wide settings and branding</p>
-            <div class="module-stats">
-                <div class="stat">
-                    <i class="fas fa-palette"></i>
-                    <span>Branding</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>Configuration</span>
-                </div>
-            </div>
         </a>
 
         <!-- Activity Logs Module -->
@@ -136,16 +106,6 @@
                 <h3>Activity Logs</h3>
             </div>
             <p class="module-description">View audit logs and system activity</p>
-            <div class="module-stats">
-                <div class="stat">
-                    <i class="fas fa-history"></i>
-                    <span>Audit Trail</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-eye"></i>
-                    <span>Monitor Activity</span>
-                </div>
-            </div>
         </a>
 
         <!-- Data Export Module -->
@@ -157,16 +117,6 @@
                 <h3>Data Export</h3>
             </div>
             <p class="module-description">Export reports and system data</p>
-            <div class="module-stats">
-                <div class="stat">
-                    <i class="fas fa-file-excel"></i>
-                    <span>Excel Reports</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-download"></i>
-                    <span>Download Data</span>
-                </div>
-            </div>
         </a>
     </div>
 </div>
