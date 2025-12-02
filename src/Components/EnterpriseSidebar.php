@@ -143,17 +143,20 @@ class EnterpriseSidebar
             (function() {
                 const sidebar = document.querySelector('[data-sidebar="enterprise"]');
                 const toggle = sidebar?.querySelector('.sidebar-toggle');
+                const shell = document.querySelector('.admin-shell');
                 const STORAGE_KEY = 'enterprise-sidebar-collapsed';
 
                 // Restore saved state
                 const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
-                if (isCollapsed && sidebar) {
+                if (isCollapsed && sidebar && shell) {
                     sidebar.classList.add('collapsed');
+                    shell.classList.add('has-collapsed-sidebar');
                 }
 
                 // Toggle functionality
                 toggle?.addEventListener('click', () => {
                     sidebar.classList.toggle('collapsed');
+                    shell.classList.toggle('has-collapsed-sidebar');
                     const collapsed = sidebar.classList.contains('collapsed');
                     localStorage.setItem(STORAGE_KEY, collapsed);
                 });

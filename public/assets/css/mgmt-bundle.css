@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 03:05:09 PM UTC 2025
+ * Generated: Tue Dec  2 03:06:09 PM UTC 2025
  */
 
 
@@ -558,6 +558,12 @@ html {
     grid-template-rows: auto minmax(0, 1fr) auto;
     min-height: 100vh;
     background: var(--gray-50);
+    transition: grid-template-columns 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Adjust grid when sidebar is collapsed */
+.admin-shell.has-collapsed-sidebar {
+    grid-template-columns: 64px minmax(0, 1fr);
 }
 
 .admin-sidebar {
