@@ -1968,13 +1968,6 @@ footer {
    Unique, top-notch animations for tables, tabs, and UI elements
    ========================================================================== */
 
-/* Tab Content - Slide and Scale from Side */
-.admin-tab {
-    opacity: 0;
-    transform: translateX(-30px) scale(0.95);
-    transition: none;
-}
-
 /* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
 .data-table tbody tr {
     opacity: 0;

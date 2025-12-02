@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:13:01 PM UTC 2025
+ * Generated: Tue Dec  2 05:15:37 PM UTC 2025
  */
 
 
@@ -4278,13 +4278,6 @@ footer {
    MODERN ADMIN DASHBOARD ANIMATIONS
    Unique, top-notch animations for tables, tabs, and UI elements
    ========================================================================== */
-
-/* Tab Content - Slide and Scale from Side */
-.admin-tab {
-    opacity: 0;
-    transform: translateX(-30px) scale(0.95);
-    transition: none;
-}
 
 /* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
 .data-table tbody tr {
