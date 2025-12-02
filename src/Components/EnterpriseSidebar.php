@@ -47,7 +47,8 @@ class EnterpriseSidebar
         ];
         $opts = array_merge($defaults, $options);
 
-        $contextClass = $opts['context'] === 'admin' ? 'admin-sidebar' : 'mgmt-sidebar';
+        // Both admin and management use the same sidebar class (280px width)
+        $contextClass = 'admin-sidebar';
         $navClass = $opts['context'] === 'admin' ? 'admin-nav' : 'mgmt-nav';
         $navLinkClass = $opts['context'] === 'admin' ? 'admin-nav-link' : 'mgmt-nav-link';
 
