@@ -230,6 +230,7 @@
     justify-content: space-between;
     padding: 1rem;
     border-bottom: 1px solid var(--gray-300);
+    min-height: 56px;
 }
 
 .panel-header h3 {
@@ -486,6 +487,7 @@
     justify-content: space-between;
     padding: 1rem;
     border-bottom: 1px solid var(--gray-300);
+    min-height: 56px;
 }
 
 .header-info {
