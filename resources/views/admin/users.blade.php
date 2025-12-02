@@ -470,6 +470,13 @@ function renderUsersTable(users, containerId) {
                     const statusText = isSuspended ? 'Suspended' : 'Active';
                     const statusClass = isSuspended ? 'status-suspended' : 'status-active';
                     
+                    // Use Google profile picture if available, otherwise use initials
+                    const avatarHtml = u.picture 
+                        ? `<img src="${u.picture}" alt="${u.name}" class="user-avatar-img ${isSuspended ? 'suspended' : ''}">`
+                        : `<div class="user-avatar ${isSuspended ? 'suspended' : ''}" style="background-color: ${avatarColor}">
+                            ${initials}
+                           </div>`;
+                    
                     return `
                     <tr data-user-id="${u.id}" class="${isSuspended ? 'user-suspended' : ''}">
                         <td class="checkbox-col">
@@ -477,9 +484,7 @@ function renderUsersTable(users, containerId) {
                         </td>
                         <td>
                             <div class="user-cell">
-                                <div class="user-avatar ${isSuspended ? 'suspended' : ''}" style="background-color: ${avatarColor}">
-                                    ${initials}
-                                </div>
+                                ${avatarHtml}
                                 <div class="user-info">
                                     <div class="user-name">${u.name}</div>
                                 </div>

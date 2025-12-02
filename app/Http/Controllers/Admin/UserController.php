@@ -34,10 +34,12 @@ class UserController extends Controller
         if ($pending) {
             $users = User::where('is_active', false)
                 ->whereNotNull('google_id')
+                ->select('id', 'name', 'email', 'role', 'picture', 'is_active', 'last_login', 'created_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
         } else {
-            $users = User::where('is_active', true)
+            // Return ALL users (both active and suspended) for status filtering
+            $users = User::select('id', 'name', 'email', 'role', 'picture', 'is_active', 'last_login')
                 ->orderBy('name')
                 ->get();
         }
