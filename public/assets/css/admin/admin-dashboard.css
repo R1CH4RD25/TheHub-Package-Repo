@@ -1963,10 +1963,7 @@ footer {
    ========================================================================== */
 
 /* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
-.data-table tbody tr {
-    opacity: 0;
-    transform: translateY(-15px);
-}
+/* Table row animation removed - was causing rows to be invisible */
 
 .data-table tbody tr.animate-in {
     animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;

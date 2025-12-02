@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:33:00 PM UTC 2025
+ * Generated: Tue Dec  2 06:22:33 PM UTC 2025
  */
 
 
@@ -4242,10 +4242,7 @@ footer {
    ========================================================================== */
 
 /* Table Rows - Clean Accordion Down (vertical only) - SLOWER */
-.data-table tbody tr {
-    opacity: 0;
-    transform: translateY(-15px);
-}
+/* Table row animation removed - was causing rows to be invisible */
 
 .data-table tbody tr.animate-in {
     animation: accordionDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
