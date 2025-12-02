@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:16:54 PM UTC 2025
+ * Generated: Tue Dec  2 05:19:06 PM UTC 2025
  */
 
 
@@ -2381,6 +2381,7 @@ html {
 .admin-tab.active {
     display: flex;
     opacity: 1;
+    padding: var(--space-4);
 }
 
 /* Fixed tab header - stays at top */
@@ -2413,7 +2414,7 @@ html {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 1.5rem;
+    padding: 0;
     background: var(--bg-secondary);
     min-width: 0;
 }

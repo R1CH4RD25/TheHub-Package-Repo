@@ -70,6 +70,7 @@
 .admin-tab.active {
     display: flex;
     opacity: 1;
+    padding: var(--space-4);
 }
 
 /* Fixed tab header - stays at top */
@@ -102,7 +103,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 1.5rem;
+    padding: 0;
     background: var(--bg-secondary);
     min-width: 0;
 }
