@@ -366,7 +366,7 @@
 
 .data-table th {
     padding: 0.75rem 1rem;
-    text-align: center;
+    text-align: left;
     font-weight: 600;
     color: var(--text-secondary);
     font-size: 0.8125rem;
@@ -375,9 +375,15 @@
     vertical-align: middle;
 }
 
-/* First column (package name) stays left-aligned */
-.data-table th:first-child {
-    text-align: left;
+/* Center-align specific columns */
+.data-table th:nth-child(3),
+.data-table th:nth-child(4) {
+    text-align: center;
+}
+
+/* Right-align actions column */
+.data-table th:last-child {
+    text-align: right;
 }
 
 .data-table tbody tr {
@@ -397,12 +403,19 @@
     padding: 0.75rem 1rem;
     color: var(--text-primary);
     vertical-align: middle;
+    text-align: left;
+}
+
+/* Center-align specific columns */
+.data-table td:nth-child(3),
+.data-table td:nth-child(4) {
     text-align: center;
 }
 
-/* First column (package name) stays left-aligned */
-.data-table td:first-child {
-    text-align: left;
+/* Right-align actions column */
+.data-table td:last-child {
+    text-align: right;
+    white-space: nowrap;
 }
 
 /* Action buttons in tables */
@@ -412,11 +425,6 @@
 
 .data-table td .btn:last-child {
     margin-right: 0;
-}
-
-/* White-space for action columns */
-.data-table td:last-child {
-    white-space: nowrap;
 }
 
 /* ============================================================================
