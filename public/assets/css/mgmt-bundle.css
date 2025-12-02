@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 03:32:45 PM UTC 2025
+ * Generated: Tue Dec  2 03:35:46 PM UTC 2025
  */
 
 
@@ -1826,8 +1826,6 @@ html {
     background: transparent;
     width: 100%;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
 }
 
 .admin-nav-link:hover,
@@ -1878,13 +1876,12 @@ html {
     position: relative;
 }
 
-/* Text clips naturally with sidebar overflow */
+/* Hide text and badges when collapsed - same as sidebar header */
 .admin-sidebar.collapsed .admin-nav-link span,
 .mgmt-sidebar.collapsed .mgmt-nav-link span,
 .admin-sidebar.collapsed .sidebar-badge,
 .mgmt-sidebar.collapsed .sidebar-badge {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
 }
 
 /* Show tooltip on hover when collapsed */
