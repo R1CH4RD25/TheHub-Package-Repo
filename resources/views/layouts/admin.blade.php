@@ -35,11 +35,11 @@
         
         // Build admin nav items
         $navItems = [
-            ['id' => 'users', 'label' => 'Users', 'url' => '/admin/users', 'icon' => 'fas fa-users'],
-            ['id' => 'packages', 'label' => 'Packages', 'url' => '/admin/packages', 'icon' => 'fas fa-box'],
-            ['id' => 'settings', 'label' => 'Settings', 'url' => '/admin/settings', 'icon' => 'fas fa-cog'],
-            ['id' => 'logs', 'label' => 'Activity Logs', 'url' => '/admin/logs', 'icon' => 'fas fa-list-alt'],
-            ['id' => 'export', 'label' => 'Export Data', 'url' => '/admin/export', 'icon' => 'fas fa-download'],
+            ['type' => 'link', 'id' => 'users', 'label' => 'Users', 'url' => '/admin/users', 'icon' => 'fas fa-users'],
+            ['type' => 'link', 'id' => 'packages', 'label' => 'Packages', 'url' => '/admin/packages', 'icon' => 'fas fa-box'],
+            ['type' => 'link', 'id' => 'settings', 'label' => 'Settings', 'url' => '/admin/settings', 'icon' => 'fas fa-cog'],
+            ['type' => 'link', 'id' => 'logs', 'label' => 'Activity Logs', 'url' => '/admin/logs', 'icon' => 'fas fa-list-alt'],
+            ['type' => 'link', 'id' => 'export', 'label' => 'Export Data', 'url' => '/admin/export', 'icon' => 'fas fa-download'],
         ];
         
         // Render Enterprise Sidebar
