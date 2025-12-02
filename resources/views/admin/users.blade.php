@@ -470,9 +470,9 @@ function renderUsersTable(users, containerId) {
                     const statusText = isSuspended ? 'Suspended' : 'Active';
                     const statusClass = isSuspended ? 'status-suspended' : 'status-active';
                     
-                    // Use Google profile picture if available, otherwise use initials
-                    const avatarHtml = u.picture 
-                        ? `<img src="${u.picture}" alt="${u.name}" class="user-avatar-img ${isSuspended ? 'suspended' : ''}">`
+                    // Show Google profile picture ONLY if active, otherwise always show initials with strikethrough
+                    const avatarHtml = (!isSuspended && u.picture)
+                        ? `<img src="${u.picture}" alt="${u.name}" class="user-avatar-img">`
                         : `<div class="user-avatar ${isSuspended ? 'suspended' : ''}" style="background-color: ${avatarColor}">
                             ${initials}
                            </div>`;
