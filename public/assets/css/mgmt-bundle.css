@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:48:27 PM UTC 2025
+ * Generated: Tue Dec  2 08:49:57 PM UTC 2025
  */
 
 
@@ -2584,6 +2584,12 @@ html {
 .role-search input:focus {
     outline: none;
     border-color: var(--primary-color);
+}
+
+/* Muted state for role search when "all roles" selected */
+.role-search.muted {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .role-tree {

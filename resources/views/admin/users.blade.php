@@ -316,18 +316,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle role selection mode (all vs selected)
     const roleTree = document.querySelector('.role-tree');
+    const roleSearch = document.querySelector('.role-search');
     const roleModeRadios = document.querySelectorAll('input[name="roleMode"]');
     
     roleModeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'all') {
-                // Mute the role tree when "all roles" is selected
+                // Mute the role tree and search when "all roles" is selected
                 roleTree.classList.add('muted');
+                if (roleSearch) roleSearch.classList.add('muted');
                 // Show all users
                 renderUsersTable(allUsers, 'usersTable');
             } else {
-                // Unmute the role tree when "selected roles" is chosen
+                // Unmute the role tree and search when "selected roles" is chosen
                 roleTree.classList.remove('muted');
+                if (roleSearch) roleSearch.classList.remove('muted');
             }
         });
     });
@@ -335,6 +338,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize as muted since "all" is checked by default
     if (roleTree) {
         roleTree.classList.add('muted');
+    }
+    if (roleSearch) {
+        roleSearch.classList.add('muted');
     }
 
     // Handle role selection

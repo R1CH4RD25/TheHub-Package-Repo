@@ -307,6 +307,12 @@
     border-color: var(--primary-color);
 }
 
+/* Muted state for role search when "all roles" selected */
+.role-search.muted {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .role-tree {
     font-size: 0.8125rem;
 }
