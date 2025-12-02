@@ -524,6 +524,26 @@ function setupCheckboxHandlers() {
         if (count > 0) {
             actionPanel.classList.add('active');
             selectedCount.textContent = `${count} selected`;
+            
+            // Determine if selected users are active or suspended
+            const selectedUsers = Array.from(checked).map(cb => {
+                const userId = cb.dataset.userId;
+                return allUsers.find(u => u.id == userId);
+            });
+            
+            const hasActive = selectedUsers.some(u => u && u.is_active);
+            const hasSuspended = selectedUsers.some(u => u && !u.is_active);
+            
+            // Show/hide suspend/activate buttons based on selection
+            const suspendBtn = document.getElementById('bulkSuspend');
+            const activateBtn = document.getElementById('bulkActivate');
+            
+            if (suspendBtn) {
+                suspendBtn.style.display = hasActive ? 'flex' : 'none';
+            }
+            if (activateBtn) {
+                activateBtn.style.display = hasSuspended ? 'flex' : 'none';
+            }
         } else {
             actionPanel.classList.remove('active');
         }
