@@ -74,6 +74,12 @@
     justify-content: center;
 }
 
+/* Keep toggle button visible when collapsed */
+.admin-sidebar.collapsed .sidebar-toggle,
+.mgmt-sidebar.collapsed .sidebar-toggle {
+    display: flex;
+}
+
 /* Hide logo/title when collapsed */
 .admin-sidebar.collapsed .sidebar-header a,
 .mgmt-sidebar.collapsed .sidebar-header a {
