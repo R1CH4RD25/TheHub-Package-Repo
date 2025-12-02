@@ -43,7 +43,7 @@
         $sidebarIcon = $sidebarIcon ?? 'fas fa-dashboard';
         $logoUrl = $logoUrl ?? '/';
         $breadcrumbs = $breadcrumbs ?? [];
-        
+
         // Render Enterprise Sidebar
         \Hub\Components\EnterpriseSidebar::render($user, $userRole, [
             'context' => $context,
@@ -94,8 +94,8 @@
         const notyf = new Notyf({
             duration: 3000,
             position: {
-                x: 'right',
-                y: 'top',
+                x: 'center',
+                y: 'bottom',
             },
             types: [
                 {
