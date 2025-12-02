@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Enterprise Header Component
- * 
+ *
  * Shared header for Management Console and Admin Dashboard
  * Google Admin Console / Microsoft 365 inspired design
- * 
+ *
  * Usage:
  *   \Hub\Components\EnterpriseHeader::render($user, $userRole, [
  *       'context' => 'management' | 'admin',
@@ -21,7 +22,7 @@ class EnterpriseHeader
 {
     /**
      * Render the enterprise header
-     * 
+     *
      * @param array $user User data
      * @param string $userRole User's role
      * @param array $options Configuration options
@@ -41,11 +42,12 @@ class EnterpriseHeader
             'show_notifications' => false
         ];
         $opts = array_merge($defaults, $options);
-        
-        $contextClass = $opts['context'] === 'admin' ? 'admin-header' : 'mgmt-header';
+
+        // Both admin and management use the same header class
+        $contextClass = 'admin-header';
         $isSuperAdmin = ($userRole === 'super_admin');
-        
-        ?>
+
+?>
         <!-- Enterprise Header Component -->
         <header class="<?= $contextClass ?>">
             <div class="breadcrumb">
@@ -66,23 +68,23 @@ class EnterpriseHeader
                     <span><?= $opts['context'] === 'admin' ? 'Admin Dashboard' : 'Management Console' ?></span>
                 <?php endif; ?>
             </div>
-            
+
             <div class="header-actions">
                 <?php if ($opts['show_search']): ?>
-                <div class="header-search">
-                    <input type="search" 
-                           class="search-input" 
-                           placeholder="Search..." 
-                           aria-label="Search">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
+                    <div class="header-search">
+                        <input type="search"
+                            class="search-input"
+                            placeholder="Search..."
+                            aria-label="Search">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
                 <?php endif; ?>
-                
+
                 <?php if (!empty($opts['actions'])): ?>
                     <?php foreach ($opts['actions'] as $action): ?>
-                        <a href="<?= htmlspecialchars($action['url'], ENT_QUOTES, 'UTF-8') ?>" 
-                           class="btn <?= htmlspecialchars($action['class'] ?? 'btn-secondary', ENT_QUOTES, 'UTF-8') ?>"
-                           style="text-decoration: none;">
+                        <a href="<?= htmlspecialchars($action['url'], ENT_QUOTES, 'UTF-8') ?>"
+                            class="btn <?= htmlspecialchars($action['class'] ?? 'btn-secondary', ENT_QUOTES, 'UTF-8') ?>"
+                            style="text-decoration: none;">
                             <?php if (!empty($action['icon'])): ?>
                                 <i class="<?= htmlspecialchars($action['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
                             <?php endif; ?>
@@ -90,23 +92,32 @@ class EnterpriseHeader
                         </a>
                     <?php endforeach; ?>
                 <?php endif; ?>
-                
-                <?php 
+
+                <?php
                 // Context-specific cross-navigation
-                if ($opts['context'] === 'management' && $isSuperAdmin): 
+                $isAdminOrHigher = in_array($userRole, ['admin', 'super_admin']);
+
+                if ($opts['context'] === 'management' && $isSuperAdmin):
                 ?>
                     <a href="/admin/" class="btn btn-secondary" style="text-decoration: none;">
                         <i class="fas fa-shield-alt"></i> Admin Dashboard
                     </a>
+                <?php elseif ($opts['context'] === 'admin' && $isAdminOrHigher):
+                    $mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
+                    $mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
+                ?>
+                    <a href="/management/" class="btn btn-secondary" style="text-decoration: none;">
+                        <i class="<?= htmlspecialchars($mgmtIcon, ENT_QUOTES, 'UTF-8') ?>"></i> <?= htmlspecialchars($mgmtDisplayName, ENT_QUOTES, 'UTF-8') ?>
+                    </a>
                 <?php endif; ?>
-                
+
                 <?php if ($opts['show_notifications']): ?>
-                <button class="btn-icon" title="Notifications" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge" style="display: none;">0</span>
-                </button>
+                    <button class="btn-icon" title="Notifications" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" style="display: none;">0</span>
+                    </button>
                 <?php endif; ?>
-                
+
                 <?php
                 // User Profile Dropdown
                 \Hub\Components\UserProfileDropdown::render($user, $userRole, [
@@ -116,6 +127,6 @@ class EnterpriseHeader
                 ?>
             </div>
         </header>
-        <?php
+<?php
     }
 }
