@@ -127,14 +127,19 @@ function loadSubtabData(subtab) {
 
 // Load active users
 function loadActiveUsers() {
+    console.log('Loading active users...');
     fetch('/admin/users/list')
-        .then(r => r.json())
+        .then(r => {
+            console.log('Response received:', r.status);
+            return r.json();
+        })
         .then(users => {
+            console.log('Users loaded:', users.length);
             renderUsersTable(users, 'usersTable');
         })
         .catch(err => {
             notyf.error('Failed to load users');
-            console.error(err);
+            console.error('Error loading users:', err);
         });
 }
 
