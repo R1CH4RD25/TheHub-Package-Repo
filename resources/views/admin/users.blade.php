@@ -31,7 +31,7 @@
                 <!-- Left Sidebar - Role Filter Panel -->
                 <div class="role-filter-panel">
                     <div class="panel-header">
-                        <h3>&nbsp;</h3>
+                        <h3>Filter by Role</h3>
                         <button class="collapse-btn" title="Collapse">
                             <i class="fas fa-chevron-left"></i>
                         </button>
@@ -120,6 +120,13 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Manage Roles Link -->
+                        <div class="manage-roles-link">
+                            <a href="#" class="manage-link">
+                                <i class="fas fa-cog"></i> MANAGE ROLE HIERARCHY
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -200,13 +207,6 @@
             </div>
                 </div> <!-- .users-content -->
             </div> <!-- .users-layout -->
-
-            <!-- Bottom Manage Link (Google-style) -->
-            <div class="manage-footer">
-                <a href="#" class="manage-link">
-                    <i class="fas fa-cog"></i> MANAGE ROLE HIERARCHY
-                </a>
-            </div>
         </div> <!-- #subtab-active-users -->
 
         <!-- Pending Users Subtab -->
@@ -315,35 +315,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Handle role selection mode (all vs selected)
-    const roleTree = document.querySelector('.role-tree');
     const roleSearch = document.querySelector('.role-search');
+    const roleTree = document.querySelector('.role-tree');
     const roleModeRadios = document.querySelectorAll('input[name="roleMode"]');
     
     roleModeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'all') {
-                // Mute the role tree and search when "all roles" is selected
-                roleTree.classList.add('muted');
+                // Mute the search and tree when "all roles" is selected
                 if (roleSearch) roleSearch.classList.add('muted');
+                if (roleTree) roleTree.classList.add('muted');
                 // Show all users
                 renderUsersTable(allUsers, 'usersTable');
             } else {
-                // Unmute the role tree and search when "selected roles" is chosen
-                roleTree.classList.remove('muted');
+                // Unmute the search and tree when "selected roles" is chosen
                 if (roleSearch) roleSearch.classList.remove('muted');
+                if (roleTree) roleTree.classList.remove('muted');
             }
         });
     });
     
     // Initialize as muted since "all" is checked by default
-    if (roleTree) {
-        roleTree.classList.add('muted');
-    }
     if (roleSearch) {
         roleSearch.classList.add('muted');
         // Clicking the search when muted switches to "selected roles" mode
         roleSearch.addEventListener('click', function() {
             if (roleSearch.classList.contains('muted')) {
+                const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
+                if (selectedRolesRadio) {
+                    selectedRolesRadio.checked = true;
+                    selectedRolesRadio.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    }
+    if (roleTree) {
+        roleTree.classList.add('muted');
+        // Clicking the tree when muted switches to "selected roles" mode
+        roleTree.addEventListener('click', function() {
+            if (roleTree.classList.contains('muted')) {
                 const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
                 if (selectedRolesRadio) {
                     selectedRolesRadio.checked = true;

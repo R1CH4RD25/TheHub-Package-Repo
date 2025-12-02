@@ -258,30 +258,8 @@
     overflow-y: auto;
     padding: 1rem;
     min-height: 0;
-}
-
-/* Muted state for entire panel content when "all roles" selected */
-.panel-content.muted {
-    opacity: 0.5;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-}
-
-.panel-content.muted:hover {
-    opacity: 0.8;
-}
-
-.panel-content.muted .role-selection-mode {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.panel-content.muted * {
-    pointer-events: none;
-}
-
-.panel-content.muted .role-selection-mode * {
-    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .role-selection-mode {
@@ -310,6 +288,16 @@
     margin-bottom: 1rem;
 }
 
+.role-search.muted {
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.role-search.muted:hover {
+    opacity: 0.8;
+}
+
 .role-search i {
     position: absolute;
     left: 0.75rem;
@@ -334,6 +322,18 @@
 
 .role-tree {
     font-size: 0.8125rem;
+    flex: 1;
+}
+
+.role-tree.muted {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.role-tree.muted:hover {
+    opacity: 0.8;
+    cursor: pointer;
 }
 
 .role-item {
@@ -403,12 +403,11 @@
     text-decoration: underline;
 }
 
-/* Manage Footer (Google-style bottom link) */
-.manage-footer {
-    padding: 1rem 0.75rem;
+/* Manage Roles Link at bottom of panel */
+.manage-roles-link {
+    padding: 1rem 0 0 0;
+    margin-top: auto;
     border-top: 1px solid var(--gray-300);
-    background: white;
-    margin-top: 1rem;
 }
 
 /* Users Content Area */
