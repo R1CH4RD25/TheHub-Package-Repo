@@ -1,9 +1,10 @@
 <?php
+
 /**
- * Management - Section Selector
+ * Management Console - Google Admin Console Style
  *
- * Professional interface for selecting which section/department to manage.
- * Shows only sections the user has access to with real-time submission counts.
+ * Module grid interface showing all sections/packages the user has access to.
+ * Each card displays key metrics and provides quick access to management functions.
  */
 
 require_once __DIR__ . '/../../src/bootstrap.php';
@@ -13,7 +14,7 @@ use Hub\ManagementCenter;
 use Hub\Database;
 use Hub\SiteSettings;
 
-// Require login and admin/super_admin role
+// Require login and manager+ role
 Auth::requireLogin();
 Auth::requireRole(['admin', 'super_admin']);
 
@@ -25,374 +26,246 @@ $isSuperAdmin = ($userRole === 'super_admin');
 $mc = new ManagementCenter();
 $db = Database::getInstance();
 
-// Get sections user has access to with submission counts
+// Get management display name
+$mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
+$mgmtDescription = SiteSettings::get('mgmt_description', 'Centralized management system for tracking and processing submissions');
+$mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
+
+// Get sections user has access to with stats
 if ($isSuperAdmin) {
-    // Super admins see all sections
     $sections = $mc->getSectionsWithCounts();
 } else {
-    // Other admins see only their assigned sections
     $sections = $mc->getSectionsWithCounts($userId);
 }
 
-// Get total stats across all accessible sections
+// Calculate aggregate stats across all accessible sections
 $totalSubmissions = 0;
 $totalPending = 0;
 $totalUrgent = 0;
+$totalRecent = 0;
 
-foreach ($sections as $section) {
+foreach ($sections as &$section) {
     $totalSubmissions += $section['submission_count'];
     $totalPending += $section['pending_count'];
 
-    // Count urgent submissions for this section
+    // Get urgent count for this section
     $urgentResult = $db->fetchOne(
         "SELECT COUNT(*) as count FROM section_submissions
-         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0",
+         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0 AND is_active = 1",
         [$section['id']]
     );
-    $totalUrgent += ($urgentResult['count'] ?? 0);
+    $section['urgent_count'] = $urgentResult['count'] ?? 0;
+    $totalUrgent += $section['urgent_count'];
+
+    // Get recent (last 7 days) count
+    $recentResult = $db->fetchOne(
+        "SELECT COUNT(*) as count FROM section_submissions
+         WHERE section_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND is_draft = 0",
+        [$section['id']]
+    );
+    $section['recent_count'] = $recentResult['count'] ?? 0;
+    $totalRecent += $section['recent_count'];
 }
+unset($section);
 
-// Auto-redirect if user has access to only ONE section
-// Improves UX by skipping selector for single-section users
-if (count($sections) === 1) {
-    header('Location: /management/section/' . $sections[0]['slug']);
-    exit;
-}
+$pageTitle = $mgmtDisplayName . ' Console';
+$orgName = SiteSettings::get('organization_name', 'Your Organization');
+$siteName = SiteSettings::get('site_name', 'The Hub');
 
-// Get Management branding
-$mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
-$mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
-
-$pageTitle = $mgmtDisplayName . ' - Select Section';
-
+// Build navigation items for sidebar
+$navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections, null);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <?php Hub\Layout::renderHead($pageTitle, 'command'); ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($pageTitle) ?> - <?= htmlspecialchars($siteName) ?></title>
+
+    <!-- MGMT BUNDLE (Theme-aware workflow) -->
+    <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
 </head>
-<body>
 
+<body class="admin-root">
+    <div class="admin-shell">
+        <?php
+        // Render Enterprise Sidebar
+        \Hub\Components\EnterpriseSidebar::render($user, $userRole, [
+            'context' => 'management',
+            'title' => $mgmtDisplayName,
+            'icon' => $mgmtIcon,
+            'logo_url' => '/management/',
+            'nav_items' => $navItems,
+            'active_item' => null
+        ]);
 
-<?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
+        // Render Enterprise Header
+        \Hub\Components\EnterpriseHeader::render($user, $userRole, [
+            'context' => 'management',
+            'breadcrumbs' => [
+                ['label' => 'Home', 'url' => '/hub.php'],
+                ['label' => $mgmtDisplayName]
+            ],
+            'show_notifications' => true
+        ]);
+        ?>
 
-<!-- Styles loaded from management.css -->
+        <!-- Main Content Area -->
+                <!-- Main Content Area -->
+        <main class="admin-main">"><?= count($sections) ?></div>
+                        <div class="metric-label">Active Modules</div>
+                    </div>
+                </div>
 
-<div class="mgmt-selector-container">
-    <div class="mgmt-selector-header">
+                <div class="metric-card">
+                    <div class="metric-icon gold">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value"><?= number_format($totalSubmissions) ?></div>
+                        <div class="metric-label">Total Submissions</div>
+                    </div>
+                </div>
 
-<style data-cache-bust="<?= time() ?>">
-/* Management Layout Fix */
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    margin: 0;
-}
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--warning-light); color: var(--warning);">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value"><?= $totalPending ?></div>
+                        <div class="metric-label">Pending Review</div>
+                    </div>
+                </div>
 
-.navbar {
-    flex-shrink: 0;
-}
+                <div class="metric-card">
+                    <div class="metric-icon error">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value"><?= $totalUrgent ?></div>
+                        <div class="metric-label">Urgent Items</div>
+                    </div>
+                </div>
+            </div>
 
-.selector-container {
-    flex: 1 0 auto;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    width: 100%;
-}
+            <!-- Module Cards Grid -->
+            <div>
+                <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--gray-900); margin: 0 0 var(--space-1) 0;">
+                    Your Modules
+                </h2>
+                <p style="font-size: var(--text-sm); color: var(--gray-600); margin: 0 0 var(--space-4) 0;">
+                    Select a module to view and manage submissions
+                </p>
 
-footer {
-    flex-shrink: 0;
-    margin-top: auto;
-}
-
-/* Professional Section Selector Styles */
-.selector-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.selector-header h1 {
-    font-size: 32px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-.selector-header p {
-    font-size: 16px;
-    color: #7f8c8d;
-}
-
-/* Summary Stats Bar */
-.summary-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 40px;
-}
-
-.summary-stat {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.summary-stat.pending {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.summary-stat.urgent {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.summary-stat .number {
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.summary-stat .label {
-    font-size: 14px;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Professional Table Selector */
-.section-table {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    overflow: hidden;
-}
-
-.section-table table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.section-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.section-table thead th {
-    padding: 18px 20px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.section-table tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    transition: background-color 0.2s;
-}
-
-.section-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-.section-table tbody tr:hover {
-    background-color: #f8f9fa;
-}
-
-.section-table tbody td {
-    padding: 20px;
-    vertical-align: middle;
-}
-
-.section-icon {
-    font-size: 24px;
-    width: 40px;
-    text-align: center;
-}
-
-.section-name {
-    font-weight: 600;
-    font-size: 16px;
-    color: #2c3e50;
-}
-
-.section-slug {
-    font-size: 13px;
-    color: #7f8c8d;
-    margin-top: 4px;
-}
-
-.badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    text-align: center;
-    min-width: 45px;
-}
-
-.badge.total {
-    background: #e3f2fd;
-    color: #1976d2;
-}
-
-.badge.pending {
-    background: #fff3e0;
-    color: #f57c00;
-}
-
-.badge.urgent {
-    background: #ffebee;
-    color: #c62828;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.btn-enter {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 10px 24px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-enter:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
-    color: white;
-    text-decoration: none;
-}
-
-.btn-enter i {
-    margin-left: 8px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #7f8c8d;
-}
-
-.empty-state i {
-    font-size: 64px;
-    margin-bottom: 20px;
-    opacity: 0.3;
-}
-
-.empty-state h3 {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.empty-state p {
-    font-size: 16px;
-}
-</style>
-
-<div class="mgmt-selector-container">
-    <!-- Selector Header -->
-    <div class="mgmt-selector-header">
-        <h1><i class="<?= htmlspecialchars($mgmtIcon) ?>"></i> <?= htmlspecialchars($mgmtDisplayName) ?></h1>
-        <p>Select a section to manage submissions and track progress</p>
-    </div>
-
-    <!-- Summary Stats -->
-    <?php if (!empty($sections)): ?>
-    <div class="mgmt-summary-stats">
-        <div class="mgmt-summary-stat">
-            <div class="number"><?php echo $totalSubmissions; ?></div>
-            <div class="label">Total Submissions</div>
-        </div>
-        <div class="mgmt-summary-stat pending">
-            <div class="number"><?php echo $totalPending; ?></div>
-            <div class="label">Pending Review</div>
-        </div>
-        <div class="mgmt-summary-stat urgent">
-            <div class="number"><?php echo $totalUrgent; ?></div>
-            <div class="label">Urgent Priority</div>
-        </div>
-    </div>
-
-    <!-- Section Table -->
-    <div class="mgmt-section-table">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 60px;"></th>
-                    <th>Section Name</th>
-                    <th style="text-align: center; width: 120px;">Total</th>
-                    <th style="text-align: center; width: 120px;">Pending</th>
-                    <th style="text-align: center; width: 120px;">Urgent</th>
-                    <th style="text-align: right; width: 150px;">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($sections as $section):
-                    // Get urgent count for this section
-                    $urgentCount = $db->fetchValue(
-                        "SELECT COUNT(*) FROM section_submissions
-                         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0 AND status_id = 1",
-                        [$section['id']]
-                    );
-                ?>
-                <tr>
-                    <td class="mgmt-section-icon">
-                        <?php echo $section['icon'] ?: '📁'; ?>
-                    </td>
-                    <td>
-                        <div class="mgmt-section-name"><?php echo htmlspecialchars($section['name']); ?></div>
-                        <div class="mgmt-section-slug"><?php echo htmlspecialchars($section['slug']); ?></div>
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="badge total"><?php echo $section['submission_count']; ?></span>
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="badge pending"><?php echo $section['pending_count']; ?></span>
-                    </td>
-                    <td style="text-align: center;">
-                        <?php if ($urgentCount > 0): ?>
-                            <span class="badge urgent"><?php echo $urgentCount; ?></span>
+                <?php if (empty($sections)): ?>
+                    <!-- Empty State -->
+                    <div class="mgmt-empty-modules">
+                        <i class="bi bi-inbox"></i>
+                        <h3>No Modules Assigned</h3>
+                        <p>You don't have access to any management modules yet.</p>
+                        <?php if ($isSuperAdmin): ?>
+                            <a href="/admin/" class="btn btn-primary">
+                                <i class="bi bi-gear"></i> Configure Access
+                            </a>
                         <?php else: ?>
-                            <span class="badge total">0</span>
+                            <p style="font-size: var(--text-sm); color: var(--gray-500);">
+                                Contact your administrator for access.
+                            </p>
                         <?php endif; ?>
-                    </td>
-                    <td style="text-align: right;">
-                        <a href="/command/section/<?php echo htmlspecialchars($section['slug']); ?>" class="btn-enter">
-                            Enter <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php else: ?>
-    <!-- Empty State -->
-    <div class="mgmt-section-table">
-        <div class="empty-state">
-            <i class="bi bi-inbox"></i>
-            <h3>No Sections Assigned</h3>
-            <p>You don't have access to any sections yet. Contact your administrator to request access.</p>
-        </div>
-    </div>
-    <?php endif; ?>
-</div>
+                    </div>
+                <?php else: ?>
+                    <!-- Module Grid -->
+                    <div class="mgmt-module-grid">
+                        <?php foreach ($sections as $section): ?>
+                            <div class="mgmt-module-card" onclick="window.location.href='/management/section.php?slug=<?= urlencode($section['slug']) ?>'">
+                                <!-- Card Header with Icon & Title -->
+                                <div class="mgmt-module-header">
+                                    <div class="mgmt-module-icon">
+                                        <i class="<?= htmlspecialchars($section['icon'] ?? 'bi-folder') ?>"></i>
+                                    </div>
+                                    <div class="mgmt-module-info">
+                                        <h3 class="mgmt-module-title"><?= htmlspecialchars($section['name']) ?></h3>
+                                        <p class="mgmt-module-subtitle"><?= htmlspecialchars($section['mgmt_prefix'] ?? 'Section') ?></p>
+                                    </div>
+                                </div>
 
-<?php Hub\Layout::renderFooter($user, 'command'); ?>
+                                <!-- Description -->
+                                <?php if (!empty($section['description'])): ?>
+                                    <p class="mgmt-module-description">
+                                        <?= htmlspecialchars($section['description']) ?>
+                                    </p>
+                                <?php endif; ?>
+
+                                <!-- Stats Grid -->
+                                <div class="mgmt-module-stats">
+                                    <div class="mgmt-module-stat">
+                                        <span class="mgmt-module-stat-value"><?= $section['submission_count'] ?></span>
+                                        <span class="mgmt-module-stat-label">Total</span>
+                                    </div>
+                                    <div class="mgmt-module-stat">
+                                        <span class="mgmt-module-stat-value"><?= $section['pending_count'] ?></span>
+                                        <span class="mgmt-module-stat-label">Pending</span>
+                                    </div>
+                                    <div class="mgmt-module-stat">
+                                        <span class="mgmt-module-stat-value"><?= $section['recent_count'] ?></span>
+                                        <span class="mgmt-module-stat-label">Last 7 Days</span>
+                                    </div>
+                                    <?php if ($section['urgent_count'] > 0): ?>
+                                        <div class="mgmt-module-stat">
+                                            <span class="mgmt-module-stat-value" style="color: var(--error);"><?= $section['urgent_count'] ?></span>
+                                            <span class="mgmt-module-stat-label">Urgent</span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Footer with Actions -->
+                                <div class="mgmt-module-footer">
+                                    <a href="/management/section.php?slug=<?= urlencode($section['slug']) ?>"
+                                        class="mgmt-module-action"
+                                        onclick="event.stopPropagation();">
+                                        <i class="bi bi-box-arrow-in-right"></i>
+                                        <span>Open Module</span>
+                                    </a>
+
+                                    <?php if ($section['urgent_count'] > 0): ?>
+                                        <div class="mgmt-module-badge">
+                                            <i class="bi bi-exclamation-circle"></i>
+                                            <span>Needs Attention</span>
+                                        </div>
+                                    <?php elseif ($section['recent_count'] > 0): ?>
+                                        <div class="mgmt-module-badge" style="background: var(--info-light); color: var(--info);">
+                                            <i class="bi bi-clock-history"></i>
+                                            <span>Recent Activity</span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </main>
+
+        <?php
+        // Render Enterprise Footer
+        \Hub\Components\EnterpriseFooter::render($user, [
+            'context' => 'management',
+            'show_version' => true,
+            'show_user' => false,
+            'show_custom_text' => true
+        ]);
+        ?>
+    </div><!-- end admin-shell -->
 </body>
+
 </html>
