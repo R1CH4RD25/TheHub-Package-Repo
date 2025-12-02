@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 03:08:47 PM UTC 2025
+ * Generated: Tue Dec  2 03:15:44 PM UTC 2025
  */
 
 
@@ -566,14 +566,7 @@ html {
     grid-template-columns: 64px minmax(0, 1fr);
 }
 
-.admin-sidebar {
-    grid-row: 1 / -1;
-    /* Span all rows (full height) */
-    background: var(--gray-900);
-    color: white;
-    padding: var(--space-3);
-    overflow-y: auto;
-}
+/* Sidebar styling is defined in admin-layout.css */
 
 .admin-header {
     grid-column: 2;
