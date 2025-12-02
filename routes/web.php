@@ -1,16 +1,71 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\{
+    ExportController,
+    UserController,
+    PackageController,
+    SettingsController,
+    LogsController
+};
 
 Route::get('/', function () {
     return redirect('/modules.php');
 });
 
-// Admin routes (Laravel migration proof-of-concept)
-Route::prefix('admin')->middleware('web')->group(function () {
-    Route::get('/export', [ExportController::class, 'index'])->name('admin.export');
-    Route::post('/export', [ExportController::class, 'export'])->name('admin.export.process');
+// Test route (no auth, no views - pure JSON)
+Route::get('/admin/export/test', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Laravel is working!',
+        'framework' => 'Laravel 11.47.0',
+        'timestamp' => date('Y-m-d H:i:s'),
+        'php_version' => PHP_VERSION,
+    ]);
 });
 
-// Future module routes will be added here as migration progresses
+// Health check
+Route::get('/laravel/health', function () {
+    return response()->json(['status' => 'ok']);
+});
+
+// Admin routes (Laravel migration proof-of-concept)
+// Requires authentication: admin, super_admin
+Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function () {
+    // Admin Dashboard - redirect to users
+    Route::get('/', function () {
+        return redirect('/admin/users');
+    })->name('admin.dashboard');
+    
+    // Users Management
+    Route::get('/users', [UserController::class, 'index'])->name('admin.users');
+    Route::get('/users/list', [UserController::class, 'list'])->name('admin.users.list');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
+    Route::get('/invitations', [UserController::class, 'invitations'])->name('admin.invitations');
+    Route::post('/invitations', [UserController::class, 'sendInvitation'])->name('admin.invitations.send');
+    Route::delete('/invitations/{id}', [UserController::class, 'revokeInvitation'])->name('admin.invitations.revoke');
+
+    // Package Management
+    Route::get('/packages', [PackageController::class, 'index'])->name('admin.packages');
+    Route::get('/packages/list', [PackageController::class, 'list'])->name('admin.packages.list');
+    Route::post('/packages/upload', [PackageController::class, 'upload'])->name('admin.packages.upload');
+    Route::post('/packages/{id}/install', [PackageController::class, 'install'])->name('admin.packages.install');
+    Route::delete('/packages/{id}', [PackageController::class, 'delete'])->name('admin.packages.delete');
+    Route::delete('/packages/{packageId}/uninstall', [PackageController::class, 'uninstall'])->name('admin.packages.uninstall');
+    Route::get('/packages/{id}/validation', [PackageController::class, 'validation'])->name('admin.packages.validation');
+
+    // Site Settings (Super Admin Only)
+    Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
+    Route::get('/settings/get', [SettingsController::class, 'get'])->name('admin.settings.get');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+    Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('admin.settings.reset');
+
+    // Activity Logs (Super Admin Only)
+    Route::get('/logs', [LogsController::class, 'index'])->name('admin.logs');
+    Route::get('/logs/list', [LogsController::class, 'list'])->name('admin.logs.list');
+
+    // Export Data
+    Route::get('/export', [ExportController::class, 'index'])->name('admin.export');
+    Route::get('/export/download', [ExportController::class, 'export'])->name('admin.export.download');
+    Route::post('/export', [ExportController::class, 'export'])->name('admin.export.process');
+});
