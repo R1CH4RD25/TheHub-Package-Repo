@@ -67,11 +67,10 @@
     transform: scale(0.95);
 }
 
-/* When collapsed, center the toggle button */
+/* When collapsed, adjust padding */
 .admin-sidebar.collapsed .sidebar-header,
 .mgmt-sidebar.collapsed .sidebar-header {
     padding: var(--space-3);
-    justify-content: center;
 }
 
 /* Keep toggle button visible when collapsed */
