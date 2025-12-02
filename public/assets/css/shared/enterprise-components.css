@@ -24,14 +24,14 @@
 .admin-shell {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
     min-height: 100vh;
     background: var(--gray-50);
 }
 
 .admin-sidebar {
-    grid-row: 1 / span 2;
-    /* Full height */
+    grid-row: 1 / -1;
+    /* Span all rows (full height) */
     background: var(--gray-900);
     color: white;
     padding: var(--space-3);
@@ -40,6 +40,7 @@
 
 .admin-header {
     grid-column: 2;
+    grid-row: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -53,11 +54,30 @@
 
 .admin-main {
     grid-column: 2;
+    grid-row: 2;
     padding: var(--space-4);
     overflow: auto;
-    max-width: var(--page-max-width);
-    margin: 0 auto;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-footer {
+    grid-column: 2;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--gray-300);
+    background: var(--gray-50);
+    font-size: var(--text-xs);
+    color: var(--gray-600);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 /* Admin Header Components */

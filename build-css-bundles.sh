@@ -1,18 +1,25 @@
 #!/bin/bash
 
 # ==============================================================================
-# CSS Development Build Script - Concatenates CSS Bundles
+# CSS Bundle Build Script - Concatenates and Optionally Minifies CSS
 # ==============================================================================
 # Rebuilds three context-specific bundles by concatenating source files:
 #   - admin-bundle.css   (Enterprise console)
 #   - mgmt-bundle.css    (Management workflow)
 #   - hub-bundle.css     (PWA frontend)
 #
-# Use this during development when CSS files change.
-# For production minification, use build-css-production.sh
+# Usage:
+#   ./build-css-bundles.sh       - Development (no minification)
+#   ./build-css-bundles.sh --min - Production (with minification)
 # ==============================================================================
 
 set -e  # Exit on any error
+
+# Parse arguments
+MINIFY=false
+if [[ "$1" == "--min" ]] || [[ "$1" == "--minify" ]]; then
+    MINIFY=true
+fi
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -26,9 +33,15 @@ NC='\033[0m' # No Color
 CSS_DIR="public/assets/css"
 
 echo ""
-echo -e "${CYAN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║         CSS Development Build - Concatenate Bundles        ║${NC}"
-echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+if $MINIFY; then
+    echo -e "${CYAN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}${BOLD}║      CSS Production Build - Concatenate + Minify          ║${NC}"
+    echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+else
+    echo -e "${CYAN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}${BOLD}║         CSS Development Build - Concatenate Bundles        ║${NC}"
+    echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+fi
 echo ""
 
 cd "$CSS_DIR" || exit 1
@@ -45,13 +58,10 @@ import os
 files = [
     "shared/enterprise-design-system.css",
     "shared/enterprise-components.css",
-    "shared/enterprise-header-sidebar.css",
-    "shared/enterprise-footer.css",
-    "admin/admin.css",
-    "admin/admin-modern.css",
+    "shared/footer.css",
+    "admin/admin-layout.css",
     "admin/admin-theme.css",
-    "admin/admin-colors.css",
-    "admin/admin-media.css",
+    "admin/admin-animations.css",
     "shared/shared-media.css"
 ]
 
@@ -85,17 +95,14 @@ python3 << 'HUBBUILD'
 import os
 
 files = [
+    "shared/base.css",
     "shared/enterprise-design-system.css",
     "shared/enterprise-components.css",
-    "shared/header.css",
     "shared/footer.css",
+    "shared/hub-components.css",
     "shared/modals.css",
-    "shared/login.css",
-    "hub/hub.css",
-    "hub/hub-modern.css",
-    "hub/sections.css",
-    "hub/modules.css",
-    "hub/hub-media.css",
+    "hub/hub-pages.css",
+    "hub/hub-animations.css",
     "shared/shared-media.css"
 ]
 
@@ -120,44 +127,28 @@ HUBBUILD
 echo ""
 
 # ==============================================================================
-# Build Management Bundle
+# Minification (if requested)
 # ==============================================================================
 
-echo -e "${BLUE}${BOLD}3. Management Bundle${NC}"
+if $MINIFY; then
+    echo -e "${BLUE}${BOLD}3. Minification${NC}"
+    echo ""
 
-python3 << 'MGMTBUILD'
-import os
+    for bundle in admin-bundle hub-bundle; do
+        if [ -f "${bundle}.css" ]; then
+            echo -e "${YELLOW}  Minifying ${bundle}.css...${NC}"
+            csso "${bundle}.css" -o "${bundle}.min.css" --no-restructure 2>/dev/null || {
+                echo -e "${GREEN}  ⚠️  csso failed, copying unminified${NC}"
+                cp "${bundle}.css" "${bundle}.min.css"
+            }
 
-files = [
-    "shared/enterprise-design-system.css",
-    "shared/enterprise-components.css",
-    "shared/enterprise-header-sidebar.css",
-    "shared/enterprise-footer.css",
-    "mgmt/management.css",
-    "mgmt/dynamic-sections.css",
-    "mgmt/mgmt-media.css",
-    "shared/shared-media.css"
-]
-
-output = []
-output.append("/**\n * Management Bundle - Concatenated CSS\n * Generated: auto\n */\n\n")
-
-for file in files:
-    if os.path.exists(file):
-        output.append(f"\n/* ========== {file} ========== */\n\n")
-        with open(file, 'r', encoding='utf-8') as f:
-            output.append(f.read())
-    else:
-        print(f"⚠️  Missing: {file}")
-
-bundle_content = ''.join(output)
-with open('mgmt-bundle.css', 'w', encoding='utf-8') as f:
-    f.write(bundle_content)
-
-print(f"✅ mgmt-bundle.css: {len(bundle_content)} bytes ({len(bundle_content)//1024}KB)")
-MGMTBUILD
-
-echo ""
+            SIZE_DEV=$(du -h "${bundle}.css" | cut -f1)
+            SIZE_MIN=$(du -h "${bundle}.min.css" | cut -f1)
+            echo -e "${GREEN}  ✓${NC} ${bundle}.css: ${SIZE_DEV} → ${SIZE_MIN}"
+        fi
+    done
+    echo ""
+fi
 
 # ==============================================================================
 # Summary
@@ -168,13 +159,17 @@ echo -e "${CYAN}${BOLD}║                Build Complete! ✓                   
 echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-echo -e "${GREEN}Development bundles ready:${NC}"
-echo -e "  • ${BOLD}admin-bundle.css${NC}"
-echo -e "  • ${BOLD}hub-bundle.css${NC}"
-echo -e "  • ${BOLD}mgmt-bundle.css${NC}"
-echo ""
-
-echo -e "${YELLOW}Usage:${NC}"
-echo -e "  Run this script whenever CSS source files change"
-echo -e "  For production builds with minification: ${CYAN}./build-css-production.sh${NC}"
+if $MINIFY; then
+    echo -e "${GREEN}Production bundles ready:${NC}"
+    echo -e "  • ${BOLD}admin-bundle.min.css${NC}"
+    echo -e "  • ${BOLD}hub-bundle.min.css${NC}"
+    echo ""
+    echo -e "${YELLOW}Next: Enable production mode in bootstrap.php${NC}"
+else
+    echo -e "${GREEN}Development bundles ready:${NC}"
+    echo -e "  • ${BOLD}admin-bundle.css${NC}"
+    echo -e "  • ${BOLD}hub-bundle.css${NC}"
+    echo ""
+    echo -e "${YELLOW}For production minified bundles: ${CYAN}./build-css-bundles.sh --min${NC}"
+fi
 echo ""
