@@ -70,6 +70,7 @@
 .admin-tab.active {
     display: flex;
     opacity: 1;
+    padding: var(--space-4);
 }
 
 /* Fixed tab header - stays at top */
@@ -78,6 +79,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem var(--space-4);
+    margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0;
     background: white;
     border-bottom: 2px solid var(--border-primary);
     flex-shrink: 0;
@@ -151,6 +153,7 @@
     display: flex;
     gap: 0.5rem;
     padding: 0 var(--space-4);
+    margin: 0 calc(var(--space-4) * -1);
     background: white;
     border-bottom: 2px solid var(--border-primary);
     flex-shrink: 0;
@@ -184,7 +187,6 @@
 /* Individual subtab content */
 .user-subtab {
     display: none;
-    padding: var(--space-4);
 }
 
 .user-subtab.active {

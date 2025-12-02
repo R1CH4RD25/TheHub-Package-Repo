@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:22:03 PM UTC 2025
+ * Generated: Tue Dec  2 05:23:30 PM UTC 2025
  */
 
 
@@ -2381,6 +2381,7 @@ html {
 .admin-tab.active {
     display: flex;
     opacity: 1;
+    padding: var(--space-4);
 }
 
 /* Fixed tab header - stays at top */
@@ -2389,6 +2390,7 @@ html {
     justify-content: space-between;
     align-items: center;
     padding: 1rem var(--space-4);
+    margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0;
     background: white;
     border-bottom: 2px solid var(--border-primary);
     flex-shrink: 0;
@@ -2462,6 +2464,7 @@ html {
     display: flex;
     gap: 0.5rem;
     padding: 0 var(--space-4);
+    margin: 0 calc(var(--space-4) * -1);
     background: white;
     border-bottom: 2px solid var(--border-primary);
     flex-shrink: 0;
@@ -2495,7 +2498,6 @@ html {
 /* Individual subtab content */
 .user-subtab {
     display: none;
-    padding: var(--space-4);
 }
 
 .user-subtab.active {
