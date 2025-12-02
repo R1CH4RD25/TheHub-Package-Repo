@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 04:36:55 PM UTC 2025
+ * Generated: Tue Dec  2 04:44:45 PM UTC 2025
  */
 
 
@@ -1721,7 +1721,8 @@ html {
     padding: var(--space-3);
     border-bottom: 1px solid var(--gray-300);
     flex-shrink: 0;
-    min-height: 64px;
+    height: 72px;
+    box-sizing: border-box;
 }
 
 /* Hamburger Toggle Button */
