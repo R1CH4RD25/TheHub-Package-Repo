@@ -3,68 +3,9 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<!-- Page Header -->
-<div class="nd-page-header">
-    <div>
-        <h1>Admin Dashboard</h1>
-        <p>Centralized administration and system management</p>
-    </div>
-</div>
-
-<!-- Overview Metrics -->
-<div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: var(--space-8);">
-    <div class="metric-card">
-        <div class="metric-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="metric-content">
-            <div class="metric-value">5</div>
-            <div class="metric-label">Admin Modules</div>
-        </div>
-    </div>
-
-    <div class="metric-card">
-        <div class="metric-icon gold">
-            <i class="fas fa-shield-alt"></i>
-        </div>
-        <div class="metric-content">
-            <div class="metric-value">Active</div>
-            <div class="metric-label">System Status</div>
-        </div>
-    </div>
-
-    <div class="metric-card">
-        <div class="metric-icon" style="background: var(--primary-light); color: var(--primary);">
-            <i class="fas fa-cogs"></i>
-        </div>
-        <div class="metric-content">
-            <div class="metric-value">Ready</div>
-            <div class="metric-label">Configuration</div>
-        </div>
-    </div>
-
-    <div class="metric-card">
-        <div class="metric-icon success">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="metric-content">
-            <div class="metric-value">Online</div>
-            <div class="metric-label">Services</div>
-        </div>
-    </div>
-</div>
-
-<!-- Admin Modules Grid -->
-<div>
-    <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--gray-900); margin: 0 0 var(--space-1) 0;">
-        Administration Modules
-    </h2>
-    <p style="font-size: var(--text-sm); color: var(--gray-600); margin: 0 0 var(--space-4) 0;">
-        Select a module to manage system settings and resources
-    </p>
-
-    <div class="mgmt-modules-grid">
-        <!-- User Management Module -->
+<!-- Admin Modules Grid - Clean like Google Admin Console -->
+<div class="mgmt-modules-grid" style="margin-top: 0;">
+    <!-- User Management Module -->
         <a href="{{ route('admin.users') }}" class="mgmt-module-card">
             <div class="module-header">
                 <div class="module-icon blue">
@@ -119,5 +60,4 @@
             <p class="module-description">Export reports and system data</p>
         </a>
     </div>
-</div>
 @endsection

@@ -1952,10 +1952,18 @@ html {
     color: var(--gray-900);
 }
 
+/* Active state - visible even when collapsed */
 .admin-nav-link.active,
 .mgmt-nav-link.active {
     background: var(--nd-gold);
     color: white;
+}
+
+.admin-sidebar.collapsed .admin-nav-link.active,
+.mgmt-sidebar.collapsed .mgmt-nav-link.active {
+    background: var(--nd-gold);
+    color: white;
+    border-radius: var(--radius-base);
 }
 
 .admin-nav-link i,
@@ -2023,6 +2031,45 @@ html {
     font-size: 11px;
     font-weight: 600;
     margin-left: auto;
+}
+
+/* ========== SIDEBAR FOOTER ========== */
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: var(--space-4);
+    border-top: 1px solid var(--gray-300);
+    background: var(--gray-100);
+}
+
+.sidebar-footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.sidebar-footer-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.sidebar-footer-desc {
+    font-size: var(--text-xs);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Hide footer text when collapsed */
+.admin-sidebar.collapsed .sidebar-footer-content,
+.mgmt-sidebar.collapsed .sidebar-footer-content {
+    display: none;
+}
+
+.admin-sidebar.collapsed .sidebar-footer,
+.mgmt-sidebar.collapsed .sidebar-footer {
+    padding: var(--space-2);
 }
 
 /* ========== HEADER STYLES ========== */
