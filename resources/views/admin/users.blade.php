@@ -27,6 +27,32 @@
 
         <!-- Active Users Subtab -->
         <div id="subtab-active-users" class="user-subtab active">
+            <!-- Search and Filters -->
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="userSearch" placeholder="Search for users" class="search-input">
+                    <button class="clear-search" id="clearSearch" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="role-filter">
+                    <label>Role:</label>
+                    <select id="roleFilter" class="filter-select">
+                        <option value="">All roles</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="principal">Principal</option>
+                        <option value="maintenance_director">Maintenance Director</option>
+                        <option value="counselor">Counselor</option>
+                        <option value="substitute_manager">Substitute Manager</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="custodial">Custodial</option>
+                        <option value="cafeteria">Cafeteria</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+            </div>
             <div id="usersTable" class="data-table-container">
                 <p class="text-center">Loading active users...</p>
             </div>
@@ -135,7 +161,10 @@ function loadActiveUsers() {
         })
         .then(users => {
             console.log('Users loaded:', users.length);
+            allUsers = users;
+            filteredUsers = users;
             renderUsersTable(users, 'usersTable');
+            setupSearchAndFilter();
         })
         .catch(err => {
             notyf.error('Failed to load users');
@@ -445,8 +474,61 @@ document.getElementById('sendInvitation').addEventListener('click', function() {
     });
 });
 
+// Search and filter functionality
+let allUsers = [];
+let filteredUsers = [];
+
+function setupSearchAndFilter() {
+    const searchInput = document.getElementById('userSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    const roleFilter = document.getElementById('roleFilter');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+            applyFilters();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            applyFilters();
+        });
+    }
+
+    if (roleFilter) {
+        roleFilter.addEventListener('change', applyFilters);
+    }
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('userSearch')?.value.toLowerCase() || '';
+    const roleFilter = document.getElementById('roleFilter')?.value || '';
+
+    filteredUsers = allUsers.filter(user => {
+        const matchesSearch = !searchTerm || 
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm);
+        
+        const matchesRole = !roleFilter || user.role === roleFilter;
+
+        return matchesSearch && matchesRole;
+    });
+
+    renderUsersTable(filteredUsers, 'usersTable');
+}
+
 // Load active users on page load
 loadActiveUsers();
+
+// Setup search and filter after DOM is ready
+setTimeout(setupSearchAndFilter, 100);
 </script>
 @endpush
 @endsection
