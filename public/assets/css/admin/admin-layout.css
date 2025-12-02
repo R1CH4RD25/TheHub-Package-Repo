@@ -25,6 +25,7 @@
 
 /* Collapsed state - icon-only mode */
 .admin-sidebar.collapsed {
+    width: 64px;
 }
 
 /* Sidebar Header */
