@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:49:57 PM UTC 2025
+ * Generated: Tue Dec  2 08:54:12 PM UTC 2025
  */
 
 
@@ -2589,7 +2589,12 @@ html {
 /* Muted state for role search when "all roles" selected */
 .role-search.muted {
     opacity: 0.5;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.role-search.muted:hover {
+    opacity: 0.8;
 }
 
 .role-tree {

@@ -341,6 +341,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (roleSearch) {
         roleSearch.classList.add('muted');
+        // Clicking the search when muted switches to "selected roles" mode
+        roleSearch.addEventListener('click', function() {
+            if (roleSearch.classList.contains('muted')) {
+                const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
+                if (selectedRolesRadio) {
+                    selectedRolesRadio.checked = true;
+                    selectedRolesRadio.dispatchEvent(new Event('change'));
+                }
+            }
+        });
     }
 
     // Handle role selection

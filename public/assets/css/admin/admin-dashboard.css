@@ -310,7 +310,12 @@
 /* Muted state for role search when "all roles" selected */
 .role-search.muted {
     opacity: 0.5;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.role-search.muted:hover {
+    opacity: 0.8;
 }
 
 .role-tree {
