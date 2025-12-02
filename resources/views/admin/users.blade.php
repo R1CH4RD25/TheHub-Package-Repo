@@ -162,25 +162,48 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="role-filter">
-                    <label>Role:</label>
-                    <select id="roleFilter" class="filter-select">
-                        <option value="">All roles</option>
-                        <option value="super_admin">Super Admin</option>
-                        <option value="admin">Admin</option>
-                        <option value="principal">Principal</option>
-                        <option value="maintenance_director">Maintenance Director</option>
-                        <option value="counselor">Counselor</option>
-                        <option value="substitute_manager">Substitute Manager</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="custodial">Custodial</option>
-                        <option value="cafeteria">Cafeteria</option>
-                        <option value="staff">Staff</option>
+                <div class="status-filter">
+                    <label>Status:</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">All statuses</option>
+                        <option value="active" selected>Active</option>
+                        <option value="suspended">Suspended</option>
                     </select>
                 </div>
             </div>
-            <div id="usersTable" class="data-table-container">
-                <p class="text-center">Loading active users...</p>
+                        <!-- Users Table Container -->
+            <div id="usersTable"></div>
+            
+            <!-- Sliding Action Panel -->
+            <div id="actionPanel" class="action-panel">
+                <div class="action-panel-header">
+                    <span id="selectedCount">0 selected</span>
+                    <button id="closePanel" class="close-panel-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="action-panel-content">
+                    <button class="panel-action-btn" id="bulkChangeRole">
+                        <i class="fas fa-user-tag"></i>
+                        <span>Change role</span>
+                    </button>
+                    <button class="panel-action-btn" id="bulkSuspend">
+                        <i class="fas fa-ban"></i>
+                        <span>Suspend</span>
+                    </button>
+                    <button class="panel-action-btn" id="bulkActivate">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Activate</span>
+                    </button>
+                    <button class="panel-action-btn" id="bulkResetPassword">
+                        <i class="fas fa-key"></i>
+                        <span>Reset password</span>
+                    </button>
+                    <button class="panel-action-btn danger" id="bulkDelete">
+                        <i class="fas fa-trash"></i>
+                        <span>Delete</span>
+                    </button>
+                </div>
             </div>
                 </div> <!-- .users-content -->
             </div> <!-- .users-layout -->
@@ -429,47 +452,189 @@ function renderUsersTable(users, containerId) {
         <table class="data-table">
             <thead>
                 <tr>
+                    <th class="checkbox-col">
+                        <input type="checkbox" id="selectAll" class="user-checkbox">
+                    </th>
                     <th>Name</th>
+                    <th>Status</th>
                     <th>Email</th>
                     <th>Role</th>
                     <th>Last Login</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 ${users.map(u => {
                     const initials = getInitials(u.name);
                     const avatarColor = getAvatarColor(u.name);
-                    const isSuspended = !u.is_active || u.email.includes('Suspended');
+                    const isSuspended = !u.is_active;
+                    const statusText = isSuspended ? 'Suspended' : 'Active';
+                    const statusClass = isSuspended ? 'status-suspended' : 'status-active';
                     
                     return `
-                    <tr>
+                    <tr data-user-id="${u.id}" class="${isSuspended ? 'user-suspended' : ''}">
+                        <td class="checkbox-col">
+                            <input type="checkbox" class="user-checkbox" data-user-id="${u.id}">
+                        </td>
                         <td>
                             <div class="user-cell">
                                 <div class="user-avatar ${isSuspended ? 'suspended' : ''}" style="background-color: ${avatarColor}">
                                     ${initials}
-                                    ${isSuspended ? '<div class="suspended-overlay"></div>' : ''}
                                 </div>
-                                <span class="user-name">${u.name}</span>
+                                <div class="user-info">
+                                    <div class="user-name">${u.name}</div>
+                                </div>
                             </div>
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusClass}">
+                                <i class="fas fa-circle"></i> ${statusText}
+                            </span>
                         </td>
                         <td>${u.email}</td>
                         <td><span class="badge badge-${u.role}">${u.role}</span></td>
                         <td>${u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary" onclick="changeUserRole(${u.id})">
-                                <i class="fas fa-user-tag"></i> Change Role
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deactivateUser(${u.id})">
-                                <i class="fas fa-ban"></i> Suspend
-                            </button>
-                        </td>
                     </tr>
                 `}).join('')}
             </tbody>
         </table>
     `;
     document.getElementById(containerId).innerHTML = html;
+    
+    // Setup checkbox handlers
+    setupCheckboxHandlers();
+}
+
+// Setup checkbox handlers for selection
+function setupCheckboxHandlers() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.user-checkbox:not(#selectAll)');
+    const actionPanel = document.getElementById('actionPanel');
+    const selectedCount = document.getElementById('selectedCount');
+    const closePanel = document.getElementById('closePanel');
+    
+    function updateSelectionUI() {
+        const checked = document.querySelectorAll('.user-checkbox:not(#selectAll):checked');
+        const count = checked.length;
+        
+        if (count > 0) {
+            actionPanel.classList.add('active');
+            selectedCount.textContent = `${count} selected`;
+        } else {
+            actionPanel.classList.remove('active');
+        }
+        
+        // Update select all checkbox state
+        if (selectAll) {
+            selectAll.checked = count > 0 && count === checkboxes.length;
+            selectAll.indeterminate = count > 0 && count < checkboxes.length;
+        }
+    }
+    
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateSelectionUI();
+        });
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectionUI);
+    });
+    
+    if (closePanel) {
+        closePanel.addEventListener('click', function() {
+            checkboxes.forEach(cb => cb.checked = false);
+            if (selectAll) selectAll.checked = false;
+            actionPanel.classList.remove('active');
+        });
+    }
+    
+    // Setup action buttons
+    document.getElementById('bulkChangeRole')?.addEventListener('click', function() {
+        const selected = Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
+            .map(cb => cb.dataset.userId);
+        if (selected.length > 0) {
+            bulkChangeRole(selected);
+        }
+    });
+    
+    document.getElementById('bulkSuspend')?.addEventListener('click', function() {
+        const selected = Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
+            .map(cb => cb.dataset.userId);
+        if (selected.length > 0) {
+            bulkSuspendUsers(selected);
+        }
+    });
+    
+    document.getElementById('bulkActivate')?.addEventListener('click', function() {
+        const selected = Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
+            .map(cb => cb.dataset.userId);
+        if (selected.length > 0) {
+            bulkActivateUsers(selected);
+        }
+    });
+}
+
+// Bulk action functions
+function bulkChangeRole(userIds) {
+    Swal.fire({
+        title: `Change Role for ${userIds.length} User(s)`,
+        input: 'select',
+        inputOptions: {
+            'staff': 'Staff',
+            'maintenance': 'Maintenance',
+            'custodial': 'Custodial',
+            'counselor': 'Counselor',
+            'admin': 'Admin',
+            'principal': 'Principal',
+            'super_admin': 'Super Admin'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Update Roles'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // TODO: Implement bulk role change API
+            notyf.success(`Updated ${userIds.length} user(s)`);
+            document.getElementById('actionPanel').classList.remove('active');
+            loadActiveUsers();
+        }
+    });
+}
+
+function bulkSuspendUsers(userIds) {
+    Swal.fire({
+        title: 'Suspend Users?',
+        text: `Are you sure you want to suspend ${userIds.length} user(s)?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, suspend them'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // TODO: Implement bulk suspend API
+            notyf.success(`Suspended ${userIds.length} user(s)`);
+            document.getElementById('actionPanel').classList.remove('active');
+            loadActiveUsers();
+        }
+    });
+}
+
+function bulkActivateUsers(userIds) {
+    Swal.fire({
+        title: 'Activate Users?',
+        text: `Are you sure you want to activate ${userIds.length} user(s)?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        confirmButtonText: 'Yes, activate them'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // TODO: Implement bulk activate API
+            notyf.success(`Activated ${userIds.length} user(s)`);
+            document.getElementById('actionPanel').classList.remove('active');
+            loadActiveUsers();
+        }
+    });
 }
 
 // Render pending table
@@ -719,7 +884,7 @@ let filteredUsers = [];
 function setupSearchAndFilter() {
     const searchInput = document.getElementById('userSearch');
     const clearBtn = document.getElementById('clearSearch');
-    const roleFilter = document.getElementById('roleFilter');
+    const statusFilter = document.getElementById('statusFilter');
 
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -740,23 +905,29 @@ function setupSearchAndFilter() {
         });
     }
 
-    if (roleFilter) {
-        roleFilter.addEventListener('change', applyFilters);
+    if (statusFilter) {
+        statusFilter.addEventListener('change', applyFilters);
     }
 }
 
 function applyFilters() {
     const searchTerm = document.getElementById('userSearch')?.value.toLowerCase() || '';
-    const roleFilter = document.getElementById('roleFilter')?.value || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
 
     filteredUsers = allUsers.filter(user => {
         const matchesSearch = !searchTerm ||
             user.name.toLowerCase().includes(searchTerm) ||
             user.email.toLowerCase().includes(searchTerm);
 
-        const matchesRole = !roleFilter || user.role === roleFilter;
+        let matchesStatus = true;
+        if (statusFilter === 'active') {
+            matchesStatus = user.is_active;
+        } else if (statusFilter === 'suspended') {
+            matchesStatus = !user.is_active;
+        }
+        // 'all' shows both active and suspended
 
-        return matchesSearch && matchesRole;
+        return matchesSearch && matchesStatus;
     });
 
     renderUsersTable(filteredUsers, 'usersTable');
