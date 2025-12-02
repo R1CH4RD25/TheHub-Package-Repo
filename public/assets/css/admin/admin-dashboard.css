@@ -37,9 +37,9 @@
 
 /* Fixed sidebar - independent vertical scroll */
 .admin-sidebar {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
     background: white;
     box-shadow: 2px 0 8px rgba(0, 0, 0, var(--shadow-light));
     overflow-y: auto;
@@ -64,10 +64,13 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 .admin-tab.active {
     display: flex;
+    opacity: 1;
 }
 
 /* Fixed tab header - stays at top */
