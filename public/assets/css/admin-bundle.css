@@ -581,6 +581,7 @@ html {
     position: sticky;
     top: 0;
     z-index: 20;
+    min-height: 72px;
 }
 
 .admin-main {
@@ -1338,6 +1339,7 @@ html {
     padding: var(--space-4);
     border-bottom: 1px solid var(--gray-300);
     flex-shrink: 0;
+    min-height: 72px;
 }
 
 .admin-root .sidebar-logo {
