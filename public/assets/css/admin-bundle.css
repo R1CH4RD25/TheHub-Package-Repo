@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 08:42:05 PM UTC 2025
+ * Generated: Tue Dec  2 08:43:11 PM UTC 2025
  */
 
 
@@ -2476,9 +2476,10 @@ html {
 .users-layout {
     display: grid;
     grid-template-columns: 280px 1fr;
-    min-height: 600px;
+    height: calc(100vh - 220px);
     gap: 0;
     transition: grid-template-columns 0.3s ease;
+    overflow: hidden;
 }
 
 /* Role Filter Panel - Left Sidebar */
@@ -2487,7 +2488,7 @@ html {
     border-right: 1px solid var(--gray-300);
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 200px);
+    height: 100%;
     transition: all 0.3s ease;
     overflow: hidden;
 }
@@ -2535,6 +2536,7 @@ html {
     flex: 1;
     overflow-y: auto;
     padding: 1rem;
+    min-height: 0;
 }
 
 .role-selection-mode {
@@ -2653,6 +2655,8 @@ html {
 .panel-footer {
     padding: 1rem;
     border-top: 1px solid var(--gray-300);
+    margin-top: auto;
+    flex-shrink: 0;
 }
 
 .manage-link {
@@ -2676,6 +2680,8 @@ html {
     flex-direction: column;
     background: white;
     position: relative;
+    height: 100%;
+    overflow-y: auto;
 }
 
 /* Expand Roles Button (shown when panel collapsed) */
