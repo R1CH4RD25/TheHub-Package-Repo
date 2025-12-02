@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 04:24:50 PM UTC 2025
+ * Generated: Tue Dec  2 04:29:07 PM UTC 2025
  */
 
 
@@ -563,7 +563,7 @@ html {
 
 /* Adjust grid when sidebar is collapsed */
 .admin-shell.has-collapsed-sidebar {
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 69px minmax(0, 1fr);
 }
 
 /* Sidebar styling is defined in admin-layout.css */
@@ -1710,7 +1710,7 @@ html {
 
 /* Collapsed state - icon-only mode */
 .admin-sidebar.collapsed {
-    width: 64px;
+    width: 69px;
 }
 
 /* Sidebar Header */
