@@ -62,7 +62,6 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    max-width: 1400px;
     overflow: hidden;
     position: relative;
     z-index: 1;

@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:06:42 PM UTC 2025
+ * Generated: Tue Dec  2 05:13:01 PM UTC 2025
  */
 
 
@@ -2373,7 +2373,6 @@ html {
     flex-direction: column;
     height: 100%;
     width: 100%;
-    max-width: 1400px;
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -5303,21 +5302,23 @@ body {
    Unique, top-notch animations for tables, tabs, and UI elements
    ========================================================================== */
 
-/* Tab Content - Slide and Scale from Side */
+/* Tab Content - Fade In */
 .admin-tab {
     opacity: 0;
-    transform: translateX(-30px) scale(0.95);
     transition: none;
 }
 
 .admin-tab.active {
-    animation: slideScaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: fadeIn 0.3s ease-in forwards;
 }
 
-@keyframes slideScaleIn {
+@keyframes fadeIn {
     0% {
         opacity: 0;
-        transform: translateX(-30px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
     }
 
     100% {
