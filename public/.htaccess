@@ -11,6 +11,16 @@ RewriteRule ^$ hub.php [L]
 # Redirect index.php to root for clean URL
 RewriteRule ^index\.php$ / [R=301,L]
 
+# Laravel routes - ALL admin routes go through laravel.php (MUST BE FIRST)
+RewriteRule ^laravel/health$ laravel.php [L,QSA]
+RewriteRule ^admin/?$ laravel.php [L,QSA]
+RewriteRule ^admin/users(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/invitations(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/packages(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/settings(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/logs(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/export(/.*)?$ laravel.php [L,QSA]
+
 # Command Center routes - must come before generic .php removal
 RewriteRule ^command/section/([a-z0-9-]+)$ command/section.php?slug=$1 [L,QSA]
 RewriteRule ^command/submission/([0-9]+)$ command/submission.php?id=$1 [L,QSA]
