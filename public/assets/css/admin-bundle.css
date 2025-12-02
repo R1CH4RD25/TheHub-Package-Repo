@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 04:50:47 PM UTC 2025
+ * Generated: Tue Dec  2 04:53:21 PM UTC 2025
  */
 
 
@@ -843,7 +843,7 @@ html {
 
 .admin-root .mgmt-module-card {
     display: block;
-    background: white;
+    background: #fafbfc;
     border: 1px solid var(--gray-300);
     border-radius: var(--radius-lg);
     padding: var(--space-5);

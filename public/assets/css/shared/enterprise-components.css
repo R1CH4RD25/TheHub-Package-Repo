@@ -312,7 +312,7 @@
 
 .admin-root .mgmt-module-card {
     display: block;
-    background: white;
+    background: #fafbfc;
     border: 1px solid var(--gray-300);
     border-radius: var(--radius-lg);
     padding: var(--space-5);
