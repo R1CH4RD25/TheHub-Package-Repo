@@ -2027,16 +2027,7 @@ footer {
     background: rgba(201, 151, 0, 0.05);
 }
 
-/* Tab Subtabs - Slide Up Stack */
-.subtab-btn {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.subtab-btn.animate-in {
-    animation: slideUpStack 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
+/* Subtab button animation - primary definition at line 164 */
 
 .subtab-btn.active {
     position: relative;
