@@ -137,6 +137,11 @@
 
                 <!-- Right Content Area -->
                 <div class="users-content">
+                    <!-- Expand Button (shown when panel collapsed) -->
+                    <button id="expandRolesBtn" class="expand-roles-btn" style="display: none;" title="Show roles">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    
                     <!-- Top Bar with Actions -->
                     <div class="content-header">
                         <div class="header-info">
@@ -272,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const collapseBtn = document.querySelector('.collapse-btn');
     const panel = document.querySelector('.role-filter-panel');
     const usersLayout = document.querySelector('.users-layout');
+    const expandBtn = document.getElementById('expandRolesBtn');
     
     if (collapseBtn) {
         collapseBtn.addEventListener('click', function() {
@@ -281,10 +287,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (panel.classList.contains('collapsed')) {
                 icon.className = 'fas fa-chevron-right';
                 usersLayout.style.gridTemplateColumns = '0 1fr';
+                if (expandBtn) expandBtn.style.display = 'flex';
             } else {
                 icon.className = 'fas fa-chevron-left';
                 usersLayout.style.gridTemplateColumns = '280px 1fr';
+                if (expandBtn) expandBtn.style.display = 'none';
             }
+        });
+    }
+    
+    // Expand button functionality
+    if (expandBtn) {
+        expandBtn.addEventListener('click', function() {
+            panel.classList.remove('collapsed');
+            const icon = collapseBtn?.querySelector('i');
+            if (icon) icon.className = 'fas fa-chevron-left';
+            usersLayout.style.gridTemplateColumns = '280px 1fr';
+            expandBtn.style.display = 'none';
         });
     }
 

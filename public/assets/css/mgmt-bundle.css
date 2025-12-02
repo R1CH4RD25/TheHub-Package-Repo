@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 07:58:10 PM UTC 2025
+ * Generated: Tue Dec  2 08:33:06 PM UTC 2025
  */
 
 
@@ -2661,6 +2661,39 @@ html {
     display: flex;
     flex-direction: column;
     background: white;
+    position: relative;
+}
+
+/* Expand Roles Button (shown when panel collapsed) */
+.expand-roles-btn {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 64px;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+    color: var(--gray-600);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.expand-roles-btn:hover {
+    background: var(--gray-50);
+    color: var(--gray-900);
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.expand-roles-btn i {
+    font-size: 14px;
 }
 
 /* User avatar in table */
