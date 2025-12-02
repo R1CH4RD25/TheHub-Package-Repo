@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 07:11:41 PM UTC 2025
+ * Generated: Tue Dec  2 07:19:08 PM UTC 2025
  */
 
 
@@ -2487,6 +2487,19 @@ html {
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 200px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.role-filter-panel.collapsed {
+    width: 0;
+    border-right: none;
+    padding: 0;
+}
+
+.role-filter-panel.collapsed .panel-content,
+.role-filter-panel.collapsed .panel-footer {
+    display: none;
 }
 
 .panel-header {
@@ -2648,6 +2661,69 @@ html {
     display: flex;
     flex-direction: column;
     background: white;
+}
+
+/* User avatar in table */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.user-avatar.suspended::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+}
+
+.user-avatar.suspended::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: white;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--gray-900);
+}
+
+.user-status {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.user-status.suspended {
+    color: var(--red-600);
 }
 
 .content-header {

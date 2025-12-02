@@ -245,6 +245,26 @@ const csrfToken = '{{ csrf_token() }}';
 
 // Role tree functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Collapse panel functionality
+    const collapseBtn = document.querySelector('.collapse-btn');
+    const panel = document.querySelector('.role-filter-panel');
+    const usersLayout = document.querySelector('.users-layout');
+    
+    if (collapseBtn) {
+        collapseBtn.addEventListener('click', function() {
+            panel.classList.toggle('collapsed');
+            const icon = this.querySelector('i');
+            
+            if (panel.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-right';
+                usersLayout.style.gridTemplateColumns = '0 1fr';
+            } else {
+                icon.className = 'fas fa-chevron-left';
+                usersLayout.style.gridTemplateColumns = '280px 1fr';
+            }
+        });
+    }
+
     // Toggle role groups
     document.querySelectorAll('.role-item.parent').forEach(item => {
         item.addEventListener('click', function(e) {
@@ -389,6 +409,21 @@ function loadInvitations() {
 }
 
 // Render users table
+// Helper function to get initials
+function getInitials(name) {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+}
+
+// Helper function to generate avatar color based on name
+function getAvatarColor(name) {
+    const colors = [
+        '#1e88e5', '#43a047', '#e53935', '#fb8c00', 
+        '#8e24aa', '#00acc1', '#7cb342', '#f4511e'
+    ];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+}
+
 function renderUsersTable(users, containerId) {
     const html = `
         <table class="data-table">
@@ -402,9 +437,22 @@ function renderUsersTable(users, containerId) {
                 </tr>
             </thead>
             <tbody>
-                ${users.map(u => `
+                ${users.map(u => {
+                    const initials = getInitials(u.name);
+                    const avatarColor = getAvatarColor(u.name);
+                    const isSuspended = !u.is_active || u.email.includes('Suspended');
+                    
+                    return `
                     <tr>
-                        <td>${u.name}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar ${isSuspended ? 'suspended' : ''}" style="background-color: ${avatarColor}">
+                                    ${initials}
+                                    ${isSuspended ? '<div class="suspended-overlay"></div>' : ''}
+                                </div>
+                                <span class="user-name">${u.name}</span>
+                            </div>
+                        </td>
                         <td>${u.email}</td>
                         <td><span class="badge badge-${u.role}">${u.role}</span></td>
                         <td>${u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never'}</td>
@@ -417,7 +465,7 @@ function renderUsersTable(users, containerId) {
                             </button>
                         </td>
                     </tr>
-                `).join('')}
+                `}).join('')}
             </tbody>
         </table>
     `;
