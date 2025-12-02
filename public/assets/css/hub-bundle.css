@@ -2433,6 +2433,13 @@ html {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--primary-color, #007bff);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Enterprise context - stronger border */
+.admin-root .nav-user-avatar,
+.mgmt-root .nav-user-avatar {
+    border: 2.5px solid var(--nd-gold);
 }
 
 .nav-user-info {
