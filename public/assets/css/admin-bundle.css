@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:23:30 PM UTC 2025
+ * Generated: Tue Dec  2 05:26:21 PM UTC 2025
  */
 
 
@@ -1526,16 +1526,7 @@ html {
 }
 
 /* ========== 8. ENTERPRISE SUBTABS ========== */
-.admin-root .user-subtabs {
-    display: flex;
-    gap: var(--space-1);
-    padding: 0 var(--space-4);
-    background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-300);
-    flex-shrink: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
+/* User subtabs styling moved to admin-dashboard.css */
 
 .admin-root .subtab-btn {
     display: inline-flex;
@@ -3236,16 +3227,7 @@ html {
 }
 
 /* User Management Sub-tabs */
-.user-subtabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 0;
-}
-
-/* REMOVED DUPLICATE .subtab-btn - primary definition at line 159 */
-/* Responsive version at line 1021 inside @media query */
+/* Primary definition at line 152, responsive version above inside @media query */
 
 .user-subtab {
     display: none;
