@@ -999,10 +999,7 @@
 
 /* Subtab button styling moved to admin-dashboard.css */
 
-.admin-root .subtab-btn.active {
-    color: var(--ms-blue);
-    border-bottom-color: var(--ms-blue);
-}
+/* Subtab button active state moved to admin-dashboard.css */
 
 .admin-root .subtab-btn i {
     font-size: 14px;
