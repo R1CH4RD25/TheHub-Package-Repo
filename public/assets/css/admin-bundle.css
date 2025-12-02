@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Tue Dec  2 09:07:37 PM UTC 2025
+ * Generated: Tue Dec  2 09:09:56 PM UTC 2025
  */
 
 
@@ -2569,12 +2569,11 @@ html {
 
 .role-search.muted {
     opacity: 0.5;
-    cursor: pointer;
     transition: opacity 0.3s ease;
 }
 
 .role-search.muted:hover {
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .role-search i {
@@ -2611,8 +2610,8 @@ html {
 }
 
 .role-tree.muted:hover {
-    opacity: 0.8;
-    cursor: pointer;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .role-item {

@@ -338,28 +338,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize as muted since "all" is checked by default
     if (roleSearch) {
         roleSearch.classList.add('muted');
-        // Clicking the search when muted switches to "selected roles" mode
-        roleSearch.addEventListener('click', function() {
-            if (roleSearch.classList.contains('muted')) {
-                const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
-                if (selectedRolesRadio) {
-                    selectedRolesRadio.checked = true;
-                    selectedRolesRadio.dispatchEvent(new Event('change'));
+        // Clicking or focusing the search when muted switches to "selected roles" mode
+        const searchInput = roleSearch.querySelector('input');
+        if (searchInput) {
+            searchInput.addEventListener('focus', function() {
+                if (roleSearch.classList.contains('muted')) {
+                    const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
+                    if (selectedRolesRadio) {
+                        selectedRolesRadio.checked = true;
+                        selectedRolesRadio.dispatchEvent(new Event('change'));
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     if (roleTree) {
         roleTree.classList.add('muted');
-        // Clicking the tree when muted switches to "selected roles" mode
-        roleTree.addEventListener('click', function() {
-            if (roleTree.classList.contains('muted')) {
-                const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
-                if (selectedRolesRadio) {
-                    selectedRolesRadio.checked = true;
-                    selectedRolesRadio.dispatchEvent(new Event('change'));
+        // Clicking a role item when muted switches to "selected roles" mode
+        document.querySelectorAll('.role-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (roleTree.classList.contains('muted')) {
+                    const selectedRolesRadio = document.querySelector('input[name="roleMode"][value="selected"]');
+                    if (selectedRolesRadio) {
+                        selectedRolesRadio.checked = true;
+                        selectedRolesRadio.dispatchEvent(new Event('change'));
+                    }
                 }
-            }
+            });
         });
     }
 
