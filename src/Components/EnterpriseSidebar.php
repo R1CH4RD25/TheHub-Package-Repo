@@ -125,14 +125,12 @@ class EnterpriseSidebar
                 <div class="sidebar-footer-content">
                     <div class="footer-info">
                         <span>&copy; <?= date('Y') ?> <?= htmlspecialchars(\Hub\SiteSettings::get('organization_name', 'Your Organization'), ENT_QUOTES, 'UTF-8') ?></span>
-                        <span class="footer-separator">•</span>
-                        <span>Admin Dashboard</span>
                     </div>
                     <?php
                     $version = \Hub\SiteSettings::get('site_version', '1.0');
                     ?>
                     <div class="footer-version">
-                        Version <?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?>
+                        Admin Dashboard v<?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?>
                     </div>
                 </div>
             </div>
