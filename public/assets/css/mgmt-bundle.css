@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 07:03:16 PM UTC 2025
+ * Generated: Tue Dec  2 07:11:41 PM UTC 2025
  */
 
 
@@ -2472,12 +2472,241 @@ html {
     display: block;
 }
 
+/* Users Layout - Two Column Design */
+.users-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 600px;
+    gap: 0;
+}
+
+/* Role Filter Panel - Left Sidebar */
+.role-filter-panel {
+    background: white;
+    border-right: 1px solid var(--gray-300);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 200px);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.panel-header h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.collapse-btn {
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.collapse-btn:hover {
+    color: var(--gray-900);
+}
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.role-selection-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    color: var(--gray-700);
+}
+
+.radio-option input[type="radio"] {
+    cursor: pointer;
+}
+
+.role-search {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.role-search i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-500);
+    font-size: 0.75rem;
+}
+
+.role-search input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    font-size: 0.8125rem;
+}
+
+.role-search input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.role-tree {
+    font-size: 0.8125rem;
+}
+
+.role-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.role-item:hover {
+    background: var(--gray-100);
+}
+
+.role-item.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.role-item.active:hover {
+    background: var(--primary-color);
+}
+
+.toggle-icon {
+    width: 12px;
+    margin-right: 0.5rem;
+    font-size: 0.75rem;
+    transition: transform 0.2s;
+}
+
+.role-item.parent.expanded .toggle-icon {
+    transform: rotate(90deg);
+}
+
+.role-name {
+    flex: 1;
+}
+
+.role-children {
+    padding-left: 1.5rem;
+}
+
+.role-item.child {
+    padding-left: 1.75rem;
+}
+
+.role-item.child .role-name {
+    font-weight: normal;
+}
+
+.panel-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--gray-300);
+}
+
+.manage-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.manage-link:hover {
+    text-decoration: underline;
+}
+
+/* Users Content Area */
+.users-content {
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+.content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.header-title {
+    font-weight: 500;
+    color: var(--gray-900);
+}
+
+.header-subtitle {
+    color: var(--gray-600);
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.action-btn:hover {
+    background: var(--gray-100);
+}
+
+.action-btn.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 /* Table controls - search and filters */
 .table-controls {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.25rem 0 1rem;
+    padding: 1.25rem 1rem 1rem;
     border-bottom: 1px solid var(--gray-300);
     margin-bottom: 0;
 }
