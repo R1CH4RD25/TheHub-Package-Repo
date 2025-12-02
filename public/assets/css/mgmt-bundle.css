@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 04:44:45 PM UTC 2025
+ * Generated: Tue Dec  2 04:47:28 PM UTC 2025
  */
 
 
@@ -1416,16 +1416,7 @@ html {
     overflow-x: hidden;
 }
 
-.admin-root .sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    border-bottom: 1px solid var(--gray-300);
-    flex-shrink: 0;
-    height: 72px;
-    box-sizing: border-box;
-}
+/* Sidebar header styling moved to admin-layout.css */
 
 .admin-root .sidebar-logo {
     width: 40px;
@@ -1751,10 +1742,10 @@ html {
     transform: scale(0.95);
 }
 
-/* When collapsed, adjust padding */
+/* When collapsed, keep padding consistent */
 .admin-sidebar.collapsed .sidebar-header,
 .mgmt-sidebar.collapsed .sidebar-header {
-    padding: var(--space-2);
+    padding: var(--space-3);
 }
 
 /* Keep toggle button visible when collapsed */
