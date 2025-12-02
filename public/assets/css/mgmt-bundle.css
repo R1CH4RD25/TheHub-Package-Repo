@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Dec  2 06:54:35 PM UTC 2025
+ * Generated: Tue Dec  2 06:58:08 PM UTC 2025
  */
 
 
@@ -2384,7 +2384,7 @@ html {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0;
-    background: var(--bg-secondary);
+    background: white;
     min-width: 0;
 }
 
@@ -2639,18 +2639,18 @@ html {
 }
 
 .data-table thead {
-    background: var(--bg-secondary);
-    border-bottom: 2px solid var(--border-primary);
+    background: white;
+    border-bottom: 1px solid var(--gray-300);
 }
 
 .data-table th {
     padding: 0.75rem 1rem;
     text-align: left;
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.05em;
     vertical-align: middle;
 }
 
@@ -2666,12 +2666,12 @@ html {
 }
 
 .data-table tbody tr {
-    border-bottom: 1px solid var(--border-primary);
+    border-bottom: 1px solid var(--gray-200);
     transition: background 0.15s;
 }
 
 .data-table tbody tr:hover {
-    background: var(--bg-secondary);
+    background: var(--gray-50);
 }
 
 .data-table tbody tr:last-child {

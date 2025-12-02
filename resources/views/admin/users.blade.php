@@ -194,7 +194,7 @@ function renderUsersTable(users, containerId) {
                                 <i class="fas fa-user-tag"></i> Change Role
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="deactivateUser(${u.id})">
-                                <i class="fas fa-ban"></i> Deactivate
+                                <i class="fas fa-ban"></i> Suspend
                             </button>
                         </td>
                     </tr>
