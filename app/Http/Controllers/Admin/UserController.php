@@ -32,16 +32,21 @@ class UserController extends Controller
         $pending = $request->query('pending') === 'true';
 
         if ($pending) {
-            // Pending users: have google_id but approved_at is NULL (never been approved)
+            // Pending users: have google_id but have never logged in (no last_login)
+            // AND are inactive (is_active = false)
             $users = User::whereNotNull('google_id')
-                ->whereNull('approved_at')
+                ->whereNull('last_login')
+                ->where('is_active', false)
                 ->select('id', 'name', 'email', 'role', 'picture', 'is_active', 'last_login', 'created_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
         } else {
-            // Return only approved users (both active and suspended) for status filtering
-            // Exclude users who are pending approval
-            $users = User::whereNotNull('approved_at')
+            // Return all users who have logged in at least once OR are active
+            // (they've been approved implicitly or explicitly)
+            $users = User::where(function($query) {
+                    $query->whereNotNull('last_login')
+                          ->orWhere('is_active', true);
+                })
                 ->select('id', 'name', 'email', 'role', 'picture', 'is_active', 'last_login')
                 ->orderBy('name')
                 ->get();
