@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(100) UNIQUE NULL,
     password VARCHAR(255) NULL,
     name VARCHAR(255) NOT NULL,
+    picture VARCHAR(500) NULL,
     role ENUM('staff', 'manager', 'admin', 'super_admin') DEFAULT 'staff',
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
