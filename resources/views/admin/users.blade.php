@@ -136,7 +136,7 @@
                     <button id="expandRolesBtn" class="expand-roles-btn" style="display: none;" title="Show roles">
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    
+
                     <!-- Top Bar with Actions -->
                     <div class="content-header">
                         <div class="header-info">
@@ -173,7 +173,7 @@
             </div>
                         <!-- Users Table Container -->
             <div id="usersTable"></div>
-            
+
             <!-- Sliding Action Panel -->
             <div id="actionPanel" class="action-panel">
                 <div class="action-panel-header">
@@ -210,7 +210,7 @@
         </div> <!-- #subtab-active-users -->
 
         <!-- Pending Users Subtab -->
-        <div id="subtab-pending-users" class="user-subtab"
+        <div id="subtab-pending-users" class="user-subtab">
             <div id="pendingTable" class="data-table-container">
                 <p class="text-center">Loading pending approvals...</p>
             </div>
@@ -273,12 +273,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const panel = document.querySelector('.role-filter-panel');
     const usersLayout = document.querySelector('.users-layout');
     const expandBtn = document.getElementById('expandRolesBtn');
-    
+
     if (collapseBtn) {
         collapseBtn.addEventListener('click', function() {
             panel.classList.toggle('collapsed');
             const icon = this.querySelector('i');
-            
+
             if (panel.classList.contains('collapsed')) {
                 icon.className = 'fas fa-chevron-right';
                 usersLayout.style.gridTemplateColumns = '0 1fr';
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Expand button functionality
     if (expandBtn) {
         expandBtn.addEventListener('click', function() {
@@ -308,18 +308,18 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             const children = this.nextElementSibling;
             const isExpanded = children.style.display !== 'none';
-            
+
             children.style.display = isExpanded ? 'none' : 'block';
             this.classList.toggle('expanded', !isExpanded);
         });
     });
-    
+
     // Handle role selection mode (all vs selected)
     const roleSearch = document.querySelector('.role-search');
     const roleTree = document.querySelector('.role-tree');
     const roleModeRadios = document.querySelectorAll('input[name="roleMode"]');
     let lastSelectedRole = null; // Remember the last selected role
-    
+
     roleModeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'all') {
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Initialize as muted since "all" is checked by default
     if (roleSearch) {
         roleSearch.classList.add('muted');
@@ -388,14 +388,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
             // Add active to clicked item
             this.classList.add('active');
-            
+
             // Get the role value
             const role = this.getAttribute('data-role');
             const roleName = this.querySelector('.role-name').textContent;
-            
+
             // Update the header subtitle
             document.getElementById('roleContext').textContent = roleName.toLowerCase();
-            
+
             // Filter users by role
             filterUsersByRole(role);
         });
@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const roleName = group.querySelector('.parent .role-name').textContent.toLowerCase();
             const hasMatch = roleName.includes(searchTerm);
             group.style.display = hasMatch ? 'block' : 'none';
-            
+
             // Expand if search matches
             if (hasMatch && searchTerm) {
                 group.querySelector('.role-children').style.display = 'block';
@@ -521,7 +521,7 @@ function getInitials(name) {
 // Helper function to generate avatar color based on name
 function getAvatarColor(name) {
     const colors = [
-        '#1e88e5', '#43a047', '#e53935', '#fb8c00', 
+        '#1e88e5', '#43a047', '#e53935', '#fb8c00',
         '#8e24aa', '#00acc1', '#7cb342', '#f4511e'
     ];
     const index = name.charCodeAt(0) % colors.length;
@@ -550,14 +550,14 @@ function renderUsersTable(users, containerId) {
                     const isSuspended = !u.is_active;
                     const statusText = isSuspended ? 'Suspended' : 'Active';
                     const statusClass = isSuspended ? 'status-suspended' : 'status-active';
-                    
+
                     // Show Google profile picture ONLY if active, otherwise always show initials with strikethrough
                     const avatarHtml = (!isSuspended && u.picture)
                         ? `<img src="${u.picture}" alt="${u.name}" class="user-avatar-img">`
                         : `<div class="user-avatar ${isSuspended ? 'suspended' : ''}" style="background-color: ${avatarColor}">
                             ${initials}
                            </div>`;
-                    
+
                     return `
                     <tr data-user-id="${u.id}" class="${isSuspended ? 'user-suspended' : ''}">
                         <td class="checkbox-col">
@@ -585,7 +585,7 @@ function renderUsersTable(users, containerId) {
         </table>
     `;
     document.getElementById(containerId).innerHTML = html;
-    
+
     // Setup checkbox handlers
     setupCheckboxHandlers();
 }
@@ -597,28 +597,28 @@ function setupCheckboxHandlers() {
     const actionPanel = document.getElementById('actionPanel');
     const selectedCount = document.getElementById('selectedCount');
     const closePanel = document.getElementById('closePanel');
-    
+
     function updateSelectionUI() {
         const checked = document.querySelectorAll('.user-checkbox:not(#selectAll):checked');
         const count = checked.length;
-        
+
         if (count > 0) {
             actionPanel.classList.add('active');
             selectedCount.textContent = `${count} selected`;
-            
+
             // Determine if selected users are active or suspended
             const selectedUsers = Array.from(checked).map(cb => {
                 const userId = cb.dataset.userId;
                 return allUsers.find(u => u.id == userId);
             });
-            
+
             const hasActive = selectedUsers.some(u => u && u.is_active);
             const hasSuspended = selectedUsers.some(u => u && !u.is_active);
-            
+
             // Show/hide suspend/activate buttons based on selection
             const suspendBtn = document.getElementById('bulkSuspend');
             const activateBtn = document.getElementById('bulkActivate');
-            
+
             if (suspendBtn) {
                 suspendBtn.style.display = hasActive ? 'flex' : 'none';
             }
@@ -628,25 +628,25 @@ function setupCheckboxHandlers() {
         } else {
             actionPanel.classList.remove('active');
         }
-        
+
         // Update select all checkbox state
         if (selectAll) {
             selectAll.checked = count > 0 && count === checkboxes.length;
             selectAll.indeterminate = count > 0 && count < checkboxes.length;
         }
     }
-    
+
     if (selectAll) {
         selectAll.addEventListener('change', function() {
             checkboxes.forEach(cb => cb.checked = this.checked);
             updateSelectionUI();
         });
     }
-    
+
     checkboxes.forEach(cb => {
         cb.addEventListener('change', updateSelectionUI);
     });
-    
+
     if (closePanel) {
         closePanel.addEventListener('click', function() {
             checkboxes.forEach(cb => cb.checked = false);
@@ -654,7 +654,7 @@ function setupCheckboxHandlers() {
             actionPanel.classList.remove('active');
         });
     }
-    
+
     // Setup action buttons
     document.getElementById('bulkChangeRole')?.addEventListener('click', function() {
         const selected = Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
@@ -663,7 +663,7 @@ function setupCheckboxHandlers() {
             bulkChangeRole(selected);
         }
     });
-    
+
     document.getElementById('bulkSuspend')?.addEventListener('click', function() {
         const selected = Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
             .map(cb => cb.dataset.userId);
@@ -671,7 +671,7 @@ function setupCheckboxHandlers() {
             bulkSuspendUsers(selected);
         }
     });
-    
+
     document.getElementById('bulkActivate')?.addEventListener('click', function() {
         const selected = Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
             .map(cb => cb.dataset.userId);
@@ -718,7 +718,7 @@ function bulkSuspendUsers(userIds) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Call API for each user
-            const promises = userIds.map(userId => 
+            const promises = userIds.map(userId =>
                 fetch(`/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
@@ -728,7 +728,7 @@ function bulkSuspendUsers(userIds) {
                     body: JSON.stringify({ action: 'deactivate' })
                 }).then(r => r.json())
             );
-            
+
             Promise.all(promises)
                 .then(() => {
                     notyf.success(`Suspended ${userIds.length} user(s)`);
@@ -754,7 +754,7 @@ function bulkActivateUsers(userIds) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Call API for each user
-            const promises = userIds.map(userId => 
+            const promises = userIds.map(userId =>
                 fetch(`/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
@@ -764,7 +764,7 @@ function bulkActivateUsers(userIds) {
                     body: JSON.stringify({ action: 'reactivate' })
                 }).then(r => r.json())
             );
-            
+
             Promise.all(promises)
                 .then(() => {
                     notyf.success(`Activated ${userIds.length} user(s)`);
