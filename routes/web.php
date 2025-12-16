@@ -7,7 +7,8 @@ use App\Http\Controllers\Admin\{
     UserController,
     PackageController,
     SettingsController,
-    LogsController
+    LogsController,
+    RoleController
 };
 
 Route::get('/', function () {
@@ -35,7 +36,7 @@ Route::get('/laravel/health', function () {
 Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function () {
     // Admin Dashboard - shows overview with links to all sections
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
-    
+
     // Users Management
     Route::get('/users', [UserController::class, 'index'])->name('admin.users');
     Route::get('/users/list', [UserController::class, 'list'])->name('admin.users.list');
@@ -43,6 +44,17 @@ Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function (
     Route::get('/invitations', [UserController::class, 'invitations'])->name('admin.invitations');
     Route::post('/invitations', [UserController::class, 'sendInvitation'])->name('admin.invitations.send');
     Route::delete('/invitations/{id}', [UserController::class, 'revokeInvitation'])->name('admin.invitations.revoke');
+
+    // Role & Permission Management
+    Route::get('/roles', [RoleController::class, 'index'])->name('admin.roles.index');
+    Route::get('/roles/{id}', [RoleController::class, 'show'])->name('admin.roles.show');
+    Route::post('/roles', [RoleController::class, 'store'])->name('admin.roles.store');
+    Route::put('/roles/{id}', [RoleController::class, 'update'])->name('admin.roles.update');
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('admin.roles.destroy');
+    Route::get('/permissions', [RoleController::class, 'permissions'])->name('admin.permissions');
+    Route::post('/roles/assign-user', [RoleController::class, 'assignToUser'])->name('admin.roles.assign');
+    Route::delete('/roles/remove-user', [RoleController::class, 'removeFromUser'])->name('admin.roles.remove');
+    Route::get('/users/{id}/permissions', [RoleController::class, 'userPermissions'])->name('admin.users.permissions');
 
     // Package Management
     Route::get('/packages', [PackageController::class, 'index'])->name('admin.packages');
