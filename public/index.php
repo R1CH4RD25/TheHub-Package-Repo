@@ -7,8 +7,8 @@ use Hub\Auth;
 // Redirect if already logged in
 if (Auth::getCurrentUser()) {
     error_log("=== INDEX.PHP: User already logged in, redirecting to hub ===");
-    // Go to hub page (dynamic based on role)
-    header('Location: /');
+    // Go to hub page (modules selector)
+    header('Location: /modules.php');
     exit;
 }
 

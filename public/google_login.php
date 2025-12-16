@@ -19,11 +19,11 @@ try {
     error_log("=== GOOGLE_LOGIN.PHP (CALLBACK): User logged in: {$user['email']} (ID: {$user['id']}, Role: {$user['role']}) ===");
     error_log("=== GOOGLE_LOGIN.PHP (CALLBACK): Redirecting to hub ===");
     
-    // Redirect to Hub (section selector)
+    // Redirect to Hub (modules selector)
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Cache-Control: post-check=0, pre-check=0', false);
     header('Pragma: no-cache');
-    header('Location: /');
+    header('Location: /modules.php');
     exit;
     
 } catch (Exception $e) {
