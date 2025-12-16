@@ -9,7 +9,7 @@
     @if(isset($context) && $context === 'management')
         <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
     @else
-        <link rel="stylesheet" href="/assets/css/admin-bundle.css">
+        <link rel="stylesheet" href="/assets/css/admin-bundle.css?v={{ filemtime(public_path('assets/css/admin-bundle.css')) }}">
     @endif
 
     <!-- Font Awesome -->
