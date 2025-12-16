@@ -252,8 +252,8 @@
 }
 
 .role-item.active {
-    background-color: var(--primary-color, #2196f3);
-    border-color: var(--primary-color, #2196f3);
+    background-color: var(--primary-color, #2196f3) !important;
+    border-color: var(--primary-color, #2196f3) !important;
     box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
