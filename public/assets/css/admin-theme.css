@@ -325,30 +325,13 @@ body {
 .settings-grid .form-group {
     display: flex;
     flex-direction: column;
-    background: var(--bg-primary);
-    padding: 1.25rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-primary);
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.settings-grid .form-group:hover {
-    border-color: var(--border-secondary);
-}
-
-.settings-grid .form-group:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(15, 77, 141, 0.1);
 }
 
 .settings-grid .form-group label {
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.625rem;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .settings-grid .form-group input[type="text"],
@@ -356,13 +339,11 @@ body {
 .settings-grid .form-group input[type="email"],
 .settings-grid .form-group select {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.625rem;
     border: 1px solid var(--border-secondary);
     border-radius: 6px;
     font-size: 0.95rem;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    transition: all 0.2s;
+    transition: border-color 0.2s;
 }
 
 .settings-grid .form-group input[type="text"]:focus,
@@ -371,61 +352,39 @@ body {
 .settings-grid .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    background: var(--bg-primary);
 }
 
 .settings-grid .form-group input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 0.5rem;
+    width: auto;
+    margin-left: 0.5rem;
     cursor: pointer;
-    accent-color: var(--primary-color);
 }
 
 .settings-grid .form-group small {
     color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    line-height: 1.4;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
 }
 
 .color-picker-wrapper {
     display: flex;
     gap: 0.75rem;
-    align-items: stretch;
+    align-items: center;
 }
 
 .color-picker-wrapper input[type="color"] {
     width: 60px;
-    height: 48px;
+    height: 40px;
     border: 1px solid var(--border-secondary);
     border-radius: 6px;
     cursor: pointer;
-    padding: 4px;
-    background: var(--bg-secondary);
-    transition: border-color 0.2s;
-}
-
-.color-picker-wrapper input[type="color"]:hover {
-    border-color: var(--primary-color);
 }
 
 .color-picker-wrapper input[type="text"] {
     flex: 1;
-    padding: 0.75rem 1rem;
+    padding: 0.625rem;
     border: 1px solid var(--border-secondary);
     border-radius: 6px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-family: 'Monaco', 'Courier New', monospace;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-}
-
-.color-picker-wrapper input[type="text"]:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background: var(--bg-primary);
     font-family: monospace;
 }
 
@@ -459,20 +418,20 @@ body {
 }
 
 @keyframes pulse-glow {
-    0%, 100% { 
+    0%, 100% {
         box-shadow: 0 0 0 0 rgba(var(--border-focus), 0.4);
     }
-    50% { 
+    50% {
         box-shadow: 0 0 12px 2px rgba(var(--unsaved-changes-glow-color), 0.6);
     }
 }
 
 @keyframes shimmer {
-    0%, 100% { 
+    0%, 100% {
         opacity: 0.6;
         transform: scaleX(0.8);
     }
-    50% { 
+    50% {
         opacity: 1;
         transform: scaleX(1);
     }
