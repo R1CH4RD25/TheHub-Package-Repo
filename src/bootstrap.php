@@ -133,3 +133,11 @@ if (!function_exists('e')) {
         return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 }
+
+// Bootstrap Laravel application if not already loaded
+if (!isset($GLOBALS['laravelApp'])) {
+    $laravelBootstrap = __DIR__ . '/../bootstrap/app.php';
+    if (file_exists($laravelBootstrap)) {
+        $GLOBALS['laravelApp'] = require_once $laravelBootstrap;
+    }
+}
