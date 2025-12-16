@@ -78,6 +78,7 @@ class Invitation
 
     public function getAll()
     {
+        // Only return pending invitations (not used and not expired)
         return $this->db->fetchAll(
             "SELECT i.*, 
                     i.used_at as accepted_at,
@@ -85,6 +86,7 @@ class Invitation
                     u.email as invited_by_email 
              FROM invitations i
              JOIN users u ON i.invited_by = u.id
+             WHERE i.used_at IS NULL
              ORDER BY i.created_at DESC"
         );
     }
