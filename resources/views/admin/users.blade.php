@@ -242,22 +242,28 @@
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+    border-left: 3px solid var(--primary-color, #2196f3);
+    background-color: #fff;
 }
 
 .role-item:hover {
     background-color: #f5f5f5;
-    border-color: #2196f3;
+    border-color: var(--primary-color, #2196f3);
 }
 
 .role-item.active {
-    background-color: #e3f2fd;
-    border-color: #2196f3;
-    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+    background-color: var(--primary-color, #2196f3);
+    border-color: var(--primary-color, #2196f3);
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+}
+
+.role-item.active strong,
+.role-item.active div {
+    color: white !important;
 }
 
 .role-item.system-role {
-    background-color: #f9f9f9;
-    border-left: 3px solid #ff9800;
+    background-color: #fff;
 }
 
 .role-item .badge {

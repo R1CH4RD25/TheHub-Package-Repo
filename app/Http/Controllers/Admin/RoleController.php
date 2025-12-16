@@ -80,11 +80,15 @@ class RoleController
 
     /**
      * Get all permissions grouped by category
+     * Only returns system-level permissions (not package-specific)
      */
     public function permissions(): JsonResponse
     {
+        // Exclude package-specific and fuel-specific permissions
+        // Those should be managed within each package's settings
         $permissions = $this->db->fetchAll("
             SELECT * FROM permissions
+            WHERE category NOT IN ('packages', 'fuel')
             ORDER BY category, display_name
         ");
 
