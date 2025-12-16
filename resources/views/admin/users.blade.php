@@ -512,6 +512,14 @@ function loadInvitations() {
         });
 }
 
+// Load role management
+function loadRoleManagement() {
+    const container = document.getElementById('subtab-role-management');
+    if (container) {
+        container.innerHTML = '<div class="text-center" style="padding: 2rem;"><p>Role management interface coming soon...</p></div>';
+    }
+}
+
 // Render users table
 // Helper function to get initials
 function getInitials(name) {
