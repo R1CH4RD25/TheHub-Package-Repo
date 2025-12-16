@@ -12,6 +12,8 @@ config/*.json
 # Logs & Sessions
 logs/*.log
 sessions/sess_*
+storage/framework/sessions/*
+!storage/framework/sessions/.gitignore
 
 # Uploads & Temp
 uploads/*
