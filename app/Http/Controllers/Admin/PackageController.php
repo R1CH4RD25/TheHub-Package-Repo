@@ -39,9 +39,15 @@ class PackageController extends Controller
             } elseif ($type === 'updates') {
                 $packages = $packageManager->checkForUpdates();
             } else {
-                // Available packages (uploaded but not installed)
-                $packages = Package::where('status', 'uploaded')
-                    ->orWhere('status', 'validated')
+                // Available packages (uploaded but not installed) - exclude already installed
+                $installedPackageIds = \DB::table('section_installations')
+                    ->where('status', 'installed')
+                    ->pluck('package_id')
+                    ->toArray();
+
+                $packages = Package::whereNotIn('package_id', $installedPackageIds)
+                    ->where('can_install', 1)
+                    ->whereIn('validation_status', ['validated', 'pass'])
                     ->orderBy('created_at', 'desc')
                     ->get()
                     ->toArray();
