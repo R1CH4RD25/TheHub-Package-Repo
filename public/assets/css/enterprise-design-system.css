@@ -187,8 +187,6 @@ html {
 }
 
 .admin-root main {
-    max-width: var(--page-max-width);
-    margin: 0 auto;
     padding: var(--page-gutter-y) var(--page-gutter-x);
 }
 
