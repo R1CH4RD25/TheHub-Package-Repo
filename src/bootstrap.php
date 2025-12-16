@@ -42,6 +42,11 @@ if ($isProduction && !$debugMode) {
 // Enable in production for performance, disable in dev for easier debugging
 define('CSS_PRODUCTION_MODE', $isProduction && !$debugMode);
 
+// Generate CSP nonce for inline scripts/styles
+if (!defined('Hub\CSP_NONCE')) {
+    define('Hub\CSP_NONCE', base64_encode(random_bytes(16)));
+}
+
 // Maintenance mode check (before Auth is loaded)
 $maintenanceMode = ($_ENV['MAINTENANCE_MODE'] ?? 'false') === 'true';
 if ($maintenanceMode) {
