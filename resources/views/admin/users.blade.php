@@ -241,6 +241,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
+    position: relative;
 }
 
 .role-item:hover {
@@ -257,6 +258,14 @@
 .role-item.system-role {
     background-color: #f9f9f9;
     border-left: 3px solid #ff9800;
+}
+
+.role-item .badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
 }
 
 .permissions-grid {
@@ -621,7 +630,7 @@ function renderRoleManagement(roles) {
         <div style="display: grid; grid-template-columns: 350px 1fr; gap: 1.5rem; height: calc(100vh - 300px);">
             <!-- Roles List -->
             <div style="border-right: 1px solid #e0e0e0; padding-right: 1.5rem; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; margin-top: 0.5rem;">
                     <h3 style="margin: 0;">Roles</h3>
                     <button class="btn btn-sm btn-primary" onclick="createNewRole()">
                         + New Role
@@ -632,13 +641,11 @@ function renderRoleManagement(roles) {
                         <div class="role-item ${role.is_system ? 'system-role' : ''}" 
                              onclick="selectRole(${role.id})"
                              data-role-id="${role.id}">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <strong>${role.display_name}</strong>
-                                    ${role.is_system ? '<span class="badge badge-secondary">System</span>' : ''}
-                                    <div style="font-size: 0.85rem; color: #666;">
-                                        ${role.permission_count} permissions • ${role.user_count} users
-                                    </div>
+                            ${role.is_system ? '<span class="badge badge-secondary">System</span>' : ''}
+                            <div style="padding-right: 3.5rem;">
+                                <strong>${role.display_name}</strong>
+                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">
+                                    ${role.permission_count} permissions • ${role.user_count} users
                                 </div>
                             </div>
                         </div>
