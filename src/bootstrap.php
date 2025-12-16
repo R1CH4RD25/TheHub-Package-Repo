@@ -43,8 +43,14 @@ if ($isProduction && !$debugMode) {
 define('CSS_PRODUCTION_MODE', $isProduction && !$debugMode);
 
 // Generate CSP nonce for inline scripts/styles
+if (!defined('CSP_NONCE')) {
+    define('CSP_NONCE', base64_encode(random_bytes(16)));
+}
 if (!defined('Hub\CSP_NONCE')) {
-    define('Hub\CSP_NONCE', base64_encode(random_bytes(16)));
+    define('Hub\CSP_NONCE', CSP_NONCE);
+}
+if (!defined('Hub\Components\CSP_NONCE')) {
+    define('Hub\Components\CSP_NONCE', CSP_NONCE);
 }
 
 // Maintenance mode check (before Auth is loaded)
