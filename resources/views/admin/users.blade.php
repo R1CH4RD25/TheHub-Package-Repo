@@ -600,8 +600,8 @@ function loadRoleManagement() {
     
     // Load permissions and roles in parallel
     Promise.all([
-        fetch('/admin/permissions').then(r => r.json()),
-        fetch('/admin/roles').then(r => r.json())
+        fetch('/admin/permissions', { credentials: 'same-origin' }).then(r => r.json()),
+        fetch('/admin/roles', { credentials: 'same-origin' }).then(r => r.json())
     ])
     .then(([permissions, roles]) => {
         allPermissions = permissions;
