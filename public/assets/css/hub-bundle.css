@@ -1,6 +1,6 @@
 /**
  * Hub Bundle - Concatenated CSS
- * Generated: Tue Dec  2 05:33:00 PM UTC 2025
+ * Generated: Tue Dec 16 07:48:46 PM UTC 2025
  */
 
 
@@ -192,6 +192,12 @@ html {
     line-height: var(--leading-normal);
     color: var(--gray-800);
     background: var(--gray-100);
+}
+
+.admin-root main {
+    max-width: var(--page-max-width);
+    margin: 0 auto;
+    padding: var(--page-gutter-y) var(--page-gutter-x);
 }
 
 /* ========== TYPOGRAPHY UTILITIES ========== */
@@ -2520,7 +2526,7 @@ html {
    ========================================================================== */
 
 /* Footer Container */
-.footer {
+.admin-footer {
     grid-row: 3;
     background: var(--footer-bg-color, #F3F4F6);
     border-top: 1px solid var(--border-primary, #e0e0e0);
@@ -2534,17 +2540,7 @@ html {
     height: var(--footer-height, 40px);
     overflow: hidden;
     position: relative;
-    z-index: 100;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100vw;
-}
-
-/* Footer inside admin-main (not part of grid) */
-.admin-main .footer {
-    grid-row: unset;
-    margin-top: auto;
-    position: static;
+    z-index: 10;
 }
 
 /* Footer Content Layout */
@@ -2554,8 +2550,6 @@ html {
     align-items: center;
     width: 100%;
     max-width: 100%;
-    box-sizing: border-box;
-    padding: 0 1rem;
 }
 
 /* Footer Sections */
@@ -2594,20 +2588,20 @@ html {
    ========================================================================== */
 
 @media (max-width: 768px) {
-    .footer {
+    .admin-footer {
         padding: 0 1rem;
         font-size: 0.75rem;
         min-height: auto;
         height: auto;
     }
-
+    
     .footer-content {
         flex-direction: column;
         gap: 0.25rem;
         text-align: center;
         padding: 0.5rem 0;
     }
-
+    
     .footer-left,
     .footer-right {
         gap: 0.5rem;
@@ -2616,14 +2610,14 @@ html {
 }
 
 @media (max-width: 480px) {
-    .footer {
+    .admin-footer {
         font-size: 0.7rem;
     }
-
+    
     .footer-separator {
         display: none;
     }
-
+    
     .footer-left,
     .footer-right {
         flex-direction: column;
@@ -3278,26 +3272,31 @@ button[data-bs-dismiss="modal"] i {
    MODERN HUB STYLES - Enhanced with animations and effects
    ========================================================================== */
 
-/* ==========================================================================
-   MODERN HUB STYLES - Enhanced with animations and effects
-   ========================================================================== */
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+    position: relative;
+}
 
 /* Header first-load animation - only on initial page load */
 .navbar {
     transform-origin: top;
-    opacity: 1; /* Default visible */
 }
 
 /* Animate only if not already shown in this session */
 html:not(.animations-played) .navbar {
-    animation: slideDownFade 0.5s ease-out forwards;
+    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
+}
+
+html.animations-played .navbar {
+    opacity: 1;
 }
 
 @keyframes slideDownFade {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-30px);
     }
 
     to {
@@ -3309,8 +3308,8 @@ html:not(.animations-played) .navbar {
 /* Footer first-load animation */
 html:not(.animations-played) .admin-footer,
 html:not(.animations-played) footer {
-    animation: slideUpFade 0.5s ease-out forwards;
-    animation-delay: 0.1s;
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.2s;
     opacity: 0;
 }
 
@@ -3322,7 +3321,7 @@ html.animations-played footer {
 @keyframes slideUpFade {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
 
     to {
@@ -3332,7 +3331,7 @@ html.animations-played footer {
 }
 
 /* Animated particle background - fully customizable via Site Settings */
-.main-content.hub-page::before {
+.hub-page::before {
     content: '';
     position: absolute;
     top: 0;
@@ -3340,8 +3339,6 @@ html.animations-played footer {
     right: 0;
     bottom: 0;
     display: var(--hub-particle-display, block);
-    overflow: hidden;
-    pointer-events: none;
     /* Use color-mix to add opacity to hex colors from settings */
     background:
         radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
@@ -3352,7 +3349,6 @@ html.animations-played footer {
             transparent 50%);
     filter: blur(var(--hub-particle-blur, 150px));
     z-index: 0;
-    will-change: opacity;
     animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
 }
 
@@ -3361,10 +3357,12 @@ html.animations-played footer {
     0%,
     100% {
         opacity: 0.7;
+        transform: scale(1);
     }
 
     50% {
         opacity: 1;
+        transform: scale(1.1);
     }
 }
 
@@ -3377,23 +3375,18 @@ html.animations-played footer {
     z-index: 1;
 }
 
-/* Hub Header - Enhanced with animations (only first load) */
+/* Hub Header - Enhanced with animations */
 .hub-header {
     text-align: center;
     margin-bottom: 50px;
-    opacity: 1; /* Default visible */
-}
-
-/* Only animate on first load */
-html:not(.animations-played) .hub-header {
     opacity: 0;
-    animation: fadeInDown 0.6s ease-out forwards;
+    animation: fadeInDown 0.8s ease-out forwards;
 }
 
 @keyframes fadeInDown {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-30px);
     }
 
     to {
@@ -3406,20 +3399,26 @@ html:not(.animations-played) .hub-header {
     font-size: 4rem;
     margin-bottom: 20px;
     line-height: 1;
+    animation: bounceIn 1s ease-out;
 }
 
-/* Only animate icon on first load */
-html:not(.animations-played) .hub-header-icon {
-    opacity: 0;
-    animation: fadeIn 0.5s ease-out 0.2s forwards;
-}
-
-@keyframes fadeIn {
-    from {
+@keyframes bounceIn {
+    0% {
         opacity: 0;
+        transform: scale(0.3);
     }
-    to {
+
+    50% {
         opacity: 1;
+        transform: scale(1.05);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
     }
 }
 
@@ -3428,11 +3427,25 @@ html:not(.animations-played) .hub-header-icon {
     margin-bottom: 15px;
     color: var(--hub-title-color, #000);
     font-weight: 800;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
 }
 
 .hub-header p {
     font-size: 1.2rem;
     color: var(--hub-subtitle-color, #666);
+    animation: slideInLeft 0.8s ease-out 0.4s both;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Sections Grid - Staggered animation */
@@ -3458,12 +3471,52 @@ html:not(.animations-played) .hub-header-icon {
         0 0 0 1px var(--hub-card-border, rgba(0, 0, 0, 0.05));
     position: relative;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
-    opacity: 1; /* Always visible - no animations */
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+    transform: translateY(30px);
 }
 
-/* NO animations - cards appear instantly */
+/* Staggered animation for cards */
+.section-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.section-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.section-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.section-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.section-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.section-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.section-card:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.section-card:nth-child(8) {
+    animation-delay: 0.8s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* Gradient border on top */
 .section-card::before {
@@ -3904,7 +3957,6 @@ html:not(.animations-played) .hub-header-icon {
     width: 16px;
     text-align: center;
 }
-
 /* ==========================================================================
    MODERN MODULES PAGE - Enhanced with cutting-edge animations
    ========================================================================== */
@@ -3922,7 +3974,7 @@ html:not(.animations-played) .hub-header-icon {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image:
+    background-image: 
         radial-gradient(circle at 10% 20%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
         radial-gradient(circle at 90% 80%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
         radial-gradient(circle at 50% 50%, rgba(201, 151, 0, 0.03) 0%, transparent 30%);
@@ -3930,15 +3982,8 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes particleFloat {
-
-    0%,
-    100% {
-        transform: translateY(0) scale(1);
-    }
-
-    50% {
-        transform: translateY(-20px) scale(1.05);
-    }
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
 }
 
 .modules-container {
@@ -3962,7 +4007,6 @@ html:not(.animations-played) .hub-header-icon {
         opacity: 0;
         transform: translateY(-30px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -3974,7 +4018,7 @@ html:not(.animations-played) .hub-header-icon {
     color: white;
     margin-bottom: 1rem;
     font-weight: 800;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
     animation: slideInLeft 0.8s ease-out 0.2s both;
 }
 
@@ -3983,7 +4027,6 @@ html:not(.animations-played) .hub-header-icon {
         opacity: 0;
         transform: translateX(-30px);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);
@@ -3993,7 +4036,7 @@ html:not(.animations-played) .hub-header-icon {
 .modules-header p {
     font-size: 1.3rem;
     color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
     animation: slideInLeft 0.8s ease-out 0.4s both;
 }
 
@@ -4011,9 +4054,9 @@ html:not(.animations-played) .hub-header-icon {
     backdrop-filter: blur(20px);
     border-radius: 24px;
     padding: 2.5rem;
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.2),
+        0 0 0 1px rgba(255,255,255,0.3);
     text-decoration: none;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 2px solid transparent;
@@ -4029,29 +4072,12 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 /* Staggered card animations */
-.module-card:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.module-card:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.module-card:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.module-card:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.module-card:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.module-card:nth-child(6) {
-    animation-delay: 0.6s;
-}
+.module-card:nth-child(1) { animation-delay: 0.1s; }
+.module-card:nth-child(2) { animation-delay: 0.2s; }
+.module-card:nth-child(3) { animation-delay: 0.3s; }
+.module-card:nth-child(4) { animation-delay: 0.4s; }
+.module-card:nth-child(5) { animation-delay: 0.5s; }
+.module-card:nth-child(6) { animation-delay: 0.6s; }
 
 @keyframes cardEntrance {
     to {
@@ -4068,10 +4094,12 @@ html:not(.animations-played) .hub-header-icon {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
     transition: left 0.5s ease;
 }
 
@@ -4087,11 +4115,13 @@ html:not(.animations-played) .hub-header-icon {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(135deg,
-            var(--primary-color, #C99700),
-            var(--primary-dark, #A07800),
-            #FFD700,
-            var(--primary-color, #C99700));
+    background: linear-gradient(
+        135deg,
+        var(--primary-color, #C99700),
+        var(--primary-dark, #A07800),
+        #FFD700,
+        var(--primary-color, #C99700)
+    );
     background-size: 300% 300%;
     border-radius: 24px;
     z-index: -1;
@@ -4101,23 +4131,15 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes gradientRotate {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .module-card:hover {
     transform: translateY(-12px) scale(1.03);
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.3),
+    box-shadow: 
+        0 20px 60px rgba(0,0,0,0.3),
         0 0 0 1px rgba(102, 126, 234, 0.5);
 }
 
@@ -4131,7 +4153,7 @@ html:not(.animations-played) .hub-header-icon {
     margin-bottom: 1.5rem;
     transition: all 0.4s ease;
     display: inline-block;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
 }
 
 .module-card:hover .module-icon {
@@ -4213,7 +4235,7 @@ html:not(.animations-played) .hub-header-icon {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     animation: fadeInUp 0.8s ease-out;
 }
 
@@ -4222,7 +4244,6 @@ html:not(.animations-played) .hub-header-icon {
         opacity: 0;
         transform: translateY(30px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -4288,9 +4309,7 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 /* Click ripple effect */
@@ -4299,22 +4318,13 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes cardClick {
-    0% {
-        transform: translateY(-12px) scale(1.03);
-    }
-
-    50% {
-        transform: translateY(-8px) scale(0.98);
-    }
-
-    100% {
-        transform: translateY(-12px) scale(1.03);
-    }
+    0% { transform: translateY(-12px) scale(1.03); }
+    50% { transform: translateY(-8px) scale(0.98); }
+    100% { transform: translateY(-12px) scale(1.03); }
 }
 
 /* Accessibility: Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -4334,8 +4344,6 @@ html:not(.animations-played) .hub-header-icon {
 /* Full-width hub background on main-content */
 .main-content.hub-page {
     background: var(--hub-page-bg, #FFFFFF);
-    overflow: hidden;
-    position: relative;
 }
 
 /* Hub Container */
@@ -4503,6 +4511,61 @@ html:not(.animations-played) .hub-header-icon {
     }
 }
 
+/* ==========================================================================
+   MODERN HUB STYLES - Enhanced with animations and effects
+   ========================================================================== */
+
+/* Full-width hub background on main-content */
+.main-content.hub-page {
+    background: var(--hub-page-bg, #FFFFFF);
+    position: relative;
+}
+
+}
+
+/* Animated particle background - fully customizable via Site Settings */
+.hub-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: var(--hub-particle-display, block);
+    /* Use color-mix to add opacity to hex colors from settings */
+    background:
+        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
+            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%),
+        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
+            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
+            transparent 50%);
+    filter: blur(var(--hub-particle-blur, 150px));
+    z-index: 0;
+    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
+}
+
+}
+
+/* Hub Container */
+.hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hub Header - Enhanced with animations */
+.hub-header {
+    text-align: center;
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+}
+
 .hub-header-icon {
     font-size: 4rem;
     margin-bottom: 20px;
@@ -4519,7 +4582,6 @@ html:not(.animations-played) .hub-header-icon {
     font-weight: 800;
     animation: slideInLeft 0.8s ease-out 0.2s both;
 }
-
 /**
  * ============================================================================
  * SECTIONS SELECTION PAGE STYLES
@@ -4556,10 +4618,43 @@ html:not(.animations-played) .hub-header-icon {
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
-    opacity: 1; /* Show immediately */
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+    transform: translateY(30px);
 }
 
-/* NO staggered animations - all cards appear at once */
+/* Staggered animation for cards */
+.section-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.section-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.section-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.section-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.section-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.section-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.section-card:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.section-card:nth-child(8) {
+    animation-delay: 0.8s;
+}
 
 }
 
@@ -4692,7 +4787,7 @@ html:not(.animations-played) .hub-header-icon {
 
 .sections-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+        gap: 20px;
 }
 
 .section-card {
@@ -4749,7 +4844,7 @@ html:not(.animations-played) .hub-header-icon {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image:
+    background-image: 
         radial-gradient(circle at 10% 20%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
         radial-gradient(circle at 90% 80%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
         radial-gradient(circle at 50% 50%, rgba(201, 151, 0, 0.03) 0%, transparent 30%);
@@ -4757,15 +4852,8 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes particleFloat {
-
-    0%,
-    100% {
-        transform: translateY(0) scale(1);
-    }
-
-    50% {
-        transform: translateY(-20px) scale(1.05);
-    }
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
 }
 
 .modules-container {
@@ -4789,7 +4877,6 @@ html:not(.animations-played) .hub-header-icon {
         opacity: 0;
         transform: translateY(-30px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -4801,7 +4888,7 @@ html:not(.animations-played) .hub-header-icon {
     color: white;
     margin-bottom: 1rem;
     font-weight: 800;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
     animation: slideInLeft 0.8s ease-out 0.2s both;
 }
 
@@ -4810,7 +4897,6 @@ html:not(.animations-played) .hub-header-icon {
         opacity: 0;
         transform: translateX(-30px);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);
@@ -4820,7 +4906,7 @@ html:not(.animations-played) .hub-header-icon {
 .modules-header p {
     font-size: 1.3rem;
     color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
     animation: slideInLeft 0.8s ease-out 0.4s both;
 }
 
@@ -4838,9 +4924,9 @@ html:not(.animations-played) .hub-header-icon {
     backdrop-filter: blur(20px);
     border-radius: 24px;
     padding: 2.5rem;
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.2),
+        0 0 0 1px rgba(255,255,255,0.3);
     text-decoration: none;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 2px solid transparent;
@@ -4856,29 +4942,12 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 /* Staggered card animations */
-.module-card:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.module-card:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.module-card:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.module-card:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.module-card:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.module-card:nth-child(6) {
-    animation-delay: 0.6s;
-}
+.module-card:nth-child(1) { animation-delay: 0.1s; }
+.module-card:nth-child(2) { animation-delay: 0.2s; }
+.module-card:nth-child(3) { animation-delay: 0.3s; }
+.module-card:nth-child(4) { animation-delay: 0.4s; }
+.module-card:nth-child(5) { animation-delay: 0.5s; }
+.module-card:nth-child(6) { animation-delay: 0.6s; }
 
 @keyframes cardEntrance {
     to {
@@ -4895,10 +4964,12 @@ html:not(.animations-played) .hub-header-icon {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
     transition: left 0.5s ease;
 }
 
@@ -4914,11 +4985,13 @@ html:not(.animations-played) .hub-header-icon {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(135deg,
-            var(--primary-color, #C99700),
-            var(--primary-dark, #A07800),
-            #FFD700,
-            var(--primary-color, #C99700));
+    background: linear-gradient(
+        135deg,
+        var(--primary-color, #C99700),
+        var(--primary-dark, #A07800),
+        #FFD700,
+        var(--primary-color, #C99700)
+    );
     background-size: 300% 300%;
     border-radius: 24px;
     z-index: -1;
@@ -4928,23 +5001,15 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes gradientRotate {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .module-card:hover {
     transform: translateY(-12px) scale(1.03);
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.3),
+    box-shadow: 
+        0 20px 60px rgba(0,0,0,0.3),
         0 0 0 1px rgba(102, 126, 234, 0.5);
 }
 
@@ -4958,7 +5023,7 @@ html:not(.animations-played) .hub-header-icon {
     margin-bottom: 1.5rem;
     transition: all 0.4s ease;
     display: inline-block;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
 }
 
 .module-card:hover .module-icon {
@@ -5040,7 +5105,7 @@ html:not(.animations-played) .hub-header-icon {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     animation: fadeInUp 0.8s ease-out;
 }
 
@@ -5049,7 +5114,6 @@ html:not(.animations-played) .hub-header-icon {
         opacity: 0;
         transform: translateY(30px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -5115,9 +5179,7 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 /* Click ripple effect */
@@ -5126,22 +5188,13 @@ html:not(.animations-played) .hub-header-icon {
 }
 
 @keyframes cardClick {
-    0% {
-        transform: translateY(-12px) scale(1.03);
-    }
-
-    50% {
-        transform: translateY(-8px) scale(0.98);
-    }
-
-    100% {
-        transform: translateY(-12px) scale(1.03);
-    }
+    0% { transform: translateY(-12px) scale(1.03); }
+    50% { transform: translateY(-8px) scale(0.98); }
+    100% { transform: translateY(-12px) scale(1.03); }
 }
 
 /* Accessibility: Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -5150,7 +5203,6 @@ html:not(.animations-played) .hub-header-icon {
         transition-duration: 0.01ms !important;
     }
 }
-
 /**
  * Hub Frontend Responsive Styles
  * Mobile-first media queries for student/staff hub
