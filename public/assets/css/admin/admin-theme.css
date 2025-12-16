@@ -344,6 +344,16 @@ body {
     font-size: 0.95rem;
 }
 
+.settings-grid .form-group select {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid var(--border-secondary);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: var(--bg-primary);
+    cursor: pointer;
+}
+
 .settings-grid .form-group input[type="checkbox"] {
     width: auto;
     margin-left: 0.5rem;
