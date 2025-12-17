@@ -204,7 +204,7 @@
                             <div class="form-group">
                                 <label for="sidebarBg">Background Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="sidebarBg" class="setting-input" data-key="sidebar_bg_color" value="#FFFFFF" style="padding:0!important">
+                                    <input type="color" id="sidebarBg" class="setting-input" data-key="sidebar_bg" value="#FFFFFF" style="padding:0!important">
                                     <input type="text" id="sidebarBgHex" value="#FFFFFF">
                                 </div>
                                 <small>Sidebar background color</small>
@@ -331,10 +331,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="secondaryColor">Secondary Color</label>
+                                <label for="accentColor">Accent Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="secondaryColor" class="setting-input" data-key="secondary_color" value="#FFD700" style="padding:0!important">
-                                    <input type="text" id="secondaryColorHex" value="#FFD700">
+                                    <input type="color" id="accentColor" class="setting-input" data-key="accent_color" value="#FFD700" style="padding:0!important">
+                                    <input type="text" id="accentColorHex" value="#FFD700">
                                 </div>
                                 <small>Accent color</small>
                             </div>
@@ -345,6 +345,33 @@
 
                                 <div class="theme-gallery-container">
                                     <div class="theme-gallery">
+                                    <!-- Woodson Personal Theme (local only, remove before distribution) -->
+                                    <div class="theme-preview-card" data-theme="woodson">
+                                        <div class="theme-preview-header" style="background: linear-gradient(135deg, #111827 0%, #0B0E15 100%); color: #FACC15;">
+                                            <div class="theme-preview-logo" style="background: rgba(250,204,21,0.18); color: #FACC15;">WD</div>
+                                            <div class="theme-preview-title">Woodson</div>
+                                        </div>
+                                        <div class="theme-preview-body" style="background: rgba(17,24,39,0.08);">
+                                            <div class="theme-preview-sidebar" style="background: #FFFFFF; border: 1px solid rgba(17,24,39,0.08);">
+                                                <div class="theme-preview-menu-item" style="background: #C99700; color: #111827;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #1F2937;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #1F2937;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #C99700;"></div>
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #111827; background: #11182710;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #C99700;" title="Gold"></span>
+                                                <span style="background: #111827;" title="Black"></span>
+                                                <span style="background: #FFFFFF;" title="White"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
+                                        </div>
+                                    </div>
+
                                     <!-- Notre Dame Theme -->
                                     <div class="theme-preview-card" data-theme="notre-dame">
                                         <div class="theme-preview-header" style="background: #0C2340; color: #C99700;">
@@ -565,16 +592,53 @@
                     </div>
                 </div>
 
-                <!-- Management Console Section -->
+                <!-- Management Branding Section -->
                 <div class="settings-section">
                     <div class="settings-section-header">
                         <h3>
-                            <i class="fas fa-toolbox"></i> Management Console
-                            <span class="badge">6</span>
+                            <i class="fas fa-id-badge"></i> Management Branding
+                            <span class="badge">3</span>
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body collapsed">
+                    <div class="settings-section-body">
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <label for="cc_display_name">Display Name</label>
+                                <input type="text" id="cc_display_name" name="cc_display_name" class="setting-input" data-key="cc_display_name" placeholder="Management">
+                                <small>Shown in navigation links, headers, and quick actions</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cc_icon">Navigation Icon</label>
+                                <div class="management-icon-input">
+                                    <div class="management-icon-preview">
+                                        <i id="managementIconPreview" class="bi-kanban"></i>
+                                    </div>
+                                    <input type="text" id="cc_icon" name="cc_icon" class="setting-input" data-key="cc_icon" placeholder="bi-kanban">
+                                </div>
+                                <small>Bootstrap icon class (for example <code>bi-kanban</code>, <code>bi-gear-fill</code>)</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="cc_description">Description</label>
+                                <textarea id="cc_description" name="cc_description" class="setting-input" data-key="cc_description" rows="3" placeholder="Centralized management system for tracking and processing submissions"></textarea>
+                                <small>Appears on the management landing experience and module selector</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Access Section -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>
+                            <i class="fas fa-toolbox"></i> Management Access
+                            <span class="badge">5</span>
+                        </h3>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="settings-section-body">
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label>
@@ -582,12 +646,6 @@
                                     <strong>Enable Management Console</strong>
                                 </label>
                                 <small>Activate the management interface for advanced operations</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="managementDisplayName">Display Name</label>
-                                <input type="text" id="managementDisplayName" class="setting-input" data-key="management_display_name" value="Management">
-                                <small>Label shown in navigation for management console</small>
                             </div>
 
                             <div class="form-group">
@@ -721,9 +779,16 @@
     margin-bottom: 1.5rem;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible !important; /* Ensure content not clipped */
     background: var(--bg-primary);
     padding: 0 !important; /* Override bundle's padding: 2rem */
+}
+
+.site-settings-container .settings-section-body {
+    padding: 1.5rem;
+    max-height: 2000px;
+    overflow: visible;
+    transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
 .settings-section-header {
@@ -781,20 +846,243 @@
     padding: 0 1.5rem;
 }
 
+.management-icon-input {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.management-icon-preview {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.management-icon-preview i {
+    line-height: 1;
+}
+
 .danger-zone {
     border-color: #DC2626;
 }
 
-.danger-zone .site-settings-container .settings-section-header.danger {
+.danger-zone .settings-section-header.danger {
     background: #FEE2E2;
 }
 
-.danger-zone .site-settings-container .settings-section-header.danger h3 {
+.danger-zone .settings-section-header.danger h3 {
     color: #DC2626;
 }
 
-.danger-zone .site-settings-container .settings-section-header.danger:hover {
+.danger-zone .settings-section-header.danger:hover {
     background: #FEF2F2;
+}
+
+/* Theme gallery refresh */
+.theme-gallery-container {
+    margin: 1.5rem 0 0;
+    padding: 1.75rem;
+    border-radius: 18px;
+    border: 1px solid var(--border-secondary);
+    background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(245,247,250,0.96) 100%);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+}
+
+.theme-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.theme-preview-card {
+    position: relative;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: var(--bg-primary);
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    isolation: isolate;
+}
+
+.theme-preview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(148,163,184,0.08) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+}
+
+.theme-preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+    border-color: rgba(37, 99, 235, 0.45);
+}
+
+.theme-preview-card:hover::before {
+    opacity: 1;
+}
+
+.theme-preview-card.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 18px 36px rgba(201, 151, 0, 0.28);
+}
+
+.theme-preview-card .theme-selected-icon {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 1.35rem;
+    color: var(--primary-color);
+    background: rgba(255,255,255,0.9);
+    border-radius: 999px;
+    padding: 0.25rem;
+    box-shadow: 0 6px 16px rgba(201, 151, 0, 0.22);
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.theme-preview-card.active .theme-selected-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.theme-preview-header {
+    padding: 0.95rem 1.1rem;
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+}
+
+.theme-preview-logo {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: rgba(255,255,255,0.18);
+}
+
+.theme-preview-title {
+    color: inherit;
+}
+
+.theme-preview-body {
+    padding: 1rem 1.15rem;
+    background: rgba(248, 250, 252, 0.92);
+    display: flex;
+    gap: 1rem;
+}
+
+.theme-preview-sidebar {
+    width: 68px;
+    padding: 0.55rem;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.theme-preview-menu-item {
+    border-radius: 6px;
+    font-size: 0.7rem;
+    padding: 0.38rem 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255,255,255,0.78);
+    color: #1F2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.theme-preview-menu-item::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.55;
+}
+
+.theme-preview-content {
+    flex: 1;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.theme-preview-card-mini {
+    height: 26px;
+    border-radius: 9px;
+    background: white;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.theme-preview-footer {
+    padding: 0.75rem 1.1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border-top: none;
+}
+
+.theme-color-dots {
+    display: flex;
+    gap: 0.45rem;
+}
+
+.theme-color-dots span {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    box-shadow: 0 6px 10px rgba(15, 23, 42, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.65);
+}
+
+@media (max-width: 640px) {
+    .theme-gallery-container {
+        padding: 1.25rem;
+    }
+
+    .theme-preview-card {
+        border-radius: 12px;
+    }
+
+    .theme-preview-header {
+        padding: 0.85rem 1rem;
+    }
+
+    .theme-preview-body {
+        flex-direction: column;
+        padding: 0.85rem 1rem;
+    }
+
+    .theme-preview-sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
 }
 </style>
 @endpush
@@ -804,6 +1092,14 @@
 const csrfToken = '{{ csrf_token() }}';
 let originalSettings = {};
 let currentSettings = {};
+
+function updateManagementIconPreview(iconClass) {
+    const preview = document.getElementById('managementIconPreview');
+    if (preview) {
+        const value = (iconClass || '').trim();
+        preview.className = value !== '' ? value : 'bi-kanban';
+    }
+}
 
 // Section toggle - bind event listeners instead of inline onclick
 document.addEventListener('DOMContentLoaded', () => {
@@ -815,26 +1111,34 @@ document.addEventListener('DOMContentLoaded', () => {
             body?.classList.toggle('collapsed');
         });
     });
-    
+
     // Logo upload button
     const logoBtn = document.getElementById('logoUploadBtn');
     const logoInput = document.getElementById('logoUpload');
     if (logoBtn && logoInput) {
         logoBtn.addEventListener('click', () => logoInput.click());
     }
-});
 
-// Subtab switching
-document.querySelectorAll('.subtab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const subtab = this.getAttribute('data-subtab');
+    // Subtab switching
+    const subtabButtons = document.querySelectorAll('.subtab-btn');
+    subtabButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const subtab = this.getAttribute('data-subtab');
 
-        document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
+            subtabButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
 
-        document.querySelectorAll('.user-subtab').forEach(s => s.classList.remove('active'));
-        document.getElementById(`subtab-${subtab}`).classList.add('active');
+            document.querySelectorAll('.user-subtab').forEach(s => s.classList.remove('active'));
+            document.getElementById(`subtab-${subtab}`)?.classList.add('active');
+        });
     });
+
+    // Ensure default active subtab content is visible
+    const initialActiveBtn = document.querySelector('.subtab-btn.active') || subtabButtons[0];
+    if (initialActiveBtn) {
+        const subtab = initialActiveBtn.getAttribute('data-subtab');
+        document.getElementById(`subtab-${subtab}`)?.classList.add('active');
+    }
 });
 
 // Load settings
@@ -844,6 +1148,7 @@ fetch('/admin/settings/get')
         originalSettings = { ...settings };
         currentSettings = { ...settings };
         populateSettings(settings);
+        highlightActiveTheme(settings);
     });
 
 function populateSettings(settings) {
@@ -851,9 +1156,32 @@ function populateSettings(settings) {
         const key = input.getAttribute('data-key');
         if (key && settings[key] !== undefined) {
             if (input.type === 'checkbox') {
-                input.checked = settings[key];
+                const value = settings[key];
+                input.checked = value === true || value === '1' || value === 1 || value === 'true';
             } else {
                 input.value = settings[key];
+            }
+
+            if (input.type === 'color') {
+                const hexInput = document.getElementById(`${input.id}Hex`);
+                if (hexInput) {
+                    hexInput.value = input.value;
+                }
+            }
+
+            if (key === 'cc_icon') {
+                if (!input.value) {
+                    input.value = 'bi-kanban';
+                    currentSettings[key] = 'bi-kanban';
+                }
+                updateManagementIconPreview(input.value);
+            } else if (key === 'cc_display_name' && !input.value) {
+                input.value = 'Management';
+                currentSettings[key] = 'Management';
+            } else if (key === 'cc_description' && !input.value) {
+                const fallback = 'Centralized management system for tracking and processing submissions';
+                input.value = fallback;
+                currentSettings[key] = fallback;
             }
         }
     });
@@ -868,12 +1196,18 @@ document.querySelectorAll('.setting-input').forEach(input => {
         } else {
             currentSettings[key] = this.value;
         }
+
+        if (key === 'cc_icon') {
+            updateManagementIconPreview(this.value);
+        }
+
+        highlightActiveTheme(currentSettings);
     });
 });
 
 // Color picker sync
 ['headerBgColor', 'headerTextColor', 'headerSubtitleColor', 'footerBgColor', 'footerTextColor',
- 'primaryColor', 'secondaryColor', 'sidebarBg', 'sidebarText'].forEach(id => {
+ 'primaryColor', 'accentColor', 'sidebarBg', 'sidebarText'].forEach(id => {
     const colorInput = document.getElementById(id);
     const hexInput = document.getElementById(id + 'Hex');
 
@@ -882,86 +1216,149 @@ document.querySelectorAll('.setting-input').forEach(input => {
         hexInput.addEventListener('input', () => {
             if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) {
                 colorInput.value = hexInput.value;
+                colorInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
     }
 });
 
+const commandCenterIconInput = document.getElementById('cc_icon');
+if (commandCenterIconInput) {
+    commandCenterIconInput.addEventListener('input', function() {
+        currentSettings['cc_icon'] = this.value;
+        updateManagementIconPreview(this.value);
+    });
+}
+
 // Theme presets
 const themePresets = {
+    // NOTE: Woodson preset is personal/local only. Remove before packaging for distribution.
+    'woodson': {
+        primary_color: '#C99700',
+        accent_color: '#111827',
+        navbar_color: '#000000',
+        background_color: '#FFFFFF',
+        header_bg_color: '#000000',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#C99700',
+        sidebar_bg: '#FFFFFF',
+        sidebar_text_color: '#1F2937',
+        footer_bg_color: '#111827',
+        footer_text_color: '#E5E7EB'
+    },
     'notre-dame': {
         primary_color: '#C99700',
-        secondary_color: '#0C2340',
+        accent_color: '#0C2340',
+        navbar_color: '#0C2340',
+        background_color: '#FFFFFF',
         header_bg_color: '#0C2340',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#C99700',
-        sidebar_bg_color: '#FFFFFF',
+        sidebar_bg: '#FFFFFF',
         sidebar_text_color: '#1F2937',
         footer_bg_color: '#F3F4F6',
         footer_text_color: '#6B7280'
     },
     'midnight': {
         primary_color: '#FFD700',
-        secondary_color: '#1A1A1A',
+        accent_color: '#1A1A1A',
+        navbar_color: '#1A1A1A',
+        background_color: '#1A1A1A',
         header_bg_color: '#1A1A1A',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#FFD700',
-        sidebar_bg_color: '#323130',
+        sidebar_bg: '#323130',
         sidebar_text_color: '#FFFFFF',
         footer_bg_color: '#1A1A1A',
         footer_text_color: '#C8C6C4'
     },
     'ocean': {
         primary_color: '#0078D4',
-        secondary_color: '#00BCF2',
+        accent_color: '#00BCF2',
+        navbar_color: '#0078D4',
+        background_color: '#E3F2FD',
         header_bg_color: '#0078D4',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#00BCF2',
-        sidebar_bg_color: '#E3F2FD',
+        sidebar_bg: '#E3F2FD',
         sidebar_text_color: '#005A9E',
         footer_bg_color: '#0078D4',
         footer_text_color: '#FFFFFF'
     },
     'forest': {
         primary_color: '#107C10',
-        secondary_color: '#498205',
+        accent_color: '#498205',
+        navbar_color: '#107C10',
+        background_color: '#E8F5E9',
         header_bg_color: '#107C10',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#90EE90',
-        sidebar_bg_color: '#E8F5E9',
+        sidebar_bg: '#E8F5E9',
         sidebar_text_color: '#1B5E20',
         footer_bg_color: '#F1F8F4',
         footer_text_color: '#2E7D32'
     },
     'sunset': {
         primary_color: '#D13438',
-        secondary_color: '#F7630C',
+        accent_color: '#F7630C',
+        navbar_color: '#D13438',
+        background_color: '#FFF4E5',
         header_bg_color: '#D13438',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#FFD700',
-        sidebar_bg_color: '#FFF4E5',
+        sidebar_bg: '#FFF4E5',
         sidebar_text_color: '#C62828',
         footer_bg_color: '#FFEBEE',
         footer_text_color: '#B71C1C'
     }
 };
 
+function highlightActiveTheme(settings, forceTheme = null) {
+    document.querySelectorAll('.theme-preview-card').forEach(card => card.classList.remove('active'));
+
+    if (forceTheme === 'custom') {
+        document.querySelector('.theme-preview-card[data-theme="custom"]')?.classList.add('active');
+        return;
+    }
+
+    let matchedTheme = null;
+
+    Object.entries(themePresets).forEach(([themeName, preset]) => {
+        const matches = Object.entries(preset).every(([key, presetValue]) => {
+            if (!(key in settings)) {
+                return false;
+            }
+
+            const settingValue = settings[key];
+            if (typeof presetValue === 'string' && presetValue.startsWith('#')) {
+                return String(settingValue).toUpperCase() === presetValue.toUpperCase();
+            }
+
+            return String(settingValue) === String(presetValue);
+        });
+
+        if (matches) {
+            matchedTheme = themeName;
+        }
+    });
+
+    if (matchedTheme) {
+        document.querySelector(`.theme-preview-card[data-theme="${matchedTheme}"]`)?.classList.add('active');
+    } else {
+        document.querySelector('.theme-preview-card[data-theme="custom"]')?.classList.add('active');
+    }
+}
+
 document.querySelectorAll('.theme-preview-card').forEach(card => {
     card.addEventListener('click', function() {
         const themeName = this.getAttribute('data-theme');
 
-        // Remove active from all cards
-        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-
         if (themeName === 'custom') {
-            // Don't change colors for custom theme
-            currentSettings.active_theme = 'custom';
+            highlightActiveTheme(currentSettings, 'custom');
             notyf.success('Custom theme selected - use color pickers to customize');
             return;
         }
 
-        // Apply theme preset
         const preset = themePresets[themeName];
         if (preset) {
             Object.keys(preset).forEach(key => {
@@ -970,15 +1367,23 @@ document.querySelectorAll('.theme-preview-card').forEach(card => {
                 if (input) {
                     if (input.type === 'color') {
                         input.value = preset[key];
-                        const hexInput = document.getElementById(input.id + 'Hex');
-                        if (hexInput) hexInput.value = preset[key];
+                        const hexInput = document.getElementById(`${input.id}Hex`);
+                        if (hexInput) {
+                            hexInput.value = preset[key];
+                        }
+                    } else if (input.type === 'checkbox') {
+                        input.checked = preset[key] === true || preset[key] === '1' || preset[key] === 1 || preset[key] === 'true';
                     } else {
                         input.value = preset[key];
                     }
+
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
-            currentSettings.active_theme = themeName;
-            notyf.success(`${this.querySelector('.theme-preview-title').textContent} theme applied`);
+
+            highlightActiveTheme(currentSettings);
+            const title = this.querySelector('.theme-preview-title')?.textContent ?? 'Theme';
+            notyf.success(`${title} theme applied`);
         }
     });
 });
@@ -1008,6 +1413,7 @@ document.getElementById('saveSiteSettings').addEventListener('click', function()
 document.getElementById('cancelSiteSettings').addEventListener('click', function() {
     currentSettings = { ...originalSettings };
     populateSettings(originalSettings);
+    highlightActiveTheme(currentSettings);
     notyf.success('Changes discarded');
 });
 
