@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Wed Dec 17 07:17:46 PM UTC 2025
+ * Generated: Wed Dec 17 08:41:35 PM UTC 2025
  */
 
 
@@ -2474,6 +2474,7 @@ html {
 
 .user-subtab.active {
     display: block;
+    min-height: 200px; /* Prevent zero-height collapse */
 }
 
 /* Users Layout - Two Column Design */
