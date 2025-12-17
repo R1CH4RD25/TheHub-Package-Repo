@@ -9,6 +9,7 @@
     @if(isset($context) && $context === 'management')
         <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
     @else
+        <!-- DEBUG: filemtime={{ filemtime(public_path('assets/css/admin-bundle.css')) }} stat={{ fileatime(public_path('assets/css/admin-bundle.css')) }} -->
         <link rel="stylesheet" href="/assets/css/admin-bundle.css?v={{ filemtime(public_path('assets/css/admin-bundle.css')) }}">
     @endif
 
