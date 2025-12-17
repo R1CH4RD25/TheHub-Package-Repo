@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Wed Dec 17 02:28:27 PM UTC 2025
+ * Generated: Wed Dec 17 02:36:52 PM UTC 2025
  */
 
 
@@ -5579,14 +5579,15 @@ body {
 input[type="color"].setting-input,
 .color-picker-wrapper input[type="color"],
 .settings-grid input[type="color"] {
-    width: 120px !important;
-    height: 80px !important;
+    width: 80px !important;
+    height: 50px !important;
     padding: 0 !important;
     margin: 0 !important;
-    border: 3px solid var(--border-primary) !important;
-    border-radius: var(--radius-lg) !important;
+    border: 2px solid var(--border-primary) !important;
+    border-radius: 8px !important;
     cursor: pointer;
     transition: all var(--transition-fast);
+    overflow: hidden;
 }
 
 .color-picker-wrapper input[type="color"]:hover {
