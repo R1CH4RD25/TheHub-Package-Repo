@@ -737,7 +737,7 @@
     user-select: none;
 }
 
-.site-settings-container .site-settings-container .settings-section-header:hover {
+.site-settings-container .settings-section-header:hover {
     background: var(--gray-200);
 }
 
@@ -765,7 +765,7 @@
     transition: transform 0.3s;
 }
 
-.site-settings-container .site-settings-container .settings-section-header.active .toggle-icon {
+.site-settings-container .settings-section-header.active .toggle-icon {
     transform: rotate(180deg);
 }
 
@@ -776,7 +776,7 @@
     transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.site-settings-container .site-settings-container .settings-section-body.collapsed {
+.site-settings-container .settings-section-body.collapsed {
     max-height: 0;
     padding: 0 1.5rem;
 }
@@ -785,15 +785,15 @@
     border-color: #DC2626;
 }
 
-.danger-zone .site-settings-container .site-settings-container .settings-section-header.danger {
+.danger-zone .site-settings-container .settings-section-header.danger {
     background: #FEE2E2;
 }
 
-.danger-zone .site-settings-container .site-settings-container .settings-section-header.danger h3 {
+.danger-zone .site-settings-container .settings-section-header.danger h3 {
     color: #DC2626;
 }
 
-.danger-zone .site-settings-container .site-settings-container .settings-section-header.danger:hover {
+.danger-zone .site-settings-container .settings-section-header.danger:hover {
     background: #FEF2F2;
 }
 </style>
