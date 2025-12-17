@@ -34,7 +34,7 @@
 
                 <!-- Branding Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-trademark"></i> Branding
                             <span class="badge">3</span>
@@ -59,7 +59,7 @@
                                 <label>Logo Upload</label>
                                 <div style="border: 2px dashed #dee2e6; border-radius: 8px; padding: 1rem; text-align: center;">
                                     <input type="file" id="logoUpload" accept="image/*" style="display: none;">
-                                    <button class="btn btn-secondary" onclick="document.getElementById('logoUpload').click()">
+                                    <button class="btn btn-secondary" id="logoUploadBtn">
                                         <i class="fas fa-upload"></i> Upload Logo
                                     </button>
                                     <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6c757d;">PNG, JPG, or SVG (max 2MB)</p>
@@ -71,7 +71,7 @@
 
                 <!-- Header Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-window-maximize"></i> Header
                             <span class="badge">11</span>
@@ -186,7 +186,7 @@
 
                 <!-- Sidebar Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-bars"></i> Sidebar & Navigation
                             <span class="badge">6</span>
@@ -246,7 +246,7 @@
 
                 <!-- Footer Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-shoe-prints"></i> Footer
                             <span class="badge">7</span>
@@ -312,7 +312,7 @@
 
                 <!-- Colors & Theme Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-palette"></i> Colors & Theme
                             <span class="badge">6</span>
@@ -342,7 +342,7 @@
                             <div class="form-group" style="grid-column: 1 / -1;">
                                 <label style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Theme Presets</label>
                                 <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1rem 0;">Select a pre-designed theme</p>
-                                
+
                                 <div class="theme-gallery-container">
                                     <div class="theme-gallery">
                                     <!-- Notre Dame Theme -->
@@ -545,7 +545,7 @@
 
                 <!-- Navigation Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-compass"></i> Navigation
                             <span class="badge">1</span>
@@ -567,7 +567,7 @@
 
                 <!-- Management Console Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-toolbox"></i> Management Console
                             <span class="badge">6</span>
@@ -632,7 +632,7 @@
 
                 <!-- Sessions Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-clock"></i> Sessions
                             <span class="badge">1</span>
@@ -652,7 +652,7 @@
 
                 <!-- Security Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-shield-alt"></i> Security
                             <span class="badge">2</span>
@@ -682,7 +682,7 @@
 
                 <!-- Danger Zone -->
                 <div class="settings-section danger-zone">
-                    <div class="settings-section-header danger" onclick="toggleSection(this)">
+                    <div class="settings-section-header danger">
                         <h3>
                             <i class="fas fa-exclamation-triangle"></i> Danger Zone
                         </h3>
@@ -715,13 +715,15 @@
 </div>
 
 @push('styles')
-<style>
-.settings-section {
+<style nonce="<?php echo CSP_NONCE; ?>">
+/* Scoped settings accordion - avoids collision with bundle's .settings-section card */
+.site-settings-container .settings-section {
     margin-bottom: 1.5rem;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
     overflow: hidden;
     background: var(--bg-primary);
+    padding: 0 !important; /* Override bundle's padding: 2rem */
 }
 
 .settings-section-header {
@@ -735,7 +737,7 @@
     user-select: none;
 }
 
-.settings-section-header:hover {
+.site-settings-container .site-settings-container .settings-section-header:hover {
     background: var(--gray-200);
 }
 
@@ -763,7 +765,7 @@
     transition: transform 0.3s;
 }
 
-.settings-section-header.active .toggle-icon {
+.site-settings-container .site-settings-container .settings-section-header.active .toggle-icon {
     transform: rotate(180deg);
 }
 
@@ -774,7 +776,7 @@
     transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.settings-section-body.collapsed {
+.site-settings-container .site-settings-container .settings-section-body.collapsed {
     max-height: 0;
     padding: 0 1.5rem;
 }
@@ -783,32 +785,44 @@
     border-color: #DC2626;
 }
 
-.danger-zone .settings-section-header.danger {
+.danger-zone .site-settings-container .site-settings-container .settings-section-header.danger {
     background: #FEE2E2;
 }
 
-.danger-zone .settings-section-header.danger h3 {
+.danger-zone .site-settings-container .site-settings-container .settings-section-header.danger h3 {
     color: #DC2626;
 }
 
-.danger-zone .settings-section-header.danger:hover {
+.danger-zone .site-settings-container .site-settings-container .settings-section-header.danger:hover {
     background: #FEF2F2;
 }
 </style>
 @endpush
 
 @push('scripts')
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 const csrfToken = '{{ csrf_token() }}';
 let originalSettings = {};
 let currentSettings = {};
 
-// Section toggle
-function toggleSection(header) {
-    header.classList.toggle('active');
-    const body = header.nextElementSibling;
-    body.classList.toggle('collapsed');
-}
+// Section toggle - bind event listeners instead of inline onclick
+document.addEventListener('DOMContentLoaded', () => {
+    // Accordion toggles
+    document.querySelectorAll('.settings-section-header').forEach(header => {
+        header.addEventListener('click', () => {
+            header.classList.toggle('active');
+            const body = header.nextElementSibling;
+            body?.classList.toggle('collapsed');
+        });
+    });
+    
+    // Logo upload button
+    const logoBtn = document.getElementById('logoUploadBtn');
+    const logoInput = document.getElementById('logoUpload');
+    if (logoBtn && logoInput) {
+        logoBtn.addEventListener('click', () => logoInput.click());
+    }
+});
 
 // Subtab switching
 document.querySelectorAll('.subtab-btn').forEach(btn => {
