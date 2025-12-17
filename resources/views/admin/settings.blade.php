@@ -834,13 +834,6 @@
     transform: rotate(180deg);
 }
 
-.settings-section-body {
-    padding: 1.5rem;
-    max-height: 2000px;
-    overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-}
-
 .site-settings-container .settings-section-body.collapsed {
     max-height: 0;
     padding: 0 1.5rem;
