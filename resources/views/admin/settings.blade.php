@@ -775,6 +775,10 @@
 @push('styles')
 <style nonce="<?php echo CSP_NONCE; ?>">
 /* Scoped settings accordion - avoids collision with bundle's .settings-section card */
+.site-settings-container {
+    min-height: 200px; /* Prevent container collapse */
+}
+
 .site-settings-container .settings-section {
     margin-bottom: 1.5rem;
     border: 1px solid var(--border-primary);
