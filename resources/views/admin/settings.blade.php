@@ -339,16 +339,80 @@
                                 <small>Accent color</small>
                             </div>
 
-                            <div class="form-group">
-                                <label for="activeTheme">Active Theme</label>
-                                <select id="activeTheme" class="setting-input" data-key="active_theme">
-                                    <option value="default">Default Theme</option>
-                                    <option value="dark">Dark Mode</option>
-                                    <option value="light">Light Mode</option>
-                                    <option value="highcontrast">High Contrast</option>
-                                    <option value="custom">Custom Theme</option>
-                                </select>
-                                <small>Select a pre-built theme or use custom colors</small>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Theme Presets</label>
+                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0.5rem 0;">Click a theme to apply preset colors</p>
+                                <div class="theme-presets">
+                                    <div class="theme-card" data-theme="notre-dame">
+                                        <div class="theme-card-header">
+                                            <span class="theme-card-name">Notre Dame</span>
+                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                        </div>
+                                        <div class="theme-card-colors">
+                                            <div class="theme-color-swatch" style="background: #0C2340;"></div>
+                                            <div class="theme-color-swatch" style="background: #C99700;"></div>
+                                            <div class="theme-color-swatch" style="background: #FFFFFF;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="theme-card" data-theme="midnight">
+                                        <div class="theme-card-header">
+                                            <span class="theme-card-name">Midnight</span>
+                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                        </div>
+                                        <div class="theme-card-colors">
+                                            <div class="theme-color-swatch" style="background: #1A1A1A;"></div>
+                                            <div class="theme-color-swatch" style="background: #FFD700;"></div>
+                                            <div class="theme-color-swatch" style="background: #323130;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="theme-card" data-theme="ocean">
+                                        <div class="theme-card-header">
+                                            <span class="theme-card-name">Ocean Blue</span>
+                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                        </div>
+                                        <div class="theme-card-colors">
+                                            <div class="theme-color-swatch" style="background: #0078D4;"></div>
+                                            <div class="theme-color-swatch" style="background: #00BCF2;"></div>
+                                            <div class="theme-color-swatch" style="background: #E3F2FD;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="theme-card" data-theme="forest">
+                                        <div class="theme-card-header">
+                                            <span class="theme-card-name">Forest Green</span>
+                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                        </div>
+                                        <div class="theme-card-colors">
+                                            <div class="theme-color-swatch" style="background: #107C10;"></div>
+                                            <div class="theme-color-swatch" style="background: #498205;"></div>
+                                            <div class="theme-color-swatch" style="background: #E8F5E9;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="theme-card" data-theme="sunset">
+                                        <div class="theme-card-header">
+                                            <span class="theme-card-name">Sunset</span>
+                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                        </div>
+                                        <div class="theme-card-colors">
+                                            <div class="theme-color-swatch" style="background: #D13438;"></div>
+                                            <div class="theme-color-swatch" style="background: #F7630C;"></div>
+                                            <div class="theme-color-swatch" style="background: #FFF4E5;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="theme-card" data-theme="custom">
+                                        <div class="theme-card-header">
+                                            <span class="theme-card-name">Custom</span>
+                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                        </div>
+                                        <div class="theme-card-colors">
+                                            <div class="theme-color-swatch" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -713,6 +777,101 @@ document.querySelectorAll('.setting-input').forEach(input => {
             }
         });
     }
+});
+
+// Theme presets
+const themePresets = {
+    'notre-dame': {
+        primary_color: '#C99700',
+        secondary_color: '#0C2340',
+        header_bg_color: '#0C2340',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#C99700',
+        sidebar_bg_color: '#FFFFFF',
+        sidebar_text_color: '#1F2937',
+        footer_bg_color: '#F3F4F6',
+        footer_text_color: '#6B7280'
+    },
+    'midnight': {
+        primary_color: '#FFD700',
+        secondary_color: '#1A1A1A',
+        header_bg_color: '#1A1A1A',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#FFD700',
+        sidebar_bg_color: '#323130',
+        sidebar_text_color: '#FFFFFF',
+        footer_bg_color: '#1A1A1A',
+        footer_text_color: '#C8C6C4'
+    },
+    'ocean': {
+        primary_color: '#0078D4',
+        secondary_color: '#00BCF2',
+        header_bg_color: '#0078D4',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#00BCF2',
+        sidebar_bg_color: '#E3F2FD',
+        sidebar_text_color: '#005A9E',
+        footer_bg_color: '#0078D4',
+        footer_text_color: '#FFFFFF'
+    },
+    'forest': {
+        primary_color: '#107C10',
+        secondary_color: '#498205',
+        header_bg_color: '#107C10',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#90EE90',
+        sidebar_bg_color: '#E8F5E9',
+        sidebar_text_color: '#1B5E20',
+        footer_bg_color: '#F1F8F4',
+        footer_text_color: '#2E7D32'
+    },
+    'sunset': {
+        primary_color: '#D13438',
+        secondary_color: '#F7630C',
+        header_bg_color: '#D13438',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#FFD700',
+        sidebar_bg_color: '#FFF4E5',
+        sidebar_text_color: '#C62828',
+        footer_bg_color: '#FFEBEE',
+        footer_text_color: '#B71C1C'
+    }
+};
+
+document.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const themeName = this.getAttribute('data-theme');
+        
+        // Remove active from all cards
+        document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+
+        if (themeName === 'custom') {
+            // Don't change colors for custom theme
+            currentSettings.active_theme = 'custom';
+            return;
+        }
+
+        // Apply theme preset
+        const preset = themePresets[themeName];
+        if (preset) {
+            Object.keys(preset).forEach(key => {
+                currentSettings[key] = preset[key];
+                const input = document.querySelector(`[data-key="${key}"]`);
+                if (input) {
+                    if (input.type === 'color') {
+                        input.value = preset[key];
+                        const hexInput = document.getElementById(input.id + 'Hex');
+                        if (hexInput) hexInput.value = preset[key];
+                    } else {
+                        input.value = preset[key];
+                    }
+                }
+            });
+            currentSettings.active_theme = themeName;
+            notyf.success(`${this.querySelector('.theme-card-name').textContent} theme applied`);
+        }
+    });
 });
 
 // Save settings
