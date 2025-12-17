@@ -1154,6 +1154,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('📊 DEBUG: Computed visibility:', computedStyle.visibility);
                 console.log('📊 DEBUG: Computed opacity:', computedStyle.opacity);
                 console.log('📊 DEBUG: Computed height:', computedStyle.height);
+                
+                // Check if content actually exists inside
+                const contentSections = targetTab.querySelectorAll('.settings-section');
+                console.log('📦 DEBUG: Sections inside tab:', contentSections.length);
+                contentSections.forEach((section, i) => {
+                    const header = section.querySelector('.settings-section-header');
+                    const body = section.querySelector('.settings-section-body');
+                    const headerText = header ? header.textContent.trim().replace(/\s+/g, ' ').substring(0, 40) : 'none';
+                    console.log(`  📦 Section ${i}: ${headerText}`, {
+                        bodyExists: !!body,
+                        bodyCollapsed: body?.classList.contains('collapsed'),
+                        bodyDisplay: body ? window.getComputedStyle(body).display : 'none',
+                        bodyHeight: body ? window.getComputedStyle(body).height : 'none',
+                        bodyMaxHeight: body ? window.getComputedStyle(body).maxHeight : 'none'
+                    });
+                });
             } else {
                 console.error('❌ ERROR: Target tab not found:', `subtab-${subtab}`);
             }
