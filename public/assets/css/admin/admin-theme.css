@@ -320,6 +320,22 @@ body {
     flex-direction: column;
 }
 
+/* Exception: Theme gallery form-group should NOT use flex layout */
+.settings-grid .form-group:has(.theme-gallery-container) {
+    display: block !important;
+}
+
+/* Fallback for older browsers without :has() support */
+.settings-grid .form-group .theme-gallery-container {
+    /* Force parent to behave as block by making container full-width */
+    width: 100%;
+}
+
+/* Ensure theme gallery itself can use grid layout */
+.theme-gallery-container .theme-gallery {
+    display: grid !important;
+}
+
 .settings-grid .form-group label {
     font-weight: 600;
     color: var(--text-secondary);
@@ -399,13 +415,15 @@ input[type="color"].setting-input,
 
 /* Theme Gallery - Compact Scrollable Preview Cards */
 .theme-gallery-container {
-    max-height: 480px;
+    max-height: 500px;
+    max-width: 900px;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1rem;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
     border-radius: 8px;
-    margin-top: 1rem;
+    margin: 1rem auto 0 0;
 }
 
 .theme-gallery-container::-webkit-scrollbar {
@@ -428,8 +446,10 @@ input[type="color"].setting-input,
 
 .theme-gallery {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(240px, 280px));
     gap: 1rem;
+    width: fit-content;
+    max-width: 100%;
 }
 
 @media (max-width: 1400px) {

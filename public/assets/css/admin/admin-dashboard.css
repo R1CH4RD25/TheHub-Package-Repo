@@ -1394,6 +1394,7 @@
 
 .user-subtab.active {
     display: block;
+    min-height: 200px; /* Prevent zero-height collapse */
 }
 
 /* Toast Notification */
