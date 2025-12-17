@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Wed Dec 17 08:44:36 PM UTC 2025
+ * Generated: Wed Dec 17 08:59:32 PM UTC 2025
  */
 
 
@@ -2474,6 +2474,7 @@ html {
 
 .user-subtab.active {
     display: block;
+    width: 100%; /* Inherit parent width instead of auto collapsing to 0 */
     min-height: 200px; /* Prevent zero-height collapse */
 }
 
@@ -3677,6 +3678,7 @@ html {
 
 .user-subtab.active {
     display: block;
+    width: 100%; /* Inherit parent width instead of auto collapsing to 0 */
     min-height: 200px; /* Prevent zero-height collapse */
 }
 

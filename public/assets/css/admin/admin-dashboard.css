@@ -191,6 +191,7 @@
 
 .user-subtab.active {
     display: block;
+    width: 100%; /* Inherit parent width instead of auto collapsing to 0 */
     min-height: 200px; /* Prevent zero-height collapse */
 }
 
@@ -1394,6 +1395,7 @@
 
 .user-subtab.active {
     display: block;
+    width: 100%; /* Inherit parent width instead of auto collapsing to 0 */
     min-height: 200px; /* Prevent zero-height collapse */
 }
 
