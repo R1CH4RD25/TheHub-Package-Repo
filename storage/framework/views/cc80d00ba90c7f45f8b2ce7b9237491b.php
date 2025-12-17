@@ -101,7 +101,7 @@
                             <div class="form-group">
                                 <label for="headerBgColor">Background Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="headerBgColor" class="setting-input" data-key="header_bg_color" value="#000000">
+                                    <input type="color" id="headerBgColor" class="setting-input" data-key="header_bg_color" value="#000000" style="padding:0!important">
                                     <input type="text" id="headerBgColorHex" value="#000000">
                                 </div>
                                 <small>Navbar background color</small>
@@ -110,7 +110,7 @@
                             <div class="form-group">
                                 <label for="headerTextColor">Text Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="headerTextColor" class="setting-input" data-key="header_text_color" value="#FFFFFF">
+                                    <input type="color" id="headerTextColor" class="setting-input" data-key="header_text_color" value="#FFFFFF" style="padding:0!important">
                                     <input type="text" id="headerTextColorHex" value="#FFFFFF">
                                 </div>
                                 <small>Navbar text and link color</small>
@@ -119,7 +119,7 @@
                             <div class="form-group">
                                 <label for="headerSubtitleColor">Subtitle Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="headerSubtitleColor" class="setting-input" data-key="header_subtitle_color" value="#FFD700">
+                                    <input type="color" id="headerSubtitleColor" class="setting-input" data-key="header_subtitle_color" value="#FFD700" style="padding:0!important">
                                     <input type="text" id="headerSubtitleColorHex" value="#FFD700">
                                 </div>
                                 <small>Color for the subtitle under organization name</small>
@@ -762,7 +762,7 @@ document.querySelectorAll('.setting-input').forEach(input => {
 });
 
 // Color picker sync
-['headerBgColor', 'headerTextColor', 'headerSubtitleColor', 'footerBgColor', 'footerTextColor', 
+['headerBgColor', 'headerTextColor', 'headerSubtitleColor', 'footerBgColor', 'footerTextColor',
  'primaryColor', 'secondaryColor', 'sidebarBg', 'sidebarText'].forEach(id => {
     const colorInput = document.getElementById(id);
     const hexInput = document.getElementById(id + 'Hex');
@@ -839,7 +839,7 @@ const themePresets = {
 document.querySelectorAll('.theme-card').forEach(card => {
     card.addEventListener('click', function() {
         const themeName = this.getAttribute('data-theme');
-        
+
         // Remove active from all cards
         document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
         this.classList.add('active');
