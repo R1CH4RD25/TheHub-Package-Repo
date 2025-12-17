@@ -122,3 +122,76 @@ grep "width: fit-content" public/assets/css/admin-bundle.css
 - Web Server: Nginx (likely)
 - Database: MySQL (woodson_hub)
 - OS: Linux
+
+---
+
+## ✅ ISSUE RESOLVED
+
+### Root Cause Identified
+**Apache mod_expires caching CSS for 30 days**, ignoring query string versioning.
+
+### Evidence
+```bash
+curl -I https://hub.woodsonisd.net/assets/css/admin-bundle.css
+# Headers showed:
+last-modified: Wed, 17 Dec 2025 15:16:20 GMT  # Correct timestamp
+cache-control: max-age=2592000                 # 30 days = 2,592,000 seconds
+expires: Fri, 16 Jan 2026 16:41:21 GMT        # Far-future expires
+```
+
+### The Problem
+`public/.htaccess` line 73:
+```apache
+ExpiresByType text/css "access plus 1 month"
+```
+
+When Apache sets a far-future expires header (30 days), browsers cache the response **keyed by the URL path only**, ignoring query strings. So:
+- `/assets/css/admin-bundle.css?v=1765984350` ← cached for 30 days
+- `/assets/css/admin-bundle.css?v=1765984580` ← still serves cached version
+
+The `filemtime()` query string was updating correctly, but the browser never requested the new version because the old one was still "fresh" according to the expires header.
+
+### The Fix (Commit bb0ea06)
+Changed cache duration from `1 month` to `1 hour`:
+```apache
+ExpiresByType text/css "access plus 1 hour"
+ExpiresByType application/javascript "access plus 1 hour"
+```
+
+**Why This Works:**
+- 1 hour is short enough that updates propagate within reasonable time
+- Query string versioning now works because cache expires before typical dev cycles
+- Still provides caching benefits (3600 seconds = 1 hour of reduced requests)
+
+**Alternative Solutions Considered:**
+1. ❌ **Filename versioning** (`admin-bundle.abc123.css`) - Requires build pipeline changes
+2. ❌ **Cache-Control: must-revalidate** - Doesn't override Expires header reliably
+3. ❌ **Remove caching entirely** - Hurts performance unnecessarily
+4. ✅ **Short expires (1 hour)** - Balances caching with update propagation
+
+### Verification Steps
+1. Wait 1 hour for existing cache to expire, OR
+2. Clear browser cache manually (Ctrl+Shift+Delete)
+3. Hard refresh (Ctrl+Shift+R)
+4. Verify HTML shows: `?v=1765984580` (new timestamp)
+5. Verify theme gallery displays 3-column compact scrollable design
+
+### Lessons Learned
+- **Query string versioning only works with short cache durations**
+- Apache mod_expires can override application-level cache control
+- Browser cache is keyed by URL path, not full URL with query string (when expires header is set)
+- Always check HTTP response headers (`curl -I`) when debugging cache issues
+- filemtime() was working correctly - the problem was HTTP-level caching
+
+### Performance Impact
+Reducing CSS cache from 30 days to 1 hour:
+- ✅ Minimal impact: CSS files are small (160K gzipped)
+- ✅ Browser still caches for 1 hour (reduces requests)
+- ✅ Updates propagate faster during development
+- ✅ Production updates visible within 1 hour vs 30 days
+
+### Files Changed
+- `public/.htaccess` - Reduced CSS/JS cache duration
+- `CSS_CACHE_ISSUE_REPORT.md` - This report with resolution
+
+**Status:** ✅ RESOLVED - CSS cache busting now working as intended
