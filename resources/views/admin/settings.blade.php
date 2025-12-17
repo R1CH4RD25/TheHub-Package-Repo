@@ -340,10 +340,11 @@
                             </div>
 
                             <div class="form-group" style="grid-column: 1 / -1;">
-                                <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem;">Theme Presets</label>
-                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">Choose a pre-designed theme or customize your own</p>
+                                <label style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Theme Presets</label>
+                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1rem 0;">Select a pre-designed theme</p>
                                 
-                                <div class="theme-gallery">
+                                <div class="theme-gallery-container">
+                                    <div class="theme-gallery">
                                     <!-- Notre Dame Theme -->
                                     <div class="theme-preview-card" data-theme="notre-dame">
                                         <div class="theme-preview-header" style="background: #0C2340; color: #C99700;">

@@ -338,76 +338,169 @@
                             </div>
 
                             <div class="form-group" style="grid-column: 1 / -1;">
-                                <label>Theme Presets</label>
-                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0.5rem 0;">Click a theme to apply preset colors</p>
-                                <div class="theme-presets">
-                                    <div class="theme-card" data-theme="notre-dame">
-                                        <div class="theme-card-header">
-                                            <span class="theme-card-name">Notre Dame</span>
-                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem;">Theme Presets</label>
+                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">Choose a pre-designed theme or customize your own</p>
+                                
+                                <div class="theme-gallery">
+                                    <!-- Notre Dame Theme -->
+                                    <div class="theme-preview-card" data-theme="notre-dame">
+                                        <div class="theme-preview-header" style="background: #0C2340; color: #C99700;">
+                                            <div class="theme-preview-logo">ND</div>
+                                            <div class="theme-preview-title">Notre Dame</div>
                                         </div>
-                                        <div class="theme-card-colors">
-                                            <div class="theme-color-swatch" style="background: #0C2340;"></div>
-                                            <div class="theme-color-swatch" style="background: #C99700;"></div>
-                                            <div class="theme-color-swatch" style="background: #FFFFFF;"></div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar" style="background: #FFFFFF; border-right: 1px solid #E5E7EB;">
+                                                <div class="theme-preview-menu-item" style="background: #F5F3E8; color: #C99700;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #2C2C2C;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #2C2C2C;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #C99700;"></div>
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #0C2340;"></div>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <div class="theme-card" data-theme="midnight">
-                                        <div class="theme-card-header">
-                                            <span class="theme-card-name">Midnight</span>
-                                            <i class="fas fa-check-circle theme-card-check"></i>
-                                        </div>
-                                        <div class="theme-card-colors">
-                                            <div class="theme-color-swatch" style="background: #1A1A1A;"></div>
-                                            <div class="theme-color-swatch" style="background: #FFD700;"></div>
-                                            <div class="theme-color-swatch" style="background: #323130;"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="theme-card" data-theme="ocean">
-                                        <div class="theme-card-header">
-                                            <span class="theme-card-name">Ocean Blue</span>
-                                            <i class="fas fa-check-circle theme-card-check"></i>
-                                        </div>
-                                        <div class="theme-card-colors">
-                                            <div class="theme-color-swatch" style="background: #0078D4;"></div>
-                                            <div class="theme-color-swatch" style="background: #00BCF2;"></div>
-                                            <div class="theme-color-swatch" style="background: #E3F2FD;"></div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #0C2340;" title="Navy"></span>
+                                                <span style="background: #C99700;" title="Gold"></span>
+                                                <span style="background: #FFFFFF; border: 1px solid #ddd;" title="White"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
                                     </div>
 
-                                    <div class="theme-card" data-theme="forest">
-                                        <div class="theme-card-header">
-                                            <span class="theme-card-name">Forest Green</span>
-                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                    <!-- Midnight Theme -->
+                                    <div class="theme-preview-card" data-theme="midnight">
+                                        <div class="theme-preview-header" style="background: #1A1A1A; color: #FFD700;">
+                                            <div class="theme-preview-logo">MN</div>
+                                            <div class="theme-preview-title">Midnight</div>
                                         </div>
-                                        <div class="theme-card-colors">
-                                            <div class="theme-color-swatch" style="background: #107C10;"></div>
-                                            <div class="theme-color-swatch" style="background: #498205;"></div>
-                                            <div class="theme-color-swatch" style="background: #E8F5E9;"></div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar" style="background: #323130;">
+                                                <div class="theme-preview-menu-item" style="background: #FFD700; color: #1A1A1A;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #FFFFFF;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #FFFFFF;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content" style="background: #252525;">
+                                                <div class="theme-preview-card-mini" style="background: #2C2C2C; border-left: 3px solid #FFD700;"></div>
+                                                <div class="theme-preview-card-mini" style="background: #2C2C2C; border-left: 3px solid #FFD700;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #1A1A1A;" title="Dark"></span>
+                                                <span style="background: #FFD700;" title="Gold"></span>
+                                                <span style="background: #323130;" title="Gray"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
                                     </div>
 
-                                    <div class="theme-card" data-theme="sunset">
-                                        <div class="theme-card-header">
-                                            <span class="theme-card-name">Sunset</span>
-                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                    <!-- Ocean Theme -->
+                                    <div class="theme-preview-card" data-theme="ocean">
+                                        <div class="theme-preview-header" style="background: #0078D4; color: #FFFFFF;">
+                                            <div class="theme-preview-logo">OB</div>
+                                            <div class="theme-preview-title">Ocean Blue</div>
                                         </div>
-                                        <div class="theme-card-colors">
-                                            <div class="theme-color-swatch" style="background: #D13438;"></div>
-                                            <div class="theme-color-swatch" style="background: #F7630C;"></div>
-                                            <div class="theme-color-swatch" style="background: #FFF4E5;"></div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar" style="background: #E3F2FD;">
+                                                <div class="theme-preview-menu-item" style="background: #0078D4; color: #FFFFFF;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #005A9E;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #005A9E;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #0078D4;"></div>
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #00BCF2;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #0078D4;" title="Blue"></span>
+                                                <span style="background: #00BCF2;" title="Cyan"></span>
+                                                <span style="background: #E3F2FD;" title="Light Blue"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
                                     </div>
 
-                                    <div class="theme-card" data-theme="custom">
-                                        <div class="theme-card-header">
-                                            <span class="theme-card-name">Custom</span>
-                                            <i class="fas fa-check-circle theme-card-check"></i>
+                                    <!-- Forest Theme -->
+                                    <div class="theme-preview-card" data-theme="forest">
+                                        <div class="theme-preview-header" style="background: #107C10; color: #FFFFFF;">
+                                            <div class="theme-preview-logo">FG</div>
+                                            <div class="theme-preview-title">Forest Green</div>
                                         </div>
-                                        <div class="theme-card-colors">
-                                            <div class="theme-color-swatch" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar" style="background: #E8F5E9;">
+                                                <div class="theme-preview-menu-item" style="background: #107C10; color: #FFFFFF;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #1B5E20;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #1B5E20;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #107C10;"></div>
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #498205;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #107C10;" title="Green"></span>
+                                                <span style="background: #498205;" title="Olive"></span>
+                                                <span style="background: #E8F5E9;" title="Light Green"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sunset Theme -->
+                                    <div class="theme-preview-card" data-theme="sunset">
+                                        <div class="theme-preview-header" style="background: #D13438; color: #FFFFFF;">
+                                            <div class="theme-preview-logo">SS</div>
+                                            <div class="theme-preview-title">Sunset</div>
+                                        </div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar" style="background: #FFF4E5;">
+                                                <div class="theme-preview-menu-item" style="background: #D13438; color: #FFFFFF;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #C62828;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #C62828;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #D13438;"></div>
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #F7630C;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #D13438;" title="Red"></span>
+                                                <span style="background: #F7630C;" title="Orange"></span>
+                                                <span style="background: #FFF4E5;" title="Cream"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Custom Theme -->
+                                    <div class="theme-preview-card" data-theme="custom">
+                                        <div class="theme-preview-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #FFFFFF;">
+                                            <div class="theme-preview-logo"><i class="fas fa-palette"></i></div>
+                                            <div class="theme-preview-title">Custom</div>
+                                        </div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar" style="background: #F9FAFB;">
+                                                <div class="theme-preview-menu-item" style="background: #667eea; color: #FFFFFF;">● Dashboard</div>
+                                                <div class="theme-preview-menu-item" style="color: #4B5563;">○ Settings</div>
+                                                <div class="theme-preview-menu-item" style="color: #4B5563;">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #667eea;"></div>
+                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #764ba2;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span style="background: #667eea;" title="Purple"></span>
+                                                <span style="background: #764ba2;" title="Violet"></span>
+                                                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Gradient"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -836,17 +929,18 @@ const themePresets = {
     }
 };
 
-document.querySelectorAll('.theme-card').forEach(card => {
+document.querySelectorAll('.theme-preview-card').forEach(card => {
     card.addEventListener('click', function() {
         const themeName = this.getAttribute('data-theme');
 
         // Remove active from all cards
-        document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
         this.classList.add('active');
 
         if (themeName === 'custom') {
             // Don't change colors for custom theme
             currentSettings.active_theme = 'custom';
+            notyf.success('Custom theme selected - use color pickers to customize');
             return;
         }
 
@@ -867,7 +961,7 @@ document.querySelectorAll('.theme-card').forEach(card => {
                 }
             });
             currentSettings.active_theme = themeName;
-            notyf.success(`${this.querySelector('.theme-card-name').textContent} theme applied`);
+            notyf.success(`${this.querySelector('.theme-preview-title').textContent} theme applied`);
         }
     });
 });
