@@ -1194,6 +1194,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     isInViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth
                 });
                 
+                // Check ALL computed styles on tab
+                const tabStyle = window.getComputedStyle(targetTab);
+                console.log('🎨 DEBUG: Tab computed styles:', {
+                    display: tabStyle.display,
+                    position: tabStyle.position,
+                    width: tabStyle.width,
+                    height: tabStyle.height,
+                    minHeight: tabStyle.minHeight,
+                    maxHeight: tabStyle.maxHeight,
+                    flex: tabStyle.flex,
+                    flexBasis: tabStyle.flexBasis,
+                    flexGrow: tabStyle.flexGrow,
+                    flexShrink: tabStyle.flexShrink
+                });
+                
                 // Check parent container
                 const container = targetTab.closest('.site-settings-container');
                 if (container) {
