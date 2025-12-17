@@ -45,14 +45,14 @@
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label for="orgName">Organization Name</label>
-                                <input type="text" id="orgName" class="setting-input" data-key="org_name">
+                                <input type="text" id="orgName" class="setting-input" data-key="organization_name">
                                 <small>Displayed in header and login page</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="orgShortName">Short Name</label>
-                                <input type="text" id="orgShortName" class="setting-input" data-key="org_short_name">
-                                <small>Abbreviated organization name</small>
+                                <label for="siteName">Site Name</label>
+                                <input type="text" id="siteName" class="setting-input" data-key="site_name">
+                                <small>Browser tab title</small>
                             </div>
 
                             <div class="form-group">
