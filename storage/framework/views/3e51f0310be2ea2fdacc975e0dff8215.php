@@ -169,8 +169,8 @@ function renderInstalledPackages(packages) {
                 ${packages.length === 0 ? '<tr><td colspan="5" class="text-center">No packages installed</td></tr>' : ''}
                 ${packages.map(p => `
                     <tr>
-                        <td><strong>${p.name}</strong></td>
-                        <td>${p.version}</td>
+                        <td><strong>${p.display_name || p.slug || p.package_id || 'Unknown'}</strong></td>
+                        <td>${p.installed_version || p.version || '1.0.0'}</td>
                         <td>${new Date(p.installed_at).toLocaleDateString()}</td>
                         <td><span class="badge badge-success">Active</span></td>
                         <td>
@@ -204,8 +204,8 @@ function renderAvailablePackages(packages) {
                 ${packages.length === 0 ? '<tr><td colspan="5" class="text-center">No packages available</td></tr>' : ''}
                 ${packages.map(p => `
                     <tr>
-                        <td><strong>${p.name}</strong></td>
-                        <td>${p.version}</td>
+                        <td><strong>${p.display_name || p.slug || p.package_id || 'Unknown'}</strong></td>
+                        <td>${p.version || '1.0.0'}</td>
                         <td>${new Date(p.created_at).toLocaleDateString()}</td>
                         <td><span class="badge badge-${p.can_install ? 'success' : 'warning'}">${p.validation_status || 'Pending'}</span></td>
                         <td>

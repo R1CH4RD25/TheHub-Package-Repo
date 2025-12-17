@@ -9,7 +9,7 @@
     <?php if(isset($context) && $context === 'management'): ?>
         <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
     <?php else: ?>
-        <link rel="stylesheet" href="/assets/css/admin-bundle.css">
+        <link rel="stylesheet" href="/assets/css/admin-bundle.css?v=<?php echo e(filemtime(public_path('assets/css/admin-bundle.css'))); ?>">
     <?php endif; ?>
 
     <!-- Font Awesome -->

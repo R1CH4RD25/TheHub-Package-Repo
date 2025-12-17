@@ -1,6 +1,8 @@
-<?php $__env->startSection('title', 'Site Settings'); ?>
+@extends('layouts.admin')
 
-<?php $__env->startSection('content'); ?>
+@section('title', 'Site Settings')
+
+@section('content')
 <div class="admin-tab active">
     <div class="tab-header">
         <div>
@@ -473,9 +475,9 @@
     </div>
 </div>
 
-<?php $__env->startPush('scripts'); ?>
+@push('scripts')
 <script>
-const csrfToken = '<?php echo e(csrf_token()); ?>';
+const csrfToken = '{{ csrf_token() }}';
 let originalSettings = {};
 let currentSettings = {};
 
@@ -598,7 +600,5 @@ document.getElementById('resetToDefaults')?.addEventListener('click', function()
     });
 });
 </script>
-<?php $__env->stopPush(); ?>
-<?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/woodson/thehub/resources/views/admin/settings.blade.php ENDPATH**/ ?>
+@endpush
+@endsection
