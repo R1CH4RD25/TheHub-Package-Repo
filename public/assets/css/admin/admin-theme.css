@@ -379,12 +379,15 @@ body {
 }
 
 /* Color picker styling */
-.color-picker-wrapper input[type="color"] {
-    width: 120px;
-    height: 80px;
+input[type="color"].setting-input,
+.color-picker-wrapper input[type="color"],
+.settings-grid input[type="color"] {
+    width: 120px !important;
+    height: 80px !important;
     padding: 0 !important;
-    border: 3px solid var(--border-primary);
-    border-radius: var(--radius-lg);
+    margin: 0 !important;
+    border: 3px solid var(--border-primary) !important;
+    border-radius: var(--radius-lg) !important;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
