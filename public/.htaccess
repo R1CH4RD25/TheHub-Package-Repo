@@ -70,7 +70,7 @@ AddDefaultCharset UTF-8
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
-    
+
     # Short cache for CSS/JS to allow query string versioning to work
     # Query strings are ignored with long expires, causing stale cache issues
     ExpiresByType text/css "access plus 1 hour"
