@@ -1209,6 +1209,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     flexShrink: tabStyle.flexShrink
                 });
                 
+                // Check first child (p tag) dimensions
+                const firstChild = targetTab.firstElementChild;
+                if (firstChild) {
+                    const childRect = firstChild.getBoundingClientRect();
+                    const childStyle = window.getComputedStyle(firstChild);
+                    console.log('📏 DEBUG: First child element:', {
+                        tagName: firstChild.tagName,
+                        rect: { width: childRect.width, height: childRect.height },
+                        display: childStyle.display,
+                        width: childStyle.width,
+                        height: childStyle.height
+                    });
+                }
+                
+                // Check first .settings-section
+                const firstSection = targetTab.querySelector('.settings-section');
+                if (firstSection) {
+                    const sectionRect = firstSection.getBoundingClientRect();
+                    const sectionStyle = window.getComputedStyle(firstSection);
+                    console.log('📦 DEBUG: First .settings-section:', {
+                        rect: { width: sectionRect.width, height: sectionRect.height },
+                        display: sectionStyle.display,
+                        width: sectionStyle.width,
+                        height: sectionStyle.height,
+                        overflow: sectionStyle.overflow
+                    });
+                }
+                
                 // Check parent container
                 const container = targetTab.closest('.site-settings-container');
                 if (container) {
