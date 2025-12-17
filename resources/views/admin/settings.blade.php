@@ -1112,25 +1112,67 @@ document.addEventListener('DOMContentLoaded', () => {
         logoBtn.addEventListener('click', () => logoInput.click());
     }
 
-    // Subtab switching
+    // Subtab switching with DEBUG
     const subtabButtons = document.querySelectorAll('.subtab-btn');
-    subtabButtons.forEach(btn => {
+    console.log('🔍 DEBUG: Found subtab buttons:', subtabButtons.length);
+    
+    subtabButtons.forEach((btn, index) => {
+        console.log(`🔍 DEBUG: Button ${index}:`, btn.getAttribute('data-subtab'), btn.classList.contains('active'));
+        
         btn.addEventListener('click', function() {
             const subtab = this.getAttribute('data-subtab');
+            console.log('🔵 DEBUG: Clicked tab:', subtab);
 
-            subtabButtons.forEach(b => b.classList.remove('active'));
+            // Remove active from all buttons
+            subtabButtons.forEach(b => {
+                b.classList.remove('active');
+                console.log(`  ❌ Removed active from button:`, b.getAttribute('data-subtab'));
+            });
+            
+            // Add active to clicked button
             this.classList.add('active');
+            console.log(`  ✅ Added active to button:`, subtab);
 
-            document.querySelectorAll('.user-subtab').forEach(s => s.classList.remove('active'));
-            document.getElementById(`subtab-${subtab}`)?.classList.add('active');
+            // Remove active from all tab content
+            const allTabs = document.querySelectorAll('.user-subtab');
+            console.log('🔍 DEBUG: Found tab contents:', allTabs.length);
+            allTabs.forEach(s => {
+                s.classList.remove('active');
+                console.log(`  ❌ Removed active from content:`, s.id);
+            });
+            
+            // Add active to target tab content
+            const targetTab = document.getElementById(`subtab-${subtab}`);
+            console.log('🔍 DEBUG: Target tab element:', targetTab);
+            if (targetTab) {
+                targetTab.classList.add('active');
+                console.log(`  ✅ Added active to content:`, targetTab.id);
+                
+                // Check computed styles
+                const computedStyle = window.getComputedStyle(targetTab);
+                console.log('📊 DEBUG: Computed display:', computedStyle.display);
+                console.log('📊 DEBUG: Computed visibility:', computedStyle.visibility);
+                console.log('📊 DEBUG: Computed opacity:', computedStyle.opacity);
+                console.log('📊 DEBUG: Computed height:', computedStyle.height);
+            } else {
+                console.error('❌ ERROR: Target tab not found:', `subtab-${subtab}`);
+            }
         });
     });
 
     // Ensure default active subtab content is visible
     const initialActiveBtn = document.querySelector('.subtab-btn.active') || subtabButtons[0];
+    console.log('🔍 DEBUG: Initial active button:', initialActiveBtn?.getAttribute('data-subtab'));
     if (initialActiveBtn) {
         const subtab = initialActiveBtn.getAttribute('data-subtab');
-        document.getElementById(`subtab-${subtab}`)?.classList.add('active');
+        const initialTab = document.getElementById(`subtab-${subtab}`);
+        console.log('🔍 DEBUG: Initial tab element:', initialTab);
+        if (initialTab) {
+            initialTab.classList.add('active');
+            console.log('✅ DEBUG: Set initial tab active:', subtab);
+            const computedStyle = window.getComputedStyle(initialTab);
+            console.log('📊 DEBUG: Initial display:', computedStyle.display);
+        }
     }
 });
 
