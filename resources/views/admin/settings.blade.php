@@ -1096,6 +1096,14 @@ function updateManagementIconPreview(iconClass) {
 
 // Section toggle - bind event listeners instead of inline onclick
 document.addEventListener('DOMContentLoaded', () => {
+    // CSS Version Debug
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    console.log('🎨 DEBUG: CSS files loaded:');
+    links.forEach(link => {
+        const url = new URL(link.href);
+        console.log(`  ${url.pathname}${url.search}`);
+    });
+    
     // Accordion toggles
     document.querySelectorAll('.settings-section-header').forEach(header => {
         header.addEventListener('click', () => {
