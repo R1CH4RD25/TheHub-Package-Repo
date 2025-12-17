@@ -1115,10 +1115,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Subtab switching with DEBUG
     const subtabButtons = document.querySelectorAll('.subtab-btn');
     console.log('🔍 DEBUG: Found subtab buttons:', subtabButtons.length);
-    
+
     subtabButtons.forEach((btn, index) => {
         console.log(`🔍 DEBUG: Button ${index}:`, btn.getAttribute('data-subtab'), btn.classList.contains('active'));
-        
+
         btn.addEventListener('click', function() {
             const subtab = this.getAttribute('data-subtab');
             console.log('🔵 DEBUG: Clicked tab:', subtab);
@@ -1128,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 b.classList.remove('active');
                 console.log(`  ❌ Removed active from button:`, b.getAttribute('data-subtab'));
             });
-            
+
             // Add active to clicked button
             this.classList.add('active');
             console.log(`  ✅ Added active to button:`, subtab);
@@ -1140,21 +1140,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 s.classList.remove('active');
                 console.log(`  ❌ Removed active from content:`, s.id);
             });
-            
+
             // Add active to target tab content
             const targetTab = document.getElementById(`subtab-${subtab}`);
             console.log('🔍 DEBUG: Target tab element:', targetTab);
             if (targetTab) {
                 targetTab.classList.add('active');
                 console.log(`  ✅ Added active to content:`, targetTab.id);
-                
+
                 // Check computed styles
                 const computedStyle = window.getComputedStyle(targetTab);
                 console.log('📊 DEBUG: Computed display:', computedStyle.display);
                 console.log('📊 DEBUG: Computed visibility:', computedStyle.visibility);
                 console.log('📊 DEBUG: Computed opacity:', computedStyle.opacity);
                 console.log('📊 DEBUG: Computed height:', computedStyle.height);
-                
+
                 // Check if content actually exists inside
                 const contentSections = targetTab.querySelectorAll('.settings-section');
                 console.log('📦 DEBUG: Sections inside tab:', contentSections.length);
@@ -1170,6 +1170,32 @@ document.addEventListener('DOMContentLoaded', () => {
                         bodyMaxHeight: body ? window.getComputedStyle(body).maxHeight : 'none'
                     });
                 });
+                
+                // Check tab position and visibility
+                const rect = targetTab.getBoundingClientRect();
+                console.log('📐 DEBUG: Tab position:', {
+                    top: rect.top,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                    bottom: rect.bottom,
+                    isInViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth
+                });
+                
+                // Check parent container
+                const container = targetTab.closest('.site-settings-container');
+                if (container) {
+                    const containerStyle = window.getComputedStyle(container);
+                    const containerRect = container.getBoundingClientRect();
+                    console.log('📦 DEBUG: Container .site-settings-container:', {
+                        display: containerStyle.display,
+                        height: containerStyle.height,
+                        maxHeight: containerStyle.maxHeight,
+                        overflow: containerStyle.overflow,
+                        position: containerStyle.position,
+                        rect: { width: containerRect.width, height: containerRect.height }
+                    });
+                }
             } else {
                 console.error('❌ ERROR: Target tab not found:', `subtab-${subtab}`);
             }
