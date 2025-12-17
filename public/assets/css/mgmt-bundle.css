@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Wed Dec 17 02:26:52 PM UTC 2025
+ * Generated: Wed Dec 17 02:28:27 PM UTC 2025
  */
 
 
@@ -5344,7 +5344,6 @@ body {
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="number"],
-.form-group input[type="color"],
 .form-group textarea,
 .form-group select {
     width: 100%;
@@ -5355,18 +5354,12 @@ body {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-group input:focus,
+.form-group input:focus:not([type="color"]),
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(var(--border-focus), 0.1);
-}
-
-.form-group input[type="color"] {
-    height: 45px;
-    padding: 0.25rem;
-    cursor: pointer;
 }
 
 .form-group .help-text {
