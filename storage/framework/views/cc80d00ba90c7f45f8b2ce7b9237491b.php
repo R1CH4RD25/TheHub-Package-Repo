@@ -43,14 +43,14 @@
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label for="orgName">Organization Name</label>
-                                <input type="text" id="orgName" class="setting-input" data-key="org_name">
+                                <input type="text" id="orgName" class="setting-input" data-key="organization_name">
                                 <small>Displayed in header and login page</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="orgShortName">Short Name</label>
-                                <input type="text" id="orgShortName" class="setting-input" data-key="org_short_name">
-                                <small>Abbreviated organization name</small>
+                                <label for="siteName">Site Name</label>
+                                <input type="text" id="siteName" class="setting-input" data-key="site_name">
+                                <small>Browser tab title</small>
                             </div>
 
                             <div class="form-group">
@@ -101,7 +101,7 @@
                             <div class="form-group">
                                 <label for="headerBgColor">Background Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="headerBgColor" class="setting-input" data-key="header_bg_color" value="#000000" style="padding:0!important">
+                                    <input type="color" id="headerBgColor" class="setting-input" data-key="header_bg_color" value="#000000" style="padding:0!important" style="padding:0!important">
                                     <input type="text" id="headerBgColorHex" value="#000000">
                                 </div>
                                 <small>Navbar background color</small>
@@ -110,7 +110,7 @@
                             <div class="form-group">
                                 <label for="headerTextColor">Text Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="headerTextColor" class="setting-input" data-key="header_text_color" value="#FFFFFF" style="padding:0!important">
+                                    <input type="color" id="headerTextColor" class="setting-input" data-key="header_text_color" value="#FFFFFF" style="padding:0!important" style="padding:0!important">
                                     <input type="text" id="headerTextColorHex" value="#FFFFFF">
                                 </div>
                                 <small>Navbar text and link color</small>
@@ -119,7 +119,7 @@
                             <div class="form-group">
                                 <label for="headerSubtitleColor">Subtitle Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="headerSubtitleColor" class="setting-input" data-key="header_subtitle_color" value="#FFD700" style="padding:0!important">
+                                    <input type="color" id="headerSubtitleColor" class="setting-input" data-key="header_subtitle_color" value="#FFD700" style="padding:0!important" style="padding:0!important">
                                     <input type="text" id="headerSubtitleColorHex" value="#FFD700">
                                 </div>
                                 <small>Color for the subtitle under organization name</small>
@@ -202,7 +202,7 @@
                             <div class="form-group">
                                 <label for="sidebarBg">Background Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="sidebarBg" class="setting-input" data-key="sidebar_bg_color" value="#FFFFFF">
+                                    <input type="color" id="sidebarBg" class="setting-input" data-key="sidebar_bg_color" value="#FFFFFF" style="padding:0!important">
                                     <input type="text" id="sidebarBgHex" value="#FFFFFF">
                                 </div>
                                 <small>Sidebar background color</small>
@@ -211,7 +211,7 @@
                             <div class="form-group">
                                 <label for="sidebarText">Text Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="sidebarText" class="setting-input" data-key="sidebar_text_color" value="#1F2937">
+                                    <input type="color" id="sidebarText" class="setting-input" data-key="sidebar_text_color" value="#1F2937" style="padding:0!important">
                                     <input type="text" id="sidebarTextHex" value="#1F2937">
                                 </div>
                                 <small>Sidebar text color</small>
@@ -268,7 +268,7 @@
                             <div class="form-group">
                                 <label for="footerBgColor">Background Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="footerBgColor" class="setting-input" data-key="footer_bg_color" value="#F3F4F6">
+                                    <input type="color" id="footerBgColor" class="setting-input" data-key="footer_bg_color" value="#F3F4F6" style="padding:0!important">
                                     <input type="text" id="footerBgColorHex" value="#F3F4F6">
                                 </div>
                                 <small>Footer background color</small>
@@ -277,7 +277,7 @@
                             <div class="form-group">
                                 <label for="footerTextColor">Text Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="footerTextColor" class="setting-input" data-key="footer_text_color" value="#6B7280">
+                                    <input type="color" id="footerTextColor" class="setting-input" data-key="footer_text_color" value="#6B7280" style="padding:0!important">
                                     <input type="text" id="footerTextColorHex" value="#6B7280">
                                 </div>
                                 <small>Footer text color</small>
@@ -322,7 +322,7 @@
                             <div class="form-group">
                                 <label for="primaryColor">Primary Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="primaryColor" class="setting-input" data-key="primary_color" value="#0F4D8D">
+                                    <input type="color" id="primaryColor" class="setting-input" data-key="primary_color" value="#0F4D8D" style="padding:0!important">
                                     <input type="text" id="primaryColorHex" value="#0F4D8D">
                                 </div>
                                 <small>Main brand color</small>
@@ -331,7 +331,7 @@
                             <div class="form-group">
                                 <label for="secondaryColor">Secondary Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="secondaryColor" class="setting-input" data-key="secondary_color" value="#FFD700">
+                                    <input type="color" id="secondaryColor" class="setting-input" data-key="secondary_color" value="#FFD700" style="padding:0!important">
                                     <input type="text" id="secondaryColorHex" value="#FFD700">
                                 </div>
                                 <small>Accent color</small>
