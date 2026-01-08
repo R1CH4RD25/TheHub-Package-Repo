@@ -470,21 +470,9 @@ class PackageManager
             ]);
             
             if (!$keepData) {
-                // Delete records
+                // Delete records (CASCADE will auto-delete history and attachments)
                 $this->db->execute(
                     "DELETE FROM section_records WHERE section_id = ?",
-                    [$sectionId]
-                );
-                
-                // Delete record history
-                $this->db->execute(
-                    "DELETE FROM section_record_history WHERE section_id = ?",
-                    [$sectionId]
-                );
-                
-                // Delete attachments
-                $this->db->execute(
-                    "DELETE FROM section_record_attachments WHERE section_id = ?",
                     [$sectionId]
                 );
             }
