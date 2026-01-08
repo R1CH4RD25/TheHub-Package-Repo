@@ -1149,11 +1149,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Accordion toggles
-    document.querySelectorAll('.settings-section-header').forEach(header => {
+    const allSectionHeaders = document.querySelectorAll('.settings-section-header');
+    console.log('🔧 Setting up accordion toggles for', allSectionHeaders.length, 'headers');
+    
+    document.querySelectorAll('.settings-section-header').forEach((header, index) => {
         header.addEventListener('click', () => {
-            header.classList.toggle('active');
+            const wasActive = header.classList.contains('active');
             const body = header.nextElementSibling;
+            const wasCollapsed = body?.classList.contains('collapsed');
+            const headerText = header.textContent.trim().replace(/\s+/g, ' ').substring(0, 30);
+            
+            console.log(`🔧 ACCORDION CLICK ${index}: "${headerText}"`);
+            console.log(`   Before: header.active=${wasActive}, body.collapsed=${wasCollapsed}`);
+            
+            header.classList.toggle('active');
             body?.classList.toggle('collapsed');
+            
+            const nowActive = header.classList.contains('active');
+            const nowCollapsed = body?.classList.contains('collapsed');
+            console.log(`   After: header.active=${nowActive}, body.collapsed=${nowCollapsed}`);
+            
+            if (body) {
+                const bodyStyle = window.getComputedStyle(body);
+                console.log(`   Body computed: maxHeight=${bodyStyle.maxHeight}, height=${bodyStyle.height}`);
+            }
         });
     });
 
