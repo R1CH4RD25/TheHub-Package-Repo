@@ -792,7 +792,7 @@
 .site-settings-container .settings-section-body {
     padding: 1.5rem;
     max-height: 2000px;
-    overflow: visible;
+    overflow: hidden;
     transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
@@ -841,7 +841,8 @@
 
 .site-settings-container .settings-section-body.collapsed {
     max-height: 0;
-    padding: 0 1.5rem;
+    padding: 0;
+    overflow: hidden;
 }
 
 .management-icon-input {
@@ -1170,8 +1171,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`   After: header.active=${nowActive}, body.collapsed=${nowCollapsed}`);
             
             if (body) {
-                const bodyStyle = window.getComputedStyle(body);
-                console.log(`   Body computed: maxHeight=${bodyStyle.maxHeight}, height=${bodyStyle.height}`);
+                const bodyStyleImmediate = window.getComputedStyle(body);
+                console.log(`   Body IMMEDIATE: maxHeight=${bodyStyleImmediate.maxHeight}, height=${bodyStyleImmediate.height}`);
+                
+                // Check again after transition completes (350ms)
+                setTimeout(() => {
+                    const bodyStyleFinal = window.getComputedStyle(body);
+                    console.log(`   Body AFTER TRANSITION: maxHeight=${bodyStyleFinal.maxHeight}, height=${bodyStyleFinal.height}`);
+                }, 350);
             }
         });
     });
