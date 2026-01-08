@@ -454,7 +454,8 @@ class PackageManager
             
             // Check for dependent packages
             $dependents = $this->db->fetchAll(
-                "SELECT package_id FROM section_package_dependencies WHERE depends_on_package = ?",
+                "SELECT package_id FROM section_package_dependencies 
+                 WHERE dependency_type = 'package' AND dependency_name = ?",
                 [$packageId]
             );
             
