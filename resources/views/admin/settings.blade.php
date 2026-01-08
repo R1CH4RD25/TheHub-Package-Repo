@@ -562,7 +562,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> <!-- Close .settings-section (Colors & Theme) -->
+            </div> <!-- Close #subtab-appearance -->
 
             <!-- BEHAVIOR & ACCESS TAB -->
             <div id="subtab-behavior" class="user-subtab">
@@ -767,10 +768,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+            </div> <!-- Close #subtab-system -->
+        </div> <!-- Close .site-settings-container -->
+    </div> <!-- Close .tab-content-scroll -->
+</div> <!-- Close .admin-tab -->
 
 @push('styles')
 <style nonce="<?php echo CSP_NONCE; ?>">
@@ -1107,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = new URL(link.href);
         console.log(`  ${url.pathname}${url.search}`);
     });
-    
+
     // Accordion toggles
     document.querySelectorAll('.settings-section-header').forEach(header => {
         header.addEventListener('click', () => {
@@ -1182,7 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         bodyMaxHeight: body ? window.getComputedStyle(body).maxHeight : 'none'
                     });
                 });
-                
+
                 // Check tab position and visibility
                 const rect = targetTab.getBoundingClientRect();
                 console.log('📐 DEBUG: Tab position:', {
@@ -1193,7 +1194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     bottom: rect.bottom,
                     isInViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth
                 });
-                
+
                 // Check ALL computed styles on tab
                 const tabStyle = window.getComputedStyle(targetTab);
                 console.log('🎨 DEBUG: Tab computed styles:', {
@@ -1208,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     flexGrow: tabStyle.flexGrow,
                     flexShrink: tabStyle.flexShrink
                 });
-                
+
                 // Check first child (p tag) dimensions
                 const firstChild = targetTab.firstElementChild;
                 if (firstChild) {
@@ -1222,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         height: childStyle.height
                     });
                 }
-                
+
                 // Check first .settings-section
                 const firstSection = targetTab.querySelector('.settings-section');
                 if (firstSection) {
@@ -1236,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         overflow: sectionStyle.overflow
                     });
                 }
-                
+
                 // Check parent container
                 const container = targetTab.closest('.site-settings-container');
                 if (container) {
