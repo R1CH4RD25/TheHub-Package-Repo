@@ -182,6 +182,18 @@
 }
 
 /* Responsive Admin Shell */
+/* Tablet: Reduce sidebar width */
+@media (max-width: 991px) and (min-width: 769px) {
+    .admin-shell {
+        grid-template-columns: 240px minmax(0, 1fr);
+    }
+    
+    .admin-shell.has-collapsed-sidebar {
+        grid-template-columns: 69px minmax(0, 1fr);
+    }
+}
+
+/* Mobile: Stack layout */
 @media (max-width: 768px) {
     .admin-shell {
         grid-template-columns: 1fr;
