@@ -438,13 +438,28 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
         html: `
             <div style="margin-bottom: 1rem;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
-                    <input type="text" id="pkgSearch" placeholder="Search packages..." style="padding: 0.5rem; border: 2px solid var(--primary-color); border-radius: 4px; outline: none;">
-                    <select id="pkgCategory" multiple size="1" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
-                        <option value="" disabled>Select Categories...</option>
-                    </select>
-                    <select id="pkgAuthor" multiple size="1" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
-                        <option value="" disabled>Select Authors...</option>
-                    </select>
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-secondary);">
+                            <i class="bi bi-search"></i> SEARCH
+                        </label>
+                        <input type="text" id="pkgSearch" placeholder="Search packages..." style="width: 100%; padding: 0.5rem; border: 2px solid var(--primary-color); border-radius: 6px; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-secondary);">
+                            <i class="bi bi-folder"></i> CATEGORIES
+                        </label>
+                        <select id="pkgCategory" multiple size="1" style="width: 100%; padding: 0.5rem; border: 2px solid var(--primary-color); border-radius: 6px; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: white;">
+                            <option value="" disabled>Select Categories...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-secondary);">
+                            <i class="bi bi-person"></i> AUTHORS
+                        </label>
+                        <select id="pkgAuthor" multiple size="1" style="width: 100%; padding: 0.5rem; border: 2px solid var(--primary-color); border-radius: 6px; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: white;">
+                            <option value="" disabled>Select Authors...</option>
+                        </select>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
                     <div id="selectedCategories" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
