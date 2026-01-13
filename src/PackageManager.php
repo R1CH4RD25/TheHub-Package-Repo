@@ -518,7 +518,7 @@ class PackageManager
                 [$installation['id']]
             );
             
-            // Log uninstall
+            // Log uninstall (section_id is NULL because section was deleted)
             $this->db->insert('section_package_installs', [
                 'package_id' => $packageId,
                 'package_version' => $installation['installed_version'],
@@ -527,7 +527,7 @@ class PackageManager
                 'attempted_by' => $uninstalledBy,
                 'attempted_at' => date('Y-m-d H:i:s'),
                 'completed_at' => date('Y-m-d H:i:s'),
-                'section_id' => $sectionId,
+                'section_id' => null,
                 'installation_log' => $keepData ? 'Data preserved' : 'Data deleted'
             ]);
             
