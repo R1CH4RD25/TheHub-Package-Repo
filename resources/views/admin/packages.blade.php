@@ -499,10 +499,14 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
                 renderDiscoveryPackages(discoveryPackages);
             });
             
+            // Update filter arrays on change but only render on blur (when dropdown closes)
             document.getElementById('pkgCategory').addEventListener('change', (e) => {
                 const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
                 currentFilter.categories = selectedOptions;
                 updateFilterBadges();
+            });
+            
+            document.getElementById('pkgCategory').addEventListener('blur', (e) => {
                 renderDiscoveryPackages(discoveryPackages);
             });
             
@@ -510,6 +514,9 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
                 const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
                 currentFilter.authors = selectedOptions;
                 updateFilterBadges();
+            });
+            
+            document.getElementById('pkgAuthor').addEventListener('blur', (e) => {
                 renderDiscoveryPackages(discoveryPackages);
             });
             
@@ -774,7 +781,7 @@ function updateFilterBadges() {
     const authBadges = document.getElementById('selectedAuthors');
     
     catBadges.innerHTML = currentFilter.categories.map(cat => 
-        `<span class="badge" style="background: var(--primary-color); cursor: pointer;" onclick="removeFilter('category', '${cat}')">
+        `<span class="badge" style="background: var(--primary-color); color: rgba(255, 255, 255, 0.95); cursor: pointer;" onclick="removeFilter('category', '${cat}')">
             ${cat} <i class="bi bi-x"></i>
         </span>`
     ).join('');
