@@ -1033,6 +1033,7 @@ async function downloadQueuedPackages() {
     }
     
     const packages = Array.from(downloadQueue).map(item => JSON.parse(item));
+    debugLog('ACTION', `🚀 QUEUE DOWNLOAD: Starting batch of ${packages.length} packages`);
     let successful = 0;
     let failed = 0;
     
@@ -1040,19 +1041,42 @@ async function downloadQueuedPackages() {
     
     for (const pkg of packages) {
         try {
+            debugLog('API', `📥 Downloading: ${pkg.filename}`);
             await downloadSinglePackage(pkg.downloadUrl, pkg.filename, false);
             successful++;
+            debugLog('SUCCESS', `✅ Downloaded: ${pkg.filename}`);
         } catch (error) {
             failed++;
+            debugLog('ERROR', `❌ Failed: ${pkg.filename}`, error);
         }
     }
     
+    debugLog('UI', `📊 Queue complete: ${successful} success, ${failed} failed`);
+    
+    // Close ALL modals BEFORE refreshing (this prevents flash)
+    debugLog('UI', '🗑️ Closing any open modals');
+    const modals = document.querySelectorAll('[style*="z-index: 10000"]');
+    modals.forEach(modal => {
+        debugLog('UI', `🗑️ Removing modal from DOM`);
+        modal.remove();
+    });
+    debugLog('UI', `✅ ${modals.length} modal(s) closed`);
+    
     if (successful > 0) {
+        debugLog('UI', '🔔 Showing success notification');
         notyf.success(`Downloaded ${successful} package(s) successfully`);
+        
+        debugLog('UI', '🧹 Clearing queue');
         downloadQueue.clear();
         updateQueueDisplay();
-        loadAvailablePackages();
-        await searchRepositoryPackages(); // Refresh to update status
+        
+        debugLog('API', '🔄 Refreshing available packages table');
+        await loadAvailablePackages();
+        debugLog('SUCCESS', '✅ Available packages refreshed');
+        
+        debugLog('API', '🔄 Refreshing repository search results');
+        await searchRepositoryPackages();
+        debugLog('SUCCESS', '✨ QUEUE COMPLETE: All tables refreshed, modals closed');
     }
     
     if (failed > 0) {
