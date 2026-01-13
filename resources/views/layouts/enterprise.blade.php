@@ -122,5 +122,21 @@
     </script>
 
     @stack('scripts')
+
+    <!-- Admin Dashboard Debug -->
+    <script src="https://hub.woodsonisd.net/assets/js/debug-helper.js"></script>
+    <script>
+    // Auto-run overflow detection on admin pages
+    document.addEventListener('DOMContentLoaded', function() {
+        debugLog('UI', '🔍 Admin Dashboard: Auto-detecting overflow issues...');
+        setTimeout(() => {
+            if (typeof logElementWidths === 'function') {
+                logElementWidths();
+            } else {
+                console.error('❌ logElementWidths not found!');
+            }
+        }, 1500); // Wait 1.5s for content to render
+    });
+    </script>
 </body>
 </html>
