@@ -385,7 +385,7 @@ class PackageDiscoveryController extends Controller
             ]
         );
         
-        $newPackageRecordId = $db->getLastInsertId();
+        $newPackageRecordId = $db->lastInsertId();
         
         // Clear cache
         Cache::delete('packages:installed');
