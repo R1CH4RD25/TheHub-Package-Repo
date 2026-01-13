@@ -64,8 +64,18 @@
     const height = window.innerHeight;
     const breakpoint = getBreakpoint();
     
+    // Check sidebar size
+    const sidebar = document.querySelector('.admin-sidebar, .mgmt-sidebar');
+    let sidebarInfo = '';
+    if (sidebar) {
+      const sidebarWidth = sidebar.offsetWidth;
+      const computedStyle = window.getComputedStyle(sidebar);
+      const computedWidth = computedStyle.width;
+      sidebarInfo = ` | Sidebar: ${sidebarWidth}px (computed: ${computedWidth})`;
+    }
+    
     console.log(
-      `%c📐 Viewport: ${width}px × ${height}px | Breakpoint: ${breakpoint}`,
+      `%c📐 Viewport: ${width}px × ${height}px | Breakpoint: ${breakpoint}${sidebarInfo}`,
       'background: #1e293b; color: #60a5fa; padding: 8px 12px; border-radius: 4px; font-size: 14px; font-weight: bold;'
     );
   }
