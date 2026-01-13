@@ -1127,6 +1127,32 @@ async function downloadSinglePackage(downloadUrl, packageName, showNotification 
         throw error;
     }
 }
+
+// MODAL FLASH DETECTIVE - Track when modals are created/destroyed
+const modalObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1 && node.style && node.style.zIndex === '10000') {
+                debugLog('UI', '🚨 MODAL CREATED IN DOM', { 
+                    id: node.id, 
+                    className: node.className,
+                    preview: node.innerHTML.substring(0, 150) + '...'
+                });
+                console.trace('📍 Modal creation stack trace');
+            }
+        });
+        mutation.removedNodes.forEach((node) => {
+            if (node.nodeType === 1 && node.style && node.style.zIndex === '10000') {
+                debugLog('UI', '🗑️ MODAL REMOVED FROM DOM', { 
+                    id: node.id, 
+                    className: node.className 
+                });
+            }
+        });
+    });
+});
+modalObserver.observe(document.body, { childList: true, subtree: false });
+debugLog('UI', '👁️ Modal detective activated - watching for all modal creation/removal');
 </script>
 <?php $__env->stopPush(); ?>
 
