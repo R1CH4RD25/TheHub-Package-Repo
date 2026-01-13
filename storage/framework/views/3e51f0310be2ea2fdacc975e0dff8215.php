@@ -102,6 +102,7 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script src="<?php echo e(asset('assets/js/debug-helper.js')); ?>"></script>
+<script src="<?php echo e(asset('assets/js/admin.js')); ?>"></script>
 <script>
 const csrfToken = '<?php echo e(csrf_token()); ?>';
 const isSuperAdmin = <?php echo e($isSuperAdmin ? 'true' : 'false'); ?>;

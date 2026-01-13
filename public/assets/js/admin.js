@@ -231,8 +231,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('🔄 Restoring saved tab:', savedTab);
         switchTab(savedTab);
     } else {
-        // No saved tab, load default User Management data
-        loadUsers();
+        // No saved tab, load default User Management data (only if on admin dashboard)
+        if (document.getElementById('usersTable')) {
+            loadUsers();
+        } else {
+            console.log('Not on admin dashboard - skipping default user load');
+        }
     }
 
     // Additional check for packages tab loading after a brief delay
@@ -538,6 +542,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             html += '</tbody></table></div>';
             const usersTable = document.getElementById('usersTable');
+            if (!usersTable) {
+                console.log('usersTable element not found - skipping users load (not on admin dashboard)');
+                return;
+            }
             usersTable.innerHTML = html;
             usersTable.dataset.loaded = 'true';
         } catch (error) {

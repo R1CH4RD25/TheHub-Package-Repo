@@ -107,7 +107,8 @@
      * Main element width logging
      */
     function logElementWidths() {
-        console.clear();
+        // DON'T clear console - preserve errors and previous logs
+        console.log('\n\n'); // Just add spacing
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #2196f3; font-weight: bold;');
         console.log('%c🔍 RESPONSIVE DEBUG - ELEMENT WIDTHS', 'color: #2196f3; font-weight: bold; font-size: 16px;');
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #2196f3; font-weight: bold;');
