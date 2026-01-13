@@ -287,6 +287,9 @@ class PackageDiscoveryController extends Controller
      */
     private function downloadPackageFromGitHub(string $downloadUrl, string $packageName): array
     {
+        // Get current user for upload attribution
+        $currentUser = request()->attributes->get('user');
+        
         // Create temp file
         $tempFile = tempnam(sys_get_temp_dir(), 'hubpkg_');
         
@@ -310,9 +313,18 @@ class PackageDiscoveryController extends Controller
         
         file_put_contents($tempFile, $packageContent);
         
+        // Create $_FILES-like array for PackageManager
+        $fileArray = [
+            'name' => $packageName,
+            'type' => 'application/octet-stream',
+            'tmp_name' => $tempFile,
+            'error' => UPLOAD_ERR_OK,
+            'size' => filesize($tempFile)
+        ];
+        
         // Use PackageManager to handle the upload
         $packageManager = new \Hub\PackageManager();
-        $result = $packageManager->uploadPackage($tempFile, $packageName . '.hubpkg');
+        $result = $packageManager->uploadPackage($fileArray, $currentUser['id']);
         
         // Clean up temp file
         @unlink($tempFile);
