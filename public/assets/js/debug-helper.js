@@ -1,6 +1,6 @@
 /**
  * Debug Helper - Comprehensive Logging System
- * 
+ *
  * Logs element widths, window sizes, and user action flow to console.
  * Helps debug responsive design and trace user interactions.
  */
@@ -15,7 +15,7 @@
      */
     window.debugLog = function(category, message, data = null) {
         if (!window.DEBUG_MODE) return;
-        
+
         const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, fractional: 3 });
         const colors = {
             'ACTION': '#FF6B6B',      // Red
@@ -27,7 +27,7 @@
             'WINDOW': '#2196F3',      // Blue
             'ELEMENT': '#9C27B0'      // Purple
         };
-        
+
         const color = colors[category] || '#888';
         console.log(`%c[${timestamp}] ${category}:`, `color: ${color}; font-weight: bold;`, message, data || '');
     };
@@ -54,7 +54,7 @@
         const scrollWidth = element.scrollWidth;
         const overflowAmount = scrollWidth - rect.width;
         const hasOverflow = overflowAmount > 1;
-        
+
         return {
             width: Math.round(rect.width),
             scrollWidth: Math.round(scrollWidth),
@@ -86,7 +86,7 @@
         const info = getElementInfo(element);
         const identifier = getElementIdentifier(element);
         const indentStr = ' '.repeat(indent);
-        
+
         if (info.hasOverflow) {
             console.log(
                 `${indentStr}%c⚠️ ${label}%c ${identifier}`,
@@ -112,7 +112,7 @@
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #2196f3; font-weight: bold;');
         console.log('%c🔍 RESPONSIVE DEBUG - ELEMENT WIDTHS', 'color: #2196f3; font-weight: bold; font-size: 16px;');
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #2196f3; font-weight: bold;');
-        
+
         // Viewport info
         console.log('\n%c📐 VIEWPORT', 'color: #9c27b0; font-weight: bold; font-size: 14px;');
         console.log(`   Width: ${window.innerWidth}px`);
@@ -155,7 +155,7 @@
             const info = getElementInfo(el);
             return info.hasOverflow;
         });
-        
+
         if (overflowElements.length > 0) {
             console.log(`%c   ⚠️ ${overflowElements.length} elements with overflow detected!`, 'color: #ff9800; font-weight: bold;');
             overflowElements.forEach((el, i) => {
@@ -187,19 +187,19 @@
     let resizeTimeout;
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
-    
+
     window.addEventListener('resize', () => {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
         const widthDelta = newWidth - lastWidth;
         const heightDelta = newHeight - lastHeight;
-        
+
         debugLog('WINDOW', `Resized: ${lastWidth}px × ${lastHeight}px → ${newWidth}px × ${newHeight}px (Δ${widthDelta > 0 ? '+' : ''}${widthDelta}px, Δ${heightDelta > 0 ? '+' : ''}${heightDelta}px)`);
         debugLog('WINDOW', `New breakpoint: ${getCurrentBreakpoint()}`);
-        
+
         lastWidth = newWidth;
         lastHeight = newHeight;
-        
+
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             debugLog('WINDOW', 'Resize complete - running element analysis');

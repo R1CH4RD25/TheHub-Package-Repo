@@ -27,10 +27,10 @@
    */
   function log(category, message, data = null, style = '') {
     if (!DEBUG_CONFIG.enabled) return;
-    
+
     const timestamp = new Date().toLocaleTimeString();
     const prefix = `[${timestamp}] [${category}]`;
-    
+
     if (data) {
       console.log(`%c${prefix} ${message}`, style || 'color: #2563eb; font-weight: bold;', data);
     } else {
@@ -51,7 +51,7 @@
   function getComputedDimensions(element) {
     const computed = window.getComputedStyle(element);
     const rect = element.getBoundingClientRect();
-    
+
     return {
       width: rect.width,
       height: rect.height,
@@ -82,7 +82,7 @@
 
     if (overflow > 0) {
       const identifier = selector || element.className || element.tagName;
-      
+
       log(
         'OVERFLOW',
         `⚠️ Horizontal overflow detected: ${identifier}`,
@@ -219,11 +219,11 @@
     ];
 
     const interactiveElements = document.querySelectorAll(interactiveSelectors.join(','));
-    
+
     interactiveElements.forEach(element => {
       const rect = element.getBoundingClientRect();
       const identifier = element.className || element.tagName;
-      
+
       // Skip hidden elements (0×0px means display:none or visibility:hidden)
       if (rect.width === 0 && rect.height === 0) return;
 
@@ -251,7 +251,7 @@
    */
   function checkCards() {
     const cards = document.querySelectorAll('.mgmt-module-card, .cc-card, .sa-card, .card');
-    
+
     cards.forEach((card, index) => {
       const identifier = card.className || `card[${index}]`;
       checkOverflow(card, identifier);
@@ -276,17 +276,17 @@
    */
   function checkTables() {
     const tables = document.querySelectorAll('table, .data-table, .sa-table, .cc-table, .cc-analytics-table');
-    
+
     tables.forEach((table, index) => {
       const container = table.closest('.data-table-container, .table-responsive, .cc-card');
       const selector = table.id ? `#${table.id}` : (table.className || `table[${index}]`);
       const tableWidth = table.scrollWidth;
       const tableOffsetWidth = table.offsetWidth;
       const viewportWidth = window.innerWidth;
-      
+
       // Check if table itself is wider than its container
       const tableOverflow = tableWidth - tableOffsetWidth;
-      
+
       if (tableOverflow > 5) {
         log(
           'TABLE',
@@ -301,7 +301,7 @@
           },
           'color: #f59e0b; font-weight: bold;'
         );
-        
+
         if (DEBUG_CONFIG.highlightProblems) {
           table.style.outline = '3px solid orange';
         }
@@ -340,14 +340,14 @@
   function findOverflowCulprit() {
     const culprits = [];
     const viewportWidth = window.innerWidth;
-    
+
     // Check all direct children of body and their descendants
     const allElements = document.querySelectorAll('*');
-    
+
     allElements.forEach(element => {
       const rect = element.getBoundingClientRect();
       const overflow = rect.right - viewportWidth;
-      
+
       if (overflow > 5) { // More than 5px overflow
         culprits.push({
           element: element,
@@ -359,10 +359,10 @@
         });
       }
     });
-    
+
     // Sort by overflow amount (worst first)
     culprits.sort((a, b) => b.overflow - a.overflow);
-    
+
     return culprits;
   }
 
@@ -371,17 +371,17 @@
    */
   function runAllChecks() {
     log('DEBUG', '🔍 Running responsive debug checks...');
-    
+
     logViewport();
-    
+
     checkAdminGrid();
     checkCards();
     checkTables();
-    
+
     if (isMobile()) {
       checkTouchTargets();
     }
-    
+
     // Check for any horizontal page scroll
     const bodyOverflow = document.body.scrollWidth - document.body.clientWidth;
     if (bodyOverflow > 0) {
@@ -396,7 +396,7 @@
         },
         'color: #dc2626; font-weight: bold; font-size: 16px;'
       );
-      
+
       // Find and log the culprits
       const culprits = findOverflowCulprit();
       if (culprits.length > 0) {
@@ -411,7 +411,7 @@
           })),
           'color: #dc2626; font-weight: bold; font-size: 14px;'
         );
-        
+
         // Highlight the worst offenders
         if (DEBUG_CONFIG.highlightProblems) {
           culprits.slice(0, 5).forEach((c, i) => {
@@ -438,7 +438,7 @@
       lastViewportHeight = vh;
 
       log('RESIZE', `Viewport resized to ${vw}×${vh}px`);
-      
+
       // Clear previous highlights
       if (DEBUG_CONFIG.highlightProblems) {
         document.querySelectorAll('[style*="outline"]').forEach(el => {
@@ -457,20 +457,20 @@
    */
   function init() {
     log('INIT', '🚀 Responsive Debug System initialized');
-    
+
     // Run checks on DOM ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', runAllChecks);
     } else {
       runAllChecks();
     }
-    
+
     // Run checks again after dynamic content loads
     setTimeout(() => {
       log('DEBUG', '🔄 Running delayed checks for dynamic content...');
       runAllChecks();
     }, 2000);
-    
+
     // Watch for DOM mutations
     if (typeof MutationObserver !== 'undefined') {
       const observer = new MutationObserver((mutations) => {
@@ -478,7 +478,7 @@
         mutations.forEach(mutation => {
           mutation.addedNodes.forEach(node => {
             if (node.nodeType === 1) {
-              const hasTable = node.tagName === 'TABLE' || 
+              const hasTable = node.tagName === 'TABLE' ||
                               (node.querySelector && node.querySelector('table, .mgmt-modules-grid'));
               if (hasTable) {
                 shouldRecheck = true;
@@ -486,13 +486,13 @@
             }
           });
         });
-        
+
         if (shouldRecheck) {
           log('DEBUG', '🔄 New content detected, re-running checks...');
           setTimeout(runAllChecks, 500);
         }
       });
-      
+
       observer.observe(document.body, {
         childList: true,
         subtree: true,
@@ -515,10 +515,10 @@
     window.ResponsiveDebug = {
       runChecks: runAllChecks,
       checkElement: (selector) => {
-        const element = typeof selector === 'string' 
-          ? document.querySelector(selector) 
+        const element = typeof selector === 'string'
+          ? document.querySelector(selector)
           : selector;
-        
+
         if (element) {
           checkOverflow(element, selector);
           checkPadding(element, selector);

@@ -112,7 +112,6 @@ if ($action === 'search') {
                 'repo' => $repo
             ]
         ]);
-
     } catch (Exception $e) {
         error_log("Package discovery error: " . $e->getMessage());
         error_log("Stack trace: " . $e->getTraceAsString());
@@ -154,14 +153,11 @@ elseif ($action === 'download') {
             'message' => 'Package downloaded successfully',
             'package' => $result
         ]);
-
     } catch (Exception $e) {
         error_log("Package download error: " . $e->getMessage());
         jsonResponse(['error' => $e->getMessage()], 500);
     }
-}
-
-else {
+} else {
     jsonResponse(['error' => 'Invalid action'], 400);
 }
 
@@ -169,7 +165,8 @@ else {
 // Helper Functions
 // ============================================================================
 
-function searchGitHubPackages($owner, $repo) {
+function searchGitHubPackages($owner, $repo)
+{
     $packages = [];
 
     // Search in root directory first
@@ -193,7 +190,8 @@ function searchGitHubPackages($owner, $repo) {
     return $uniquePackages;
 }
 
-function searchGitHubDirectory($owner, $repo, $path) {
+function searchGitHubDirectory($owner, $repo, $path)
+{
     $packages = [];
 
     // GitHub API URL for repository contents
@@ -308,7 +306,6 @@ function searchGitHubDirectory($owner, $repo, $path) {
                 $packages[] = $packageInfo;
             }
         }
-
     } catch (Exception $e) {
         error_log("GitHub directory search error: " . $e->getMessage());
     } finally {
@@ -318,7 +315,8 @@ function searchGitHubDirectory($owner, $repo, $path) {
     return $packages;
 }
 
-function downloadPackageFromGitHub($downloadUrl, $packageName) {
+function downloadPackageFromGitHub($downloadUrl, $packageName)
+{
     // Validate download URL
     if (!filter_var($downloadUrl, FILTER_VALIDATE_URL)) {
         throw new Exception('Invalid download URL');

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cleanup orphaned package installation data
  */
@@ -23,7 +24,7 @@ echo "   ✅ Cache cleared\n\n";
 // Find orphaned section_installations (section doesn't exist)
 echo "2️⃣  Finding orphaned installations (section deleted)...\n";
 $orphanedInstalls = $db->fetchAll("
-    SELECT si.* 
+    SELECT si.*
     FROM section_installations si
     LEFT JOIN sections s ON si.section_id = s.id
     WHERE s.id IS NULL
@@ -34,12 +35,12 @@ if (count($orphanedInstalls) > 0) {
     foreach ($orphanedInstalls as $install) {
         echo "   - Installation ID {$install['id']}: package_id={$install['package_id']}, section_id={$install['section_id']} (section deleted)\n";
     }
-    
+
     echo "\n   Deleting orphaned installations...\n";
     $db->execute("
-        DELETE FROM section_installations 
+        DELETE FROM section_installations
         WHERE id IN (
-            SELECT si.id 
+            SELECT si.id
             FROM section_installations si
             LEFT JOIN sections s ON si.section_id = s.id
             WHERE s.id IS NULL
@@ -53,7 +54,7 @@ if (count($orphanedInstalls) > 0) {
 // Find orphaned sections (no installation record)
 echo "3️⃣  Finding orphaned sections (installed but no installation record)...\n";
 $orphanedSections = $db->fetchAll("
-    SELECT s.* 
+    SELECT s.*
     FROM sections s
     LEFT JOIN section_installations si ON s.id = si.section_id
     WHERE si.id IS NULL AND s.is_dynamic = 1
@@ -64,7 +65,7 @@ if (count($orphanedSections) > 0) {
     foreach ($orphanedSections as $section) {
         echo "   - Section ID {$section['id']}: {$section['slug']} ({$section['display_name']})\n";
     }
-    
+
     echo "\n   Deleting orphaned sections...\n";
     foreach ($orphanedSections as $section) {
         // Delete related data first
@@ -94,17 +95,17 @@ if (count($duplicates) > 0) {
     echo "   Found " . count($duplicates) . " packages with duplicate installations:\n";
     foreach ($duplicates as $dup) {
         echo "   - Package {$dup['package_id']}: {$dup['count']} installations\n";
-        
+
         // Keep the most recent one, delete others
         $installations = $db->fetchAll("
-            SELECT * FROM section_installations 
-            WHERE package_id = ? 
+            SELECT * FROM section_installations
+            WHERE package_id = ?
             ORDER BY installed_at DESC
         ", [$dup['package_id']]);
-        
+
         $keep = array_shift($installations); // Keep first (most recent)
         echo "     Keeping installation ID {$keep['id']} (most recent)\n";
-        
+
         foreach ($installations as $old) {
             echo "     Deleting installation ID {$old['id']}\n";
             $db->execute("DELETE FROM section_installations WHERE id = ?", [$old['id']]);

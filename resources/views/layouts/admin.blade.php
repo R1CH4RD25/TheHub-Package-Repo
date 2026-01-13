@@ -34,4 +34,3 @@ $breadcrumbs = [
     ['label' => 'Admin']
 ];
 @endphp
-
