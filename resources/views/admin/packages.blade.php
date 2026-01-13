@@ -103,6 +103,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('assets/js/debug-helper.js') }}"></script>
 <script>
 const csrfToken = '{{ csrf_token() }}';
 const isSuperAdmin = {{ $isSuperAdmin ? 'true' : 'false' }};
@@ -336,7 +337,6 @@ function installPackage(packageId) {
         } else {
             debugLog('ACTION', 'User cancelled install');
         }
-    });
     });
 }
 

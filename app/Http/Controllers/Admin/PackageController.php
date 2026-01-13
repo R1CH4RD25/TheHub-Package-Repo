@@ -205,4 +205,16 @@ class PackageController extends Controller
             return response()->json(['error' => 'Validation check failed: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Search GitHub repository for available packages.
+     */
+    public function discoverySearch(Request $request): JsonResponse
+    {
+        // For now, return empty result - GitHub API integration coming soon
+        return response()->json([
+            'success' => true,
+            'packages' => []
+        ]);
+    }
 }

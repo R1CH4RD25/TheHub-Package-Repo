@@ -64,6 +64,7 @@ Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function (
     Route::delete('/packages/{id}', [PackageController::class, 'delete'])->name('admin.packages.delete');
     Route::delete('/packages/{packageId}/uninstall', [PackageController::class, 'uninstall'])->name('admin.packages.uninstall');
     Route::get('/packages/{id}/validation', [PackageController::class, 'validation'])->name('admin.packages.validation');
+    Route::post('/packages/discovery/search', [PackageController::class, 'discoverySearch'])->name('admin.packages.discovery.search');
 
     // Site Settings (Super Admin Only)
     Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');

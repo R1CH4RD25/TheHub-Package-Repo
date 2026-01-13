@@ -101,6 +101,7 @@
 </div>
 
 <?php $__env->startPush('scripts'); ?>
+<script src="<?php echo e(asset('assets/js/debug-helper.js')); ?>"></script>
 <script>
 const csrfToken = '<?php echo e(csrf_token()); ?>';
 const isSuperAdmin = <?php echo e($isSuperAdmin ? 'true' : 'false'); ?>;
@@ -180,6 +181,7 @@ function loadPackageUpdates() {
 }
 
 function renderInstalledPackages(packages) {
+    debugLog('UI', `Rendering ${packages.length} installed packages`);
     const html = `
         <table class="data-table">
             <thead>
@@ -211,7 +213,13 @@ function renderInstalledPackages(packages) {
             </tbody>
         </table>
     `;
-    document.getElementById('installedPackagesTable').innerHTML = html;
+    const container = document.getElementById('installedPackagesTable');
+    if (container) {
+        container.innerHTML = html;
+        debugLog('UI', 'Installed packages table updated successfully');
+    } else {
+        debugLog('ERROR', 'installedPackagesTable container not found!');
+    }
 }
 
 function renderAvailablePackages(packages) {
@@ -327,7 +335,6 @@ function installPackage(packageId) {
         } else {
             debugLog('ACTION', 'User cancelled install');
         }
-    });
     });
 }
 

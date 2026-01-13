@@ -274,6 +274,9 @@ class PackageManager
             
             $this->db->commit();
             
+            // Clear installed packages cache
+            Cache::delete('packages:installed');
+            
             // Log installation
             $this->auditLogger->log('package_install', 'section_installations', $installId, null, [
                 'package_id' => $pkg['id'],
@@ -532,6 +535,9 @@ class PackageManager
             ]);
             
             $this->db->commit();
+            
+            // Clear installed packages cache
+            Cache::delete('packages:installed');
             
             // Audit log
             $this->auditLogger->log('package_uninstall', 'section_installations', $installation['id'], [
