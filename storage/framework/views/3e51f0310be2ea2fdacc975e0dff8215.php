@@ -881,13 +881,18 @@ function showPackageDetails(index, pkg) {
 }
 
 async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
+    debugLog('ACTION', `Download button clicked in modal for: ${filename}`);
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
     
     try {
+        debugLog('API', `Starting download for: ${filename}`);
         await downloadSinglePackage(downloadUrl, filename, true);
+        debugLog('SUCCESS', `Download complete for: ${filename}, closing modal...`);
         button.closest('[style*="z-index: 10000"]').remove();
+        debugLog('UI', 'Modal removed');
     } catch (error) {
+        debugLog('ERROR', `Download failed for: ${filename}`, error);
         button.disabled = false;
         button.innerHTML = '<i class="bi bi-download"></i> Download Now';
     }
@@ -1028,6 +1033,7 @@ async function downloadQueuedPackages() {
 
 async function downloadSinglePackage(downloadUrl, packageName, showNotification = true) {
     try {
+        debugLog('API', `Sending download request to server for: ${packageName}`);
         const response = await fetch('/admin/packages/discovery/download', {
             method: 'POST',
             headers: {
@@ -1040,22 +1046,27 @@ async function downloadSinglePackage(downloadUrl, packageName, showNotification 
             })
         });
         
+        debugLog('RESPONSE', `Download response received for: ${packageName}`, { status: response.status });
         const data = await response.json();
+        debugLog('RESPONSE', `Download data for: ${packageName}`, data);
         
         if (data.success) {
             if (showNotification) {
+                debugLog('SUCCESS', `Package downloaded: ${packageName}`);
                 notyf.success('Package downloaded successfully!');
                 loadAvailablePackages();
                 await searchRepositoryPackages();
             }
             return true;
         } else {
+            debugLog('ERROR', `Download failed: ${packageName}`, data.error);
             if (showNotification) {
                 notyf.error('Download failed: ' + data.error);
             }
             throw new Error(data.error);
         }
     } catch (error) {
+        debugLog('ERROR', `Download exception for: ${packageName}`, error);
         console.error('Download error:', error);
         if (showNotification) {
             notyf.error('Failed to download package');
