@@ -1,0 +1,929 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "id": "com.woodson.vehicle-request-form",
+    "name": "vehicle-request-form",
+    "namespace": "vrf",
+    "display_name": "Vehicle Request Form",
+    "description": "Request, approve, and analyze school vehicle usage with multi-vehicle assignments, availability validation, analytics, and exports.",
+    "version": "1.0.0",
+    "author": "Woodson ISD Tech Department",
+    "author_email": "tech@woodsonisd.net",
+    "license": "MIT",
+    "category": "operations",
+    "tags": ["transportation", "vehicles", "requests", "field-trips", "analytics"],
+    "icon": "bi-truck",
+    "base_url": "/pkg/vrf/",
+    "repository": "https://github.com/woodson-hub/vehicle-request-form",
+    "homepage": "https://hub.woodsonisd.net/packages/vehicle-request-form",
+    "support": "https://github.com/woodson-hub/vehicle-request-form/issues"
+  },
+
+  "compatibility": {
+    "hub_version": ">=1.0.0 <2.0.0",
+    "php_version": ">=8.0",
+    "mysql_version": ">=5.7",
+    "tested_up_to": "1.5.0"
+  },
+
+  "capabilities": [
+    "forms",
+    "tables",
+    "workflows",
+    "analytics",
+    "notifications",
+    "exports"
+  ],
+
+  "db": {
+    "entities": [
+      {
+        "name": "vrf_request",
+        "displayName": "Vehicle Request",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "request_number VARCHAR(50) NOT NULL",
+          "request_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
+          "requester_user_id CHAR(26)",
+          "requester_email VARCHAR(320) NOT NULL",
+          "requester_name VARCHAR(255)",
+          "district_name VARCHAR(255)",
+          "request_applies_to VARCHAR(255)",
+          "activity_category ENUM('athletics','academics','professional_development','administrative','other') DEFAULT 'other'",
+          "group_name VARCHAR(255)",
+          "reason_for_substitute TEXT",
+          "start_date DATE",
+          "end_date DATE",
+          "class_periods VARCHAR(255)",
+          "general_comments TEXT",
+          "transportation_needed BOOLEAN DEFAULT TRUE",
+          "activity_purpose TEXT NOT NULL",
+          "destination VARCHAR(255) NOT NULL",
+          "requested_vehicle_types VARCHAR(255)",
+          "trip_start_date DATE NOT NULL",
+          "estimated_departure_time TIME NOT NULL",
+          "trip_end_date DATE NOT NULL",
+          "estimated_return_time TIME NOT NULL",
+          "number_of_students INT",
+          "grade_levels VARCHAR(255)",
+          "number_of_staff INT",
+          "estimated_miles DECIMAL(10,2)",
+          "driver_name VARCHAR(255)",
+          "transportation_comments TEXT",
+          "approval_status ENUM('pending','approved','denied','cancelled') DEFAULT 'pending'",
+          "approval_date TIMESTAMP NULL",
+          "approved_by_user_id CHAR(26)",
+          "approved_by_name VARCHAR(255)",
+          "calendar_event_id VARCHAR(255)",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "UNIQUE INDEX idx_vrf_request_number (tenant_id, request_number)",
+          "INDEX idx_vrf_request_tenant (tenant_id)",
+          "INDEX idx_vrf_request_status_created (approval_status, created_at)",
+          "INDEX idx_vrf_request_trip_dates (trip_start_date, trip_end_date)",
+          "INDEX idx_vrf_request_requester (requester_email)",
+          "INDEX idx_vrf_request_activity_group (activity_category, group_name)"
+        ]
+      },
+      {
+        "name": "vrf_vehicle",
+        "displayName": "Vehicle",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "name VARCHAR(255) NOT NULL",
+          "category ENUM('bus','activity_bus','van','car','suburban','other') DEFAULT 'other'",
+          "capacity INT",
+          "is_active BOOLEAN DEFAULT TRUE",
+          "notes TEXT",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_vrf_vehicle_tenant (tenant_id)",
+          "INDEX idx_vrf_vehicle_category (category)",
+          "INDEX idx_vrf_vehicle_active (is_active)"
+        ]
+      },
+      {
+        "name": "vrf_request_vehicle",
+        "displayName": "Vehicle Assignment",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "request_id CHAR(26) NOT NULL",
+          "vehicle_id CHAR(26) NOT NULL",
+          "assigned_by_user_id CHAR(26)",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_vrf_rv_tenant (tenant_id)",
+          "INDEX idx_vrf_rv_request (request_id)",
+          "INDEX idx_vrf_rv_vehicle (vehicle_id)"
+        ],
+        "foreignKeys": [
+          "FOREIGN KEY (request_id) REFERENCES vrf_request(id) ON DELETE RESTRICT",
+          "FOREIGN KEY (vehicle_id) REFERENCES vrf_vehicle(id) ON DELETE RESTRICT"
+        ]
+      }
+    ],
+    "migrations": []
+  },
+
+  "modules": [
+    {
+      "type": "Form",
+      "slug": "vehicle-request-form",
+      "displayName": "Request a Vehicle",
+      "entity": "vrf_request",
+      "route": "/pkg/vrf/vehicle-request-form",
+      "icon": "bi-truck",
+      "allowAnonymous": false,
+      "fields": [
+        {
+          "key": "requester_email",
+          "fieldType": "email",
+          "label": "Email Address",
+          "required": true,
+          "helpText": "District email of the person submitting this request.",
+          "validation": {
+            "maxLength": 320
+          }
+        },
+        {
+          "key": "district_name",
+          "fieldType": "select",
+          "label": "District",
+          "required": true,
+          "options": [
+            { "value": "WISD", "label": "Woodson ISD" },
+            { "value": "NISD", "label": "Newcastle ISD" },
+            { "value": "OTHER", "label": "Other (specify in comments)" }
+          ]
+        },
+        {
+          "key": "request_applies_to",
+          "fieldType": "select",
+          "label": "This request applies to",
+          "required": true,
+          "options": [
+            { "value": "transportation_only", "label": "Transportation Only" },
+            { "value": "substitute_and_transportation", "label": "Substitute & Transportation" },
+            { "value": "other", "label": "Other" }
+          ]
+        },
+        {
+          "key": "activity_category",
+          "fieldType": "select",
+          "label": "Activity Category",
+          "required": true,
+          "options": [
+            { "value": "athletics", "label": "Athletics" },
+            { "value": "academics", "label": "Academics" },
+            { "value": "professional_development", "label": "Professional Development" },
+            { "value": "administrative", "label": "Administrative" },
+            { "value": "other", "label": "Other" }
+          ]
+        },
+        {
+          "key": "group_name",
+          "fieldType": "text",
+          "label": "Group / Program Name",
+          "required": false,
+          "helpText": "Example: Football, Band, NHS, PD, etc.",
+          "validation": {
+            "maxLength": 255
+          }
+        },
+        {
+          "key": "reason_for_substitute",
+          "fieldType": "textarea",
+          "label": "Reason for Substitute",
+          "required": false,
+          "rows": 3,
+          "showIf": {
+            "request_applies_to": "substitute_and_transportation"
+          },
+          "validation": {
+            "maxLength": 2000
+          }
+        },
+        {
+          "key": "start_date",
+          "fieldType": "date",
+          "label": "Start Date (Substitute / Duty Start)",
+          "required": false
+        },
+        {
+          "key": "end_date",
+          "fieldType": "date",
+          "label": "End Date (Substitute / Duty End)",
+          "required": false,
+          "validation": {
+            "minDateField": "start_date"
+          }
+        },
+        {
+          "key": "class_periods",
+          "fieldType": "text",
+          "label": "Class Periods",
+          "required": false,
+          "helpText": "List class periods affected (if applicable).",
+          "validation": {
+            "maxLength": 255
+          }
+        },
+        {
+          "key": "general_comments",
+          "fieldType": "textarea",
+          "label": "Special Comments (General)",
+          "required": false,
+          "rows": 3,
+          "validation": {
+            "maxLength": 4000
+          }
+        },
+        {
+          "key": "transportation_needed",
+          "fieldType": "checkbox",
+          "label": "Is Transportation Needed?",
+          "required": false,
+          "defaultValue": true
+        },
+        {
+          "key": "activity_purpose",
+          "fieldType": "textarea",
+          "label": "Activity or Purpose",
+          "required": true,
+          "rows": 3,
+          "validation": {
+            "minLength": 5,
+            "maxLength": 2000
+          }
+        },
+        {
+          "key": "destination",
+          "fieldType": "text",
+          "label": "Destination",
+          "required": true,
+          "validation": {
+            "maxLength": 255
+          }
+        },
+        {
+          "key": "requested_vehicle_types",
+          "fieldType": "multi_select",
+          "label": "Requested Vehicle Type(s)",
+          "required": false,
+          "helpText": "Select vehicle types you prefer. Final assignment will be made by administration.",
+          "options": [
+            { "value": "bus", "label": "Bus" },
+            { "value": "activity_bus", "label": "Activity Bus" },
+            { "value": "van", "label": "Van" },
+            { "value": "car", "label": "Car" },
+            { "value": "suburban", "label": "Suburban" },
+            { "value": "other", "label": "Other" }
+          ]
+        },
+        {
+          "key": "trip_start_date",
+          "fieldType": "date",
+          "label": "Date Trip Starts",
+          "required": true,
+          "validation": {
+            "minDate": "today"
+          }
+        },
+        {
+          "key": "estimated_departure_time",
+          "fieldType": "time",
+          "label": "Estimated Departure Time",
+          "required": true
+        },
+        {
+          "key": "trip_end_date",
+          "fieldType": "date",
+          "label": "Date Trip Ends",
+          "required": true,
+          "validation": {
+            "minDateField": "trip_start_date"
+          }
+        },
+        {
+          "key": "estimated_return_time",
+          "fieldType": "time",
+          "label": "Estimated Return Time",
+          "required": true
+        },
+        {
+          "key": "number_of_students",
+          "fieldType": "number",
+          "label": "Number of Students",
+          "required": true,
+          "validation": {
+            "minValue": 0,
+            "maxValue": 1000
+          }
+        },
+        {
+          "key": "grade_levels",
+          "fieldType": "text",
+          "label": "Grade Levels",
+          "required": false,
+          "helpText": "Example: 7–8, 9–12.",
+          "validation": {
+            "maxLength": 255
+          }
+        },
+        {
+          "key": "number_of_staff",
+          "fieldType": "number",
+          "label": "Number of Faculty & Staff",
+          "required": true,
+          "validation": {
+            "minValue": 0,
+            "maxValue": 200
+          }
+        },
+        {
+          "key": "estimated_miles",
+          "fieldType": "number",
+          "label": "Total Estimated Miles",
+          "required": true,
+          "helpText": "Numeric only for the entire request.",
+          "validation": {
+            "minValue": 0,
+            "maxValue": 10000,
+            "step": 0.1
+          }
+        },
+        {
+          "key": "driver_name",
+          "fieldType": "text",
+          "label": "Driver's Name",
+          "required": true,
+          "validation": {
+            "maxLength": 255
+          }
+        },
+        {
+          "key": "transportation_comments",
+          "fieldType": "textarea",
+          "label": "Special Comments (Transportation)",
+          "required": false,
+          "rows": 3,
+          "validation": {
+            "maxLength": 4000
+          }
+        }
+      ],
+      "validation": {
+        "rateLimit": {
+          "perUser": 10,
+          "perMinute": 5,
+          "perHour": 20
+        }
+      },
+      "onSubmit": {
+        "generateRequestNumber": true,
+        "setWorkflowStatus": "pending",
+        "notify": ["vrf_approve"],
+        "redirect": "/pkg/vrf/vehicle-request-confirmation"
+      }
+    },
+
+    {
+      "type": "TableView",
+      "slug": "vehicle-requests-table",
+      "displayName": "Vehicle Requests",
+      "entity": "vrf_request",
+      "route": "/pkg/vrf/vehicle-requests",
+      "icon": "bi-table",
+      "columns": [
+        { "key": "request_number", "label": "Request #", "sortable": true },
+        { "key": "request_timestamp", "label": "Submitted", "sortable": true, "format": "datetime" },
+        { "key": "requester_email", "label": "Requester", "filterable": true },
+        { "key": "district_name", "label": "District", "filterable": true },
+        { "key": "activity_category", "label": "Category", "filterable": true },
+        { "key": "group_name", "label": "Group / Program", "filterable": true },
+        { "key": "destination", "label": "Destination", "filterable": true },
+        { "key": "trip_start_date", "label": "Trip Start", "sortable": true, "format": "date" },
+        { "key": "trip_end_date", "label": "Trip End", "sortable": true, "format": "date" },
+        {
+          "key": "approval_status",
+          "label": "Status",
+          "filterable": true,
+          "badge": true
+        }
+      ],
+      "filters": [
+        { "key": "approval_status", "type": "select", "label": "Status" },
+        { "key": "district_name", "type": "select", "label": "District" },
+        { "key": "activity_category", "type": "select", "label": "Category" },
+        { "key": "group_name", "type": "text", "label": "Group / Program" },
+        { "key": "trip_start_date", "type": "dateRange", "label": "Trip Date Range" },
+        { "key": "requester_email", "type": "text", "label": "Requester Email" }
+      ],
+      "actions": [
+        {
+          "key": "view",
+          "label": "View Details",
+          "icon": "bi-eye"
+        },
+        {
+          "key": "assign_vehicles",
+          "label": "Assign Vehicle(s)",
+          "icon": "bi-truck-front",
+          "permission": "vrf_approve"
+        },
+        {
+          "key": "approve",
+          "label": "Approve",
+          "icon": "bi-check-circle",
+          "permission": "vrf_approve",
+          "requiresStatus": ["pending"]
+        },
+        {
+          "key": "deny",
+          "label": "Deny",
+          "icon": "bi-x-circle",
+          "permission": "vrf_approve",
+          "requiresStatus": ["pending"]
+        },
+        {
+          "key": "cancel",
+          "label": "Cancel",
+          "icon": "bi-slash-circle",
+          "permission": "vrf_admin",
+          "requiresStatus": ["pending", "approved"]
+        },
+        {
+          "key": "export_csv",
+          "label": "Export CSV",
+          "icon": "bi-file-earmark-spreadsheet",
+          "permission": "vrf_report"
+        },
+        {
+          "key": "export_pdf",
+          "label": "Export PDF",
+          "icon": "bi-file-earmark-pdf",
+          "permission": "vrf_report"
+        }
+      ],
+      "defaultSort": { "field": "request_timestamp", "direction": "DESC" },
+      "pagination": {
+        "enabled": true,
+        "perPage": 25,
+        "options": [10, 25, 50, 100]
+      },
+      "export": {
+        "enabled": true,
+        "formats": ["csv", "pdf"]
+      }
+    },
+
+    {
+      "type": "TableView",
+      "slug": "vehicles-table",
+      "displayName": "Manage Vehicles",
+      "entity": "vrf_vehicle",
+      "route": "/pkg/vrf/vehicles",
+      "icon": "bi-gear",
+      "columns": [
+        { "key": "name", "label": "Vehicle Name", "sortable": true },
+        { "key": "category", "label": "Category", "filterable": true },
+        { "key": "capacity", "label": "Capacity", "sortable": true },
+        { "key": "is_active", "label": "Active", "badge": true }
+      ],
+      "filters": [
+        { "key": "category", "type": "select", "label": "Category" },
+        { "key": "is_active", "type": "select", "label": "Active" }
+      ],
+      "actions": [
+        { "key": "add", "label": "Add Vehicle", "icon": "bi-plus-circle", "permission": "vrf_admin" },
+        { "key": "edit", "label": "Edit Vehicle", "icon": "bi-pencil", "permission": "vrf_admin" },
+        { "key": "toggle_active", "label": "Activate/Deactivate", "icon": "bi-toggle-on", "permission": "vrf_admin" }
+      ],
+      "defaultSort": { "field": "name", "direction": "ASC" },
+      "pagination": {
+        "enabled": true,
+        "perPage": 50,
+        "options": [25, 50, 100]
+      }
+    },
+
+    {
+      "type": "Workflow",
+      "slug": "vehicle-request-approval",
+      "displayName": "Vehicle Request Approval Workflow",
+      "entity": "vrf_request",
+      "steps": [
+        {
+          "id": "pending",
+          "label": "Pending",
+          "description": "Request has been submitted and is awaiting review.",
+          "nextSteps": ["approved", "denied", "cancelled"],
+          "requiredRole": "vrf_approve"
+        },
+        {
+          "id": "approved",
+          "label": "Approved",
+          "description": "Request has been approved by administration.",
+          "nextSteps": ["cancelled"],
+          "requiredRole": "vrf_approve",
+          "requiredFields": ["trip_start_date", "trip_end_date"],
+          "validation": {
+            "rules": [
+              {
+                "type": "vehicle_availability",
+                "message": "One or more selected vehicles are not available in that time window."
+              }
+            ]
+          },
+          "onEnter": {
+            "setField": {
+              "approval_status": "approved",
+              "approval_date": "now",
+              "approved_by_user_id": "{{ current_user.id }}",
+              "approved_by_name": "{{ current_user.name }}"
+            },
+            "notify": ["requester_email", "vrf_approve"],
+            "createCalendarEvent": {
+              "enabled": true,
+              "title": "{{ activity_purpose }}",
+              "startDateField": "trip_start_date",
+              "startTimeField": "estimated_departure_time",
+              "endDateField": "trip_end_date",
+              "endTimeField": "estimated_return_time",
+              "locationField": "destination",
+              "descriptionTemplate": "Requested by: {{ requester_name }}\nGroup: {{ group_name }}\nCategory: {{ activity_category }}\nVehicles: {{ assigned_vehicle_names }}\nStudents: {{ number_of_students }}\nMiles: {{ estimated_miles }}\nDriver: {{ driver_name }}"
+            }
+          }
+        },
+        {
+          "id": "denied",
+          "label": "Denied",
+          "description": "Request has been denied by administration.",
+          "nextSteps": [],
+          "requiredRole": "vrf_approve",
+          "onEnter": {
+            "setField": {
+              "approval_status": "denied",
+              "approval_date": "now",
+              "approved_by_user_id": "{{ current_user.id }}",
+              "approved_by_name": "{{ current_user.name }}"
+            },
+            "notify": ["requester_email", "vrf_approve"]
+          }
+        },
+        {
+          "id": "cancelled",
+          "label": "Cancelled",
+          "description": "Request has been cancelled.",
+          "nextSteps": [],
+          "requiredRole": "vrf_admin",
+          "onEnter": {
+            "setField": {
+              "approval_status": "cancelled",
+              "approval_date": "now"
+            },
+            "notify": ["vrf_approve"]
+          }
+        }
+      ]
+    },
+
+    {
+      "type": "Analytics",
+      "slug": "vehicle-requests-analytics",
+      "displayName": "Vehicle Requests Analytics",
+      "entity": "vrf_request",
+      "route": "/pkg/vrf/vehicle-analytics",
+      "icon": "bi-graph-up",
+      "charts": [
+        {
+          "key": "requests_by_month",
+          "label": "Requests by Month",
+          "type": "bar",
+          "groupBy": "MONTH(trip_start_date)",
+          "metrics": [
+            { "type": "count", "label": "Total Requests" }
+          ]
+        },
+        {
+          "key": "requests_by_status",
+          "label": "Requests by Status",
+          "type": "pie",
+          "groupBy": "approval_status",
+          "metrics": [
+            { "type": "count", "label": "Requests" }
+          ]
+        },
+        {
+          "key": "miles_by_district",
+          "label": "Estimated Miles by District",
+          "type": "bar",
+          "groupBy": "district_name",
+          "metrics": [
+            { "type": "sum", "field": "estimated_miles", "label": "Estimated Miles" }
+          ]
+        },
+        {
+          "key": "requests_by_requester",
+          "label": "Requests by Requester",
+          "type": "bar",
+          "groupBy": "requester_email",
+          "metrics": [
+            { "type": "count", "label": "Requests" }
+          ]
+        },
+        {
+          "key": "requests_by_group",
+          "label": "Requests by Group / Program",
+          "type": "bar",
+          "groupBy": "group_name",
+          "metrics": [
+            { "type": "count", "label": "Requests" }
+          ]
+        }
+      ],
+      "filters": [
+        { "key": "trip_start_date", "type": "dateRange", "label": "Trip Date Range" },
+        { "key": "district_name", "type": "select", "label": "District" },
+        { "key": "activity_category", "type": "select", "label": "Category" },
+        { "key": "group_name", "type": "text", "label": "Group / Program" },
+        { "key": "approval_status", "type": "select", "label": "Status" }
+      ],
+      "export": {
+        "enabled": true,
+        "formats": ["csv", "pdf"]
+      },
+      "access": ["vrf_report", "vrf_admin"]
+    },
+
+    {
+      "type": "EmailNotification",
+      "slug": "vehicle-request-emails",
+      "displayName": "Vehicle Request Email Notifications",
+      "entity": "vrf_request",
+      "triggers": [
+        {
+          "event": "created",
+          "template": "vrf_request_submitted",
+          "recipients": ["role:vrf_approve"],
+          "subject": "New Vehicle Request Submitted",
+          "body": "You have a new vehicle request from {{ requester_email }}.\n\nActivity: {{ activity_purpose }}\nDestination: {{ destination }}\nTrip Dates: {{ trip_start_date }} to {{ trip_end_date }}\nRequested Vehicle Types: {{ requested_vehicle_types }}\n\nPlease log into The Hub to review and approve this request."
+        },
+        {
+          "event": "status_changed_to_approved",
+          "template": "vrf_request_approved",
+          "recipients": ["field:requester_email"],
+          "subject": "Vehicle Request Approved",
+          "body": "Your vehicle request {{ request_number }} has been approved.\n\nActivity: {{ activity_purpose }}\nDestination: {{ destination }}\nTrip Dates: {{ trip_start_date }} to {{ trip_end_date }}\nAssigned Vehicles: {{ assigned_vehicle_names }}\n\nPlease contact your administrator if you have any questions."
+        },
+        {
+          "event": "status_changed_to_denied",
+          "template": "vrf_request_denied",
+          "recipients": ["field:requester_email"],
+          "subject": "Vehicle Request Denied",
+          "body": "Your vehicle request {{ request_number }} has been denied by {{ approved_by_name }}.\n\nActivity: {{ activity_purpose }}\nDestination: {{ destination }}\nTrip Dates: {{ trip_start_date }} to {{ trip_end_date }}\n\nIf you have questions, please contact your administrator."
+        }
+      ]
+    }
+  ],
+
+  "fields": [
+    {
+      "name": "request_number",
+      "type": "text",
+      "label": "Request Number",
+      "required": true,
+      "order": 1,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "request_timestamp",
+      "type": "datetime",
+      "label": "Submitted At",
+      "required": true,
+      "order": 2,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "requester_email",
+      "type": "email",
+      "label": "Requester Email",
+      "required": true,
+      "order": 3,
+      "searchable": true,
+      "visible_in_list": true,
+      "pii": true
+    },
+    {
+      "name": "district_name",
+      "type": "select",
+      "label": "District",
+      "required": true,
+      "order": 4,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "activity_category",
+      "type": "select",
+      "label": "Activity Category",
+      "required": true,
+      "order": 5,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "group_name",
+      "type": "text",
+      "label": "Group / Program",
+      "required": false,
+      "order": 6,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "destination",
+      "type": "text",
+      "label": "Destination",
+      "required": true,
+      "order": 7,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "trip_start_date",
+      "type": "date",
+      "label": "Trip Start Date",
+      "required": true,
+      "order": 8,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "trip_end_date",
+      "type": "date",
+      "label": "Trip End Date",
+      "required": true,
+      "order": 9,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "requested_vehicle_types",
+      "type": "multi_select",
+      "label": "Requested Vehicle Types",
+      "required": false,
+      "order": 10,
+      "visible_in_list": true
+    },
+    {
+      "name": "number_of_students",
+      "type": "number",
+      "label": "Number of Students",
+      "required": true,
+      "order": 11,
+      "visible_in_list": true
+    },
+    {
+      "name": "number_of_staff",
+      "type": "number",
+      "label": "Number of Faculty & Staff",
+      "required": true,
+      "order": 12,
+      "visible_in_list": true
+    },
+    {
+      "name": "estimated_miles",
+      "type": "number",
+      "label": "Estimated Miles",
+      "required": true,
+      "order": 13,
+      "visible_in_list": true
+    },
+    {
+      "name": "approval_status",
+      "type": "select",
+      "label": "Approval Status",
+      "required": true,
+      "order": 14,
+      "visible_in_list": true,
+      "default_value": "pending",
+      "options": [
+        { "value": "pending", "label": "Pending", "color": "warning" },
+        { "value": "approved", "label": "Approved", "color": "success" },
+        { "value": "denied", "label": "Denied", "color": "danger" },
+        { "value": "cancelled", "label": "Cancelled", "color": "secondary" }
+      ]
+    }
+  ],
+
+  "permissions": {
+    "roles": [
+      {
+        "key": "vrf_request",
+        "displayName": "Submit Vehicle Requests",
+        "description": "Can submit new vehicle requests."
+      },
+      {
+        "key": "vrf_approve",
+        "displayName": "Approve Vehicle Requests",
+        "description": "Can review, assign vehicles, and approve or deny requests."
+      },
+      {
+        "key": "vrf_report",
+        "displayName": "View Vehicle Request Analytics",
+        "description": "Can view analytics and export reports."
+      },
+      {
+        "key": "vrf_admin",
+        "displayName": "Vehicle Request Administrator",
+        "description": "Full control over vehicle request configuration, vehicles list, and data."
+      }
+    ],
+    "roleMatrix": {
+      "vrf_request": [
+        "module:vehicle-request-form:create",
+        "module:vehicle-request-form:read"
+      ],
+      "vrf_approve": [
+        "module:vehicle-requests-table:read",
+        "module:vehicle-requests-table:update",
+        "module:vehicles-table:read",
+        "module:vehicle-request-approval:advance",
+        "module:vehicle-request-emails:read"
+      ],
+      "vrf_report": [
+        "module:vehicle-requests-table:read",
+        "module:vehicle-requests-table:export",
+        "module:vehicle-requests-analytics:read"
+      ],
+      "vrf_admin": [
+        "module:vehicle-request-form:*",
+        "module:vehicle-requests-table:*",
+        "module:vehicles-table:*",
+        "module:vehicle-request-approval:*",
+        "module:vehicle-requests-analytics:*",
+        "module:vehicle-request-emails:*"
+      ]
+    },
+    "defaultAccess": {
+      "staff": ["vrf_request"],
+      "coach": ["vrf_request"],
+      "teacher": ["vrf_request"],
+      "principal": ["vrf_approve", "vrf_report"],
+      "transportation_admin": ["vrf_approve", "vrf_report"],
+      "super_admin": ["vrf_admin"]
+    }
+  },
+
+  "menu_items": [
+    {
+      "label": "Request a Vehicle",
+      "route": "/pkg/vrf/vehicle-request-form",
+      "icon": "bi-truck",
+      "order": 1,
+      "minimum_role": "vrf_request"
+    },
+    {
+      "label": "Vehicle Requests",
+      "route": "/pkg/vrf/vehicle-requests",
+      "icon": "bi-table",
+      "order": 2,
+      "minimum_role": "vrf_approve"
+    },
+    {
+      "label": "Vehicle Analytics",
+      "route": "/pkg/vrf/vehicle-analytics",
+      "icon": "bi-graph-up",
+      "order": 3,
+      "minimum_role": "vrf_report"
+    },
+    {
+      "label": "Manage Vehicles",
+      "route": "/pkg/vrf/vehicles",
+      "icon": "bi-gear",
+      "order": 4,
+      "minimum_role": "vrf_admin"
+    }
+  ]
+}

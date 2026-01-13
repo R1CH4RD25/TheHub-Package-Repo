@@ -1061,7 +1061,16 @@ async function downloadQueuedPackages() {
     debugLog('UI', `📊 Queue complete: ${successful} success, ${failed} failed`);
     updateVerificationStatus(verifyModal, 'Verifying package requirements...');
     
-    // Close ALL package detail modals (from repository or anywhere)
+    // Close SweetAlert repository modal if open
+    debugLog('UI', '🗑️ Closing SweetAlert repository modal');
+    if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+        Swal.close();
+        debugLog('UI', '✅ SweetAlert modal closed');
+    } else {
+        debugLog('UI', 'ℹ️ No SweetAlert modal open');
+    }
+    
+    // Close ALL package detail modals (standard modals with z-index: 10000)
     debugLog('UI', '🗑️ Searching for open package detail modals...');
     const modals = document.querySelectorAll('[style*="z-index: 10000"]');
     debugLog('UI', `Found ${modals.length} modals with z-index: 10000`);

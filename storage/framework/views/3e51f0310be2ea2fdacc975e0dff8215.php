@@ -1059,15 +1059,22 @@ async function downloadQueuedPackages() {
     debugLog('UI', `📊 Queue complete: ${successful} success, ${failed} failed`);
     updateVerificationStatus(verifyModal, 'Verifying package requirements...');
     
-    // Close ALL package detail modals
-    debugLog('UI', '🗑️ Closing any open package detail modals');
+    // Close ALL package detail modals (from repository or anywhere)
+    debugLog('UI', '🗑️ Searching for open package detail modals...');
     const modals = document.querySelectorAll('[style*="z-index: 10000"]');
+    debugLog('UI', `Found ${modals.length} modals with z-index: 10000`);
+    
+    let closedCount = 0;
     modals.forEach(modal => {
         if (modal !== verifyModal) {
-            debugLog('UI', `🗑️ Removing modal from DOM`);
+            debugLog('UI', `🗑️ Removing modal: ${modal.id || 'unnamed'} ${modal.className}`);
             modal.remove();
+            closedCount++;
+        } else {
+            debugLog('UI', `⏭️ Skipping verification modal (keeping it)`);
         }
     });
+    debugLog('UI', `✅ Closed ${closedCount} package detail modal(s)`);
     
     if (successful > 0) {
         debugLog('UI', '🧹 Clearing queue');
