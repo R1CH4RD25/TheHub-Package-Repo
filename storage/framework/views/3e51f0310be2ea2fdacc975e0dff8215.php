@@ -321,8 +321,10 @@ function uninstallPackage(packageId) {
             })
             .then(r => r.json())
             .then(data => {
+                console.log('Uninstall response:', data);
                 if (data.success) {
                     notyf.success('Package uninstalled');
+                    console.log('Reloading installed packages...');
                     loadInstalledPackages();
                 } else {
                     notyf.error(data.error || 'Uninstall failed');

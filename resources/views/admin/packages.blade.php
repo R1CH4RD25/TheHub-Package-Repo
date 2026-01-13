@@ -137,14 +137,23 @@ function loadSubtabData(subtab) {
 }
 
 function loadInstalledPackages() {
+    debugLog('API', 'Loading installed packages');
     fetch('/admin/packages/list?type=installed')
-        .then(r => r.json())
+        .then(r => {
+            debugLog('RESPONSE', 'Installed packages response received', { status: r.status });
+            return r.json();
+        })
         .then(data => {
+            debugLog('RESPONSE', 'Installed packages data', { count: data.packages?.length || 0 });
             if (data.success) {
                 renderInstalledPackages(data.packages);
             } else {
+                debugLog('ERROR', 'Failed to load packages', data);
                 notyf.error('Failed to load packages');
             }
+        })
+        .catch(err => {
+            debugLog('ERROR', 'Load installed packages error', err);
         });
 }
 
@@ -281,6 +290,7 @@ function renderPackageUpdates(updates) {
 }
 
 function installPackage(packageId) {
+    debugLog('ACTION', `User clicked INSTALL for package ID: ${packageId}`);
     Swal.fire({
         title: 'Install Package?',
         text: 'This will create a new section from this package',
@@ -289,25 +299,42 @@ function installPackage(packageId) {
         confirmButtonText: 'Yes, install'
     }).then((result) => {
         if (result.isConfirmed) {
+            debugLog('ACTION', `User confirmed install for package ID: ${packageId}`);
+            debugLog('API', `Sending POST request to /admin/packages/${packageId}/install`);
             fetch(`/admin/packages/${packageId}/install`, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': csrfToken }
             })
-            .then(r => r.json())
+            .then(r => {
+                debugLog('RESPONSE', 'Install response received', { status: r.status });
+                return r.json();
+            })
             .then(data => {
+                debugLog('RESPONSE', 'Install data', data);
                 if (data.success) {
+                    debugLog('SUCCESS', 'Package installed successfully');
                     notyf.success('Package installed successfully');
+                    debugLog('UI', 'Reloading installed and available packages tables...');
                     loadInstalledPackages();
                     loadAvailablePackages();
                 } else {
+                    debugLog('ERROR', 'Installation failed', data);
                     notyf.error(data.error || 'Installation failed');
                 }
+            })
+            .catch(err => {
+                debugLog('ERROR', 'Install error', err);
+                notyf.error('Failed to install package');
             });
+        } else {
+            debugLog('ACTION', 'User cancelled install');
         }
+    });
     });
 }
 
 function uninstallPackage(packageId) {
+    debugLog('ACTION', `User clicked UNINSTALL for package: ${packageId}`);
     Swal.fire({
         title: 'Uninstall Package?',
         text: 'This will remove the section and all its data',
@@ -317,25 +344,34 @@ function uninstallPackage(packageId) {
         confirmButtonColor: '#d32f2f'
     }).then((result) => {
         if (result.isConfirmed) {
+            debugLog('ACTION', `User confirmed uninstall for: ${packageId}`);
+            debugLog('API', `Sending DELETE request to /admin/packages/${packageId}/uninstall`);
             fetch(`/admin/packages/${packageId}/uninstall`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': csrfToken }
             })
-            .then(r => r.json())
+            .then(r => {
+                debugLog('RESPONSE', 'Uninstall response received', { status: r.status });
+                return r.json();
+            })
             .then(data => {
-                console.log('Uninstall response:', data);
+                debugLog('RESPONSE', 'Uninstall data', data);
                 if (data.success) {
+                    debugLog('SUCCESS', 'Package uninstalled successfully');
                     notyf.success('Package uninstalled');
-                    console.log('Reloading installed packages...');
+                    debugLog('UI', 'Reloading installed packages table...');
                     loadInstalledPackages();
                 } else {
+                    debugLog('ERROR', 'Uninstall failed', data);
                     notyf.error(data.error || 'Uninstall failed');
                 }
             })
             .catch(err => {
-                console.error('Uninstall error:', err);
+                debugLog('ERROR', 'Uninstall error', err);
                 notyf.error('Failed to uninstall package');
             });
+        } else {
+            debugLog('ACTION', 'User cancelled uninstall');
         }
     });
 }
