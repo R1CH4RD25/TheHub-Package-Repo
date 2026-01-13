@@ -715,12 +715,21 @@ class PackageManager
      */
     private function installPermissions(int $sectionId, array $permissions, int $installedBy): void
     {
+        // Valid role ENUM values from database schema
+        $validRoles = ['user', 'driver', 'manager', 'admin', 'super_admin'];
+        
         // Clear existing
         $this->db->execute("DELETE FROM section_role_access WHERE section_id = ?", [$sectionId]);
         
-        // Install new
+        // Install new (skip invalid roles)
         foreach ($permissions as $role => $access) {
             if ($access) {
+                // Validate role against ENUM values
+                if (!in_array($role, $validRoles, true)) {
+                    error_log("PackageManager: Skipping invalid role '{$role}' for section {$sectionId}");
+                    continue; // Skip invalid role
+                }
+                
                 $this->db->insert('section_role_access', [
                     'section_id' => $sectionId,
                     'role' => $role,
