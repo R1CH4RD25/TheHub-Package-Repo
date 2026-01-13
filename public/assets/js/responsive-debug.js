@@ -46,6 +46,31 @@
   }
 
   /**
+   * Get current breakpoint name based on viewport width
+   */
+  function getBreakpoint() {
+    const width = window.innerWidth;
+    if (width <= 575) return 'Small Mobile (≤575px)';
+    if (width <= 768) return 'Mobile (≤768px)';
+    if (width <= 991) return 'Tablet (769-991px)';
+    return 'Desktop (≥992px)';
+  }
+
+  /**
+   * Display viewport size in console with styling
+   */
+  function logViewportSize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const breakpoint = getBreakpoint();
+    
+    console.log(
+      `%c📐 Viewport: ${width}px × ${height}px | Breakpoint: ${breakpoint}`,
+      'background: #1e293b; color: #60a5fa; padding: 8px 12px; border-radius: 4px; font-size: 14px; font-weight: bold;'
+    );
+  }
+
+  /**
    * Get computed styles for an element
    */
   function getComputedDimensions(element) {
@@ -503,17 +528,27 @@
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(handleResize, 250);
+      resizeTimer = setTimeout(() => {
+        handleResize();
+        logViewportSize(); // Log size on resize
+      }, 250);
     });
 
     // Run checks on orientation change
     window.addEventListener('orientationchange', () => {
-      setTimeout(runAllChecks, 300);
+      setTimeout(() => {
+        runAllChecks();
+        logViewportSize(); // Log size on orientation change
+      }, 300);
     });
+
+    // Log initial viewport size
+    logViewportSize();
 
     // Expose debug functions globally
     window.ResponsiveDebug = {
       runChecks: runAllChecks,
+      logSize: logViewportSize, // Expose viewport size logger
       checkElement: (selector) => {
         const element = typeof selector === 'string'
           ? document.querySelector(selector)
