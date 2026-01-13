@@ -116,7 +116,7 @@ class PackageDiscoveryController extends Controller
         }
         
         try {
-            $result = $this->downloadPackageFromGitHub($downloadUrl, $packageName);
+            $result = $this->downloadPackageFromGitHub($downloadUrl, $packageName, $currentUser['id']);
             
             // Log the download action
             AuditLogger::log(
@@ -285,11 +285,8 @@ class PackageDiscoveryController extends Controller
     /**
      * Download package from GitHub
      */
-    private function downloadPackageFromGitHub(string $downloadUrl, string $packageName): array
+    private function downloadPackageFromGitHub(string $downloadUrl, string $packageName, int $userId): array
     {
-        // Get current user for upload attribution
-        $currentUser = request()->attributes->get('user');
-        
         // Create temp file
         $tempFile = tempnam(sys_get_temp_dir(), 'hubpkg_');
         
@@ -324,7 +321,7 @@ class PackageDiscoveryController extends Controller
         
         // Use PackageManager to handle the upload
         $packageManager = new \Hub\PackageManager();
-        $result = $packageManager->uploadPackage($fileArray, $currentUser['id']);
+        $result = $packageManager->uploadPackage($fileArray, $userId);
         
         // Clean up temp file
         @unlink($tempFile);
