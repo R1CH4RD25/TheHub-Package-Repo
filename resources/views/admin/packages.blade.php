@@ -1036,13 +1036,25 @@ async function downloadQueuedPackages() {
     
     const packages = Array.from(downloadQueue).map(item => JSON.parse(item));
     debugLog('ACTION', `🚀 QUEUE DOWNLOAD: Starting batch of ${packages.length} packages`);
+    
+    // Close repository discovery section to prevent refresh flash
+    debugLog('UI', '📦 Closing repository discovery panel');
+    const discoverySection = document.querySelector('.packages-subtab[data-subtab="package-discovery"]');
+    if (discoverySection && discoverySection.classList.contains('active')) {
+        discoverySection.classList.remove('active');
+    }
+    
+    // Show verification modal
+    const verifyModal = createVerificationModal(packages.length);
+    document.body.appendChild(verifyModal);
+    debugLog('UI', '🔍 Verification modal shown');
+    
     let successful = 0;
     let failed = 0;
     
-    notyf.success(`Downloading ${packages.length} package(s)...`);
-    
     for (const pkg of packages) {
         try {
+            updateVerificationStatus(verifyModal, `Downloading ${pkg.filename.split('_')[0]}...`);
             debugLog('API', `📥 Downloading: ${pkg.filename}`);
             await downloadSinglePackage(pkg.downloadUrl, pkg.filename, false);
             successful++;
@@ -1054,20 +1066,19 @@ async function downloadQueuedPackages() {
     }
     
     debugLog('UI', `📊 Queue complete: ${successful} success, ${failed} failed`);
+    updateVerificationStatus(verifyModal, 'Verifying package requirements...');
     
-    // Close ALL modals BEFORE refreshing (this prevents flash)
-    debugLog('UI', '🗑️ Closing any open modals');
+    // Close ALL package detail modals
+    debugLog('UI', '🗑️ Closing any open package detail modals');
     const modals = document.querySelectorAll('[style*="z-index: 10000"]');
     modals.forEach(modal => {
-        debugLog('UI', `🗑️ Removing modal from DOM`);
-        modal.remove();
+        if (modal !== verifyModal) {
+            debugLog('UI', `🗑️ Removing modal from DOM`);
+            modal.remove();
+        }
     });
-    debugLog('UI', `✅ ${modals.length} modal(s) closed`);
     
     if (successful > 0) {
-        debugLog('UI', '🔔 Showing success notification');
-        notyf.success(`Downloaded ${successful} package(s) successfully`);
-        
         debugLog('UI', '🧹 Clearing queue');
         downloadQueue.clear();
         updateQueueDisplay();
@@ -1076,9 +1087,22 @@ async function downloadQueuedPackages() {
         await loadAvailablePackages();
         debugLog('SUCCESS', '✅ Available packages refreshed');
         
-        debugLog('API', '🔄 Refreshing repository search results');
-        await searchRepositoryPackages();
-        debugLog('SUCCESS', '✨ QUEUE COMPLETE: All tables refreshed, modals closed');
+        // Switch to Available Packages tab
+        debugLog('UI', '📑 Switching to Available Packages tab');
+        document.querySelector('.packages-subtab[data-subtab="available-packages"]')?.classList.add('active');
+        
+        // Close verification modal
+        updateVerificationStatus(verifyModal, 'Complete!', true);
+        setTimeout(() => {
+            verifyModal.remove();
+            debugLog('UI', '✅ Verification modal closed');
+        }, 800);
+        
+        notyf.success(`Downloaded ${successful} package(s) successfully`);
+        debugLog('SUCCESS', '✨ QUEUE COMPLETE: Switched to available packages');
+    } else {
+        // Close verification modal on failure
+        verifyModal.remove();
     }
     
     if (failed > 0) {
@@ -1179,10 +1203,66 @@ const modalObserver = new MutationObserver((mutations) => {
 modalObserver.observe(document.body, { childList: true, subtree: true }); // subtree: true to catch nested elements
 debugLog('UI', '👁️ Modal detective activated - watching for all modal creation/removal');
 
+// Verification modal helper functions
+function createVerificationModal(packageCount) {
+    const modal = document.createElement('div');
+    modal.id = 'packageVerificationModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: var(--surface-color, white); border-radius: 8px; padding: 2rem; min-width: 300px; text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+            <h3 style="margin: 0 0 1rem 0; color: var(--text-primary);">Processing Packages</h3>
+            <div id="verificationStatus" style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Downloading ${packageCount} package${packageCount !== 1 ? 's' : ''}...
+            </div>
+            <div style="display: flex; justify-content: center; gap: 0.5rem;">
+                <div class="spinner-dot" style="width: 8px; height: 8px; background: var(--primary-color); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both;"></div>
+                <div class="spinner-dot" style="width: 8px; height: 8px; background: var(--primary-color); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.32s;"></div>
+                <div class="spinner-dot" style="width: 8px; height: 8px; background: var(--primary-color); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.16s;"></div>
+            </div>
+        </div>
+    `;
+    
+    return modal;
+}
+
+function updateVerificationStatus(modal, message, isComplete = false) {
+    const statusDiv = modal.querySelector('#verificationStatus');
+    if (statusDiv) {
+        statusDiv.textContent = message;
+        if (isComplete) {
+            statusDiv.innerHTML = '<span style="color: var(--success-color); font-size: 1.2rem;">✓ ' + message + '</span>';
+            modal.querySelectorAll('.spinner-dot').forEach(dot => dot.style.display = 'none');
+        }
+    }
+}
+
 </script>
 @endpush
 
 <style>
+/* Verification modal animation */
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
 .category-section {
     margin-bottom: 2rem;
 }
