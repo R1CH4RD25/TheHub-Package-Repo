@@ -716,11 +716,17 @@ function renderDiscoveryPackages(packages) {
     }
     
     // Render table
+    // Check if all queueable packages are in the queue
+    const queueablePackages = filtered.filter(pkg => !pkg.is_installed && !pkg.is_downloaded);
+    const allQueued = queueablePackages.length > 0 && queueablePackages.every(pkg => 
+        downloadQueue.has(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }))
+    );
+    
     const html = `
         <table class="data-table" style="width: 100%;">
             <thead>
                 <tr>
-                    <th style="width: 40px;"><input type="checkbox" id="selectAllPkgs" onchange="toggleSelectAll(this.checked)" style="width: 18px; height: 18px;"></th>
+                    <th style="width: 40px;"><input type="checkbox" id="selectAllPkgs" ${allQueued ? 'checked' : ''} onchange="toggleSelectAll(this.checked)" style="width: 18px; height: 18px;"></th>
                     <th style="cursor: pointer;" onclick="sortPackages('name')">
                         Package Name ${currentSort.field === 'name' ? (currentSort.direction === 'asc' ? '▲' : '▼') : ''}
                     </th>
