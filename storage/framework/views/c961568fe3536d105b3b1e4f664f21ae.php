@@ -123,21 +123,8 @@
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
 
-    <!-- Admin Dashboard Debug -->
-    <script src="https://hub.woodsonisd.net/assets/js/debug-helper.js"></script>
-    <script>
-    // Auto-run overflow detection on admin pages
-    document.addEventListener('DOMContentLoaded', function() {
-        debugLog('UI', '🔍 Admin Dashboard: Auto-detecting overflow issues...');
-        setTimeout(() => {
-            if (typeof logElementWidths === 'function') {
-                logElementWidths();
-            } else {
-                console.error('❌ logElementWidths not found!');
-            }
-        }, 1500); // Wait 1.5s for content to render
-    });
-    </script>
+    <!-- Admin Dashboard Responsive Debug -->
+    <script src="https://hub.woodsonisd.net/assets/js/responsive-debug.js"></script>
 </body>
 </html>
 <?php /**PATH /var/www/woodson/thehub/resources/views/layouts/enterprise.blade.php ENDPATH**/ ?>
