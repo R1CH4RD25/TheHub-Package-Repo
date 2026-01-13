@@ -461,6 +461,14 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
                         </select>
                     </div>
                 </div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center;">
+                    <button id="applyFiltersBtn" class="btn btn-sm btn-primary" style="font-size: 0.85rem;">
+                        <i class="bi bi-check-circle"></i> Apply Filters
+                    </button>
+                    <button id="resetFiltersBtn" class="btn btn-sm btn-outline-secondary" style="font-size: 0.85rem;">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    </button>
+                </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
                     <div id="selectedCategories" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
                     <div id="selectedAuthors" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
@@ -499,15 +507,11 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
                 renderDiscoveryPackages(discoveryPackages);
             });
             
-            // Update filter arrays on change but only render on blur (when dropdown closes)
+            // Update filter arrays on change and show badges
             document.getElementById('pkgCategory').addEventListener('change', (e) => {
                 const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
                 currentFilter.categories = selectedOptions;
                 updateFilterBadges();
-            });
-            
-            document.getElementById('pkgCategory').addEventListener('blur', (e) => {
-                renderDiscoveryPackages(discoveryPackages);
             });
             
             document.getElementById('pkgAuthor').addEventListener('change', (e) => {
@@ -516,7 +520,22 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
                 updateFilterBadges();
             });
             
-            document.getElementById('pkgAuthor').addEventListener('blur', (e) => {
+            // Apply filters button
+            document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+                renderDiscoveryPackages(discoveryPackages);
+            });
+            
+            // Reset filters button
+            document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+                currentFilter.categories = [];
+                currentFilter.authors = [];
+                currentFilter.status = 'all';
+                currentFilter.search = '';
+                document.getElementById('pkgSearch').value = '';
+                document.getElementById('pkgCategory').selectedIndex = -1;
+                document.getElementById('pkgAuthor').selectedIndex = -1;
+                document.getElementById('pkgStatus').value = 'all';
+                updateFilterBadges();
                 renderDiscoveryPackages(discoveryPackages);
             });
             
@@ -685,7 +704,7 @@ function renderDiscoveryPackages(packages) {
                             }
                         </td>
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><strong>${pkg.display_name || pkg.name}</strong></td>
-                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span class="badge" style="background: var(--primary-color);">${pkg.category || 'other'}</span></td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span class="badge" style="background: var(--primary-color); color: rgba(255, 255, 255, 0.95);">${pkg.category || 'other'}</span></td>
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${pkg.version}</span></td>
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${pkg.author}</span></td>
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${(pkg.size / 1024).toFixed(1)} KB</span></td>
