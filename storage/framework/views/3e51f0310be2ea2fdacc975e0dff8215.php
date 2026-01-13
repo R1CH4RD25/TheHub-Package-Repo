@@ -48,7 +48,7 @@
                     <strong>🆕 Available Packages:</strong> Upload and review new packages before installation.
                     All packages are validated for compatibility before they can be installed.
                 </p>
-                
+
                 <!-- Discover Packages from Repository -->
                 <div style="background: var(--primary-color); border-radius: 6px; padding: 0.875rem 1rem; margin-bottom: 1rem; color: white;">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
@@ -548,31 +548,31 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
         showConfirmButton: false,
         didOpen: () => {
             searchRepositoryPackages();
-            
+
             // Attach event listeners
             document.getElementById('pkgSearch').addEventListener('input', (e) => {
                 currentFilter.search = e.target.value.toLowerCase();
                 renderDiscoveryPackages(discoveryPackages);
             });
-            
+
             // Update filter arrays on change and show badges
             document.getElementById('pkgCategory').addEventListener('change', (e) => {
                 const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
                 currentFilter.categories = selectedOptions;
                 updateFilterBadges();
             });
-            
+
             document.getElementById('pkgAuthor').addEventListener('change', (e) => {
                 const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
                 currentFilter.authors = selectedOptions;
                 updateFilterBadges();
             });
-            
+
             // Apply filters button
             document.getElementById('applyFiltersBtn').addEventListener('click', () => {
                 renderDiscoveryPackages(discoveryPackages);
             });
-            
+
             // Reset filters button
             document.getElementById('resetFiltersBtn').addEventListener('click', () => {
                 currentFilter.categories = [];
@@ -586,12 +586,12 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
                 updateFilterBadges();
                 renderDiscoveryPackages(discoveryPackages);
             });
-            
+
             document.getElementById('pkgStatus').addEventListener('change', (e) => {
                 currentFilter.status = e.target.value;
                 renderDiscoveryPackages(discoveryPackages);
             });
-            
+
             document.getElementById('downloadQueueBtn')?.addEventListener('click', downloadQueuedPackages);
             document.getElementById('clearQueueBtn')?.addEventListener('click', clearDownloadQueue);
         },
@@ -602,7 +602,7 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
 async function searchRepositoryPackages() {
     const resultsDiv = document.getElementById('discoveryResults');
     resultsDiv.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin"></i> Searching repository...</p>';
-    
+
     try {
         const response = await fetch('/admin/packages/discovery/search', {
             method: 'POST',
@@ -615,12 +615,12 @@ async function searchRepositoryPackages() {
                 repo: 'TheHub-Package-Repo'
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             discoveryPackages = data.packages;
-            
+
             // Populate category dropdown
             const categories = [...new Set(data.packages.map(p => p.category || 'other'))].sort();
             const catSelect = document.getElementById('pkgCategory');
@@ -630,7 +630,7 @@ async function searchRepositoryPackages() {
                 option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
                 catSelect.appendChild(option);
             });
-            
+
             // Populate author dropdown
             const authors = [...new Set(data.packages.map(p => p.author))].sort();
             const authorSelect = document.getElementById('pkgAuthor');
@@ -640,7 +640,7 @@ async function searchRepositoryPackages() {
                 option.textContent = author;
                 authorSelect.appendChild(option);
             });
-            
+
             renderDiscoveryPackages(discoveryPackages);
         } else {
             resultsDiv.innerHTML = `<p class="text-center text-danger">Error: ${data.error}</p>`;
@@ -653,31 +653,31 @@ async function searchRepositoryPackages() {
 
 function renderDiscoveryPackages(packages) {
     const resultsDiv = document.getElementById('discoveryResults');
-    
+
     if (packages.length === 0) {
         resultsDiv.innerHTML = '<p class="text-center">No packages found in repository</p>';
         return;
     }
-    
+
     // Filter packages
     let filtered = packages.filter(pkg => {
         // Category filter (multi-select)
         if (currentFilter.categories.length > 0 && !currentFilter.categories.includes(pkg.category || 'other')) {
             return false;
         }
-        
+
         // Author filter (multi-select)
         if (currentFilter.authors.length > 0 && !currentFilter.authors.includes(pkg.author)) {
             return false;
         }
-        
+
         // Status filter
         if (currentFilter.status !== 'all') {
             if (currentFilter.status === 'installed' && !pkg.is_installed) return false;
             if (currentFilter.status === 'downloaded' && !pkg.is_downloaded) return false;
             if (currentFilter.status === 'available' && (pkg.is_installed || pkg.is_downloaded)) return false;
         }
-        
+
         // Search filter
         if (currentFilter.search) {
             const searchLower = currentFilter.search;
@@ -688,15 +688,15 @@ function renderDiscoveryPackages(packages) {
                 return false;
             }
         }
-        
+
         return true;
     });
-    
+
     // Sort packages
     filtered.sort((a, b) => {
         let aVal = a[currentSort.field] || '';
         let bVal = b[currentSort.field] || '';
-        
+
         if (currentSort.field === 'size') {
             aVal = parseInt(aVal) || 0;
             bVal = parseInt(bVal) || 0;
@@ -704,24 +704,24 @@ function renderDiscoveryPackages(packages) {
             aVal = String(aVal).toLowerCase();
             bVal = String(bVal).toLowerCase();
         }
-        
+
         if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
         return 0;
     });
-    
+
     if (filtered.length === 0) {
         resultsDiv.innerHTML = '<p class="text-center text-muted">No packages match your filters</p>';
         return;
     }
-    
+
     // Render table
     // Check if all queueable packages are in the queue
     const queueablePackages = filtered.filter(pkg => !pkg.is_installed && !pkg.is_downloaded);
-    const allQueued = queueablePackages.length > 0 && queueablePackages.every(pkg => 
+    const allQueued = queueablePackages.length > 0 && queueablePackages.every(pkg =>
         downloadQueue.has(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }))
     );
-    
+
     const html = `
         <table class="data-table" style="width: 100%;">
             <thead>
@@ -752,7 +752,7 @@ function renderDiscoveryPackages(packages) {
                     return `
                     <tr>
                         <td onclick="event.stopPropagation();">
-                            ${isQueueable ? 
+                            ${isQueueable ?
                                 `<input type="checkbox" ${inQueue ? 'checked' : ''} onchange="toggleQueue('${pkg.download_url}', '${pkg.filename}', this.checked)" style="width: 18px; height: 18px;">` :
                                 '<span style="color: var(--text-muted);">—</span>'
                             }
@@ -763,7 +763,7 @@ function renderDiscoveryPackages(packages) {
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${pkg.author}</span></td>
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${(pkg.size / 1024).toFixed(1)} KB</span></td>
                         <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})">
-                            ${pkg.is_installed ? 
+                            ${pkg.is_installed ?
                                 '<span class="badge" style="background: var(--success-color);"><i class="bi bi-check-circle"></i> Installed</span>' :
                                 pkg.is_downloaded ?
                                     '<span class="badge" style="background: var(--info-color);">Downloaded</span>' :
@@ -775,7 +775,7 @@ function renderDiscoveryPackages(packages) {
             </tbody>
         </table>
     `;
-    
+
     resultsDiv.innerHTML = html;
 }
 
@@ -791,7 +791,7 @@ function sortPackages(field) {
 
 function showPackageDetails(index, pkg) {
     const inQueue = downloadQueue.has(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }));
-    
+
     // Create custom modal overlay to avoid closing browse modal
     const modalOverlay = document.createElement('div');
     modalOverlay.style.cssText = `
@@ -807,7 +807,7 @@ function showPackageDetails(index, pkg) {
         justify-content: center;
         padding: 1rem;
     `;
-    
+
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
         background: var(--surface-color, white);
@@ -818,7 +818,7 @@ function showPackageDetails(index, pkg) {
         overflow-y: auto;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     `;
-    
+
     modalContent.innerHTML = `
         <div style="padding: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -827,10 +827,10 @@ function showPackageDetails(index, pkg) {
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            
+
             <div style="text-align: left;">
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">${pkg.description}</p>
-                
+
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
                     <div>
                         <strong>Version:</strong> ${pkg.version}
@@ -845,23 +845,23 @@ function showPackageDetails(index, pkg) {
                         <strong>Size:</strong> ${(pkg.size / 1024).toFixed(1)} KB
                     </div>
                 </div>
-                
-                ${pkg.is_installed ? 
+
+                ${pkg.is_installed ?
                     '<div class="alert alert-success"><i class="bi bi-check-circle"></i> This package is already installed</div>' :
                     pkg.is_downloaded ?
                         '<div class="alert alert-info"><i class="bi bi-info-circle"></i> This package is downloaded and ready to install</div>' :
                         `<div style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; padding: 1rem; text-align: center; margin-bottom: 1rem;">
                             <label style="display: inline-flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="queueCheckbox_${index}" ${inQueue ? 'checked' : ''} 
+                                <input type="checkbox" id="queueCheckbox_${index}" ${inQueue ? 'checked' : ''}
                                        onchange="toggleQueueFromDetail('${pkg.download_url}', '${pkg.filename}', this.checked)"
                                        style="margin-right: 0.5rem; width: 18px; height: 18px;">
                                 <span>Add to download queue</span>
                             </label>
                         </div>`
                 }
-                
+
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
-                    ${!pkg.is_installed && !pkg.is_downloaded ? 
+                    ${!pkg.is_installed && !pkg.is_downloaded ?
                         `<button onclick="downloadSinglePackageFromModal('${pkg.download_url}', '${pkg.filename}', this)" class="btn btn-primary" style="flex: 1 1 auto; min-width: 140px;">
                             <i class="bi bi-download"></i> Download Now
                         </button>` : ''
@@ -873,16 +873,16 @@ function showPackageDetails(index, pkg) {
             </div>
         </div>
     `;
-    
+
     modalOverlay.appendChild(modalContent);
-    
+
     // Close modal when clicking overlay (but not content)
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) {
             modalOverlay.remove();
         }
     });
-    
+
     document.body.appendChild(modalOverlay);
 }
 
@@ -891,13 +891,13 @@ async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
     debugLog('UI', 'Disabling button and showing spinner');
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
-    
+
     try {
         debugLog('API', `📥 Calling downloadSinglePackage for: ${filename}`);
         // Download without notifications/refreshes
         await downloadSinglePackage(downloadUrl, filename, false);
         debugLog('SUCCESS', `✅ Download complete for: ${filename}`);
-        
+
         debugLog('UI', '🎯 Step 1: Finding modal element');
         const modal = button.closest('[style*="z-index: 10000"]');
         if (modal) {
@@ -907,18 +907,18 @@ async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
         } else {
             debugLog('ERROR', '❌ Modal element not found in DOM!');
         }
-        
+
         debugLog('UI', '🔔 Step 4: Showing success notification');
         notyf.success('Package downloaded successfully!');
-        
+
         debugLog('API', '🔄 Step 5: Refreshing available packages table');
         await loadAvailablePackages();
         debugLog('SUCCESS', '✅ Step 6: Available packages refreshed');
-        
+
         debugLog('API', '🔄 Step 7: Refreshing repository search results');
         await searchRepositoryPackages();
         debugLog('SUCCESS', '✨ COMPLETE: All steps finished, modal should be gone');
-        
+
     } catch (error) {
         debugLog('ERROR', `❌ DOWNLOAD FAILED for: ${filename}`, error);
         notyf.error('Download failed: ' + (error.message || 'Unknown error'));
@@ -930,14 +930,14 @@ async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
 function updateFilterBadges() {
     const catBadges = document.getElementById('selectedCategories');
     const authBadges = document.getElementById('selectedAuthors');
-    
-    catBadges.innerHTML = currentFilter.categories.map(cat => 
+
+    catBadges.innerHTML = currentFilter.categories.map(cat =>
         `<span class="badge" style="background: var(--primary-color); color: rgba(255, 255, 255, 0.95); cursor: pointer;" onclick="removeFilter('category', '${cat}')">
             ${cat} <i class="bi bi-x"></i>
         </span>`
     ).join('');
-    
-    authBadges.innerHTML = currentFilter.authors.map(author => 
+
+    authBadges.innerHTML = currentFilter.authors.map(author =>
         `<span class="badge" style="background: var(--info-color); cursor: pointer;" onclick="removeFilter('author', '${author}')">
             ${author} <i class="bi bi-x"></i>
         </span>`
@@ -980,7 +980,7 @@ function toggleSelectAll(checked) {
         }
         return !pkg.is_installed && !pkg.is_downloaded;
     });
-    
+
     if (checked) {
         filtered.forEach(pkg => {
             downloadQueue.add(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }));
@@ -988,7 +988,7 @@ function toggleSelectAll(checked) {
     } else {
         downloadQueue.clear();
     }
-    
+
     updateQueueDisplay();
     renderDiscoveryPackages(discoveryPackages);
 }
@@ -1011,7 +1011,7 @@ function toggleQueueFromDetail(downloadUrl, filename, add) {
 function updateQueueDisplay() {
     const queueInfo = document.getElementById('queueInfo');
     const queueCount = document.getElementById('queueCount');
-    
+
     if (downloadQueue.size > 0) {
         queueInfo.style.display = 'block';
         queueCount.textContent = downloadQueue.size;
@@ -1031,18 +1031,18 @@ async function downloadQueuedPackages() {
         notyf.error('No packages in queue');
         return;
     }
-    
+
     const packages = Array.from(downloadQueue).map(item => JSON.parse(item));
     debugLog('ACTION', `🚀 QUEUE DOWNLOAD: Starting batch of ${packages.length} packages`);
-    
+
     // Show verification modal FIRST (before any UI changes)
     const verifyModal = createVerificationModal(packages.length);
     document.body.appendChild(verifyModal);
     debugLog('UI', '🔍 Verification modal shown');
-    
+
     let successful = 0;
     let failed = 0;
-    
+
     for (const pkg of packages) {
         try {
             updateVerificationStatus(verifyModal, `Downloading ${pkg.filename.split('_')[0]}...`);
@@ -1055,10 +1055,10 @@ async function downloadQueuedPackages() {
             debugLog('ERROR', `❌ Failed: ${pkg.filename}`, error);
         }
     }
-    
+
     debugLog('UI', `📊 Queue complete: ${successful} success, ${failed} failed`);
     updateVerificationStatus(verifyModal, 'Verifying package requirements...');
-    
+
     // Close SweetAlert repository modal if open
     debugLog('UI', '🗑️ Closing SweetAlert repository modal');
     if (typeof Swal !== 'undefined' && Swal.isVisible()) {
@@ -1067,12 +1067,12 @@ async function downloadQueuedPackages() {
     } else {
         debugLog('UI', 'ℹ️ No SweetAlert modal open');
     }
-    
+
     // Close ALL package detail modals (standard modals with z-index: 10000)
     debugLog('UI', '🗑️ Searching for open package detail modals...');
     const modals = document.querySelectorAll('[style*="z-index: 10000"]');
     debugLog('UI', `Found ${modals.length} modals with z-index: 10000`);
-    
+
     let closedCount = 0;
     modals.forEach(modal => {
         if (modal !== verifyModal) {
@@ -1084,16 +1084,16 @@ async function downloadQueuedPackages() {
         }
     });
     debugLog('UI', `✅ Closed ${closedCount} package detail modal(s)`);
-    
+
     if (successful > 0) {
         debugLog('UI', '🧹 Clearing queue');
         downloadQueue.clear();
         updateQueueDisplay();
-        
+
         debugLog('API', '🔄 Refreshing available packages table');
         await loadAvailablePackages();
         debugLog('SUCCESS', '✅ Available packages refreshed');
-        
+
         // Switch to Available Packages tab (this will close repository if open)
         debugLog('UI', '📑 Switching to Available Packages tab');
         const availablePackagesBtn = document.querySelector('.subtab-btn[data-subtab="available-packages"]');
@@ -1101,21 +1101,21 @@ async function downloadQueuedPackages() {
             availablePackagesBtn.click();
             debugLog('UI', '✅ Tab switch triggered - repository panel closed');
         }
-        
+
         // Close verification modal
         updateVerificationStatus(verifyModal, 'Complete!', true);
         setTimeout(() => {
             verifyModal.remove();
             debugLog('UI', '✅ Verification modal closed');
         }, 800);
-        
+
         notyf.success(`Downloaded ${successful} package(s) successfully`);
         debugLog('SUCCESS', '✨ QUEUE COMPLETE: Switched to available packages');
     } else {
         // Close verification modal on failure
         verifyModal.remove();
     }
-    
+
     if (failed > 0) {
         notyf.error(`${failed} package(s) failed to download`);
     }
@@ -1135,11 +1135,11 @@ async function downloadSinglePackage(downloadUrl, packageName, showNotification 
                 package_name: packageName
             })
         });
-        
+
         debugLog('RESPONSE', `Download response received for: ${packageName}`, { status: response.status });
         const data = await response.json();
         debugLog('RESPONSE', `Download data for: ${packageName}`, data);
-        
+
         if (data.success) {
             if (showNotification) {
                 debugLog('SUCCESS', `Package downloaded: ${packageName}`);
@@ -1173,11 +1173,11 @@ const modalObserver = new MutationObserver((mutations) => {
                 // Check if it's a modal (z-index: 10000 in style attribute OR computed style)
                 const inlineZ = node.style && node.style.zIndex;
                 const computedZ = window.getComputedStyle ? window.getComputedStyle(node).zIndex : null;
-                
+
                 if (inlineZ === '10000' || computedZ === '10000') {
-                    debugLog('UI', '🚨 MODAL CREATED IN DOM', { 
+                    debugLog('UI', '🚨 MODAL CREATED IN DOM', {
                         tag: node.tagName,
-                        id: node.id, 
+                        id: node.id,
                         className: node.className,
                         inlineZIndex: inlineZ,
                         computedZIndex: computedZ,
@@ -1185,7 +1185,7 @@ const modalObserver = new MutationObserver((mutations) => {
                     });
                     console.trace('📍 Modal creation stack trace');
                 }
-                
+
                 // Also catch validation modal specifically
                 if (node.id === 'packageValidationModal' || node.className.includes('validation')) {
                     debugLog('UI', '🚨 VALIDATION ELEMENT CREATED', {
@@ -1201,10 +1201,10 @@ const modalObserver = new MutationObserver((mutations) => {
             if (node.nodeType === 1) {
                 const inlineZ = node.style && node.style.zIndex;
                 if (inlineZ === '10000' || node.id === 'packageValidationModal') {
-                    debugLog('UI', '🗑️ MODAL/VALIDATION REMOVED FROM DOM', { 
+                    debugLog('UI', '🗑️ MODAL/VALIDATION REMOVED FROM DOM', {
                         tag: node.tagName,
-                        id: node.id, 
-                        className: node.className 
+                        id: node.id,
+                        className: node.className
                     });
                 }
             }
@@ -1230,7 +1230,7 @@ function createVerificationModal(packageCount) {
         justify-content: center;
         z-index: 10000;
     `;
-    
+
     modal.innerHTML = `
         <div style="background: var(--surface-color, white); border-radius: 8px; padding: 2rem; min-width: 300px; text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);">
             <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
@@ -1245,7 +1245,7 @@ function createVerificationModal(packageCount) {
             </div>
         </div>
     `;
-    
+
     return modal;
 }
 
@@ -1358,7 +1358,7 @@ function updateVerificationStatus(modal, message, isComplete = false) {
     [style*="z-index: 10000"] [style*="justify-content: flex-end"] {
         justify-content: center !important;
     }
-    
+
     [style*="z-index: 10000"] .btn {
         flex: 1 1 100% !important;
         min-width: 100% !important;

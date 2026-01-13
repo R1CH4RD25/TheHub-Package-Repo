@@ -58,6 +58,7 @@ import os
 files = [
     "shared/enterprise-design-system.css",
     "shared/enterprise-components.css",
+    "shared/enterprise-header-sidebar.css",
     "shared/footer.css",
     "admin/admin-layout.css",
     "admin/admin-dashboard.css",

@@ -33,5 +33,4 @@ $breadcrumbs = [
 ];
 ?>
 
-
 <?php echo $__env->make('layouts.enterprise', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/woodson/thehub/resources/views/layouts/admin.blade.php ENDPATH**/ ?>
