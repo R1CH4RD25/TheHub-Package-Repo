@@ -147,14 +147,7 @@ class PackageController extends Controller
             $packageManager = new PackageManager();
             $result = $packageManager->uninstallPackage($packageId, $currentUser['id']);
 
-            if ($result['success']) {
-                AuditLogger::logDelete(
-                    'section_package_installs',
-                    null,
-                    ['package_id' => $packageId],
-                    $currentUser['id']
-                );
-            }
+            // Audit logging already handled in PackageManager->uninstallPackage()
 
             return response()->json($result);
         } catch (\Exception $e) {
