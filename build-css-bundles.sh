@@ -60,6 +60,7 @@ files = [
     "shared/enterprise-components.css",
     "shared/footer.css",
     "admin/admin-layout.css",
+    "admin/admin-dashboard.css",
     "admin/admin-theme.css",
     "admin/admin-animations.css",
     "shared/shared-media.css"
