@@ -50,8 +50,39 @@ if (count($orphanedInstalls) > 0) {
     echo "   ✅ No orphaned installations found\n\n";
 }
 
+// Find orphaned sections (no installation record)
+echo "3️⃣  Finding orphaned sections (installed but no installation record)...\n";
+$orphanedSections = $db->fetchAll("
+    SELECT s.* 
+    FROM sections s
+    LEFT JOIN section_installations si ON s.id = si.section_id
+    WHERE si.id IS NULL AND s.is_dynamic = 1
+");
+
+if (count($orphanedSections) > 0) {
+    echo "   Found " . count($orphanedSections) . " orphaned sections:\n";
+    foreach ($orphanedSections as $section) {
+        echo "   - Section ID {$section['id']}: {$section['slug']} ({$section['display_name']})\n";
+    }
+    
+    echo "\n   Deleting orphaned sections...\n";
+    foreach ($orphanedSections as $section) {
+        // Delete related data first
+        $db->execute("DELETE FROM section_field_definitions WHERE section_id = ?", [$section['id']]);
+        $db->execute("DELETE FROM section_role_access WHERE section_id = ?", [$section['id']]);
+        $db->execute("DELETE FROM section_access WHERE section_id = ?", [$section['id']]);
+        $db->execute("DELETE FROM section_administrators WHERE section_id = ?", [$section['id']]);
+        $db->execute("DELETE FROM section_menu_items WHERE section_id = ?", [$section['id']]);
+        $db->execute("DELETE FROM sections WHERE id = ?", [$section['id']]);
+        echo "   - Deleted section ID {$section['id']}\n";
+    }
+    echo "   ✅ Cleaned up " . count($orphanedSections) . " orphaned sections\n\n";
+} else {
+    echo "   ✅ No orphaned sections found\n\n";
+}
+
 // Find duplicate installations (same package_id installed multiple times)
-echo "3️⃣  Finding duplicate installations...\n";
+echo "4️⃣  Finding duplicate installations...\n";
 $duplicates = $db->fetchAll("
     SELECT package_id, COUNT(*) as count
     FROM section_installations
@@ -85,7 +116,7 @@ if (count($duplicates) > 0) {
 }
 
 // Show current state
-echo "4️⃣  Current package state:\n";
+echo "5️⃣  Current package state:\n";
 $installed = $db->fetchAll("
     SELECT si.*, s.display_name, s.slug, s.is_active
     FROM section_installations si
