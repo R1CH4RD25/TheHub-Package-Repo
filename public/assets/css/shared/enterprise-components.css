@@ -187,7 +187,7 @@
     .admin-shell {
         grid-template-columns: 240px minmax(0, 1fr);
     }
-    
+
     .admin-shell.has-collapsed-sidebar {
         grid-template-columns: 69px minmax(0, 1fr);
     }
