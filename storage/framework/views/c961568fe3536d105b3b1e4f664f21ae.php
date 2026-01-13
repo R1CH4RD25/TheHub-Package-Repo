@@ -9,6 +9,7 @@
     <?php if(isset($context) && $context === 'management'): ?>
         <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
     <?php else: ?>
+        <!-- DEBUG: filemtime=<?php echo e(filemtime(public_path('assets/css/admin-bundle.css'))); ?> stat=<?php echo e(fileatime(public_path('assets/css/admin-bundle.css'))); ?> -->
         <link rel="stylesheet" href="/assets/css/admin-bundle.css?v=<?php echo e(filemtime(public_path('assets/css/admin-bundle.css'))); ?>">
     <?php endif; ?>
 
@@ -121,6 +122,22 @@
     </script>
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
+
+    <!-- Admin Dashboard Debug -->
+    <script src="https://hub.woodsonisd.net/assets/js/debug-helper.js"></script>
+    <script>
+    // Auto-run overflow detection on admin pages
+    document.addEventListener('DOMContentLoaded', function() {
+        debugLog('UI', '🔍 Admin Dashboard: Auto-detecting overflow issues...');
+        setTimeout(() => {
+            if (typeof logElementWidths === 'function') {
+                logElementWidths();
+            } else {
+                console.error('❌ logElementWidths not found!');
+            }
+        }, 1500); // Wait 1.5s for content to render
+    });
+    </script>
 </body>
 </html>
 <?php /**PATH /var/www/woodson/thehub/resources/views/layouts/enterprise.blade.php ENDPATH**/ ?>

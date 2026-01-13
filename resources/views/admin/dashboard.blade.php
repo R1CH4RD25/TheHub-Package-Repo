@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Admin Modules Grid - Clean like Google Admin Console -->
-<div class="mgmt-modules-grid" style="margin-top: 0;">
+<div class="mgmt-modules-grid admin-responsive">
     <!-- User Management Module -->
         <a href="{{ route('admin.users') }}" class="mgmt-module-card">
             <div class="module-header">
