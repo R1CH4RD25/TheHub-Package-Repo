@@ -52,17 +52,17 @@
                 </p>
                 
                 <!-- Discover Packages from Repository -->
-                <div style="background: var(--primary-gradient, linear-gradient(135deg, var(--primary-color), var(--secondary-color))); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; color: white;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: var(--primary-color); border-radius: 6px; padding: 0.875rem 1rem; margin-bottom: 1rem; color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                         <div>
-                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">
+                            <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
                                 <i class="bi bi-cloud-download"></i> Discover Community Packages
                             </h3>
-                            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">
+                            <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">
                                 Browse and download packages from the official repository
                             </p>
                         </div>
-                        <button id="discoverPackagesBtn" class="btn" style="background: white; color: var(--primary-color); font-weight: 600; border: none;">
+                        <button id="discoverPackagesBtn" class="btn" style="background: white; color: var(--primary-color); font-weight: 600; border: none; white-space: nowrap;">
                             <i class="bi bi-search"></i> Browse Repository
                         </button>
                     </div>
