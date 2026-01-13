@@ -893,12 +893,22 @@ async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
     
     try {
         debugLog('API', `Starting download for: ${filename}`);
-        await downloadSinglePackage(downloadUrl, filename, true);
+        // Download without notifications/refreshes
+        await downloadSinglePackage(downloadUrl, filename, false);
         debugLog('SUCCESS', `Download complete for: ${filename}, closing modal...`);
-        button.closest('[style*="z-index: 10000"]').remove();
-        debugLog('UI', 'Modal removed');
+        // Close modal FIRST
+        const modal = button.closest('[style*="z-index: 10000"]');
+        if (modal) {
+            modal.remove();
+            debugLog('UI', 'Modal removed');
+        }
+        // THEN show notification and refresh
+        notyf.success('Package downloaded successfully!');
+        loadAvailablePackages();
+        await searchRepositoryPackages();
     } catch (error) {
         debugLog('ERROR', `Download failed for: ${filename}`, error);
+        notyf.error('Download failed: ' + (error.message || 'Unknown error'));
         button.disabled = false;
         button.innerHTML = '<i class="bi bi-download"></i> Download Now';
     }

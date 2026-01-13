@@ -889,27 +889,40 @@ function showPackageDetails(index, pkg) {
 }
 
 async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
-    debugLog('ACTION', `Download button clicked in modal for: ${filename}`);
+    debugLog('ACTION', `🚀 MODAL DOWNLOAD: ${filename}`);
+    debugLog('UI', 'Disabling button and showing spinner');
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
     
     try {
-        debugLog('API', `Starting download for: ${filename}`);
+        debugLog('API', `📥 Calling downloadSinglePackage for: ${filename}`);
         // Download without notifications/refreshes
         await downloadSinglePackage(downloadUrl, filename, false);
-        debugLog('SUCCESS', `Download complete for: ${filename}, closing modal...`);
-        // Close modal FIRST
+        debugLog('SUCCESS', `✅ Download complete for: ${filename}`);
+        
+        debugLog('UI', '🎯 Step 1: Finding modal element');
         const modal = button.closest('[style*="z-index: 10000"]');
         if (modal) {
+            debugLog('UI', '🗑️ Step 2: Removing modal from DOM');
             modal.remove();
-            debugLog('UI', 'Modal removed');
+            debugLog('UI', '✅ Step 3: Modal removed successfully');
+        } else {
+            debugLog('ERROR', '❌ Modal element not found in DOM!');
         }
-        // THEN show notification and refresh
+        
+        debugLog('UI', '🔔 Step 4: Showing success notification');
         notyf.success('Package downloaded successfully!');
-        loadAvailablePackages();
+        
+        debugLog('API', '🔄 Step 5: Refreshing available packages table');
+        await loadAvailablePackages();
+        debugLog('SUCCESS', '✅ Step 6: Available packages refreshed');
+        
+        debugLog('API', '🔄 Step 7: Refreshing repository search results');
         await searchRepositoryPackages();
+        debugLog('SUCCESS', '✨ COMPLETE: All steps finished, modal should be gone');
+        
     } catch (error) {
-        debugLog('ERROR', `Download failed for: ${filename}`, error);
+        debugLog('ERROR', `❌ DOWNLOAD FAILED for: ${filename}`, error);
         notyf.error('Download failed: ' + (error.message || 'Unknown error'));
         button.disabled = false;
         button.innerHTML = '<i class="bi bi-download"></i> Download Now';
