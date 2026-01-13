@@ -329,6 +329,10 @@ function uninstallPackage(packageId) {
                 } else {
                     notyf.error(data.error || 'Uninstall failed');
                 }
+            })
+            .catch(err => {
+                console.error('Uninstall error:', err);
+                notyf.error('Failed to uninstall package');
             });
         }
     });
