@@ -120,15 +120,7 @@ class PackageController extends Controller
             $packageManager = new PackageManager();
             $result = $packageManager->installPackage($id, $currentUser['id']);
 
-            if ($result['success']) {
-                AuditLogger::logCreate(
-                    'section_package_installs',
-                    $result['install_id'] ?? null,
-                    null,
-                    ['package_id' => $id],
-                    $currentUser['id']
-                );
-            }
+            // Audit logging already handled in PackageManager->installPackage()
 
             return response()->json($result);
         } catch (\Exception $e) {
