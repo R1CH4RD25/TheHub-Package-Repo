@@ -1035,14 +1035,7 @@ async function downloadQueuedPackages() {
     const packages = Array.from(downloadQueue).map(item => JSON.parse(item));
     debugLog('ACTION', `🚀 QUEUE DOWNLOAD: Starting batch of ${packages.length} packages`);
     
-    // Close repository discovery section to prevent refresh flash
-    debugLog('UI', '📦 Closing repository discovery panel');
-    const discoverySection = document.querySelector('.packages-subtab[data-subtab="package-discovery"]');
-    if (discoverySection && discoverySection.classList.contains('active')) {
-        discoverySection.classList.remove('active');
-    }
-    
-    // Show verification modal
+    // Show verification modal FIRST (before any UI changes)
     const verifyModal = createVerificationModal(packages.length);
     document.body.appendChild(verifyModal);
     debugLog('UI', '🔍 Verification modal shown');
@@ -1085,9 +1078,13 @@ async function downloadQueuedPackages() {
         await loadAvailablePackages();
         debugLog('SUCCESS', '✅ Available packages refreshed');
         
-        // Switch to Available Packages tab
+        // Switch to Available Packages tab (this will close repository if open)
         debugLog('UI', '📑 Switching to Available Packages tab');
-        document.querySelector('.packages-subtab[data-subtab="available-packages"]')?.classList.add('active');
+        const availablePackagesBtn = document.querySelector('.subtab-btn[data-subtab="available-packages"]');
+        if (availablePackagesBtn) {
+            availablePackagesBtn.click();
+            debugLog('UI', '✅ Tab switch triggered - repository panel closed');
+        }
         
         // Close verification modal
         updateVerificationStatus(verifyModal, 'Complete!', true);

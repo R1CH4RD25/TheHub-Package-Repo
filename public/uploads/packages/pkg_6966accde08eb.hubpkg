@@ -1,0 +1,1003 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "id": "com.woodson.reimbursement-request",
+    "name": "reimbursement-request",
+    "namespace": "reimb",
+    "display_name": "Reimbursement Request & Fuel Tracking",
+    "description": "Unified reimbursement system for monetary expenses and fuel trips, including YTD tracking, role-based approval, and analytics.",
+    "version": "1.0.0",
+    "author": "Woodson ISD Tech Department",
+    "author_email": "tech@woodsonisd.net",
+    "license": "Proprietary",
+    "category": "finance",
+    "tags": ["reimbursement", "finance", "fuel", "travel"],
+    "icon": "bi-cash-coin",
+    "base_url": "/pkg/reimb/",
+    "repository": "https://github.com/R1CH4RD25/TheHub",
+    "homepage": "https://github.com/R1CH4RD25/TheHub-Package-Repo/tree/main/packages/finance/reimbursement-request",
+    "support": "https://github.com/R1CH4RD25/TheHub/issues"
+  },
+
+  "compatibility": {
+    "hub_version": ">=1.0.0 <2.0.0",
+    "php_version": ">=8.0",
+    "mysql_version": ">=5.7",
+    "tested_up_to": "1.3.0"
+  },
+
+  "capabilities": [
+    "forms",
+    "tables",
+    "workflows",
+    "file-uploads",
+    "notifications",
+    "analytics",
+    "settings"
+  ],
+
+  "db": {
+    "entities": [
+      {
+        "name": "reimb_monetary_request",
+        "displayName": "Monetary Reimbursement Request",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "requester_id CHAR(26) NOT NULL",
+          "expense_date DATE NOT NULL",
+          "category VARCHAR(100) NOT NULL",
+          "amount DECIMAL(10,2) NOT NULL",
+          "vendor_name VARCHAR(255)",
+          "notes TEXT",
+          "receipt_type ENUM('upload','physical') NOT NULL DEFAULT 'upload'",
+          "receipt_file_id CHAR(26)",
+          "status ENUM('submitted','reviewing','needs_info','approved','denied','paid') NOT NULL DEFAULT 'submitted'",
+          "supervisor_id CHAR(26)",
+          "business_manager_id CHAR(26)",
+          "paid_date DATE",
+          "paid_reference VARCHAR(255)",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_requester (requester_id, status)",
+          "INDEX idx_status (status, expense_date)",
+          "INDEX idx_paid (status, paid_date)"
+        ]
+      },
+      {
+        "name": "reimb_fuel_trip",
+        "displayName": "Fuel Trip Record",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "user_id CHAR(26) NOT NULL",
+          "trip_date DATE NOT NULL",
+          "destination VARCHAR(255) NOT NULL",
+          "with_trailer BOOLEAN NOT NULL DEFAULT FALSE",
+          "trip_miles INT NOT NULL",
+          "category VARCHAR(100) NOT NULL",
+          "notes TEXT",
+          "acquiring_now BOOLEAN NOT NULL DEFAULT FALSE",
+          "gallons_earned DECIMAL(10,2) NOT NULL",
+          "gallons_claimed DECIMAL(10,2) NOT NULL DEFAULT 0.00",
+          "receipt_required BOOLEAN NOT NULL DEFAULT FALSE",
+          "receipt_type ENUM('upload','physical','none') NOT NULL DEFAULT 'none'",
+          "receipt_file_id CHAR(26)",
+          "fiscal_year_start DATE NULL",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "INDEX idx_tenant (tenant_id)",
+          "INDEX idx_user_date (user_id, trip_date)",
+          "INDEX idx_category (category, trip_date)"
+        ]
+      },
+      {
+        "name": "reimb_settings",
+        "displayName": "Reimbursement Settings",
+        "fields": [
+          "id CHAR(26) PRIMARY KEY",
+          "tenant_id CHAR(26) NOT NULL",
+          "fiscal_year_start_month TINYINT NOT NULL DEFAULT 9",
+          "fiscal_year_start_day TINYINT NOT NULL DEFAULT 1",
+          "allow_physical_receipts BOOLEAN NOT NULL DEFAULT TRUE",
+          "notify_submitter_on_submit BOOLEAN NOT NULL DEFAULT FALSE",
+          "notify_submitter_on_approval BOOLEAN NOT NULL DEFAULT FALSE",
+          "notify_supervisor_on_submit BOOLEAN NOT NULL DEFAULT FALSE",
+          "notify_bm_on_submit BOOLEAN NOT NULL DEFAULT FALSE",
+          "notify_bm_on_approval BOOLEAN NOT NULL DEFAULT FALSE",
+          "bm_notification_email VARCHAR(320)",
+          "admin_notification_email VARCHAR(320)",
+          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          "created_by CHAR(26)",
+          "updated_by CHAR(26)",
+          "is_deleted BOOLEAN DEFAULT FALSE"
+        ],
+        "indexes": [
+          "UNIQUE INDEX idx_tenant_unique (tenant_id)",
+          "INDEX idx_tenant (tenant_id)"
+        ]
+      }
+    ],
+    "migrations": []
+  },
+
+  "modules": [
+    {
+      "type": "Form",
+      "slug": "monetary-request-form",
+      "displayName": "Submit Monetary Reimbursement",
+      "entity": "reimb_monetary_request",
+      "route": "/pkg/reimb/monetary-request-form",
+      "icon": "bi-cash-coin",
+      "access": ["reimb_submitter", "reimb_supervisor", "reimb_bm", "reimb_admin"],
+      "fields": [
+        {
+          "key": "expense_date",
+          "fieldType": "date",
+          "label": "Date of Expense",
+          "required": true,
+          "validation": { "maxDate": "today" },
+          "helpText": "The date the expense occurred"
+        },
+        {
+          "key": "category",
+          "fieldType": "select",
+          "label": "Category",
+          "required": true,
+          "options": [
+            { "value": "meals", "label": "Meals" },
+            { "value": "supplies", "label": "Supplies / Classroom" },
+            { "value": "travel_meals", "label": "Travel Meals" },
+            { "value": "student_activity", "label": "Student Activity" },
+            { "value": "other", "label": "Other" }
+          ]
+        },
+        {
+          "key": "amount",
+          "fieldType": "currency",
+          "label": "Amount",
+          "required": true,
+          "validation": {
+            "minValue": 0.01,
+            "maxValue": 10000
+          }
+        },
+        {
+          "key": "vendor_name",
+          "fieldType": "text",
+          "label": "Vendor / Payee",
+          "required": false,
+          "validation": { "maxLength": 255 }
+        },
+        {
+          "key": "receipt_type",
+          "fieldType": "select",
+          "label": "Receipt Type",
+          "required": true,
+          "helpText": "Choose whether you are uploading a receipt or turning in a physical copy.",
+          "options": [
+            { "value": "upload", "label": "Upload Now" },
+            { "value": "physical", "label": "Will Turn In Physical Receipt" }
+          ]
+        },
+        {
+          "key": "receipt_file_id",
+          "fieldType": "file",
+          "label": "Upload Receipt",
+          "required": false,
+          "showIf": { "receipt_type": "upload" },
+          "validation": {
+            "maxSize": 10485760,
+            "allowedExtensions": ["pdf", "jpg", "jpeg", "png"],
+            "allowedMimeTypes": ["application/pdf", "image/jpeg", "image/png"]
+          }
+        },
+        {
+          "key": "notes",
+          "fieldType": "textarea",
+          "label": "Notes / Justification",
+          "required": false,
+          "validation": { "maxLength": 2000 },
+          "rows": 4
+        }
+      ],
+      "validation": {
+        "rateLimit": {
+          "perUser": 10,
+          "perMinute": 5,
+          "perHour": 20
+        }
+      },
+      "onSubmit": {
+        "notify": ["reimb_bm"],
+        "redirect": "/pkg/reimb/my-requests"
+      }
+    },
+
+    {
+      "type": "Form",
+      "slug": "fuel-trip-form",
+      "displayName": "Log Fuel Trip",
+      "entity": "reimb_fuel_trip",
+      "route": "/pkg/reimb/fuel-trip-form",
+      "icon": "bi-fuel-pump",
+      "access": ["reimb_submitter", "reimb_bm", "reimb_admin"],
+      "fields": [
+        {
+          "key": "trip_date",
+          "fieldType": "date",
+          "label": "Trip Date",
+          "required": true,
+          "validation": { "maxDate": "today" }
+        },
+        {
+          "key": "destination",
+          "fieldType": "text",
+          "label": "Destination",
+          "required": true,
+          "validation": { "maxLength": 255 }
+        },
+        {
+          "key": "with_trailer",
+          "fieldType": "checkbox",
+          "label": "With Trailer?",
+          "required": false,
+          "helpText": "Check if you used a trailer on this trip"
+        },
+        {
+          "key": "trip_miles",
+          "fieldType": "number",
+          "label": "Trip Mileage (Round Trip)",
+          "required": true,
+          "validation": { "minValue": 1, "maxValue": 2000 }
+        },
+        {
+          "key": "category",
+          "fieldType": "select",
+          "label": "Category of Trip",
+          "required": true,
+          "options": [
+            { "value": "athletics", "label": "Athletics" },
+            { "value": "field_trip", "label": "Field Trip" },
+            { "value": "training", "label": "Training / PD" },
+            { "value": "student_transport", "label": "Student Transport" },
+            { "value": "other", "label": "Other" }
+          ]
+        },
+        {
+          "key": "notes",
+          "fieldType": "textarea",
+          "label": "Notes",
+          "required": false,
+          "validation": { "maxLength": 2000 }
+        },
+        {
+          "key": "acquiring_now",
+          "fieldType": "checkbox",
+          "label": "Acquiring Fuel at this time?",
+          "required": false,
+          "helpText": "Check if you are claiming fuel gallons now"
+        },
+        {
+          "key": "gallons_claimed",
+          "fieldType": "number",
+          "label": "Gallons Being Received Now",
+          "required": false,
+          "showIf": { "acquiring_now": true },
+          "validation": { "minValue": 0, "maxValue": 500 }
+        },
+        {
+          "key": "receipt_required",
+          "fieldType": "checkbox",
+          "label": "Receipt Provided?",
+          "required": false,
+          "showIf": { "acquiring_now": true }
+        },
+        {
+          "key": "receipt_type",
+          "fieldType": "select",
+          "label": "Fuel Receipt Type",
+          "required": false,
+          "showIf": { "acquiring_now": true },
+          "options": [
+            { "value": "upload", "label": "Upload Receipt / Pump Photo" },
+            { "value": "physical", "label": "Will Turn In Physical Receipt" },
+            { "value": "none", "label": "No Receipt (Not Claiming Fuel)" }
+          ]
+        },
+        {
+          "key": "receipt_file_id",
+          "fieldType": "file",
+          "label": "Upload Fuel Receipt / Pump Photo",
+          "required": false,
+          "showIf": {
+            "acquiring_now": true,
+            "receipt_type": "upload"
+          },
+          "validation": {
+            "maxSize": 10485760,
+            "allowedExtensions": ["pdf", "jpg", "jpeg", "png"],
+            "allowedMimeTypes": ["application/pdf", "image/jpeg", "image/png"]
+          }
+        }
+      ],
+      "validation": {
+        "rateLimit": {
+          "perUser": 20,
+          "perMinute": 10,
+          "perHour": 40
+        }
+      },
+      "onSubmit": {
+        "notify": [],
+        "redirect": "/pkg/reimb/my-fuel"
+      }
+    },
+
+    {
+      "type": "TableView",
+      "slug": "my-requests",
+      "displayName": "My Reimbursement Requests",
+      "entity": "reimb_monetary_request",
+      "route": "/pkg/reimb/my-requests",
+      "icon": "bi-list-check",
+      "access": ["reimb_submitter", "reimb_supervisor", "reimb_bm", "reimb_admin"],
+      "columns": [
+        { "key": "expense_date", "label": "Date", "sortable": true },
+        { "key": "category", "label": "Category", "filterable": true },
+        { "key": "amount", "label": "Amount", "sortable": true, "format": "currency" },
+        { "key": "status", "label": "Status", "filterable": true, "badge": true },
+        { "key": "paid_date", "label": "Paid Date", "sortable": true, "format": "date" }
+      ],
+      "filters": [
+        { "key": "status", "type": "select", "label": "Status" },
+        { "key": "expense_date", "type": "dateRange", "label": "Date Range" }
+      ],
+      "actions": [
+        {
+          "key": "view",
+          "label": "View Details",
+          "icon": "bi-eye",
+          "targetModule": "monetary-request-detail"
+        },
+        {
+          "key": "edit",
+          "label": "Edit",
+          "icon": "bi-pencil",
+          "permission": "reimb_submitter",
+          "conditions": { "status_not_in": ["paid"] }
+        }
+      ],
+      "export": {
+        "enabled": true,
+        "formats": ["csv", "xlsx"]
+      },
+      "defaultSort": { "field": "expense_date", "direction": "DESC" },
+      "pagination": {
+        "enabled": true,
+        "perPage": 25,
+        "options": [10, 25, 50, 100]
+      }
+    },
+
+    {
+      "type": "TableView",
+      "slug": "my-fuel",
+      "displayName": "My Fuel Trips",
+      "entity": "reimb_fuel_trip",
+      "route": "/pkg/reimb/my-fuel",
+      "icon": "bi-fuel-pump",
+      "access": ["reimb_submitter", "reimb_bm", "reimb_admin"],
+      "columns": [
+        { "key": "trip_date", "label": "Date", "sortable": true },
+        { "key": "destination", "label": "Destination", "filterable": true },
+        { "key": "trip_miles", "label": "Miles", "sortable": true },
+        { "key": "gallons_earned", "label": "Gallons Earned", "sortable": true },
+        { "key": "gallons_claimed", "label": "Gallons Claimed", "sortable": true }
+      ],
+      "filters": [
+        { "key": "trip_date", "type": "dateRange", "label": "Date Range" },
+        { "key": "category", "type": "select", "label": "Category" }
+      ],
+      "actions": [
+        {
+          "key": "view",
+          "label": "View Details",
+          "icon": "bi-eye",
+          "targetModule": "fuel-trip-detail"
+        }
+      ],
+      "export": {
+        "enabled": true,
+        "formats": ["csv", "xlsx"]
+      },
+      "defaultSort": { "field": "trip_date", "direction": "DESC" },
+      "pagination": {
+        "enabled": true,
+        "perPage": 25,
+        "options": [10, 25, 50, 100]
+      }
+    },
+
+    {
+      "type": "TableView",
+      "slug": "admin-reimbursement-dashboard",
+      "displayName": "Reimbursement Dashboard",
+      "entity": "reimb_monetary_request",
+      "route": "/pkg/reimb/admin-reimbursement-dashboard",
+      "icon": "bi-speedometer2",
+      "access": ["reimb_supervisor", "reimb_bm", "reimb_admin"],
+      "columns": [
+        { "key": "expense_date", "label": "Date", "sortable": true },
+        { "key": "requester_id", "label": "Requester", "lookup": "user" },
+        { "key": "category", "label": "Category", "filterable": true },
+        { "key": "amount", "label": "Amount", "sortable": true, "format": "currency" },
+        { "key": "status", "label": "Status", "filterable": true, "badge": true },
+        { "key": "paid_date", "label": "Paid Date", "sortable": true, "format": "date" }
+      ],
+      "filters": [
+        { "key": "status", "type": "select", "label": "Status" },
+        { "key": "category", "type": "select", "label": "Category" },
+        { "key": "expense_date", "type": "dateRange", "label": "Expense Date Range" }
+      ],
+      "actions": [
+        {
+          "key": "view",
+          "label": "View",
+          "icon": "bi-eye",
+          "targetModule": "monetary-request-detail"
+        },
+        {
+          "key": "approve",
+          "label": "Approve",
+          "icon": "bi-check-circle",
+          "permission": "reimb_supervisor",
+          "workflowStep": "approved",
+          "conditions": { "status_in": ["submitted", "reviewing", "needs_info"] }
+        },
+        {
+          "key": "deny",
+          "label": "Deny",
+          "icon": "bi-x-circle",
+          "permission": "reimb_supervisor",
+          "workflowStep": "denied",
+          "conditions": { "status_in": ["submitted", "reviewing", "needs_info"] }
+        },
+        {
+          "key": "mark_paid",
+          "label": "Mark Paid",
+          "icon": "bi-cash-stack",
+          "permission": "reimb_bm",
+          "workflowStep": "paid",
+          "conditions": { "status_in": ["approved"] }
+        }
+      ],
+      "export": {
+        "enabled": true,
+        "formats": ["csv", "xlsx"]
+      },
+      "defaultSort": { "field": "expense_date", "direction": "DESC" },
+      "pagination": {
+        "enabled": true,
+        "perPage": 50,
+        "options": [25, 50, 100]
+      }
+    },
+
+    {
+      "type": "TableView",
+      "slug": "admin-fuel-dashboard",
+      "displayName": "Fuel Ledger Dashboard",
+      "entity": "reimb_fuel_trip",
+      "route": "/pkg/reimb/admin-fuel-dashboard",
+      "icon": "bi-fuel-pump",
+      "access": ["reimb_bm", "reimb_admin"],
+      "columns": [
+        { "key": "trip_date", "label": "Date", "sortable": true },
+        { "key": "user_id", "label": "User", "lookup": "user" },
+        { "key": "destination", "label": "Destination", "filterable": true },
+        { "key": "trip_miles", "label": "Miles", "sortable": true },
+        { "key": "gallons_earned", "label": "Gallons Earned", "sortable": true },
+        { "key": "gallons_claimed", "label": "Gallons Claimed", "sortable": true }
+      ],
+      "filters": [
+        { "key": "trip_date", "type": "dateRange", "label": "Date Range" },
+        { "key": "category", "type": "select", "label": "Category" }
+      ],
+      "actions": [
+        {
+          "key": "view",
+          "label": "View",
+          "icon": "bi-eye",
+          "targetModule": "fuel-trip-detail"
+        },
+        {
+          "key": "delete_trip",
+          "label": "Remove Trip",
+          "icon": "bi-trash",
+          "permission": "reimb_admin"
+        }
+      ],
+      "export": {
+        "enabled": true,
+        "formats": ["csv", "xlsx"]
+      },
+      "defaultSort": { "field": "trip_date", "direction": "DESC" },
+      "pagination": {
+        "enabled": true,
+        "perPage": 50,
+        "options": [25, 50, 100]
+      }
+    },
+
+    {
+      "type": "Workflow",
+      "slug": "reimbursement-workflow",
+      "displayName": "Reimbursement Workflow",
+      "entity": "reimb_monetary_request",
+      "route": "/pkg/reimb/reimbursement-workflow",
+      "icon": "bi-diagram-3",
+      "access": ["reimb_supervisor", "reimb_bm", "reimb_admin"],
+      "steps": [
+        {
+          "id": "submitted",
+          "label": "Submitted",
+          "description": "Request has been submitted by the employee.",
+          "nextSteps": ["reviewing", "needs_info", "denied"],
+          "requiredRole": "reimb_submitter"
+        },
+        {
+          "id": "reviewing",
+          "label": "Reviewing",
+          "description": "Supervisor or business manager is reviewing the request.",
+          "nextSteps": ["needs_info", "approved", "denied"],
+          "requiredRole": "reimb_supervisor"
+        },
+        {
+          "id": "needs_info",
+          "label": "Needs More Info",
+          "description": "Additional information is required from the requester.",
+          "nextSteps": ["reviewing"],
+          "requiredRole": "reimb_supervisor"
+        },
+        {
+          "id": "approved",
+          "label": "Approved",
+          "description": "Request has been approved and is awaiting payment.",
+          "nextSteps": ["paid"],
+          "requiredRole": "reimb_supervisor"
+        },
+        {
+          "id": "denied",
+          "label": "Denied",
+          "description": "Request has been denied.",
+          "nextSteps": [],
+          "requiredRole": "reimb_supervisor"
+        },
+        {
+          "id": "paid",
+          "label": "Paid",
+          "description": "Request has been fully paid.",
+          "nextSteps": [],
+          "requiredRole": "reimb_bm"
+        }
+      ]
+    },
+
+    {
+      "type": "Analytics",
+      "slug": "reimbursement-analytics",
+      "displayName": "Reimbursement Analytics",
+      "entity": "reimb_monetary_request",
+      "route": "/pkg/reimb/reimbursement-analytics",
+      "icon": "bi-graph-up",
+      "access": ["reimb_bm", "reimb_admin"],
+      "config": {
+        "tabs": [
+          {
+            "key": "monetary",
+            "label": "Monetary Analytics",
+            "charts": [
+              {
+                "key": "spend_by_category",
+                "type": "bar",
+                "title": "Spend by Category (Current Fiscal Year)",
+                "groupBy": "category",
+                "aggregate": "SUM(amount)"
+              },
+              {
+                "key": "spend_over_time",
+                "type": "line",
+                "title": "Monthly Spend (Current Fiscal Year)",
+                "groupBy": "MONTH(expense_date)",
+                "aggregate": "SUM(amount)"
+              }
+            ]
+          },
+          {
+            "key": "fuel",
+            "label": "Fuel Analytics",
+            "entity": "reimb_fuel_trip",
+            "charts": [
+              {
+                "key": "gallons_earned_by_user",
+                "type": "bar",
+                "title": "Gallons Earned by User (Current Fiscal Year)",
+                "groupBy": "user_id",
+                "aggregate": "SUM(gallons_earned)"
+              },
+              {
+                "key": "gallons_claimed_over_time",
+                "type": "line",
+                "title": "Gallons Claimed Over Time",
+                "groupBy": "MONTH(trip_date)",
+                "aggregate": "SUM(gallons_claimed)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Form",
+      "slug": "reimbursement-settings",
+      "displayName": "Reimbursement Settings",
+      "entity": "reimb_settings",
+      "route": "/pkg/reimb/reimbursement-settings",
+      "icon": "bi-gear",
+      "access": ["reimb_admin"],
+      "fields": [
+        {
+          "key": "fiscal_year_start_month",
+          "fieldType": "number",
+          "label": "Fiscal Year Start Month (1–12)",
+          "required": true,
+          "validation": { "minValue": 1, "maxValue": 12 }
+        },
+        {
+          "key": "fiscal_year_start_day",
+          "fieldType": "number",
+          "label": "Fiscal Year Start Day (1–31)",
+          "required": true,
+          "validation": { "minValue": 1, "maxValue": 31 }
+        },
+        {
+          "key": "allow_physical_receipts",
+          "fieldType": "checkbox",
+          "label": "Allow Physical Receipts",
+          "required": false
+        },
+        {
+          "key": "notify_submitter_on_submit",
+          "fieldType": "checkbox",
+          "label": "Notify Submitter on Submit",
+          "required": false
+        },
+        {
+          "key": "notify_submitter_on_approval",
+          "fieldType": "checkbox",
+          "label": "Notify Submitter on Approval",
+          "required": false
+        },
+        {
+          "key": "notify_supervisor_on_submit",
+          "fieldType": "checkbox",
+          "label": "Notify Supervisor on Submit",
+          "required": false
+        },
+        {
+          "key": "notify_bm_on_submit",
+          "fieldType": "checkbox",
+          "label": "Notify Business Manager on Submit",
+          "required": false
+        },
+        {
+          "key": "notify_bm_on_approval",
+          "fieldType": "checkbox",
+          "label": "Notify Business Manager on Approval",
+          "required": false
+        },
+        {
+          "key": "bm_notification_email",
+          "fieldType": "email",
+          "label": "Business Manager Notification Email",
+          "required": false,
+          "validation": { "maxLength": 320 }
+        },
+        {
+          "key": "admin_notification_email",
+          "fieldType": "email",
+          "label": "Admin Notification Email",
+          "required": false,
+          "validation": { "maxLength": 320 }
+        }
+      ],
+      "validation": {
+        "rateLimit": {
+          "perUser": 5,
+          "perMinute": 2,
+          "perHour": 10
+        }
+      },
+      "onSubmit": {
+        "notify": [],
+        "redirect": "/pkg/reimb/reimbursement-settings"
+      }
+    },
+
+    {
+      "type": "Form",
+      "slug": "monetary-request-detail",
+      "displayName": "Monetary Request Detail",
+      "entity": "reimb_monetary_request",
+      "route": "/pkg/reimb/monetary-request-detail",
+      "icon": "bi-file-text",
+      "access": ["reimb_submitter", "reimb_supervisor", "reimb_bm", "reimb_admin"],
+      "mode": "readOnly",
+      "fields": [
+        { "key": "expense_date", "fieldType": "date", "label": "Date of Expense", "required": true },
+        { "key": "category", "fieldType": "text", "label": "Category", "required": true },
+        { "key": "amount", "fieldType": "currency", "label": "Amount", "required": true },
+        { "key": "vendor_name", "fieldType": "text", "label": "Vendor / Payee", "required": false },
+        { "key": "status", "fieldType": "text", "label": "Status", "required": true },
+        { "key": "paid_date", "fieldType": "date", "label": "Paid Date", "required": false },
+        { "key": "notes", "fieldType": "textarea", "label": "Notes / Justification", "required": false }
+      ]
+    },
+
+    {
+      "type": "Form",
+      "slug": "fuel-trip-detail",
+      "displayName": "Fuel Trip Detail",
+      "entity": "reimb_fuel_trip",
+      "route": "/pkg/reimb/fuel-trip-detail",
+      "icon": "bi-file-text",
+      "access": ["reimb_submitter", "reimb_bm", "reimb_admin"],
+      "mode": "readOnly",
+      "fields": [
+        { "key": "trip_date", "fieldType": "date", "label": "Trip Date", "required": true },
+        { "key": "destination", "fieldType": "text", "label": "Destination", "required": true },
+        { "key": "with_trailer", "fieldType": "checkbox", "label": "With Trailer?", "required": false },
+        { "key": "trip_miles", "fieldType": "number", "label": "Trip Mileage", "required": true },
+        { "key": "category", "fieldType": "text", "label": "Category of Trip", "required": true },
+        { "key": "gallons_earned", "fieldType": "number", "label": "Gallons Earned", "required": true },
+        { "key": "gallons_claimed", "fieldType": "number", "label": "Gallons Claimed", "required": true },
+        { "key": "notes", "fieldType": "textarea", "label": "Notes", "required": false }
+      ]
+    }
+  ],
+
+  "fields": [
+    {
+      "name": "expense_date",
+      "type": "date",
+      "label": "Expense Date",
+      "required": true,
+      "order": 1,
+      "searchable": true,
+      "visible_in_list": true,
+      "validation": { "maxDate": "today" }
+    },
+    {
+      "name": "category",
+      "type": "select",
+      "label": "Category",
+      "required": true,
+      "order": 2,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "amount",
+      "type": "currency",
+      "label": "Amount",
+      "required": true,
+      "order": 3,
+      "visible_in_list": true
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "label": "Status",
+      "required": true,
+      "order": 4,
+      "visible_in_list": true,
+      "default_value": "submitted",
+      "options": [
+        { "value": "submitted", "label": "Submitted", "color": "info" },
+        { "value": "reviewing", "label": "Reviewing", "color": "warning" },
+        { "value": "needs_info", "label": "Needs Info", "color": "secondary" },
+        { "value": "approved", "label": "Approved", "color": "primary" },
+        { "value": "denied", "label": "Denied", "color": "danger" },
+        { "value": "paid", "label": "Paid", "color": "success" }
+      ]
+    },
+    {
+      "name": "trip_date",
+      "type": "date",
+      "label": "Trip Date",
+      "required": true,
+      "order": 5,
+      "searchable": true,
+      "visible_in_list": true
+    },
+    {
+      "name": "destination",
+      "type": "text",
+      "label": "Destination",
+      "required": true,
+      "order": 6,
+      "searchable": true,
+      "visible_in_list": true,
+      "validation": { "maxLength": 255 }
+    },
+    {
+      "name": "trip_miles",
+      "type": "number",
+      "label": "Trip Mileage",
+      "required": true,
+      "order": 7,
+      "visible_in_list": true
+    },
+    {
+      "name": "gallons_earned",
+      "type": "number",
+      "label": "Gallons Earned",
+      "required": true,
+      "order": 8,
+      "visible_in_list": true
+    },
+    {
+      "name": "gallons_claimed",
+      "type": "number",
+      "label": "Gallons Claimed",
+      "required": true,
+      "order": 9,
+      "visible_in_list": true
+    },
+    {
+      "name": "notes",
+      "type": "textarea",
+      "label": "Notes",
+      "required": false,
+      "order": 10,
+      "searchable": true,
+      "visible_in_list": false,
+      "validation": { "maxLength": 2000 }
+    }
+  ],
+
+  "permissions": {
+    "roles": [
+      {
+        "key": "reimb_submitter",
+        "displayName": "Reimbursement Submitter",
+        "description": "Can submit and view their own monetary and fuel requests; can edit non-paid monetary requests."
+      },
+      {
+        "key": "reimb_supervisor",
+        "displayName": "Reimbursement Supervisor",
+        "description": "Can review monetary reimbursement requests and advance workflow up to approved/denied."
+      },
+      {
+        "key": "reimb_bm",
+        "displayName": "Business Manager",
+        "description": "Can approve and mark monetary requests as paid, manage fuel trips, and view analytics."
+      },
+      {
+        "key": "reimb_admin",
+        "displayName": "Reimbursement Admin",
+        "description": "Full control, including settings, dashboards, fuel, and analytics."
+      }
+    ],
+    "roleMatrix": {
+      "reimb_submitter": [
+        "module:monetary-request-form:create",
+        "module:fuel-trip-form:create",
+        "module:my-requests:read",
+        "module:my-requests:update",
+        "module:my-fuel:read",
+        "module:monetary-request-detail:read",
+        "module:fuel-trip-detail:read"
+      ],
+      "reimb_supervisor": [
+        "module:admin-reimbursement-dashboard:read",
+        "module:admin-reimbursement-dashboard:update",
+        "module:reimbursement-workflow:advance",
+        "module:reimbursement-analytics:read",
+        "module:monetary-request-detail:read"
+      ],
+      "reimb_bm": [
+        "module:admin-reimbursement-dashboard:*",
+        "module:admin-fuel-dashboard:*",
+        "module:reimbursement-analytics:*",
+        "module:reimbursement-workflow:advance",
+        "module:monetary-request-detail:read",
+        "module:fuel-trip-detail:read"
+      ],
+      "reimb_admin": [
+        "module:*:*"
+      ]
+    },
+    "defaultAccess": {
+      "staff": ["reimb_submitter"],
+      "teacher": ["reimb_submitter"],
+      "business_manager": ["reimb_bm"],
+      "principal": ["reimb_supervisor"],
+      "admin": ["reimb_admin"],
+      "super_admin": ["reimb_admin"]
+    }
+  },
+
+  "menu_items": [
+    {
+      "label": "Submit Monetary Request",
+      "route": "/pkg/reimb/monetary-request-form",
+      "icon": "bi-cash-coin",
+      "order": 1,
+      "minimum_role": "reimb_submitter"
+    },
+    {
+      "label": "Log Fuel Trip",
+      "route": "/pkg/reimb/fuel-trip-form",
+      "icon": "bi-fuel-pump",
+      "order": 2,
+      "minimum_role": "reimb_submitter"
+    },
+    {
+      "label": "My Requests",
+      "route": "/pkg/reimb/my-requests",
+      "icon": "bi-list-check",
+      "order": 3,
+      "minimum_role": "reimb_submitter"
+    },
+    {
+      "label": "My Fuel",
+      "route": "/pkg/reimb/my-fuel",
+      "icon": "bi-fuel-pump",
+      "order": 4,
+      "minimum_role": "reimb_submitter"
+    },
+    {
+      "label": "Reimbursement Dashboard",
+      "route": "/pkg/reimb/admin-reimbursement-dashboard",
+      "icon": "bi-speedometer2",
+      "order": 10,
+      "minimum_role": "reimb_supervisor"
+    },
+    {
+      "label": "Fuel Dashboard",
+      "route": "/pkg/reimb/admin-fuel-dashboard",
+      "icon": "bi-fuel-pump",
+      "order": 11,
+      "minimum_role": "reimb_bm"
+    },
+    {
+      "label": "Analytics",
+      "route": "/pkg/reimb/reimbursement-analytics",
+      "icon": "bi-graph-up",
+      "order": 12,
+      "minimum_role": "reimb_bm"
+    },
+    {
+      "label": "Settings",
+      "route": "/pkg/reimb/reimbursement-settings",
+      "icon": "bi-gear",
+      "order": 20,
+      "minimum_role": "reimb_admin"
+    }
+  ]
+}
