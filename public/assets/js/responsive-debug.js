@@ -71,7 +71,12 @@
       const sidebarWidth = sidebar.offsetWidth;
       const computedStyle = window.getComputedStyle(sidebar);
       const computedWidth = computedStyle.width;
-      sidebarInfo = ` | Sidebar: ${sidebarWidth}px (computed: ${computedWidth})`;
+      const display = computedStyle.display;
+      const visibility = computedStyle.visibility;
+      const gridColumn = computedStyle.gridColumn;
+      sidebarInfo = ` | Sidebar: ${sidebarWidth}px (computed: ${computedWidth}, display: ${display}, visibility: ${visibility}, grid-column: ${gridColumn})`;
+    } else {
+      sidebarInfo = ' | Sidebar: NOT FOUND';
     }
     
     console.log(
