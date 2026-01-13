@@ -104,6 +104,7 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/debug-helper.js') }}"></script>
+<script src="{{ asset('assets/js/admin.js') }}"></script>
 <script>
 const csrfToken = '{{ csrf_token() }}';
 const isSuperAdmin = {{ $isSuperAdmin ? 'true' : 'false' }};
