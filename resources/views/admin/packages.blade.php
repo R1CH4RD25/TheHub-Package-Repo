@@ -430,18 +430,27 @@ loadInstalledPackages();
 let discoveryPackages = [];
 let downloadQueue = new Set();
 let currentSort = { field: 'name', direction: 'asc' };
-let currentFilter = { category: 'all', status: 'all', search: '' };
+let currentFilter = { categories: [], authors: [], status: 'all', search: '' };
 
 document.getElementById('discoverPackagesBtn')?.addEventListener('click', async function() {
     Swal.fire({
         title: '<i class="bi bi-cloud-download"></i> Package Repository',
         html: `
             <div style="margin-bottom: 1rem;">
-                <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-                    <input type="text" id="pkgSearch" placeholder="Search packages..." style="flex: 1; min-width: 200px; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
-                    <select id="pkgCategory" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
-                        <option value="all">All Categories</option>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <input type="text" id="pkgSearch" placeholder="Search packages..." style="padding: 0.5rem; border: 2px solid var(--primary-color); border-radius: 4px; outline: none;">
+                    <select id="pkgCategory" multiple size="1" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <option value="" disabled>Select Categories...</option>
                     </select>
+                    <select id="pkgAuthor" multiple size="1" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <option value="" disabled>Select Authors...</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                    <div id="selectedCategories" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                    <div id="selectedAuthors" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
                     <select id="pkgStatus" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
                         <option value="all">All Status</option>
                         <option value="available">Available</option>
@@ -476,7 +485,16 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
             });
             
             document.getElementById('pkgCategory').addEventListener('change', (e) => {
-                currentFilter.category = e.target.value;
+                const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
+                currentFilter.categories = selectedOptions;
+                updateFilterBadges();
+                renderDiscoveryPackages(discoveryPackages);
+            });
+            
+            document.getElementById('pkgAuthor').addEventListener('change', (e) => {
+                const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
+                currentFilter.authors = selectedOptions;
+                updateFilterBadges();
                 renderDiscoveryPackages(discoveryPackages);
             });
             
@@ -515,13 +533,23 @@ async function searchRepositoryPackages() {
             discoveryPackages = data.packages;
             
             // Populate category dropdown
-            const categories = [...new Set(data.packages.map(p => p.category || 'other'))];
+            const categories = [...new Set(data.packages.map(p => p.category || 'other'))].sort();
             const catSelect = document.getElementById('pkgCategory');
             categories.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
                 option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
                 catSelect.appendChild(option);
+            });
+            
+            // Populate author dropdown
+            const authors = [...new Set(data.packages.map(p => p.author))].sort();
+            const authorSelect = document.getElementById('pkgAuthor');
+            authors.forEach(author => {
+                const option = document.createElement('option');
+                option.value = author;
+                option.textContent = author;
+                authorSelect.appendChild(option);
             });
             
             renderDiscoveryPackages(discoveryPackages);
@@ -544,8 +572,13 @@ function renderDiscoveryPackages(packages) {
     
     // Filter packages
     let filtered = packages.filter(pkg => {
-        // Category filter
-        if (currentFilter.category !== 'all' && pkg.category !== currentFilter.category) {
+        // Category filter (multi-select)
+        if (currentFilter.categories.length > 0 && !currentFilter.categories.includes(pkg.category || 'other')) {
+            return false;
+        }
+        
+        // Author filter (multi-select)
+        if (currentFilter.authors.length > 0 && !currentFilter.authors.includes(pkg.author)) {
             return false;
         }
         
@@ -598,6 +631,7 @@ function renderDiscoveryPackages(packages) {
         <table class="data-table" style="width: 100%;">
             <thead>
                 <tr>
+                    <th style="width: 40px;"><input type="checkbox" id="selectAllPkgs" onchange="toggleSelectAll(this.checked)" style="width: 18px; height: 18px;"></th>
                     <th style="cursor: pointer;" onclick="sortPackages('name')">
                         Package Name ${currentSort.field === 'name' ? (currentSort.direction === 'asc' ? '▲' : '▼') : ''}
                     </th>
@@ -617,14 +651,23 @@ function renderDiscoveryPackages(packages) {
                 </tr>
             </thead>
             <tbody>
-                ${filtered.map((pkg, idx) => `
-                    <tr style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})">
-                        <td><strong>${pkg.display_name || pkg.name}</strong></td>
-                        <td><span class="badge" style="background: var(--primary-color);">${pkg.category || 'other'}</span></td>
-                        <td>${pkg.version}</td>
-                        <td>${pkg.author}</td>
-                        <td>${(pkg.size / 1024).toFixed(1)} KB</td>
-                        <td>
+                ${filtered.map((pkg, idx) => {
+                    const isQueueable = !pkg.is_installed && !pkg.is_downloaded;
+                    const inQueue = downloadQueue.has(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }));
+                    return `
+                    <tr>
+                        <td onclick="event.stopPropagation();">
+                            ${isQueueable ? 
+                                `<input type="checkbox" ${inQueue ? 'checked' : ''} onchange="toggleQueue('${pkg.download_url}', '${pkg.filename}', this.checked)" style="width: 18px; height: 18px;">` :
+                                '<span style="color: var(--text-muted);">—</span>'
+                            }
+                        </td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><strong>${pkg.display_name || pkg.name}</strong></td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span class="badge" style="background: var(--primary-color);">${pkg.category || 'other'}</span></td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${pkg.version}</span></td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${pkg.author}</span></td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})"><span>${(pkg.size / 1024).toFixed(1)} KB</span></td>
+                        <td style="cursor: pointer;" onclick="showPackageDetails(${idx}, ${JSON.stringify(pkg).replace(/"/g, '&quot;')})">
                             ${pkg.is_installed ? 
                                 '<span class="badge" style="background: var(--success-color);"><i class="bi bi-check-circle"></i> Installed</span>' :
                                 pkg.is_downloaded ?
@@ -633,7 +676,7 @@ function renderDiscoveryPackages(packages) {
                             }
                         </td>
                     </tr>
-                `).join('')}
+                `}).join('')}
             </tbody>
         </table>
     `;
@@ -652,7 +695,7 @@ function sortPackages(field) {
 }
 
 function showPackageDetails(index, pkg) {
-    const inQueue = downloadQueue.has(pkg.download_url);
+    const inQueue = downloadQueue.has(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }));
     
     Swal.fire({
         title: pkg.display_name || pkg.name,
@@ -679,10 +722,10 @@ function showPackageDetails(index, pkg) {
                     '<div class="alert alert-success"><i class="bi bi-check-circle"></i> This package is already installed</div>' :
                     pkg.is_downloaded ?
                         '<div class="alert alert-info"><i class="bi bi-info-circle"></i> This package is downloaded and ready to install</div>' :
-                        `<div style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; padding: 1rem;">
-                            <label style="display: flex; align-items: center; cursor: pointer;">
+                        `<div style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; padding: 1rem; text-align: center;">
+                            <label style="display: inline-flex; align-items: center; cursor: pointer;">
                                 <input type="checkbox" id="queueCheckbox" ${inQueue ? 'checked' : ''} 
-                                       onchange="toggleQueue('${pkg.download_url}', '${pkg.filename}', this.checked)"
+                                       onchange="toggleQueueFromDetail('${pkg.download_url}', '${pkg.filename}', this.checked)"
                                        style="margin-right: 0.5rem; width: 18px; height: 18px;">
                                 <span>Add to download queue</span>
                             </label>
@@ -696,12 +739,85 @@ function showPackageDetails(index, pkg) {
         confirmButtonText: '<i class="bi bi-download"></i> Download Now',
         showCancelButton: true,
         cancelButtonText: 'Close',
+        didOpen: () => {
+            // Prevent this modal from closing the browse modal
+            const detailModal = Swal.getPopup();
+            if (detailModal) {
+                detailModal.style.zIndex = '10000';
+            }
+        },
         preConfirm: () => {
             if (!pkg.is_installed && !pkg.is_downloaded) {
-                return downloadSinglePackage(pkg.download_url, pkg.filename);
+                return downloadSinglePackage(pkg.download_url, pkg.filename, true);
             }
         }
     });
+}
+
+function updateFilterBadges() {
+    const catBadges = document.getElementById('selectedCategories');
+    const authBadges = document.getElementById('selectedAuthors');
+    
+    catBadges.innerHTML = currentFilter.categories.map(cat => 
+        `<span class="badge" style="background: var(--primary-color); cursor: pointer;" onclick="removeFilter('category', '${cat}')">
+            ${cat} <i class="bi bi-x"></i>
+        </span>`
+    ).join('');
+    
+    authBadges.innerHTML = currentFilter.authors.map(author => 
+        `<span class="badge" style="background: var(--info-color); cursor: pointer;" onclick="removeFilter('author', '${author}')">
+            ${author} <i class="bi bi-x"></i>
+        </span>`
+    ).join('');
+}
+
+function removeFilter(type, value) {
+    if (type === 'category') {
+        currentFilter.categories = currentFilter.categories.filter(c => c !== value);
+        const select = document.getElementById('pkgCategory');
+        Array.from(select.options).forEach(opt => {
+            if (opt.value === value) opt.selected = false;
+        });
+    } else if (type === 'author') {
+        currentFilter.authors = currentFilter.authors.filter(a => a !== value);
+        const select = document.getElementById('pkgAuthor');
+        Array.from(select.options).forEach(opt => {
+            if (opt.value === value) opt.selected = false;
+        });
+    }
+    updateFilterBadges();
+    renderDiscoveryPackages(discoveryPackages);
+}
+
+function toggleSelectAll(checked) {
+    const filtered = discoveryPackages.filter(pkg => {
+        if (currentFilter.categories.length > 0 && !currentFilter.categories.includes(pkg.category || 'other')) return false;
+        if (currentFilter.authors.length > 0 && !currentFilter.authors.includes(pkg.author)) return false;
+        if (currentFilter.status !== 'all') {
+            if (currentFilter.status === 'installed' && !pkg.is_installed) return false;
+            if (currentFilter.status === 'downloaded' && !pkg.is_downloaded) return false;
+            if (currentFilter.status === 'available' && (pkg.is_installed || pkg.is_downloaded)) return false;
+        }
+        if (currentFilter.search) {
+            const searchLower = currentFilter.search;
+            const name = (pkg.display_name || pkg.name || '').toLowerCase();
+            const desc = (pkg.description || '').toLowerCase();
+            const author = (pkg.author || '').toLowerCase();
+            if (!name.includes(searchLower) && !desc.includes(searchLower) && !author.includes(searchLower)) return false;
+        }
+        return !pkg.is_installed && !pkg.is_downloaded;
+    });
+    
+    if (checked) {
+        filtered.forEach(pkg => {
+            downloadQueue.add(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }));
+        });
+    } else {
+        downloadQueue.clear();
+    }
+    
+    updateQueueDisplay();
+    renderDiscoveryPackages(discoveryPackages);
 }
 
 function toggleQueue(downloadUrl, filename, add) {
@@ -711,6 +827,12 @@ function toggleQueue(downloadUrl, filename, add) {
         downloadQueue.delete(JSON.stringify({ downloadUrl, filename }));
     }
     updateQueueDisplay();
+}
+
+function toggleQueueFromDetail(downloadUrl, filename, add) {
+    toggleQueue(downloadUrl, filename, add);
+    // Refresh the table to show updated checkbox states
+    renderDiscoveryPackages(discoveryPackages);
 }
 
 function updateQueueDisplay() {
