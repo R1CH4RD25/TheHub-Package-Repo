@@ -855,13 +855,13 @@ function showPackageDetails(index, pkg) {
                         </div>`
                 }
                 
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
                     ${!pkg.is_installed && !pkg.is_downloaded ? 
-                        `<button onclick="downloadSinglePackageFromModal('${pkg.download_url}', '${pkg.filename}', this)" class="btn btn-primary">
+                        `<button onclick="downloadSinglePackageFromModal('${pkg.download_url}', '${pkg.filename}', this)" class="btn btn-primary" style="flex: 1 1 auto; min-width: 140px;">
                             <i class="bi bi-download"></i> Download Now
                         </button>` : ''
                     }
-                    <button onclick="this.closest('[style*=\\'z-index: 10000\\']').remove()" class="btn btn-outline-secondary">
+                    <button onclick="this.closest('[style*=\\'z-index: 10000\\']').remove()" class="btn btn-outline-secondary" style="flex: 1 1 auto; min-width: 100px;">
                         Close
                     </button>
                 </div>
@@ -1145,6 +1145,19 @@ async function downloadSinglePackage(downloadUrl, packageName, showNotification 
 .package-actions {
     display: flex;
     justify-content: flex-end;
+}
+
+/* Responsive modal buttons */
+@media (max-width: 576px) {
+    [style*="z-index: 10000"] [style*="justify-content: flex-end"] {
+        justify-content: center !important;
+    }
+    
+    [style*="z-index: 10000"] .btn {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
 }
 </style>
 
