@@ -182,6 +182,7 @@ function loadPackageUpdates() {
 }
 
 function renderInstalledPackages(packages) {
+    debugLog('UI', `Rendering ${packages.length} installed packages`);
     const html = `
         <table class="data-table">
             <thead>
@@ -213,7 +214,13 @@ function renderInstalledPackages(packages) {
             </tbody>
         </table>
     `;
-    document.getElementById('installedPackagesTable').innerHTML = html;
+    const container = document.getElementById('installedPackagesTable');
+    if (container) {
+        container.innerHTML = html;
+        debugLog('UI', 'Installed packages table updated successfully');
+    } else {
+        debugLog('ERROR', 'installedPackagesTable container not found!');
+    }
 }
 
 function renderAvailablePackages(packages) {
