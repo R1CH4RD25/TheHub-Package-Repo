@@ -385,10 +385,11 @@ class PackageDiscoveryController extends Controller
         $canInstall = $validation['can_install'] ? 1 : 0;
         
         $db->execute(
-            "INSERT INTO section_packages (package_id, version, display_name, description, author, file_path, uploaded_by, uploaded_at, validation_status, can_install) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)",
+            "INSERT INTO section_packages (package_id, name, version, display_name, description, author, file_path, uploaded_by, uploaded_at, validation_status, can_install) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)",
             [
                 $packageId,
+                $pkg['name'] ?? $packageId, // Use package name or fall back to ID
                 $version,
                 $displayName,
                 $pkg['description'] ?? '',
