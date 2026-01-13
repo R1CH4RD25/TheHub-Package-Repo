@@ -15,27 +15,24 @@
     table-layout: auto;
 }
 
-/* Mobile: Hide less important columns to prevent overflow */
-@media (max-width: 767px) {
-    /* Priority 1: Always visible (Name, Status, Action columns) */
-    .data-table th:nth-child(1),
-    .data-table td:nth-child(1) {
-        /* Keep visible */
+/* Very small screens: Hide columns 3-6 */
+@media (max-width: 575px) {
+    .data-table th.hide-xs,
+    .data-table td.hide-xs,
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3),
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4),
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5),
+    .data-table th:nth-child(6),
+    .data-table td:nth-child(6) {
+        display: none;
     }
-    
-    /* Priority 2: Hide on very small screens (< 576px) */
-    @media (max-width: 575px) {
-        .data-table th.hide-xs,
-        .data-table td.hide-xs,
-        .data-table th:nth-child(3),
-        .data-table td:nth-child(3),
-        .data-table th:nth-child(4),
-        .data-table td:nth-child(4) {
-            display: none;
-        }
-    }
-    
-    /* Priority 3: Hide on small screens (< 768px) */
+}
+
+/* Small screens: Hide columns 5-6 only */
+@media (min-width: 576px) and (max-width: 767px) {
     .data-table th.hide-sm,
     .data-table td.hide-sm,
     .data-table th:nth-child(5),
@@ -44,8 +41,10 @@
     .data-table td:nth-child(6) {
         display: none;
     }
-    
-    /* Make action buttons stack vertically on mobile */
+}
+
+/* Mobile: Stack action buttons */
+@media (max-width: 767px) {
     .data-table td .btn-group {
         display: flex;
         flex-direction: column;
