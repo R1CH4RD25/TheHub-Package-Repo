@@ -342,6 +342,11 @@ class PackageDiscoveryController extends Controller
             throw new Exception('Invalid package JSON: ' . json_last_error_msg());
         }
         
+        // Add format_version if missing (for backwards compatibility with older packages)
+        if (!isset($packageData['format_version'])) {
+            $packageData['format_version'] = '1.0.0';
+        }
+        
         // Extract package metadata
         $pkg = $packageData['package'] ?? [];
         $packageId = $pkg['id'] ?? null;
@@ -365,15 +370,23 @@ class PackageDiscoveryController extends Controller
         $installType = $existing ? 'upgrade' : 'new';
         $validation = $validator->validate($packageData, $installType);
         
-        if (!$validation['valid']) {
+        if (!$validation['can_install']) {
             @unlink($uploadPath);
-            throw new Exception('Package validation failed: ' . implode(', ', $validation['errors']));
+            $errors = array_merge(
+                $validation['critical_issues'] ?? [],
+                $validation['errors'] ?? []
+            );
+            $errorMessages = array_map(fn($e) => $e['message'] ?? 'Unknown error', $errors);
+            throw new Exception('Package validation failed: ' . implode(', ', $errorMessages));
         }
         
-        // Store package record
+        // Store package record with validation results
+        $validationStatus = $validation['overall_status'] ?? 'fail';
+        $canInstall = $validation['can_install'] ? 1 : 0;
+        
         $db->execute(
-            "INSERT INTO section_packages (package_id, version, display_name, description, author, file_path, uploaded_by, uploaded_at, status) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'pending')",
+            "INSERT INTO section_packages (package_id, version, display_name, description, author, file_path, uploaded_by, uploaded_at, validation_status, can_install) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)",
             [
                 $packageId,
                 $version,
@@ -381,7 +394,9 @@ class PackageDiscoveryController extends Controller
                 $pkg['description'] ?? '',
                 $pkg['author'] ?? 'Unknown',
                 $uploadPath,
-                $userId
+                $userId,
+                $validationStatus,
+                $canInstall
             ]
         );
         
@@ -393,8 +408,14 @@ class PackageDiscoveryController extends Controller
         return [
             'success' => true,
             'package_id' => $newPackageRecordId,
-            'message' => 'Package downloaded and ready for installation',
-            'file_size' => filesize($uploadPath)
+            'package_name' => $displayName,
+            'version' => $version,
+            'validation_status' => $validationStatus,
+            'can_install' => (bool)$canInstall,
+            'message' => 'Package downloaded and validated successfully',
+            'file_size' => filesize($uploadPath),
+            'warnings' => count($validation['warnings'] ?? []),
+            'next_step' => 'Package is now available for installation in the Available Packages tab'
         ];
     }
 }
