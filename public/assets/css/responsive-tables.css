@@ -1,0 +1,129 @@
+/**
+ * Responsive Tables - Mobile-First Approach
+ * Fixes overflow issues on small screens by hiding non-critical columns
+ */
+
+/* Base table styles - ensure tables don't exceed container */
+.data-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    min-width: 100%;
+    table-layout: auto;
+}
+
+/* Mobile: Hide less important columns to prevent overflow */
+@media (max-width: 767px) {
+    /* Priority 1: Always visible (Name, Status, Action columns) */
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        /* Keep visible */
+    }
+    
+    /* Priority 2: Hide on very small screens (< 576px) */
+    @media (max-width: 575px) {
+        .data-table th.hide-xs,
+        .data-table td.hide-xs,
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3),
+        .data-table th:nth-child(4),
+        .data-table td:nth-child(4) {
+            display: none;
+        }
+    }
+    
+    /* Priority 3: Hide on small screens (< 768px) */
+    .data-table th.hide-sm,
+    .data-table td.hide-sm,
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5),
+    .data-table th:nth-child(6),
+    .data-table td:nth-child(6) {
+        display: none;
+    }
+    
+    /* Make action buttons stack vertically on mobile */
+    .data-table td .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .data-table td .btn {
+        width: 100%;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Tablet: Show more columns */
+@media (min-width: 768px) and (max-width: 991px) {
+    .data-table th.hide-md,
+    .data-table td.hide-md {
+        display: none;
+    }
+}
+
+/* Scroll indicator for overflow tables */
+.data-table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.data-table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.data-table-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.data-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Alternative: Card-based layout for very small screens */
+@media (max-width: 575px) {
+    .data-table.use-cards {
+        display: block;
+    }
+    
+    .data-table.use-cards thead {
+        display: none;
+    }
+    
+    .data-table.use-cards tbody,
+    .data-table.use-cards tr,
+    .data-table.use-cards td {
+        display: block;
+        width: 100%;
+    }
+    
+    .data-table.use-cards tr {
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        background: var(--surface-color, white);
+    }
+    
+    .data-table.use-cards td {
+        border: none;
+        padding: 0.5rem 0;
+        position: relative;
+        padding-left: 50%;
+    }
+    
+    .data-table.use-cards td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+}
