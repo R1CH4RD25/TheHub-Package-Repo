@@ -508,8 +508,7 @@ class PackageManager
             
             // Soft delete section
             $this->db->update('sections', $sectionId, [
-                'is_active' => 0,
-                'deleted_at' => date('Y-m-d H:i:s')
+                'is_active' => 0
             ]);
             
             // Delete installation record
