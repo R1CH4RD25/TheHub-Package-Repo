@@ -738,9 +738,42 @@ function sortPackages(field) {
 function showPackageDetails(index, pkg) {
     const inQueue = downloadQueue.has(JSON.stringify({ downloadUrl: pkg.download_url, filename: pkg.filename }));
     
-    Swal.fire({
-        title: pkg.display_name || pkg.name,
-        html: `
+    // Create custom modal overlay to avoid closing browse modal
+    const modalOverlay = document.createElement('div');
+    modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: var(--surface-color, white);
+        border-radius: 8px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    `;
+    
+    modalContent.innerHTML = `
+        <div style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.25rem;">${pkg.display_name || pkg.name}</h3>
+                <button onclick="this.closest('[style*=\\'z-index: 10000\\']').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
             <div style="text-align: left;">
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">${pkg.description}</p>
                 
@@ -763,36 +796,53 @@ function showPackageDetails(index, pkg) {
                     '<div class="alert alert-success"><i class="bi bi-check-circle"></i> This package is already installed</div>' :
                     pkg.is_downloaded ?
                         '<div class="alert alert-info"><i class="bi bi-info-circle"></i> This package is downloaded and ready to install</div>' :
-                        `<div style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; padding: 1rem; text-align: center;">
+                        `<div style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px; padding: 1rem; text-align: center; margin-bottom: 1rem;">
                             <label style="display: inline-flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="queueCheckbox" ${inQueue ? 'checked' : ''} 
+                                <input type="checkbox" id="queueCheckbox_${index}" ${inQueue ? 'checked' : ''} 
                                        onchange="toggleQueueFromDetail('${pkg.download_url}', '${pkg.filename}', this.checked)"
                                        style="margin-right: 0.5rem; width: 18px; height: 18px;">
                                 <span>Add to download queue</span>
                             </label>
                         </div>`
                 }
+                
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    ${!pkg.is_installed && !pkg.is_downloaded ? 
+                        `<button onclick="downloadSinglePackageFromModal('${pkg.download_url}', '${pkg.filename}', this)" class="btn btn-primary">
+                            <i class="bi bi-download"></i> Download Now
+                        </button>` : ''
+                    }
+                    <button onclick="this.closest('[style*=\\'z-index: 10000\\']').remove()" class="btn btn-outline-secondary">
+                        Close
+                    </button>
+                </div>
             </div>
-        `,
-        width: '600px',
-        showCloseButton: true,
-        showConfirmButton: !pkg.is_installed && !pkg.is_downloaded,
-        confirmButtonText: '<i class="bi bi-download"></i> Download Now',
-        showCancelButton: true,
-        cancelButtonText: 'Close',
-        didOpen: () => {
-            // Prevent this modal from closing the browse modal
-            const detailModal = Swal.getPopup();
-            if (detailModal) {
-                detailModal.style.zIndex = '10000';
-            }
-        },
-        preConfirm: () => {
-            if (!pkg.is_installed && !pkg.is_downloaded) {
-                return downloadSinglePackage(pkg.download_url, pkg.filename, true);
-            }
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modalContent);
+    
+    // Close modal when clicking overlay (but not content)
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.remove();
         }
     });
+    
+    document.body.appendChild(modalOverlay);
+}
+
+async function downloadSinglePackageFromModal(downloadUrl, filename, button) {
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+    
+    try {
+        await downloadSinglePackage(downloadUrl, filename, true);
+        button.closest('[style*="z-index: 10000"]').remove();
+    } catch (error) {
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-download"></i> Download Now';
+    }
 }
 
 function updateFilterBadges() {
