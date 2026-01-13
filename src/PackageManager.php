@@ -506,10 +506,11 @@ class PackageManager
                 [$sectionId]
             );
             
-            // Soft delete section
-            $this->db->update('sections', $sectionId, [
-                'is_active' => 0
-            ]);
+            // Hard delete the section (to allow reinstallation)
+            $this->db->execute(
+                "DELETE FROM sections WHERE id = ?",
+                [$sectionId]
+            );
             
             // Delete installation record
             $this->db->execute(
