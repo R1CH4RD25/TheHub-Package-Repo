@@ -310,22 +310,91 @@ class PackageDiscoveryController extends Controller
         
         file_put_contents($tempFile, $packageContent);
         
-        // Create $_FILES-like array for PackageManager
-        $fileArray = [
-            'name' => $packageName,
-            'type' => 'application/octet-stream',
-            'tmp_name' => $tempFile,
-            'error' => UPLOAD_ERR_OK,
-            'size' => filesize($tempFile)
-        ];
-        
-        // Use PackageManager to handle the upload
+        // Instead of using uploadPackage, handle the package directly
+        // since we're not dealing with an actual HTTP upload
         $packageManager = new \Hub\PackageManager();
-        $result = $packageManager->uploadPackage($fileArray, $userId);
+        
+        // Generate unique filename
+        $filename = uniqid('pkg_') . '.hubpkg';
+        $uploadPath = 'uploads/packages/' . $filename;
+        
+        // Create upload directory if not exists
+        $uploadDir = 'uploads/packages/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+        
+        // Copy temp file to upload directory (can't use move_uploaded_file for non-HTTP uploads)
+        if (!copy($tempFile, $uploadPath)) {
+            @unlink($tempFile);
+            throw new Exception('Failed to save package file');
+        }
         
         // Clean up temp file
         @unlink($tempFile);
         
-        return $result;
+        // Parse package metadata
+        $packageJson = file_get_contents($uploadPath);
+        $packageData = json_decode($packageJson, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            @unlink($uploadPath);
+            throw new Exception('Invalid package JSON: ' . json_last_error_msg());
+        }
+        
+        // Extract package metadata
+        $pkg = $packageData['package'] ?? [];
+        $packageId = $pkg['id'] ?? null;
+        $version = $pkg['version'] ?? '0.0.0';
+        $displayName = $pkg['display_name'] ?? 'Unknown Package';
+        
+        if (!$packageId) {
+            @unlink($uploadPath);
+            throw new Exception('Package missing required ID');
+        }
+        
+        // Check if package already exists
+        $db = Database::getInstance();
+        $existing = $db->fetchOne(
+            "SELECT id, version FROM section_packages WHERE package_id = ? ORDER BY uploaded_at DESC LIMIT 1",
+            [$packageId]
+        );
+        
+        // Validate package
+        $validator = new \Hub\PackageValidator();
+        $installType = $existing ? 'upgrade' : 'new';
+        $validation = $validator->validate($packageData, $installType);
+        
+        if (!$validation['valid']) {
+            @unlink($uploadPath);
+            throw new Exception('Package validation failed: ' . implode(', ', $validation['errors']));
+        }
+        
+        // Store package record
+        $db->execute(
+            "INSERT INTO section_packages (package_id, version, display_name, description, author, file_path, uploaded_by, uploaded_at, status) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'pending')",
+            [
+                $packageId,
+                $version,
+                $displayName,
+                $pkg['description'] ?? '',
+                $pkg['author'] ?? 'Unknown',
+                $uploadPath,
+                $userId
+            ]
+        );
+        
+        $newPackageRecordId = $db->getLastInsertId();
+        
+        // Clear cache
+        Cache::delete('packages:installed');
+        
+        return [
+            'success' => true,
+            'package_id' => $newPackageRecordId,
+            'message' => 'Package downloaded and ready for installation',
+            'file_size' => filesize($uploadPath)
+        ];
     }
 }
