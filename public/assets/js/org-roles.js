@@ -81,8 +81,8 @@ function renderOrgRolesTable(roles) {
                 <button class="btn-icon" onclick="manageRoleUsers(${role.id}, '${escapeHtml(role.name)}')" title="Manage Users">
                     <i class="fas fa-users"></i>
                 </button>
-                <button class="btn-icon" onclick="manageGoogleGroups(${role.id}, '${escapeHtml(role.name)}')" title="Google Groups">
-                    <i class="fab fa-google"></i>
+                <button class="btn-icon" onclick="manageCloudGroups(${role.id}, '${escapeHtml(role.name)}')" title="Cloud Groups">
+                    <i class="fas fa-users-cog"></i>
                 </button>
                 <button class="btn-icon" onclick="editOrgRole(${role.id})" title="Edit">
                     <i class="fas fa-edit"></i>
@@ -96,18 +96,30 @@ function renderOrgRolesTable(roles) {
 }
 
 /**
- * Render Google Groups badges
+ * Render Cloud Groups badges (Google + Microsoft)
  */
 function renderGoogleGroups(role) {
-    if (!role.google_groups || role.google_groups.length === 0) {
-        return '<em style="color: #94a3b8; font-size: 0.9rem;">None</em>';
+    const groups = [];
+    
+    // Add Google Groups
+    if (role.google_groups && role.google_groups.length > 0) {
+        groups.push(...role.google_groups.map(group => 
+            `<span class="badge badge-info" style="margin: 2px; font-size: 0.85rem;">
+                <i class="fab fa-google"></i> ${escapeHtml(group)}
+            </span>`
+        ));
     }
     
-    return role.google_groups.map(group => 
-        `<span class="badge badge-info" style="margin: 2px; font-size: 0.85rem;">
-            <i class="fab fa-google"></i> ${escapeHtml(group)}
-        </span>`
-    ).join(' ');
+    // Add Microsoft Groups
+    if (role.microsoft_groups && role.microsoft_groups.length > 0) {
+        groups.push(...role.microsoft_groups.map(group => 
+            `<span class="badge badge-primary" style="margin: 2px; font-size: 0.85rem;">
+                <i class="fab fa-microsoft"></i> ${escapeHtml(group.azure_group_name || group.azure_group_id)}
+            </span>`
+        ));
+    }
+    
+    return groups.length > 0 ? groups.join(' ') : '<em style="color: #94a3b8; font-size: 0.9rem;">None</em>';
 }
 
 /**
@@ -370,54 +382,118 @@ async function saveRoleUsers(roleId) {
 }
 
 /**
- * Manage Google Groups mappings
+ * Manage Cloud Groups (Google + Microsoft)
  */
-async function manageGoogleGroups(roleId, roleName) {
+async function manageCloudGroups(roleId, roleName) {
     const response = await fetch('/api/org-roles.php?action=list');
     const data = await response.json();
     const role = data.roles.find(r => r.id === roleId);
     
-    const modal = createModal(`Google Groups - ${roleName}`, `
+    const modal = createModal(`Cloud Identity Groups - ${roleName}`, `
         <p class="info-text">
-            <i class="fab fa-google"></i> 
-            Users in these Google Groups will automatically be assigned this role when they log in.
+            <i class="fas fa-cloud"></i> 
+            Users in these cloud identity groups will automatically be assigned this role when they log in.
         </p>
         
-        <div id="googleGroupsList" style="margin-bottom: 1.5rem;">
-            ${role.google_groups.length > 0 ? role.google_groups.map(group => `
-                <div class="badge badge-info" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                    ${escapeHtml(group)}
-                    <button onclick="removeGoogleGroup(${roleId}, '${escapeHtml(group)}')" 
-                            style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
-                        <i class="fas fa-times"></i>
-                    </button>
+        <!-- Google Groups Section -->
+        <div class="cloud-groups-section" style="margin-bottom: 2rem;">
+            <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <i class="fab fa-google"></i> Google Workspace Groups
+            </h4>
+            <div id="googleGroupsList" style="margin-bottom: 1rem;">
+                ${role.google_groups && role.google_groups.length > 0 ? role.google_groups.map(group => `
+                    <div class="badge badge-info" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                        ${escapeHtml(group)}
+                        <button onclick="removeGoogleGroup(${roleId}, '${escapeHtml(group)}')" 
+                                style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('') : '<em style="color: #94a3b8;">No Google Groups mapped</em>'}
+            </div>
+            
+            <form id="addGoogleGroupForm" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Add Google Group</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="email" id="googleGroupEmail" class="form-control" 
+                               placeholder="group@yourdomain.com">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
                 </div>
-            `).join('') : '<em style="color: #94a3b8;">No Google Groups mapped yet</em>'}
+            </form>
         </div>
         
-        <form id="addGoogleGroupForm">
-            <div class="form-group">
-                <label>Add Google Group</label>
-                <div style="display: flex; gap: 0.5rem;">
-                    <input type="email" id="googleGroupEmail" class="form-control" 
-                           placeholder="group@yourdomain.com" required>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add
-                    </button>
-                </div>
+        <!-- Microsoft Groups Section -->
+        <div class="cloud-groups-section" style="margin-bottom: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+            <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <i class="fab fa-microsoft"></i> Microsoft Azure AD Groups
+            </h4>
+            <div id="microsoftGroupsList" style="margin-bottom: 1rem;">
+                ${role.microsoft_groups && role.microsoft_groups.length > 0 ? role.microsoft_groups.map(group => `
+                    <div class="badge badge-primary" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                        ${escapeHtml(group.azure_group_name || group.azure_group_id)}
+                        <button onclick="removeMicrosoftGroup(${roleId}, '${group.id}')" 
+                                style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('') : '<em style="color: #94a3b8;">No Microsoft Groups mapped</em>'}
             </div>
-        </form>
+            
+            <form id="addMicrosoftGroupForm" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Add Microsoft Group</label>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <input type="text" id="azureGroupId" class="form-control" 
+                               placeholder="Azure Group ID (GUID: 12345678-1234-1234-1234-123456789abc)" 
+                               pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}">
+                        <input type="text" id="azureGroupName" class="form-control" 
+                               placeholder="Display Name (optional)">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">
+                        Find Group Object ID in Azure Portal → Azure Active Directory → Groups
+                    </small>
+                </div>
+            </form>
+        </div>
         
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
             <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
         </div>
     `);
     
+    // Google Groups form handler
     document.getElementById('addGoogleGroupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('googleGroupEmail').value;
-        await addGoogleGroup(roleId, email);
+        if (email) {
+            await addGoogleGroup(roleId, email);
+        }
     });
+    
+    // Microsoft Groups form handler
+    document.getElementById('addMicrosoftGroupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const groupId = document.getElementById('azureGroupId').value;
+        const groupName = document.getElementById('azureGroupName').value;
+        if (groupId) {
+            await addMicrosoftGroup(roleId, groupId, groupName);
+        }
+    });
+}
+
+/**
+ * Manage Google Groups mappings (legacy - keeping for compatibility)
+ */
+async function manageGoogleGroups(roleId, roleName) {
+    // Redirect to the unified cloud groups manager
+    await manageCloudGroups(roleId, roleName);
 }
 
 /**
@@ -443,6 +519,64 @@ async function addGoogleGroup(roleId, googleGroupEmail) {
     } catch (error) {
         console.error('Error adding Google Group:', error);
         showMessage('Failed to add Google Group: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Add Microsoft Group mapping
+ */
+async function addMicrosoftGroup(roleId, azureGroupId, azureGroupName) {
+    try {
+        const response = await fetch('/api/org-roles.php?action=add-microsoft-group', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                role_id: roleId, 
+                azure_group_id: azureGroupId,
+                azure_group_name: azureGroupName 
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to add Microsoft Group');
+        }
+        
+        showMessage('Microsoft Group mapped successfully', 'success');
+        closeModal();
+        loadOrgRoles();
+    } catch (error) {
+        console.error('Error adding Microsoft Group:', error);
+        showMessage('Failed to add Microsoft Group: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Remove Microsoft Group mapping
+ */
+async function removeMicrosoftGroup(roleId, groupId) {
+    if (!confirm('Remove this Microsoft Group mapping?')) return;
+    
+    try {
+        const response = await fetch('/api/org-roles.php?action=remove-microsoft-group', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role_id: roleId, group_id: groupId })
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to remove Microsoft Group');
+        }
+        
+        showMessage('Microsoft Group removed successfully', 'success');
+        closeModal();
+        loadOrgRoles();
+    } catch (error) {
+        console.error('Error removing Microsoft Group:', error);
+        showMessage('Failed to remove Microsoft Group: ' + error.message, 'error');
     }
 }
 

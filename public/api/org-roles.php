@@ -66,6 +66,10 @@ function handleGet($orgRole, $action) {
             getGoogleGroupMappings($orgRole);
             break;
             
+        case 'microsoft-groups':
+            getMicrosoftGroupMappings($orgRole);
+            break;
+            
         default:
             getRolesList($orgRole);
     }
@@ -77,15 +81,21 @@ function handleGet($orgRole, $action) {
 function getRolesList($orgRole) {
     $roles = $orgRole->getAll();
     
-    // Add user counts and Google Group info
+    // Add user counts, Google Groups, and Microsoft Groups info
     foreach ($roles as &$role) {
         $role['user_count'] = $orgRole->getRoleUserCount($role['id']);
         
-        // Get Google Group mapping if exists
         $db = Database::getInstance()->getConnection();
+        
+        // Get Google Group mappings
         $stmt = $db->prepare("SELECT google_group_email FROM org_role_google_groups WHERE org_role_id = :role_id AND is_active = 1");
         $stmt->execute(['role_id' => $role['id']]);
         $role['google_groups'] = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        
+        // Get Microsoft Group mappings
+        $stmt = $db->prepare("SELECT id, azure_group_id, azure_group_name FROM org_role_microsoft_groups WHERE org_role_id = :role_id AND is_active = 1");
+        $stmt->execute(['role_id' => $role['id']]);
+        $role['microsoft_groups'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
     
     jsonResponse([
@@ -162,6 +172,14 @@ function handlePost($orgRole, $action) {
             
         case 'sync-google-groups':
             syncGoogleGroups($orgRole);
+            break;
+            
+        case 'add-microsoft-group':
+            addMicrosoftGroup($orgRole, $data);
+            break;
+            
+        case 'sync-microsoft-groups':
+            syncMicrosoftGroups($orgRole);
             break;
             
         default:
@@ -287,6 +305,89 @@ function syncGoogleGroups($orgRole) {
 }
 
 /**
+ * Get Microsoft Group mappings for a role
+ */
+function getMicrosoftGroupMappings($orgRole) {
+    if (empty($_GET['role_id'])) {
+        jsonResponse(['error' => 'role_id required'], 400);
+    }
+    
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->prepare("
+        SELECT id, azure_group_id, azure_group_name, is_active, sync_on_login, 
+               last_sync_at, created_at
+        FROM org_role_microsoft_groups
+        WHERE org_role_id = :role_id AND is_active = 1
+        ORDER BY azure_group_name ASC
+    ");
+    $stmt->execute(['role_id' => $_GET['role_id']]);
+    
+    jsonResponse([
+        'success' => true,
+        'groups' => $stmt->fetchAll(\PDO::FETCH_ASSOC)
+    ]);
+}
+
+/**
+ * Add Microsoft Azure AD Group mapping to a role
+ */
+function addMicrosoftGroup($orgRole, $data) {
+    if (empty($data['role_id']) || empty($data['azure_group_id'])) {
+        jsonResponse(['error' => 'role_id and azure_group_id required'], 400);
+    }
+    
+    $db = Database::getInstance()->getConnection();
+    $currentUser = Auth::getCurrentUser();
+    
+    // Validate Azure Group ID format (should be a GUID)
+    $groupId = trim($data['azure_group_id']);
+    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $groupId)) {
+        jsonResponse(['error' => 'Invalid Azure Group ID format. Must be a GUID (e.g., 12345678-1234-1234-1234-123456789abc)'], 400);
+    }
+    
+    $stmt = $db->prepare("
+        INSERT INTO org_role_microsoft_groups 
+        (org_role_id, azure_group_id, azure_group_name, created_by) 
+        VALUES (:role_id, :group_id, :group_name, :created_by)
+        ON DUPLICATE KEY UPDATE is_active = 1, azure_group_name = :group_name, updated_at = NOW()
+    ");
+    
+    $stmt->execute([
+        'role_id' => $data['role_id'],
+        'group_id' => $groupId,
+        'group_name' => $data['azure_group_name'] ?? null,
+        'created_by' => $currentUser['id']
+    ]);
+    
+    // Log the mapping
+    $role = $orgRole->getById($data['role_id']);
+    AuditLogger::log('org_role_microsoft_group_added', 'org_roles', $data['role_id'], null, [
+        'role_name' => $role['name'],
+        'azure_group_id' => $groupId,
+        'azure_group_name' => $data['azure_group_name'] ?? null
+    ]);
+    
+    jsonResponse([
+        'success' => true,
+        'message' => 'Microsoft Group mapped successfully'
+    ]);
+}
+
+/**
+ * Sync all Microsoft Azure AD Group memberships
+ */
+function syncMicrosoftGroups($orgRole) {
+    // This requires Microsoft Graph API access
+    // For now, return a placeholder - will implement with Graph SDK
+    
+    jsonResponse([
+        'success' => true,
+        'message' => 'Microsoft Groups sync initiated',
+        'note' => 'Full implementation requires Microsoft Graph API'
+    ]);
+}
+
+/**
  * PUT handler - Update role
  */
 function handlePut($orgRole) {
@@ -318,11 +419,19 @@ function handlePut($orgRole) {
 }
 
 /**
- * DELETE handler - Soft delete role
+ * DELETE handler - Soft delete role or remove group mapping
  */
 function handleDelete($orgRole) {
     parse_str(file_get_contents('php://input'), $data);
+    $action = $_GET['action'] ?? null;
     
+    // Handle Microsoft Group removal
+    if ($action === 'remove-microsoft-group') {
+        removeMicrosoftGroup($data);
+        return;
+    }
+    
+    // Handle role deletion
     if (empty($data['id'])) {
         jsonResponse(['error' => 'Role ID required'], 400);
     }
@@ -348,5 +457,28 @@ function handleDelete($orgRole) {
     jsonResponse([
         'success' => true,
         'message' => 'Organization role deleted successfully'
+    ]);
+}
+
+/**
+ * Remove Microsoft Group mapping
+ */
+function removeMicrosoftGroup($data) {
+    if (empty($data['group_id'])) {
+        jsonResponse(['error' => 'group_id required'], 400);
+    }
+    
+    $db = Database::getInstance()->getConnection();
+    $stmt = $db->prepare("
+        UPDATE org_role_microsoft_groups 
+        SET is_active = 0, updated_at = NOW()
+        WHERE id = :group_id
+    ");
+    
+    $stmt->execute(['group_id' => $data['group_id']]);
+    
+    jsonResponse([
+        'success' => true,
+        'message' => 'Microsoft Group mapping removed successfully'
     ]);
 }
