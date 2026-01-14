@@ -591,7 +591,6 @@ function filterUserList() {
 /**
  * Save role user assignments (DEPRECATED - replaced with addSelectedUsers)
  */
- */
 async function saveRoleUsers(roleId) {
     const checkboxes = document.querySelectorAll('#userSelectionList input[type="checkbox"]:checked');
     const userIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
