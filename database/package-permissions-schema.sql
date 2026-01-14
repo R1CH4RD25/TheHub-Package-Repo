@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS org_roles (
 -- User to Organization Role Assignment
 -- Users can have multiple org roles (many-to-many)
 CREATE TABLE IF NOT EXISTS user_org_roles (
-    user_id INT UNSIGNED NOT NULL,
+    user_id INT NOT NULL,
     org_role_id INT UNSIGNED NOT NULL,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    assigned_by INT UNSIGNED,
+    assigned_by INT,
     PRIMARY KEY (user_id, org_role_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (org_role_id) REFERENCES org_roles(id) ON DELETE CASCADE,
@@ -39,9 +39,10 @@ CREATE TABLE IF NOT EXISTS user_org_roles (
 -- Package Roles
 -- Immutable roles defined by package creators in manifest
 -- These are the same across all installations of a package
+-- NOTE: package_id references sections.id (packages are called sections in the database)
 CREATE TABLE IF NOT EXISTS package_roles (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    package_id INT UNSIGNED NOT NULL,
+    package_id INT NOT NULL,                    -- References sections.id
     role_key VARCHAR(50) NOT NULL,              -- Unique identifier: administration, director, staff
     role_name VARCHAR(100) NOT NULL,            -- Display name: Administration, Director, Maintenance Staff
     tier_level TINYINT UNSIGNED NOT NULL,       -- Display hierarchy: 1=highest, 3=lowest (visual only)
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS package_roles (
     permissions JSON NOT NULL,                  -- Array of permissions: ["hub.submit_form", "management.view_reports"]
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_package_role (package_id, role_key),
-    FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE,
+    FOREIGN KEY (package_id) REFERENCES sections(id) ON DELETE CASCADE,
     INDEX idx_package_roles (package_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -58,13 +59,13 @@ CREATE TABLE IF NOT EXISTS package_roles (
 -- Example: "Maintenance Director" org role → "director" package role in Vehicle Maintenance
 CREATE TABLE IF NOT EXISTS package_role_mappings (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    package_id INT UNSIGNED NOT NULL,
+    package_id INT NOT NULL,                    -- References sections.id
     package_role_id INT UNSIGNED NOT NULL,
     org_role_id INT UNSIGNED NOT NULL,
     mapped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    mapped_by INT UNSIGNED,
+    mapped_by INT,
     UNIQUE KEY unique_mapping (package_id, package_role_id, org_role_id),
-    FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE,
+    FOREIGN KEY (package_id) REFERENCES sections(id) ON DELETE CASCADE,
     FOREIGN KEY (package_role_id) REFERENCES package_roles(id) ON DELETE CASCADE,
     FOREIGN KEY (org_role_id) REFERENCES org_roles(id) ON DELETE CASCADE,
     FOREIGN KEY (mapped_by) REFERENCES users(id) ON DELETE SET NULL,
@@ -77,14 +78,14 @@ CREATE TABLE IF NOT EXISTS package_role_mappings (
 -- Parsed from package manifest during installation
 CREATE TABLE IF NOT EXISTS package_sections (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    package_id INT UNSIGNED NOT NULL,
+    package_id INT NOT NULL,                    -- References sections.id
     section_type ENUM('hub', 'management', 'admin') NOT NULL,
     is_enabled TINYINT(1) DEFAULT 1,
     config JSON,                                -- Section-specific config from manifest
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_package_section (package_id, section_type),
-    FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE,
+    FOREIGN KEY (package_id) REFERENCES sections(id) ON DELETE CASCADE,
     INDEX idx_section_type (section_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -92,7 +93,7 @@ CREATE TABLE IF NOT EXISTS package_sections (
 -- Forms, lookups, and other items that appear in Hub (mobile-first)
 CREATE TABLE IF NOT EXISTS package_hub_items (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    package_id INT UNSIGNED NOT NULL,
+    package_id INT NOT NULL,                    -- References sections.id
     item_key VARCHAR(50) NOT NULL,              -- Unique key: work_order, my_orders
     item_type ENUM('form', 'lookup', 'card', 'custom') NOT NULL,
     title VARCHAR(100) NOT NULL,                -- Display title
@@ -104,7 +105,7 @@ CREATE TABLE IF NOT EXISTS package_hub_items (
     config JSON,                                -- Additional configuration
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_hub_item (package_id, item_key),
-    FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE,
+    FOREIGN KEY (package_id) REFERENCES sections(id) ON DELETE CASCADE,
     INDEX idx_package_hub_items (package_id, is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -112,7 +113,7 @@ CREATE TABLE IF NOT EXISTS package_hub_items (
 -- Tabs that appear in Management sidebar for each package
 CREATE TABLE IF NOT EXISTS package_management_tabs (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    package_id INT UNSIGNED NOT NULL,
+    package_id INT NOT NULL,                    -- References sections.id
     tab_key VARCHAR(50) NOT NULL,               -- Unique key: work_orders, fleet_reports
     label VARCHAR(100) NOT NULL,                -- Display label
     route VARCHAR(255) NOT NULL,                -- URL route
@@ -124,7 +125,7 @@ CREATE TABLE IF NOT EXISTS package_management_tabs (
     config JSON,                                -- Additional configuration
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_management_tab (package_id, tab_key),
-    FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE,
+    FOREIGN KEY (package_id) REFERENCES sections(id) ON DELETE CASCADE,
     INDEX idx_package_mgmt_tabs (package_id, is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
