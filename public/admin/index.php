@@ -193,7 +193,7 @@ $users = $userModel->getAll();
                         <button class="subtab-btn" data-subtab="pending-users">Pending Approvals</button>
                         <button class="subtab-btn" data-subtab="invitations">Invitations</button>
                         <?php if ($isSuperAdmin): ?>
-                            <button class="subtab-btn" data-subtab="role-management">Role Management</button>
+                            <button class="subtab-btn" data-subtab="org-roles">Organization Roles</button>
                         <?php endif; ?>
                     </div>
 
@@ -218,49 +218,51 @@ $users = $userModel->getAll();
                         </div>
                     </div>
 
-                    <!-- Role Management Subtab (Super Admin Only) -->
+                    <!-- Organization Roles Subtab (Super Admin Only) -->
                     <?php if ($isSuperAdmin): ?>
-                        <div id="subtab-role-management" class="user-subtab">
-                            <div class="role-management">
-                                <p class="info-text">
-                                    <strong>🎭 Role Management:</strong> Enable or disable roles system-wide.
-                                    Inactive roles are hidden from all dropdowns, section access, and user assignment forms.
-                                    <span style="color: #d32f2f; font-weight: 600;">⚠️ Cannot disable Super Admin or Staff roles (core system roles).</span>
-                                </p>
+                        <div id="subtab-org-roles" class="user-subtab">
+                            <div class="org-roles-management">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+                                    <div>
+                                        <p class="info-text">
+                                            <strong>🎭 Organization Roles:</strong> Create custom roles that match your organization's structure.
+                                            These roles will be mapped to package permissions to control access.
+                                        </p>
+                                    </div>
+                                    <button id="createOrgRoleBtn" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> New Role
+                                    </button>
+                                </div>
 
                                 <div class="table-responsive">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 100px;">Status</th>
-                                                <th style="min-width: 200px;">Role</th>
+                                                <th style="min-width: 200px;">Role Name</th>
                                                 <th style="min-width: 250px;">Description</th>
-                                                <th style="width: 100px; text-align: center;">Hierarchy</th>
-                                                <th style="width: 120px; text-align: center;">Active Users</th>
-                                                <th style="min-width: 200px;">Notes</th>
-                                                <th style="width: 120px; text-align: center;">Actions</th>
+                                                <th style="width: 120px; text-align: center;">Assigned Users</th>
+                                                <th style="min-width: 200px;">Google Groups</th>
+                                                <th style="width: 180px; text-align: center;">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="rolesManagementTableBody">
+                                        <tbody id="orgRolesTableBody">
                                             <tr>
-                                                <td colspan="7" style="text-align: center; padding: 40px;">
-                                                    Loading roles...
+                                                <td colspan="5" style="text-align: center; padding: 40px;">
+                                                    Loading organization roles...
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
 
-                                <div class="info-panel" style="margin-top: 2rem; padding: 1.5rem; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 8px;">
-                                    <h3 style="margin: 0 0 1rem 0; color: #1e40af; font-size: 1.1rem;">💡 How to Add New Roles</h3>
-                                    <p style="margin: 0 0 0.75rem 0;">Roles are defined in the codebase for security and consistency. To add a new role:</p>
-                                    <ol style="margin: 0; padding-left: 1.5rem;">
-                                        <li style="margin-bottom: 0.5rem;">Edit <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">/src/Roles.php</code> and add your role to the <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">getAll()</code> method</li>
-                                        <li style="margin-bottom: 0.5rem;">Set a unique <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">value</code>, descriptive <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">label</code>, and appropriate <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">hierarchy</code> (1-100)</li>
-                                        <li style="margin-bottom: 0.5rem;">Run database migration: <code style="background: #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">php cli/migrate.php</code></li>
-                                        <li>Refresh this page - your new role will appear above and can be assigned to users</li>
-                                    </ol>
-                                    <p style="margin: 1rem 0 0 0; font-size: 0.9rem; color: #64748b;"><strong>Note:</strong> Higher hierarchy numbers = more permissions. Super Admin (100) has the highest level.</p>
+                                <div class="info-panel" style="margin-top: 2rem; padding: 1.5rem; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 8px;">
+                                    <h3 style="margin: 0 0 1rem 0; color: #047857; font-size: 1.1rem;">💡 How Organization Roles Work</h3>
+                                    <ul style="margin: 0; padding-left: 1.5rem;">
+                                        <li style="margin-bottom: 0.5rem;"><strong>Create roles</strong> that match your org: Principal, Maintenance Director, Teacher, etc.</li>
+                                        <li style="margin-bottom: 0.5rem;"><strong>Assign users</strong> to roles (manually or via Google Groups sync)</li>
+                                        <li style="margin-bottom: 0.5rem;"><strong>Map to packages</strong> - each package defines its permission roles, you map your org roles to them</li>
+                                        <li><strong>Google Groups sync</strong> - automatically assign roles based on Google Workspace group membership</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -2518,6 +2520,7 @@ $users = $userModel->getAll();
 
     <script src="/assets/js/modal-renderer.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/admin.js?v=<?php echo time(); ?>"></script>
+    <script src="/assets/js/org-roles.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/site-settings.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/section-config.js?v=<?php echo time(); ?>"></script>
     <script src="/assets/js/modern-ui-helpers.js?v=<?php echo time(); ?>"></script>
