@@ -1,0 +1,14 @@
+{
+  "package_id": "com.woodson.vehicle-maintenance-v2",
+  "display_name": "Vehicle Maintenance & Fleet Tracking v2",
+  "version": "2.0.0",
+  "author": "Woodson ISD Technology Department",
+  "description": "Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. User-friendly forms for Hub users, full configuration for Management.",
+  "category": "operations",
+  "tags": ["operations", "fleet", "vehicles", "maintenance", "fuel", "tracking", "hub-management"],
+  "hub_version_min": "1.0.0",
+  "hub_version_max": null,
+  "dependencies": [],
+  "conflicts": ["vehicle-maintenance"],
+  "replaces": ["vehicle-maintenance"]
+}
