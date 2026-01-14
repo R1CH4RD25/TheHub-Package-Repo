@@ -367,21 +367,34 @@ async function deleteOrgRole(roleId, roleName, userCount) {
  * Manage users assigned to a role
  */
 async function manageRoleUsers(roleId, roleName) {
+    console.group(`📋 Manage Users Modal - ${roleName} (ID: ${roleId})`);
+    console.log('Fetching data...');
+    
     // Fetch all users and current role assignments
     const [usersResponse, roleUsersResponse] = await Promise.all([
         fetch('/api/users.php?action=list'),
         fetch(`/api/org-roles.php?action=users&role_id=${roleId}`)
     ]);
 
+    console.log('Users API Response Status:', usersResponse.status);
+    console.log('Role Users API Response Status:', roleUsersResponse.status);
+
     const usersData = await usersResponse.json();
     const roleUsersData = await roleUsersResponse.json();
+
+    console.log('Raw Users Data:', usersData);
+    console.log('Raw Role Users Data:', roleUsersData);
 
     const allUsers = usersData.users || [];
     const currentMembers = roleUsersData.users || [];
     const currentMemberIds = currentMembers.map(u => u.id);
     const availableUsers = allUsers.filter(u => !currentMemberIds.includes(u.id));
 
-    console.log('All users:', allUsers.length, 'Current members:', currentMembers.length, 'Available:', availableUsers.length);
+    console.log('📊 Summary:');
+    console.log(`  Total Users in System: ${allUsers.length}`);
+    console.log(`  Current Members: ${currentMembers.length}`, currentMembers.map(u => u.name));
+    console.log(`  Available to Add: ${availableUsers.length}`, availableUsers.map(u => u.name));
+    console.groupEnd();
 
     const modal = createModal(`Manage Users - ${roleName}`, `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 500px;">

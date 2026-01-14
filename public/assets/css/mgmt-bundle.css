@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Wed Dec 17 07:17:46 PM UTC 2025
+ * Generated: Wed Jan 14 04:41:47 PM UTC 2026
  */
 
 
@@ -717,6 +717,18 @@ html {
 }
 
 /* Responsive Admin Shell */
+/* Tablet: Reduce sidebar width */
+@media (max-width: 991px) and (min-width: 769px) {
+    .admin-shell {
+        grid-template-columns: 240px minmax(0, 1fr);
+    }
+
+    .admin-shell.has-collapsed-sidebar {
+        grid-template-columns: 69px minmax(0, 1fr);
+    }
+}
+
+/* Mobile: Stack layout */
 @media (max-width: 768px) {
     .admin-shell {
         grid-template-columns: 1fr;
@@ -842,7 +854,41 @@ html {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-5);
-    margin-top: var(--space-4);
+    margin-top: var(--space-6) !important;
+    padding-top: var(--space-4);
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+}
+
+/* Responsive adjustments for admin grid */
+@media (max-width: 991px) {
+    .admin-root .mgmt-modules-grid {
+        margin-top: var(--space-5) !important;
+        padding-top: var(--space-3);
+        padding-left: var(--space-3);
+        padding-right: var(--space-3);
+    }
+}
+
+@media (max-width: 767px) {
+    .admin-root .mgmt-modules-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+        margin-top: var(--space-4) !important;
+        padding-top: var(--space-2);
+        padding-left: var(--space-2);
+        padding-right: var(--space-2);
+    }
+}
+
+@media (max-width: 575px) {
+    .admin-root .mgmt-modules-grid {
+        gap: var(--space-3);
+        margin-top: var(--space-3) !important;
+        padding-top: var(--space-1);
+        padding-left: var(--space-1);
+        padding-right: var(--space-1);
+    }
 }
 
 .admin-root .mgmt-module-card {
@@ -2474,6 +2520,8 @@ html {
 
 .user-subtab.active {
     display: block;
+    width: 100%; /* Inherit parent width instead of auto collapsing to 0 */
+    min-height: 200px; /* Prevent zero-height collapse */
 }
 
 /* Users Layout - Two Column Design */
@@ -3676,6 +3724,8 @@ html {
 
 .user-subtab.active {
     display: block;
+    width: 100%; /* Inherit parent width instead of auto collapsing to 0 */
+    min-height: 200px; /* Prevent zero-height collapse */
 }
 
 /* Toast Notification */
