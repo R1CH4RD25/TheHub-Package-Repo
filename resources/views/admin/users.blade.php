@@ -21,7 +21,7 @@
             <button class="subtab-btn" data-subtab="pending-users">Pending Approvals</button>
             <button class="subtab-btn" data-subtab="invitations">Invitations</button>
             @if($isSuperAdmin)
-                <button class="subtab-btn" data-subtab="role-management">Role Management</button>
+                <button class="subtab-btn" data-subtab="org-roles">Organization Roles</button>
             @endif
         </div>
 
@@ -223,10 +223,53 @@
             </div>
         </div>
 
-        <!-- Role Management Subtab (Super Admin Only) -->
+        <!-- Organization Roles Subtab (Super Admin Only) -->
         @if($isSuperAdmin)
-            <div id="subtab-role-management" class="user-subtab">
-                <p class="text-center">Loading roles...</p>
+            <div id="subtab-org-roles" class="user-subtab">
+                <div class="org-roles-management">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+                        <div>
+                            <p class="info-text">
+                                <strong>🎭 Organization Roles:</strong> Create custom roles that match your organization's structure.
+                                These roles will be mapped to package permissions to control access.
+                            </p>
+                        </div>
+                        <button id="createOrgRoleBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Role
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 200px;">Role Name</th>
+                                    <th style="min-width: 250px;">Description</th>
+                                    <th style="width: 120px; text-align: center;">Assigned Users</th>
+                                    <th style="min-width: 200px;">Google Groups</th>
+                                    <th style="width: 180px; text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orgRolesTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 40px;">
+                                        Loading organization roles...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="info-panel" style="margin-top: 2rem; padding: 1.5rem; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 8px;">
+                        <h3 style="margin: 0 0 1rem 0; color: #047857; font-size: 1.1rem;">💡 How Organization Roles Work</h3>
+                        <ul style="margin: 0; padding-left: 1.5rem;">
+                            <li style="margin-bottom: 0.5rem;"><strong>Create roles</strong> that match your org: Principal, Maintenance Director, Teacher, etc.</li>
+                            <li style="margin-bottom: 0.5rem;"><strong>Assign users</strong> to roles (manually or via Google Groups sync)</li>
+                            <li style="margin-bottom: 0.5rem;"><strong>Map to packages</strong> - each package defines its permission roles, you map your org roles to them</li>
+                            <li><strong>Google Groups sync</strong> - automatically assign roles based on Google Workspace group membership</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         @endif
     </div>
@@ -550,8 +593,8 @@ function loadSubtabData(subtab) {
         case 'invitations':
             loadInvitations();
             break;
-        case 'role-management':
-            loadRoleManagement();
+        case 'org-roles':
+            loadOrgRoles();
             break;
     }
 }
@@ -603,316 +646,17 @@ function loadInvitations() {
         });
 }
 
-// Load role management
-let allPermissions = {};
-let currentEditingRole = null;
-
-function loadRoleManagement() {
-    const container = document.getElementById('subtab-role-management');
-    if (!container) return;
-    
-    container.innerHTML = '<div class="loading">Loading roles...</div>';
-    
-    // Load permissions and roles in parallel
-    Promise.all([
-        fetch('/admin/permissions', { credentials: 'same-origin' }).then(r => r.json()),
-        fetch('/admin/roles', { credentials: 'same-origin' }).then(r => r.json())
-    ])
-    .then(([permissions, roles]) => {
-        allPermissions = permissions;
-        renderRoleManagement(roles);
-    })
-    .catch(err => {
-        notyf.error('Failed to load role management data');
-        console.error(err);
-        container.innerHTML = '<div class="alert alert-danger">Failed to load role management data</div>';
-    });
-}
-
-function renderRoleManagement(roles) {
-    const container = document.getElementById('subtab-role-management');
-    
-    const html = `
-        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 1.5rem; height: calc(100vh - 300px);">
-            <!-- Roles List -->
-            <div style="border-right: 1px solid #e0e0e0; padding-right: 1.5rem; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; margin-top: 0.5rem;">
-                    <h3 style="margin: 0;">Roles</h3>
-                    <button class="btn btn-sm btn-primary" onclick="createNewRole()">
-                        + New Role
-                    </button>
-                </div>
-                <div id="roles-list">
-                    ${roles.map(role => `
-                        <div class="role-item ${role.is_system ? 'system-role' : ''}" 
-                             onclick="selectRole(${role.id})"
-                             data-role-id="${role.id}">
-                            ${role.is_system ? '<span class="badge badge-secondary">System</span>' : ''}
-                            <div style="padding-right: 3.5rem;">
-                                <strong>${role.display_name}</strong>
-                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">
-                                    ${role.permission_count} permissions • ${role.user_count} users
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            
-            <!-- Role Editor -->
-            <div id="role-editor" style="overflow-y: auto; padding-left: 1.5rem;">
-                <div class="text-center" style="padding-top: 3rem; color: #999;">
-                    <p>Select a role to edit or create a new one</p>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    container.innerHTML = html;
-}
-
-function selectRole(roleId) {
-    // Highlight selected
-    document.querySelectorAll('.role-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    document.querySelector(`[data-role-id="${roleId}"]`)?.classList.add('active');
-    
-    // Load role details
-    document.getElementById('role-editor').innerHTML = '<div class="loading">Loading role details...</div>';
-    
-    fetch(`/admin/roles/${roleId}`)
-        .then(r => r.json())
-        .then(role => {
-            currentEditingRole = role;
-            renderRoleEditor(role);
-        })
-        .catch(err => {
-            notyf.error('Failed to load role details');
-            console.error(err);
-        });
-}
-
-function renderRoleEditor(role) {
-    const isSystem = role.is_system;
-    const rolePermissions = new Set(role.permissions.map(p => p.id));
-    
-    const html = `
-        <div class="role-editor-content">
-            <div style="margin-bottom: 2rem;">
-                <h2>${role.display_name}</h2>
-                ${role.description ? `<p style="color: #666;">${role.description}</p>` : ''}
-                ${isSystem ? '<p class="badge badge-secondary">System Role (Protected)</p>' : ''}
-            </div>
-            
-            <form id="role-form" onsubmit="saveRole(event)">
-                <input type="hidden" name="role_id" value="${role.id}">
-                
-                <div class="form-group">
-                    <label>Display Name</label>
-                    <input type="text" class="form-control" name="display_name" 
-                           value="${role.display_name}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea class="form-control" name="description" rows="2">${role.description || ''}</textarea>
-                </div>
-                
-                ${!isSystem ? `
-                    <div class="form-group">
-                        <label>Role Name (slug)</label>
-                        <input type="text" class="form-control" name="name" 
-                               value="${role.name}" pattern="[a-z0-9_]+" 
-                               title="Lowercase letters, numbers, and underscores only" required>
-                        <small class="form-text text-muted">Used in code (lowercase, underscores only)</small>
-                    </div>
-                ` : ''}
-                
-                <hr>
-                
-                <h4>Permissions</h4>
-                <p style="color: #666; font-size: 0.9rem;">Check the permissions this role should have</p>
-                
-                <div class="permissions-grid">
-                    ${Object.entries(allPermissions).map(([category, perms]) => `
-                        <div class="permission-category">
-                            <h5 style="text-transform: capitalize; margin-bottom: 0.5rem; color: #444;">
-                                ${category.replace('_', ' ')}
-                            </h5>
-                            ${perms.map(perm => `
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions[]" 
-                                           value="${perm.id}" 
-                                           ${rolePermissions.has(perm.id) ? 'checked' : ''}>
-                                    <span>${perm.display_name}</span>
-                                    ${perm.description ? `<small>${perm.description}</small>` : ''}
-                                </label>
-                            `).join('')}
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: space-between;">
-                    <div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <button type="button" class="btn btn-secondary" onclick="loadRoleManagement()">Cancel</button>
-                    </div>
-                    ${!isSystem ? `
-                        <button type="button" class="btn btn-danger" onclick="deleteRole(${role.id})">
-                            Delete Role
-                        </button>
-                    ` : ''}
-                </div>
-            </form>
-            
-            ${role.users.length > 0 ? `
-                <hr style="margin-top: 2rem;">
-                <h4>Users with this role (${role.users.length})</h4>
-                <ul class="list-unstyled">
-                    ${role.users.map(user => `
-                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
-                            ${user.name} <span style="color: #999;">(${user.email})</span>
-                        </li>
-                    `).join('')}
-                </ul>
-            ` : ''}
-        </div>
-    `;
-    
-    document.getElementById('role-editor').innerHTML = html;
-}
-
-function createNewRole() {
-    currentEditingRole = null;
-    
-    const html = `
-        <div class="role-editor-content">
-            <h2>Create New Role</h2>
-            
-            <form id="role-form" onsubmit="saveRole(event)">
-                <div class="form-group">
-                    <label>Role Name (slug) *</label>
-                    <input type="text" class="form-control" name="name" 
-                           pattern="[a-z0-9_]+" 
-                           title="Lowercase letters, numbers, and underscores only" 
-                           placeholder="e.g., department_manager" required>
-                    <small class="form-text text-muted">Used in code (lowercase, underscores only)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>Display Name *</label>
-                    <input type="text" class="form-control" name="display_name" 
-                           placeholder="e.g., Department Manager" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea class="form-control" name="description" rows="2" 
-                              placeholder="Brief description of this role's purpose"></textarea>
-                </div>
-                
-                <hr>
-                
-                <h4>Permissions</h4>
-                <p style="color: #666; font-size: 0.9rem;">Check the permissions this role should have</p>
-                
-                <div class="permissions-grid">
-                    ${Object.entries(allPermissions).map(([category, perms]) => `
-                        <div class="permission-category">
-                            <h5 style="text-transform: capitalize; margin-bottom: 0.5rem; color: #444;">
-                                ${category.replace('_', ' ')}
-                            </h5>
-                            ${perms.map(perm => `
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions[]" value="${perm.id}">
-                                    <span>${perm.display_name}</span>
-                                    ${perm.description ? `<small>${perm.description}</small>` : ''}
-                                </label>
-                            `).join('')}
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div style="margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Create Role</button>
-                    <button type="button" class="btn btn-secondary" onclick="loadRoleManagement()">Cancel</button>
-                </div>
-            </form>
-        </div>
-    `;
-    
-    document.getElementById('role-editor').innerHTML = html;
-}
-
-function saveRole(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    
-    // Collect selected permissions
-    const permissions = Array.from(form.querySelectorAll('input[name="permissions[]"]:checked'))
-        .map(cb => parseInt(cb.value));
-    
-    const data = {
-        name: formData.get('name'),
-        display_name: formData.get('display_name'),
-        description: formData.get('description'),
-        permissions: permissions
-    };
-    
-    const roleId = formData.get('role_id');
-    const url = roleId ? `/admin/roles/${roleId}` : '/admin/roles';
-    const method = roleId ? 'PUT' : 'POST';
-    
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
-        },
-        body: JSON.stringify(data)
-    })
-    .then(r => r.json())
-    .then(result => {
-        if (result.success) {
-            notyf.success(roleId ? 'Role updated successfully' : 'Role created successfully');
-            loadRoleManagement();
-        } else {
-            notyf.error(result.error || 'Failed to save role');
-        }
-    })
-    .catch(err => {
-        notyf.error('Failed to save role');
-        console.error(err);
-    });
-}
-
-function deleteRole(roleId) {
-    if (!confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
-        return;
+// Load organization roles - delegates to org-roles.js
+function loadOrgRoles() {
+    // The org-roles.js file defines its own loadOrgRoles function
+    // which works with the HTML structure above
+    if (typeof window.loadOrgRoles !== 'undefined') {
+        // Already loaded, just call it
+        window.loadOrgRoles();
+    } else {
+        // Will be loaded when the script tag loads at the end of the page
+        console.log('Org roles script will auto-load the data');
     }
-    
-    fetch(`/admin/roles/${roleId}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
-        }
-    })
-    .then(r => r.json())
-    .then(result => {
-        if (result.success) {
-            notyf.success('Role deleted successfully');
-            loadRoleManagement();
-        } else {
-            notyf.error(result.error || 'Failed to delete role');
-        }
-    })
-    .catch(err => {
-        notyf.error('Failed to delete role');
-        console.error(err);
-    });
 }
 
 // Render users table
@@ -1484,5 +1228,9 @@ loadActiveUsers();
 // Setup search and filter after DOM is ready
 setTimeout(setupSearchAndFilter, 100);
 </script>
+
+<!-- Organization Roles JavaScript -->
+<script src="/assets/js/org-roles.js?v={{ time() }}"></script>
+
 @endpush
 @endsection
