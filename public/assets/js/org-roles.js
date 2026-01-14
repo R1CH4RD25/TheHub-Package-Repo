@@ -700,18 +700,6 @@ function removeSingleRoleUser(roleId, userId) {
         updateBadgesAndEmptyStates();
     }
 }
-                }
-                
-                // Refresh main table in background
-                loadOrgRoles();
-            }
-        } else {
-            throw new Error(data.error || 'Failed to remove user');
-        }
-    } catch (error) {
-        showMessage('Failed to remove user: ' + error.message, 'error');
-    }
-}
 
 /**
  * Remove all users from role
