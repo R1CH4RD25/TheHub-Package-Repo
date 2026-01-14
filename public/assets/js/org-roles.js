@@ -604,8 +604,9 @@ function addSelectedUsers(roleId) {
         if (userLabel) {
             // Extract user info
             const img = userLabel.querySelector('img');
-            const nameDiv = userLabel.querySelector('div > div:first-child');
-            const emailDiv = userLabel.querySelector('div > div:last-child');
+            const userInfoDiv = userLabel.querySelector('div');
+            const nameDiv = userInfoDiv.querySelector('div:first-child');
+            const emailDiv = userInfoDiv.querySelector('div:last-child');
             
             const userName = nameDiv.textContent;
             const userEmail = emailDiv.textContent;
@@ -659,8 +660,9 @@ function removeSingleRoleUser(roleId, userId) {
     const memberItem = document.querySelector(`.member-item[data-user-id="${userId}"]`);
     if (memberItem) {
         const img = memberItem.querySelector('img');
-        const nameDiv = memberItem.querySelector('div > div:first-child');
-        const emailDiv = memberItem.querySelector('div > div:last-child');
+        const userInfoDiv = memberItem.querySelector('div > div > div');
+        const nameDiv = userInfoDiv.querySelector('div:first-child');
+        const emailDiv = userInfoDiv.querySelector('div:last-child');
         
         const userName = nameDiv.textContent;
         const userEmail = emailDiv.textContent;
@@ -730,8 +732,9 @@ async function removeAllRoleUsers(roleId) {
             memberItems.forEach(memberItem => {
                 const userId = memberItem.dataset.userId;
                 const img = memberItem.querySelector('img');
-                const nameDiv = memberItem.querySelector('div > div:first-child');
-                const emailDiv = memberItem.querySelector('div > div:last-child');
+                const userInfoDiv = memberItem.querySelector('div > div > div');
+                const nameDiv = userInfoDiv.querySelector('div:first-child');
+                const emailDiv = userInfoDiv.querySelector('div:last-child');
                 
                 const userName = nameDiv.textContent;
                 const userEmail = emailDiv.textContent;
