@@ -385,7 +385,10 @@ async function manageRoleUsers(roleId, roleName) {
     console.log('Raw Users Data:', usersData);
     console.log('Raw Role Users Data:', roleUsersData);
 
-    const allUsers = usersData.users || [];
+    // Handle different API response formats
+    // users.php returns array directly: [{...}, {...}]
+    // org-roles.php returns object: {success: true, users: [...]}
+    const allUsers = Array.isArray(usersData) ? usersData : (usersData.users || []);
     const currentMembers = roleUsersData.users || [];
     const currentMemberIds = currentMembers.map(u => u.id);
     const availableUsers = allUsers.filter(u => !currentMemberIds.includes(u.id));
