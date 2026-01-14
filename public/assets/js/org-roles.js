@@ -60,16 +60,16 @@ function createModal(title, content) {
     modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: background 0.3s ease; opacity: 0;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0;';
+    modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 92vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0;';
     
     modalContent.innerHTML = `
-        <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between;">
-            <h3 style="margin: 0; font-size: 1.25rem; color: #111827;">${title}</h3>
+        <div class="modal-header" style="padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="margin: 0; font-size: 1.125rem; font-weight: 500; color: #111827;">${title}</h3>
             <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="modal-body" style="padding: 2rem; overflow-y: auto; max-height: calc(90vh - 140px);">
+        <div class="modal-body" style="padding: 1.5rem; overflow-y: auto; max-height: calc(92vh - 120px);">
             ${content}
         </div>
     `;
@@ -446,7 +446,7 @@ async function manageRoleUsers(roleId, roleName) {
     console.groupEnd();
 
     const modal = createModal(`Manage Users - ${roleName}`, `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 500px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 600px;">
             <!-- Current Members Panel -->
             <div style="border-right: 1px solid #e5e7eb; padding-right: 2rem;">
                 <h4 style="margin: 0 0 1rem 0; display: flex; align-items: center; justify-content: space-between;">
@@ -457,7 +457,7 @@ async function manageRoleUsers(roleId, roleName) {
                     ${currentMembers.length > 0 ? `<button type="button" class="btn btn-sm btn-danger" onclick="removeAllRoleUsers(${roleId})" style="font-size: 0.85rem; padding: 4px 12px;">Remove All</button>` : ''}
                 </h4>
                 
-                <div id="currentMembersList" style="max-height: 420px; overflow-y: auto;">
+                <div id="currentMembersList" style="max-height: 560px; overflow-y: auto;">
                     ${currentMembers.length > 0 ? currentMembers.map(user => `
                         <div class="member-item" data-user-id="${user.id}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 0.5rem; background: #f9fafb;">
                             <div style="display: flex; align-items: center; flex: 1;">
@@ -498,7 +498,7 @@ async function manageRoleUsers(roleId, roleName) {
                     </div>
                 </div>
 
-                <div id="availableUsersList" style="max-height: 360px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; background: #fafafa;">
+                <div id="availableUsersList" style="max-height: 460px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; background: #fafafa;">
                     ${availableUsers.length > 0 ? availableUsers.map(user => `
                         <label class="available-user-item" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name).toLowerCase()} ${escapeHtml(user.email).toLowerCase()}"
                                style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
