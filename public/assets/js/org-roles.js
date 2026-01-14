@@ -3,6 +3,80 @@
  * Handles UI for creating, editing, and managing org roles
  */
 
+/**
+ * Create a modal with title and content
+ */
+function createModal(title, content) {
+    // Remove existing modal if any
+    let modal = document.getElementById('dynamicModal');
+    if (modal) modal.remove();
+
+    // Create modal backdrop
+    modal = document.createElement('div');
+    modal.id = 'dynamicModal';
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: background 0.3s ease; opacity: 0;';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background: white; border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0;';
+    
+    modalContent.innerHTML = `
+        <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="margin: 0; font-size: 1.25rem; color: #111827;">${title}</h3>
+            <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" style="padding: 2rem; overflow-y: auto; max-height: calc(90vh - 140px);">
+            ${content}
+        </div>
+    `;
+
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Trigger animations
+    requestAnimationFrame(() => {
+        modal.style.background = 'rgba(0,0,0,0.5)';
+        modal.style.opacity = '1';
+        modalContent.style.transform = 'scale(1)';
+        modalContent.style.opacity = '1';
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape key
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+
+    return modal;
+}
+
+/**
+ * Close the modal
+ */
+function closeModal() {
+    const modal = document.getElementById('dynamicModal');
+    if (!modal) return;
+
+    const modalContent = modal.querySelector('div');
+    
+    // Animate out
+    modal.style.background = 'rgba(0,0,0,0)';
+    modal.style.opacity = '0';
+    modalContent.style.transform = 'scale(0.9)';
+    modalContent.style.opacity = '0';
+
+    setTimeout(() => modal.remove(), 300);
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Load org roles when tab is activated
