@@ -540,10 +540,23 @@ async function manageRoleUsers(roleId, roleName) {
                 border-color: #3B82F6 !important;
             }
         </style>
+        
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="saveRoleUserChanges(${roleId})" id="saveRoleChangesBtn">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
     `);
 
-    // Store roleId and roleName for later use
-    window.currentRoleManagement = { roleId, roleName };
+    // Store roleId, roleName, and initial state for change tracking
+    window.currentRoleManagement = { 
+        roleId, 
+        roleName,
+        initialMembers: new Set(currentMembers.map(u => u.id)),
+        currentMembers: new Set(currentMembers.map(u => u.id)),
+        allUsers: new Map(allUsers.map(u => [u.id, u]))
+    };
 }
 
 /**
@@ -573,28 +586,70 @@ function updateSelectedCount() {
 }
 
 /**
- * Add selected users to role
+ * Add selected users to role (in-memory, not saved yet)
  */
-async function addSelectedUsers(roleId) {
+function addSelectedUsers(roleId) {
     const checkboxes = document.querySelectorAll('.user-checkbox:checked');
     const userIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
     if (userIds.length === 0) {
-        showMessage('Please select at least one user', 'warning');
         return;
     }
 
-    try {
-        const response = await fetch(`/api/org-roles.php?action=assign-users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role_id: roleId, user_ids: userIds })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showMessage(`Added ${userIds.length} user(s) to role`, 'success');
+    const availableList = document.getElementById('availableUsersList');
+    const currentList = document.getElementById('currentMembersList');
+    
+    userIds.forEach(userId => {
+        const userLabel = availableList.querySelector(`label[data-user-id="${userId}"]`);
+        if (userLabel) {
+            // Extract user info
+            const img = userLabel.querySelector('img');
+            const nameDiv = userLabel.querySelector('div > div:first-child');
+            const emailDiv = userLabel.querySelector('div > div:last-child');
+            
+            const userName = nameDiv.textContent;
+            const userEmail = emailDiv.textContent;
+            const userPicture = img.src;
+            
+            // Remove from available list
+            userLabel.remove();
+            
+            // Add to current members list
+            const memberHtml = `
+                <div class="member-item" data-user-id="${userId}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 0.5rem; background: #f9fafb;">
+                    <div style="display: flex; align-items: center; flex: 1;">
+                        <img src="${userPicture}"
+                             style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                        <div>
+                            <div style="font-weight: 500; color: #111827;">${userName}</div>
+                            <div style="font-size: 0.85rem; color: #6b7280;">${userEmail}</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSingleRoleUser(${roleId}, ${userId})" style="padding: 6px 12px;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Replace "No members" message if exists
+            const noMembersMsg = currentList.querySelector('div[style*="text-align: center"]');
+            if (noMembersMsg) {
+                currentList.innerHTML = memberHtml;
+            } else {
+                currentList.insertAdjacentHTML('beforeend', memberHtml);
+            }
+            
+            // Track change in memory
+            window.currentRoleManagement.currentMembers.add(userId);
+        }
+    });
+    
+    // Update badges
+    updateBadgesAndEmptyStates();
+    
+    // Clear selection
+    updateSelectedCount();
+}
             
             // Move users from available to current members
             const availableList = document.getElementById('availableUsersList');
@@ -675,74 +730,54 @@ async function addSelectedUsers(roleId) {
 }
 
 /**
- * Remove single user from role
+ * Remove single user from role (in-memory, not saved yet)
  */
-async function removeSingleRoleUser(roleId, userId) {
-    if (!confirm('Remove this user from the role?')) return;
-
-    try {
-        const response = await fetch(`/api/org-roles.php?action=remove-users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role_id: roleId, user_ids: [userId] })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showMessage('User removed from role', 'success');
-            
-            // Get user info before removing
-            const memberItem = document.querySelector(`.member-item[data-user-id="${userId}"]`);
-            if (memberItem) {
-                const img = memberItem.querySelector('img');
-                const nameDiv = memberItem.querySelector('div > div:first-child');
-                const emailDiv = memberItem.querySelector('div > div:last-child');
-                
-                const userName = nameDiv.textContent;
-                const userEmail = emailDiv.textContent;
-                const userPicture = img.src;
-                
-                // Remove from current members
-                memberItem.remove();
-                
-                // Add to available users
-                const availableList = document.getElementById('availableUsersList');
-                const userHtml = `
-                    <label class="available-user-item" data-user-id="${userId}" data-user-name="${userName.toLowerCase()} ${userEmail.toLowerCase()}"
-                           style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
-                        <input type="checkbox" value="${userId}" class="user-checkbox" onchange="updateSelectedCount()"
-                               style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
-                        <img src="${userPicture}"
-                             style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
-                        <div>
-                            <div style="font-weight: 500; color: #111827;">${userName}</div>
-                            <div style="font-size: 0.85rem; color: #6b7280;">${userEmail}</div>
-                        </div>
-                    </label>
-                `;
-                
-                // Remove empty state message if exists
-                const emptyMsg = availableList.querySelector('div[style*="text-align: center"]');
-                if (emptyMsg) {
-                    availableList.innerHTML = userHtml;
-                } else {
-                    availableList.insertAdjacentHTML('beforeend', userHtml);
-                }
-                
-                // Update badges
-                const currentList = document.getElementById('currentMembersList');
-                const currentBadge = currentList.closest('div').previousElementSibling.querySelector('.badge');
-                const availableBadge = availableList.closest('div').previousElementSibling.querySelector('.badge');
-                const currentCount = currentList.querySelectorAll('.member-item').length;
-                const availableCount = availableList.querySelectorAll('label').length;
-                
-                if (currentBadge) currentBadge.textContent = currentCount;
-                if (availableBadge) availableBadge.textContent = availableCount;
-                
-                // Show empty state in current members if needed
-                if (currentCount === 0) {
-                    currentList.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;"><i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>No members assigned</div>';
+function removeSingleRoleUser(roleId, userId) {
+    // Get user info before removing
+    const memberItem = document.querySelector(`.member-item[data-user-id="${userId}"]`);
+    if (memberItem) {
+        const img = memberItem.querySelector('img');
+        const nameDiv = memberItem.querySelector('div > div:first-child');
+        const emailDiv = memberItem.querySelector('div > div:last-child');
+        
+        const userName = nameDiv.textContent;
+        const userEmail = emailDiv.textContent;
+        const userPicture = img.src;
+        
+        // Remove from current members
+        memberItem.remove();
+        
+        // Add to available users
+        const availableList = document.getElementById('availableUsersList');
+        const userHtml = `
+            <label class="available-user-item" data-user-id="${userId}" data-user-name="${userName.toLowerCase()} ${userEmail.toLowerCase()}"
+                   style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
+                <input type="checkbox" value="${userId}" class="user-checkbox" onchange="updateSelectedCount()"
+                       style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                <img src="${userPicture}"
+                     style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                <div>
+                    <div style="font-weight: 500; color: #111827;">${userName}</div>
+                    <div style="font-size: 0.85rem; color: #6b7280;">${userEmail}</div>
+                </div>
+            </label>
+        `;
+        
+        // Remove empty state message if exists
+        const emptyMsg = availableList.querySelector('div[style*="text-align: center"]');
+        if (emptyMsg) {
+            availableList.innerHTML = userHtml;
+        } else {
+            availableList.insertAdjacentHTML('beforeend', userHtml);
+        }
+        
+        // Track change in memory
+        window.currentRoleManagement.currentMembers.delete(userId);
+        
+        // Update badges
+        updateBadgesAndEmptyStates();
+    }
+}
                 }
                 
                 // Refresh main table in background
@@ -834,6 +869,103 @@ async function removeAllRoleUsers(roleId) {
         }
     } catch (error) {
         showMessage('Failed to remove users: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Update badges and empty states in modal
+ */
+function updateBadgesAndEmptyStates() {
+    const currentList = document.getElementById('currentMembersList');
+    const availableList = document.getElementById('availableUsersList');
+    
+    const currentBadge = currentList.closest('div').previousElementSibling.querySelector('.badge');
+    const availableBadge = availableList.closest('div').previousElementSibling.querySelector('.badge');
+    const currentCount = currentList.querySelectorAll('.member-item').length;
+    const availableCount = availableList.querySelectorAll('label').length;
+    
+    if (currentBadge) currentBadge.textContent = currentCount;
+    if (availableBadge) availableBadge.textContent = availableCount;
+    
+    // Show empty state in available list if needed
+    if (availableCount === 0) {
+        availableList.innerHTML = `<div style="padding: 2rem; text-align: center; color: #94a3b8;">
+            <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+            <p style="margin: 0; font-weight: 500; color: #6b7280;">All users are already members</p>
+        </div>`;
+    }
+    
+    // Show empty state in current members if needed
+    if (currentCount === 0) {
+        currentList.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;"><i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>No members assigned</div>';
+    }
+}
+
+/**
+ * Save all role user changes
+ */
+async function saveRoleUserChanges(roleId) {
+    const { initialMembers, currentMembers } = window.currentRoleManagement;
+    
+    // Calculate what changed
+    const usersToAdd = [...currentMembers].filter(id => !initialMembers.has(id));
+    const usersToRemove = [...initialMembers].filter(id => !currentMembers.has(id));
+    
+    if (usersToAdd.length === 0 && usersToRemove.length === 0) {
+        showMessage('No changes to save', 'info');
+        return;
+    }
+    
+    const saveBtn = document.getElementById('saveRoleChangesBtn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+    
+    try {
+        // Remove users first
+        if (usersToRemove.length > 0) {
+            const removeResponse = await fetch(`/api/org-roles.php?action=remove-users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role_id: roleId, user_ids: usersToRemove })
+            });
+            const removeData = await removeResponse.json();
+            if (!removeData.success) {
+                throw new Error(removeData.error || 'Failed to remove users');
+            }
+        }
+        
+        // Add users second
+        if (usersToAdd.length > 0) {
+            const addResponse = await fetch(`/api/org-roles.php?action=assign-users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role_id: roleId, user_ids: usersToAdd })
+            });
+            const addData = await addResponse.json();
+            if (!addData.success) {
+                throw new Error(addData.error || 'Failed to add users');
+            }
+        }
+        
+        // Build success message
+        const changes = [];
+        if (usersToAdd.length > 0) changes.push(`Added ${usersToAdd.length}`);
+        if (usersToRemove.length > 0) changes.push(`Removed ${usersToRemove.length}`);
+        
+        showMessage(`Changes saved! ${changes.join(', ')} user(s)`, 'success');
+        
+        // Close modal and refresh table
+        closeModal();
+        loadOrgRoles();
+        
+    } catch (error) {
+        showMessage('Failed to save changes: ' + error.message, 'error');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        }
     }
 }
 
