@@ -580,7 +580,7 @@
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body">
+                    <div class="settings-section-body collapsed">
                         <div class="settings-grid">
                             <!-- Login Methods -->
                             <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin-bottom: 1rem;">
@@ -698,7 +698,7 @@
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body">
+                    <div class="settings-section-body collapsed">
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label for="cc_display_name">Display Name</label>
@@ -735,7 +735,7 @@
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body">
+                    <div class="settings-section-body collapsed">
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label>
