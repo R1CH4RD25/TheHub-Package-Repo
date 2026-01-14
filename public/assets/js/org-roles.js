@@ -602,9 +602,9 @@ function addSelectedUsers(roleId) {
     userIds.forEach(userId => {
         const userLabel = availableList.querySelector(`label[data-user-id="${userId}"]`);
         if (userLabel) {
-            // Extract user info
+            // Extract user info - get the div immediately after the img
             const img = userLabel.querySelector('img');
-            const userInfoDiv = userLabel.querySelector('div');
+            const userInfoDiv = userLabel.querySelector('img + div');
             const nameDiv = userInfoDiv.querySelector('div:first-child');
             const emailDiv = userInfoDiv.querySelector('div:last-child');
             
@@ -660,7 +660,7 @@ function removeSingleRoleUser(roleId, userId) {
     const memberItem = document.querySelector(`.member-item[data-user-id="${userId}"]`);
     if (memberItem) {
         const img = memberItem.querySelector('img');
-        const userInfoDiv = memberItem.querySelector('div > div > div');
+        const userInfoDiv = memberItem.querySelector('img + div');
         const nameDiv = userInfoDiv.querySelector('div:first-child');
         const emailDiv = userInfoDiv.querySelector('div:last-child');
         
@@ -732,7 +732,7 @@ async function removeAllRoleUsers(roleId) {
             memberItems.forEach(memberItem => {
                 const userId = memberItem.dataset.userId;
                 const img = memberItem.querySelector('img');
-                const userInfoDiv = memberItem.querySelector('div > div > div');
+                const userInfoDiv = memberItem.querySelector('img + div');
                 const nameDiv = userInfoDiv.querySelector('div:first-child');
                 const emailDiv = userInfoDiv.querySelector('div:last-child');
                 
