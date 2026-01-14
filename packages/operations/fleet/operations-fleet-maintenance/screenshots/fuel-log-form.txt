@@ -1,0 +1,15 @@
+Screenshot Placeholder: Fuel Log Form
+
+This screenshot should show:
+- Vehicle selector dropdown
+- Date picker
+- Odometer input field
+- Gallons input field
+- Fuel type dropdown (Unleaded, Diesel, Propane, Other)
+- Trip category dropdown (11, 23, 34, 36, 41)
+- "Purchased Fuel?" checkbox
+- Conditional purchase fields (vendor, location, cost, receipt upload)
+- Submit and Cancel buttons
+
+Recommended size: 1280x720 pixels
+Format: PNG or JPG

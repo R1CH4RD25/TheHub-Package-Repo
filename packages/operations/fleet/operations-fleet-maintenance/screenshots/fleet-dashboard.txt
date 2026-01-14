@@ -1,0 +1,11 @@
+Screenshot Placeholder: Fleet Dashboard
+
+This screenshot should show:
+- Fleet overview with vehicle list
+- Vehicle cards showing unit number, make/model, status
+- Out-of-service indicators (if any)
+- Recent fuel and maintenance activity
+- Quick action buttons (Add Vehicle, View Analytics)
+
+Recommended size: 1280x720 pixels
+Format: PNG or JPG
