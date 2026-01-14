@@ -1,0 +1,221 @@
+{
+  "package_id": "operations-fleet-maintenance",
+  "display_name": "Vehicle Maintenance & Fleet Tracking",
+  "version": "1.0.0",
+  "author": "Woodson ISD Technology Department",
+  "description": "Comprehensive district-wide vehicle management, fuel tracking with trip categorization, and maintenance scheduling with role-based access for Hub and Management users.",
+  "category": "operations",
+  "tags": ["operations", "fleet", "vehicles", "maintenance", "fuel", "tracking"],
+  "hub_version_min": "1.0.0",
+  "hub_version_max": null,
+  "dependencies": [],
+  "conflicts": [],
+  "database": {
+    "schema_file": "database/schema.sql",
+    "tables": [
+      "vm_vehicles",
+      "vm_trip_categories",
+      "vm_fuel_logs",
+      "vm_maintenance_items",
+      "vm_maintenance_events",
+      "vm_maintenance_templates",
+      "vm_template_items",
+      "vm_vehicle_schedules",
+      "vm_departments",
+      "vm_campuses",
+      "vm_settings"
+    ]
+  },
+  "permissions": {
+    "hub_user": {
+      "description": "Standard Hub users - view fleet, submit fuel/maintenance logs",
+      "capabilities": [
+        "view_fleet_roster",
+        "submit_fuel_log",
+        "view_own_fuel_logs",
+        "submit_maintenance_log",
+        "view_own_maintenance_logs"
+      ]
+    },
+    "management_crew": {
+      "description": "Maintenance crew - log maintenance for all vehicles",
+      "capabilities": [
+        "view_all_fleet",
+        "submit_fuel_log_any_vehicle",
+        "view_all_fuel_logs",
+        "submit_maintenance_any_vehicle",
+        "view_all_maintenance_logs"
+      ]
+    },
+    "management_fleet_manager": {
+      "description": "Fleet managers - manage assigned vehicles and schedules",
+      "capabilities": [
+        "manage_assigned_vehicles",
+        "edit_vehicle_details",
+        "view_vehicle_schedules",
+        "update_out_of_service_status",
+        "view_assigned_analytics"
+      ]
+    },
+    "management_director": {
+      "description": "Maintenance director - district-wide control and configuration",
+      "capabilities": [
+        "manage_all_vehicles",
+        "configure_trip_categories",
+        "configure_maintenance_items",
+        "manage_maintenance_templates",
+        "configure_package_settings",
+        "view_district_analytics",
+        "manage_departments_campuses"
+      ]
+    },
+    "management_admin": {
+      "description": "Full package administration",
+      "capabilities": ["*"]
+    }
+  },
+  "hub_cards": [
+    {
+      "id": "fleet-management",
+      "title": "Fleet Management",
+      "description": "View fleet roster and vehicle details",
+      "icon": "bi-truck",
+      "access": ["hub_user", "management_crew", "management_fleet_manager", "management_director", "management_admin"],
+      "modules": [
+        "view-fleet-roster"
+      ]
+    },
+    {
+      "id": "fuel-trip-tracking",
+      "title": "Fuel & Trip Tracking",
+      "description": "Log fuel usage and view trip history",
+      "icon": "bi-fuel-pump",
+      "access": ["hub_user", "management_crew", "management_fleet_manager", "management_director", "management_admin"],
+      "modules": [
+        "submit-fuel-log",
+        "view-my-fuel-logs"
+      ]
+    },
+    {
+      "id": "maintenance-tracking",
+      "title": "Maintenance Tracking",
+      "description": "Log maintenance events and view service history",
+      "icon": "bi-wrench",
+      "access": ["hub_user", "management_crew", "management_fleet_manager", "management_director", "management_admin"],
+      "modules": [
+        "submit-maintenance-log",
+        "view-my-maintenance-logs"
+      ]
+    }
+  ],
+  "management_sections": [
+    {
+      "id": "fleet-configuration",
+      "title": "Fleet Configuration",
+      "description": "Manage vehicles, departments, and campuses",
+      "icon": "bi-gear-fill",
+      "access": ["management_fleet_manager", "management_director", "management_admin"],
+      "modules": [
+        "manage-vehicles",
+        "manage-departments",
+        "manage-campuses",
+        "vehicle-assignments"
+      ]
+    },
+    {
+      "id": "fuel-analytics",
+      "title": "Fuel Analytics",
+      "description": "View district-wide fuel consumption and costs",
+      "icon": "bi-graph-up",
+      "access": ["management_director", "management_admin"],
+      "modules": [
+        "fuel-dashboard",
+        "fuel-reports",
+        "trip-category-analysis"
+      ]
+    },
+    {
+      "id": "maintenance-management",
+      "title": "Maintenance Management",
+      "description": "Configure templates, items, and schedules",
+      "icon": "bi-calendar-check",
+      "access": ["management_director", "management_admin"],
+      "modules": [
+        "manage-maintenance-items",
+        "manage-maintenance-templates",
+        "vehicle-schedules",
+        "maintenance-dashboard"
+      ]
+    },
+    {
+      "id": "trip-categories",
+      "title": "Trip Categories",
+      "description": "Manage trip classification codes",
+      "icon": "bi-tags",
+      "access": ["management_director", "management_admin"],
+      "modules": [
+        "manage-trip-categories"
+      ]
+    },
+    {
+      "id": "package-settings",
+      "title": "Package Settings",
+      "description": "Configure package-wide settings",
+      "icon": "bi-sliders",
+      "access": ["management_director", "management_admin"],
+      "modules": [
+        "package-settings"
+      ]
+    }
+  ],
+  "file_uploads": {
+    "fuel_receipts": {
+      "max_size": "5MB",
+      "allowed_types": ["pdf", "jpg", "jpeg", "png"],
+      "storage_path": "uploads/vm/fuel-receipts/"
+    },
+    "maintenance_invoices": {
+      "max_size": "5MB",
+      "allowed_types": ["pdf", "jpg", "jpeg", "png"],
+      "storage_path": "uploads/vm/maintenance-invoices/"
+    },
+    "maintenance_photos": {
+      "max_size": "10MB",
+      "allowed_types": ["jpg", "jpeg", "png"],
+      "storage_path": "uploads/vm/maintenance-photos/"
+    }
+  },
+  "validation": {
+    "year": {
+      "min": 1900,
+      "max": 2100
+    },
+    "odometer": {
+      "min": 0,
+      "max": 999999
+    },
+    "gallons": {
+      "min": 0.01,
+      "max": 9999.99
+    },
+    "costs": {
+      "min": 0.01,
+      "max": 999999.99
+    },
+    "price_per_gallon": {
+      "min": 0.01,
+      "max": 99.99
+    }
+  },
+  "notifications": {
+    "maintenance_due": {
+      "enabled": true,
+      "lead_time_days": 30,
+      "lead_distance_miles": 500
+    },
+    "out_of_service": {
+      "enabled": true,
+      "notify_roles": ["management_director", "management_admin"]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+Screenshot Placeholder: Maintenance Log Form
+
+This screenshot should show:
+- Vehicle selector dropdown
+- Maintenance item dropdown (Oil Change, Tire Rotation, etc.)
+- Date picker
+- Odometer input field
+- Vendor input field
+- Parts cost input
+- Labor cost input
+- Total cost (auto-calculated)
+- Invoice upload field
+- Photo upload field (multiple)
+- Notes textarea
+- Submit and Cancel buttons
+
+Recommended size: 1280x720 pixels
+Format: PNG or JPG
