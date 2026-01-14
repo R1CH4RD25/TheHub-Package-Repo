@@ -381,6 +381,8 @@ async function manageRoleUsers(roleId, roleName) {
     const currentMemberIds = currentMembers.map(u => u.id);
     const availableUsers = allUsers.filter(u => !currentMemberIds.includes(u.id));
 
+    console.log('All users:', allUsers.length, 'Current members:', currentMembers.length, 'Available:', availableUsers.length);
+
     const modal = createModal(`Manage Users - ${roleName}`, `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 500px;">
             <!-- Current Members Panel -->
@@ -425,11 +427,16 @@ async function manageRoleUsers(roleId, roleName) {
                 </h4>
 
                 <div style="margin-bottom: 1rem;">
-                    <input type="text" id="userSearchInput" class="form-control"
-                           placeholder="🔍 Search by name or email..." onkeyup="filterAvailableUsers()">
+                    <div style="position: relative;">
+                        <input type="text" id="userSearchInput" class="form-control"
+                               placeholder="Search by name or email..."
+                               onkeyup="filterAvailableUsers()"
+                               style="padding-left: 2.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fas fa-search" style="position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
+                    </div>
                 </div>
 
-                <div id="availableUsersList" style="max-height: 360px; overflow-y: auto;">
+                <div id="availableUsersList" style="max-height: 360px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; background: #fafafa;">
                     ${availableUsers.length > 0 ? availableUsers.map(user => `
                         <label class="available-user-item" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name).toLowerCase()} ${escapeHtml(user.email).toLowerCase()}"
                                style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
@@ -442,12 +449,26 @@ async function manageRoleUsers(roleId, roleName) {
                                 <div style="font-size: 0.85rem; color: #6b7280;">${escapeHtml(user.email)}</div>
                             </div>
                         </label>
-                    `).join('') : '<div style="padding: 2rem; text-align: center; color: #94a3b8;"><i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>All users are already members</div>'}
+                    `).join('') : `<div style="padding: 2rem; text-align: center; color: #94a3b8;">
+                        <i class="fas fa-${currentMembers.length === allUsers.length && allUsers.length > 0 ? 'check-circle' : 'users-slash'}" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                        <p style="margin: 0; font-weight: 500; color: #6b7280;">
+                            ${currentMembers.length === allUsers.length && allUsers.length > 0 
+                                ? 'All users are already members' 
+                                : allUsers.length === 0 
+                                    ? 'No active users in the system' 
+                                    : 'No available users to add'}
+                        </p>
+                    </div>`}
                 </div>
             </div>
         </div>
 
         <style>
+            #userSearchInput:focus {
+                outline: none;
+                border-color: #3B82F6 !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            }
             .available-user-item:hover {
                 background: #f3f4f6 !important;
                 border-color: #d1d5db !important;

@@ -644,18 +644,8 @@ function loadInvitations() {
         });
 }
 
-// Load organization roles - delegates to org-roles.js
-function loadOrgRoles() {
-    // The org-roles.js file defines its own loadOrgRoles function
-    // which works with the HTML structure above
-    if (typeof window.loadOrgRoles !== 'undefined') {
-        // Already loaded, just call it
-        window.loadOrgRoles();
-    } else {
-        // Will be loaded when the script tag loads at the end of the page
-        console.log('Org roles script will auto-load the data');
-    }
-}
+// Load organization roles - handled by org-roles.js
+// The loadOrgRoles function is defined in org-roles.js and auto-loads when the tab is clicked
 
 // Render users table
 // Helper function to get initials
