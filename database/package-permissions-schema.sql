@@ -175,6 +175,49 @@ ON DUPLICATE KEY UPDATE name=name;
 -- AND JSON_CONTAINS(pr.permissions, JSON_QUOTE(phi.required_permission));
 
 -- =============================================================================
+-- Auto-Assignment via Cloud Identity Providers
+-- =============================================================================
+
+-- Google Workspace Groups → Organization Roles
+CREATE TABLE IF NOT EXISTS org_role_google_groups (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    org_role_id INT UNSIGNED NOT NULL,
+    google_group_email VARCHAR(255) NOT NULL COMMENT 'Google Group email (e.g., principals@yourdomain.com)',
+    is_active TINYINT(1) DEFAULT 1,
+    sync_on_login TINYINT(1) DEFAULT 1 COMMENT 'Auto-assign role when user logs in',
+    last_sync_at TIMESTAMP NULL DEFAULT NULL,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (org_role_id) REFERENCES org_roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE KEY unique_role_google_group (org_role_id, google_group_email),
+    INDEX idx_google_group_lookup (google_group_email),
+    INDEX idx_active_groups (is_active, sync_on_login)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Maps Google Workspace groups to organization roles for auto-assignment';
+
+-- Microsoft Azure AD Groups → Organization Roles
+CREATE TABLE IF NOT EXISTS org_role_microsoft_groups (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    org_role_id INT UNSIGNED NOT NULL,
+    azure_group_id VARCHAR(255) NOT NULL COMMENT 'Azure AD Group Object ID (GUID)',
+    azure_group_name VARCHAR(255) COMMENT 'Display name for UI reference',
+    is_active TINYINT(1) DEFAULT 1,
+    sync_on_login TINYINT(1) DEFAULT 1 COMMENT 'Auto-assign role when user logs in',
+    last_sync_at TIMESTAMP NULL DEFAULT NULL,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (org_role_id) REFERENCES org_roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE KEY unique_role_azure_group (org_role_id, azure_group_id),
+    INDEX idx_azure_group_lookup (azure_group_id),
+    INDEX idx_active_groups (is_active, sync_on_login)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Maps Azure AD groups to organization roles for auto-assignment';
+
+-- =============================================================================
 -- Notes
 -- =============================================================================
 -- 1. Permissions are ADDITIVE: Users with multiple org roles get union of all permissions
@@ -182,3 +225,4 @@ ON DUPLICATE KEY UPDATE name=name;
 -- 3. Package roles and permissions are IMMUTABLE after package creation
 -- 4. Organizations map their roles to package roles during package configuration
 -- 5. Section visibility (Hub, Management links) determined by ANY permission in that section
+-- 6. Cloud identity integration (Google/Microsoft) auto-assigns roles based on group membership at login
