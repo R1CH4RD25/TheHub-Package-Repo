@@ -446,7 +446,7 @@ async function manageRoleUsers(roleId, roleName) {
     console.groupEnd();
 
     const modal = createModal(`Manage Users - ${roleName}`, `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 600px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 550px;">
             <!-- Current Members Panel -->
             <div style="border-right: 1px solid #e5e7eb; padding-right: 2rem;">
                 <h4 style="margin: 0 0 1rem 0; display: flex; align-items: center; justify-content: space-between;">
@@ -459,16 +459,16 @@ async function manageRoleUsers(roleId, roleName) {
                 
                 <div id="currentMembersList" style="max-height: 560px; overflow-y: auto;">
                     ${currentMembers.length > 0 ? currentMembers.map(user => `
-                        <div class="member-item" data-user-id="${user.id}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 0.5rem; background: #f9fafb;">
+                        <div class="member-item" data-user-id="${user.id}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.625rem; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 0.375rem; background: #f9fafb;">
                             <div style="display: flex; align-items: center; flex: 1;">
                                 <img src="${user.picture || '/assets/images/default-avatar.png'}"
-                                     style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                                     style="width: 36px; height: 36px; border-radius: 50%; margin-right: 0.625rem; border: 2px solid #e5e7eb;">
                                 <div>
-                                    <div style="font-weight: 500; color: #111827;">${escapeHtml(user.name)}</div>
-                                    <div style="font-size: 0.85rem; color: #6b7280;">${escapeHtml(user.email)}</div>
+                                    <div style="font-weight: 500; color: #111827; font-size: 0.9rem;">${escapeHtml(user.name)}</div>
+                                    <div style="font-size: 0.8rem; color: #6b7280;">${escapeHtml(user.email)}</div>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-sm btn-danger" onclick="removeSingleRoleUser(${roleId}, ${user.id})" style="padding: 6px 12px;">
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeSingleRoleUser(${roleId}, ${user.id})" style="padding: 4px 10px; font-size: 0.85rem;">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -501,14 +501,14 @@ async function manageRoleUsers(roleId, roleName) {
                 <div id="availableUsersList" style="max-height: 460px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; background: #fafafa;">
                     ${availableUsers.length > 0 ? availableUsers.map(user => `
                         <label class="available-user-item" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name).toLowerCase()} ${escapeHtml(user.email).toLowerCase()}"
-                               style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
+                               style="display: flex; align-items: center; padding: 0.5rem 0.625rem; cursor: pointer; border-radius: 6px; margin-bottom: 0.375rem; border: 1px solid transparent; transition: all 0.2s;">
                             <input type="checkbox" value="${user.id}" class="user-checkbox" onchange="updateSelectedCount()"
-                                   style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                                   style="margin-right: 0.625rem; width: 16px; height: 16px; cursor: pointer;">
                             <img src="${user.picture || '/assets/images/default-avatar.png'}"
-                                 style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                                 style="width: 36px; height: 36px; border-radius: 50%; margin-right: 0.625rem; border: 2px solid #e5e7eb;">
                             <div>
-                                <div style="font-weight: 500; color: #111827;">${escapeHtml(user.name)}</div>
-                                <div style="font-size: 0.85rem; color: #6b7280;">${escapeHtml(user.email)}</div>
+                                <div style="font-weight: 500; color: #111827; font-size: 0.9rem;">${escapeHtml(user.name)}</div>
+                                <div style="font-size: 0.8rem; color: #6b7280;">${escapeHtml(user.email)}</div>
                             </div>
                         </label>
                     `).join('') : `<div style="padding: 2rem; text-align: center; color: #94a3b8;">
@@ -541,7 +541,7 @@ async function manageRoleUsers(roleId, roleName) {
             }
         </style>
         
-        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.75rem;">
             <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
             <button type="button" class="btn btn-primary" onclick="saveRoleUserChanges(${roleId})" id="saveRoleChangesBtn">
                 <i class="fas fa-save"></i> Save Changes
@@ -617,16 +617,16 @@ function addSelectedUsers(roleId) {
             
             // Add to current members list
             const memberHtml = `
-                <div class="member-item" data-user-id="${userId}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 0.5rem; background: #f9fafb;">
+                <div class="member-item" data-user-id="${userId}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.625rem; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 0.375rem; background: #f9fafb;">
                     <div style="display: flex; align-items: center; flex: 1;">
                         <img src="${userPicture}"
-                             style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                             style="width: 36px; height: 36px; border-radius: 50%; margin-right: 0.625rem; border: 2px solid #e5e7eb;">
                         <div>
-                            <div style="font-weight: 500; color: #111827;">${userName}</div>
-                            <div style="font-size: 0.85rem; color: #6b7280;">${userEmail}</div>
+                            <div style="font-weight: 500; color: #111827; font-size: 0.9rem;">${userName}</div>
+                            <div style="font-size: 0.8rem; color: #6b7280;">${userEmail}</div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSingleRoleUser(${roleId}, ${userId})" style="padding: 6px 12px;">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSingleRoleUser(${roleId}, ${userId})" style="padding: 4px 10px; font-size: 0.85rem;">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -675,14 +675,14 @@ function removeSingleRoleUser(roleId, userId) {
         const availableList = document.getElementById('availableUsersList');
         const userHtml = `
             <label class="available-user-item" data-user-id="${userId}" data-user-name="${userName.toLowerCase()} ${userEmail.toLowerCase()}"
-                   style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
+                   style="display: flex; align-items: center; padding: 0.5rem 0.625rem; cursor: pointer; border-radius: 6px; margin-bottom: 0.375rem; border: 1px solid transparent; transition: all 0.2s;">
                 <input type="checkbox" value="${userId}" class="user-checkbox" onchange="updateSelectedCount()"
-                       style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                       style="margin-right: 0.625rem; width: 16px; height: 16px; cursor: pointer;">
                 <img src="${userPicture}"
-                     style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                     style="width: 36px; height: 36px; border-radius: 50%; margin-right: 0.625rem; border: 2px solid #e5e7eb;">
                 <div>
-                    <div style="font-weight: 500; color: #111827;">${userName}</div>
-                    <div style="font-size: 0.85rem; color: #6b7280;">${userEmail}</div>
+                    <div style="font-weight: 500; color: #111827; font-size: 0.9rem;">${userName}</div>
+                    <div style="font-size: 0.8rem; color: #6b7280;">${userEmail}</div>
                 </div>
             </label>
         `;
@@ -743,14 +743,14 @@ async function removeAllRoleUsers(roleId) {
                 // Add to available users
                 const userHtml = `
                     <label class="available-user-item" data-user-id="${userId}" data-user-name="${userName.toLowerCase()} ${userEmail.toLowerCase()}"
-                           style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
+                           style="display: flex; align-items: center; padding: 0.5rem 0.625rem; cursor: pointer; border-radius: 6px; margin-bottom: 0.375rem; border: 1px solid transparent; transition: all 0.2s;">
                         <input type="checkbox" value="${userId}" class="user-checkbox" onchange="updateSelectedCount()"
-                               style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                               style="margin-right: 0.625rem; width: 16px; height: 16px; cursor: pointer;">
                         <img src="${userPicture}"
-                             style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                             style="width: 36px; height: 36px; border-radius: 50%; margin-right: 0.625rem; border: 2px solid #e5e7eb;">
                         <div>
-                            <div style="font-weight: 500; color: #111827;">${userName}</div>
-                            <div style="font-size: 0.85rem; color: #6b7280;">${userEmail}</div>
+                            <div style="font-weight: 500; color: #111827; font-size: 0.9rem;">${userName}</div>
+                            <div style="font-size: 0.8rem; color: #6b7280;">${userEmail}</div>
                         </div>
                     </label>
                 `;
