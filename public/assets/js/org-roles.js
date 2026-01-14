@@ -459,107 +459,150 @@ async function saveRoleUsers(roleId) {
  * Manage Cloud Groups (Google + Microsoft)
  */
 async function manageCloudGroups(roleId, roleName) {
-    const response = await fetch('/api/org-roles.php?action=list');
-    const data = await response.json();
+    // Fetch role data and settings in parallel
+    const [roleResponse, settingsResponse] = await Promise.all([
+        fetch('/api/org-roles.php?action=list'),
+        fetch('/api/site-settings.php')
+    ]);
+    
+    const data = await roleResponse.json();
+    const settings = await settingsResponse.json();
     const role = data.roles.find(r => r.id === roleId);
 
-    const modal = createModal(`Cloud Identity Groups - ${roleName}`, `
-        <p class="info-text">
+    // Check which providers are enabled
+    const googleEnabled = settings.enable_google_groups === true || settings.enable_google_groups === 1;
+    const microsoftEnabled = settings.enable_microsoft_groups === true || settings.enable_microsoft_groups === 1;
+
+    // Build modal content based on enabled providers
+    let modalContent = `
+        <p class="info-text" style="margin-bottom: 1.5rem; padding: 1rem; background: #EFF6FF; border-left: 4px solid #3B82F6; color: #1E40AF;">
             <i class="fas fa-cloud"></i>
             Users in these cloud identity groups will automatically be assigned this role when they log in.
         </p>
+    `;
 
-        <!-- Google Groups Section -->
-        <div class="cloud-groups-section" style="margin-bottom: 2rem;">
-            <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                <i class="fab fa-google"></i> Google Workspace Groups
-            </h4>
-            <div id="googleGroupsList" style="margin-bottom: 1rem;">
-                ${role.google_groups && role.google_groups.length > 0 ? role.google_groups.map(group => `
-                    <div class="badge badge-info" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                        ${escapeHtml(group)}
-                        <button onclick="removeGoogleGroup(${roleId}, '${escapeHtml(group)}')"
-                                style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `).join('') : '<em style="color: #94a3b8;">No Google Groups mapped</em>'}
+    // Only show sections for enabled providers
+    if (!googleEnabled && !microsoftEnabled) {
+        modalContent += `
+            <div style="padding: 2rem; text-align: center; color: #6b7280;">
+                <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #94a3b8;"></i>
+                <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No Cloud Providers Enabled</p>
+                <p style="font-size: 0.9rem;">Enable Google Groups or Microsoft Groups in <a href="/admin/settings" style="color: #3B82F6; text-decoration: underline;">Settings → Authentication</a></p>
             </div>
-
-            <form id="addGoogleGroupForm" style="margin-top: 1rem;">
-                <div class="form-group">
-                    <label>Add Google Group</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="email" id="googleGroupEmail" class="form-control"
-                               placeholder="group@yourdomain.com">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Add
-                        </button>
+        `;
+    } else {
+        // Google Groups Section (only if enabled)
+        if (googleEnabled) {
+            modalContent += `
+                <div class="cloud-groups-section" style="margin-bottom: 2rem;">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                        <i class="fab fa-google"></i> Google Workspace Groups
+                    </h4>
+                    <div id="googleGroupsList" style="margin-bottom: 1rem;">
+                        ${role.google_groups && role.google_groups.length > 0 ? role.google_groups.map(group => `
+                            <div class="badge badge-info" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                ${escapeHtml(group)}
+                                <button onclick="removeGoogleGroup(${roleId}, '${escapeHtml(group)}')"
+                                        style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `).join('') : '<em style="color: #94a3b8;">No Google Groups mapped</em>'}
                     </div>
+
+                    <form id="addGoogleGroupForm" style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Add Google Group</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="email" id="googleGroupEmail" class="form-control"
+                                       placeholder="group@yourdomain.com">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
+            `;
+        }
 
-        <!-- Microsoft Groups Section -->
-        <div class="cloud-groups-section" style="margin-bottom: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-            <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                <i class="fab fa-microsoft"></i> Microsoft Azure AD Groups
-            </h4>
-            <div id="microsoftGroupsList" style="margin-bottom: 1rem;">
-                ${role.microsoft_groups && role.microsoft_groups.length > 0 ? role.microsoft_groups.map(group => `
-                    <div class="badge badge-primary" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                        ${escapeHtml(group.azure_group_name || group.azure_group_id)}
-                        <button onclick="removeMicrosoftGroup(${roleId}, '${group.id}')"
-                                style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
-                            <i class="fas fa-times"></i>
-                        </button>
+        // Microsoft Groups Section (only if enabled)
+        if (microsoftEnabled) {
+            modalContent += `
+                <div class="cloud-groups-section" style="margin-bottom: 2rem; ${googleEnabled ? 'padding-top: 1.5rem; border-top: 1px solid #e5e7eb;' : ''}">
+                    <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                        <i class="fab fa-microsoft"></i> Microsoft Azure AD Groups
+                    </h4>
+                    <div id="microsoftGroupsList" style="margin-bottom: 1rem;">
+                        ${role.microsoft_groups && role.microsoft_groups.length > 0 ? role.microsoft_groups.map(group => `
+                            <div class="badge badge-primary" style="margin: 4px; padding: 8px 12px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                ${escapeHtml(group.azure_group_name || group.azure_group_id)}
+                                <button onclick="removeMicrosoftGroup(${roleId}, '${group.id}')"
+                                        style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin: 0;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `).join('') : '<em style="color: #94a3b8;">No Microsoft Groups mapped</em>'}
                     </div>
-                `).join('') : '<em style="color: #94a3b8;">No Microsoft Groups mapped</em>'}
-            </div>
 
-            <form id="addMicrosoftGroupForm" style="margin-top: 1rem;">
-                <div class="form-group">
-                    <label>Add Microsoft Group</label>
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                        <input type="text" id="azureGroupId" class="form-control"
-                               placeholder="Azure Group ID (GUID: 12345678-1234-1234-1234-123456789abc)"
-                               pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}">
-                        <input type="text" id="azureGroupName" class="form-control"
-                               placeholder="Display Name (optional)">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Add
-                        </button>
-                    </div>
-                    <small class="form-text text-muted">
-                        Find Group Object ID in Azure Portal → Azure Active Directory → Groups
-                    </small>
+                    <form id="addMicrosoftGroupForm" style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Add Microsoft Group</label>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <input type="text" id="azureGroupId" class="form-control"
+                                       placeholder="Azure Group ID (GUID: 12345678-1234-1234-1234-123456789abc)"
+                                       pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}">
+                                <input type="text" id="azureGroupName" class="form-control"
+                                       placeholder="Display Name (optional)">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                Find Group Object ID in Azure Portal → Azure Active Directory → Groups
+                            </small>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
+            `;
+        }
+    }
 
+    modalContent += `
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
             <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
         </div>
-    `);
+    `;
 
-    // Google Groups form handler
-    document.getElementById('addGoogleGroupForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('googleGroupEmail').value;
-        if (email) {
-            await addGoogleGroup(roleId, email);
-        }
-    });
+    const modal = createModal(`Cloud Identity Groups - ${roleName}`, modalContent);
 
-    // Microsoft Groups form handler
-    document.getElementById('addMicrosoftGroupForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const groupId = document.getElementById('azureGroupId').value;
-        const groupName = document.getElementById('azureGroupName').value;
-        if (groupId) {
-            await addMicrosoftGroup(roleId, groupId, groupName);
+    // Attach form handlers only if the forms exist
+    if (googleEnabled) {
+        const googleForm = document.getElementById('addGoogleGroupForm');
+        if (googleForm) {
+            googleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('googleGroupEmail').value;
+                if (email) {
+                    await addGoogleGroup(roleId, email);
+                }
+            });
         }
-    });
+    }
+
+    if (microsoftEnabled) {
+        const microsoftForm = document.getElementById('addMicrosoftGroupForm');
+        if (microsoftForm) {
+            microsoftForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const groupId = document.getElementById('azureGroupId').value;
+                const groupName = document.getElementById('azureGroupName').value;
+                if (groupId) {
+                    await addMicrosoftGroup(roleId, groupId, groupName);
+                }
+            });
+        }
+    }
 }
 
 /**
