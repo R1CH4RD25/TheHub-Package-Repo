@@ -377,57 +377,220 @@ async function manageRoleUsers(roleId, roleName) {
     const roleUsersData = await roleUsersResponse.json();
 
     const allUsers = usersData.users || [];
-    const assignedUserIds = roleUsersData.users.map(u => u.id);
+    const currentMembers = roleUsersData.users || [];
+    const currentMemberIds = currentMembers.map(u => u.id);
+    const availableUsers = allUsers.filter(u => !currentMemberIds.includes(u.id));
 
     const modal = createModal(`Manage Users - ${roleName}`, `
-        <div style="margin-bottom: 1rem;">
-            <input type="text" id="userSearchInput" class="form-control"
-                   placeholder="Search users..." onkeyup="filterUserList()">
-        </div>
-
-        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
-            <div id="userSelectionList">
-                ${allUsers.map(user => `
-                    <label style="display: flex; align-items: center; padding: 0.5rem; cursor: pointer; border-radius: 4px; margin-bottom: 0.5rem;"
-                           class="user-selection-item" data-user-name="${escapeHtml(user.name).toLowerCase()}">
-                        <input type="checkbox" value="${user.id}"
-                               ${assignedUserIds.includes(user.id) ? 'checked' : ''}
-                               style="margin-right: 0.75rem;">
-                        <img src="${user.picture || '/assets/images/default-avatar.png'}"
-                             style="width: 32px; height: 32px; border-radius: 50%; margin-right: 0.75rem;">
-                        <div>
-                            <div style="font-weight: 500;">${escapeHtml(user.name)}</div>
-                            <div style="font-size: 0.85rem; color: #64748b;">${escapeHtml(user.email)}</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; min-height: 500px;">
+            <!-- Current Members Panel -->
+            <div style="border-right: 1px solid #e5e7eb; padding-right: 2rem;">
+                <h4 style="margin: 0 0 1rem 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>
+                        <i class="fas fa-users"></i> Current Members
+                        <span class="badge" style="margin-left: 0.5rem; background: #3B82F6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${currentMembers.length}</span>
+                    </span>
+                    ${currentMembers.length > 0 ? `<button type="button" class="btn btn-sm btn-danger" onclick="removeAllRoleUsers(${roleId})" style="font-size: 0.85rem; padding: 4px 12px;">Remove All</button>` : ''}
+                </h4>
+                
+                <div id="currentMembersList" style="max-height: 420px; overflow-y: auto;">
+                    ${currentMembers.length > 0 ? currentMembers.map(user => `
+                        <div class="member-item" data-user-id="${user.id}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 0.5rem; background: #f9fafb;">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <img src="${user.picture || '/assets/images/default-avatar.png'}"
+                                     style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                                <div>
+                                    <div style="font-weight: 500; color: #111827;">${escapeHtml(user.name)}</div>
+                                    <div style="font-size: 0.85rem; color: #6b7280;">${escapeHtml(user.email)}</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeSingleRoleUser(${roleId}, ${user.id})" style="padding: 6px 12px;">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                    </label>
-                `).join('')}
+                    `).join('') : '<div style="padding: 2rem; text-align: center; color: #94a3b8;"><i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>No members assigned</div>'}
+                </div>
+            </div>
+
+            <!-- Available Users Panel -->
+            <div>
+                <h4 style="margin: 0 0 1rem 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>
+                        <i class="fas fa-user-plus"></i> Add Members
+                        <span class="badge" style="margin-left: 0.5rem; background: #10B981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${availableUsers.length}</span>
+                    </span>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addSelectedUsers(${roleId})" id="addSelectedBtn" disabled style="font-size: 0.85rem; padding: 4px 12px;">
+                        <i class="fas fa-plus"></i> Add Selected (<span id="selectedCount">0</span>)
+                    </button>
+                </h4>
+
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="userSearchInput" class="form-control"
+                           placeholder="🔍 Search by name or email..." onkeyup="filterAvailableUsers()">
+                </div>
+
+                <div id="availableUsersList" style="max-height: 360px; overflow-y: auto;">
+                    ${availableUsers.length > 0 ? availableUsers.map(user => `
+                        <label class="available-user-item" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name).toLowerCase()} ${escapeHtml(user.email).toLowerCase()}"
+                               style="display: flex; align-items: center; padding: 0.75rem; cursor: pointer; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.2s;">
+                            <input type="checkbox" value="${user.id}" class="user-checkbox" onchange="updateSelectedCount()"
+                                   style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                            <img src="${user.picture || '/assets/images/default-avatar.png'}"
+                                 style="width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; border: 2px solid #e5e7eb;">
+                            <div>
+                                <div style="font-weight: 500; color: #111827;">${escapeHtml(user.name)}</div>
+                                <div style="font-size: 0.85rem; color: #6b7280;">${escapeHtml(user.email)}</div>
+                            </div>
+                        </label>
+                    `).join('') : '<div style="padding: 2rem; text-align: center; color: #94a3b8;"><i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>All users are already members</div>'}
+                </div>
             </div>
         </div>
 
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="saveRoleUsers(${roleId})">
-                <i class="fas fa-save"></i> Save Assignments
-            </button>
-        </div>
-    `, 'large');
+        <style>
+            .available-user-item:hover {
+                background: #f3f4f6 !important;
+                border-color: #d1d5db !important;
+            }
+            .available-user-item:has(input:checked) {
+                background: #EFF6FF !important;
+                border-color: #3B82F6 !important;
+            }
+        </style>
+    `);
+
+    // Store roleId and roleName for later use
+    window.currentRoleManagement = { roleId, roleName };
 }
 
 /**
- * Filter user list
+ * Filter available users
  */
-function filterUserList() {
+function filterAvailableUsers() {
     const search = document.getElementById('userSearchInput').value.toLowerCase();
-    const items = document.querySelectorAll('.user-selection-item');
+    const items = document.querySelectorAll('.available-user-item');
 
     items.forEach(item => {
-        const name = item.dataset.userName;
-        item.style.display = name.includes(search) ? 'flex' : 'none';
+        const searchText = item.dataset.userName;
+        item.style.display = searchText.includes(search) ? 'flex' : 'none';
     });
 }
 
 /**
- * Save role user assignments
+ * Update selected count badge
+ */
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const count = checkboxes.length;
+    const countSpan = document.getElementById('selectedCount');
+    const addBtn = document.getElementById('addSelectedBtn');
+    
+    if (countSpan) countSpan.textContent = count;
+    if (addBtn) addBtn.disabled = count === 0;
+}
+
+/**
+ * Add selected users to role
+ */
+async function addSelectedUsers(roleId) {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const userIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+    if (userIds.length === 0) {
+        showMessage('Please select at least one user', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/org-roles.php?action=assign-users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role_id: roleId, user_ids: userIds })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showMessage(`Added ${userIds.length} user(s) to role`, 'success');
+            closeModal();
+            loadOrgRoles(); // Refresh the table
+        } else {
+            throw new Error(data.error || 'Failed to add users');
+        }
+    } catch (error) {
+        showMessage('Failed to add users: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Remove single user from role
+ */
+async function removeSingleRoleUser(roleId, userId) {
+    if (!confirm('Remove this user from the role?')) return;
+
+    try {
+        const response = await fetch(`/api/org-roles.php?action=remove-users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role_id: roleId, user_ids: [userId] })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showMessage('User removed from role', 'success');
+            // Refresh the modal
+            const { roleName } = window.currentRoleManagement;
+            closeModal();
+            setTimeout(() => manageRoleUsers(roleId, roleName), 100);
+        } else {
+            throw new Error(data.error || 'Failed to remove user');
+        }
+    } catch (error) {
+        showMessage('Failed to remove user: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Remove all users from role
+ */
+async function removeAllRoleUsers(roleId) {
+    if (!confirm('Remove ALL users from this role? This action cannot be undone.')) return;
+
+    try {
+        const memberItems = document.querySelectorAll('.member-item');
+        const userIds = Array.from(memberItems).map(item => parseInt(item.dataset.userId));
+
+        const response = await fetch(`/api/org-roles.php?action=remove-users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role_id: roleId, user_ids: userIds })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showMessage('All users removed from role', 'success');
+            closeModal();
+            loadOrgRoles(); // Refresh the table
+        } else {
+            throw new Error(data.error || 'Failed to remove users');
+        }
+    } catch (error) {
+        showMessage('Failed to remove users: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Filter user list (DEPRECATED - keeping for backwards compatibility)
+ */
+function filterUserList() {
+    filterAvailableUsers();
+}
+
+/**
+ * Save role user assignments (DEPRECATED - replaced with addSelectedUsers)
+ */
  */
 async function saveRoleUsers(roleId) {
     const checkboxes = document.querySelectorAll('#userSelectionList input[type="checkbox"]:checked');

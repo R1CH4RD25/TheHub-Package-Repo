@@ -172,6 +172,10 @@ function handlePost($orgRole, $action)
             assignUsers($orgRole, $data);
             break;
 
+        case 'remove-users':
+            removeUsers($orgRole, $data);
+            break;
+
         case 'add-google-group':
             addGoogleGroup($orgRole, $data);
             break;
@@ -259,6 +263,44 @@ function assignUsers($orgRole, $data)
         'success' => true,
         'added' => count($added),
         'message' => count($added) . ' user(s) assigned to role'
+    ]);
+}
+
+/**
+ * Remove users from a role
+ */
+function removeUsers($orgRole, $data)
+{
+    if (empty($data['role_id']) || !isset($data['user_ids'])) {
+        jsonResponse(['error' => 'role_id and user_ids required'], 400);
+    }
+
+    $roleId = (int)$data['role_id'];
+    $userIds = (array)$data['user_ids'];
+    $currentUser = Auth::getCurrentUser();
+
+    // Remove assignments
+    $db = Database::getInstance()->getConnection();
+    $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+    $stmt = $db->prepare("DELETE FROM user_org_roles WHERE org_role_id = ? AND user_id IN ($placeholders)");
+    $params = array_merge([$roleId], $userIds);
+    $stmt->execute($params);
+    $removed = $stmt->rowCount();
+
+    // Log the removals
+    if ($removed > 0) {
+        $role = $orgRole->getById($roleId);
+        AuditLogger::log('org_role_users_removed', 'org_roles', $roleId, null, [
+            'role_name' => $role['name'],
+            'user_ids' => $userIds,
+            'count' => $removed
+        ]);
+    }
+
+    jsonResponse([
+        'success' => true,
+        'removed' => $removed,
+        'message' => $removed . ' user(s) removed from role'
     ]);
 }
 
