@@ -808,12 +808,18 @@
                     <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-shield-alt"></i> Security
-                            <span class="badge">2</span>
+                            <span class="badge">3</span>
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
                     <div class="settings-section-body collapsed">
                         <div class="settings-grid">
+                            <div class="form-group">
+                                <label for="maxUploadSize">Maximum Upload Size (MB)</label>
+                                <input type="number" id="maxUploadSize" class="setting-input" data-key="max_upload_size" value="10" min="1" max="100">
+                                <small>Maximum file size for uploads (1-100 MB)</small>
+                            </div>
+
                             <div class="form-group">
                                 <label>
                                     <input type="checkbox" id="maintenanceMode" class="setting-input" data-key="maintenance_mode">
