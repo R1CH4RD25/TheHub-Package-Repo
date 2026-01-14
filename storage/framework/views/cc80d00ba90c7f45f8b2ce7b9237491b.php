@@ -32,7 +32,7 @@
 
                 <!-- Branding Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-trademark"></i> Branding
                             <span class="badge">3</span>
@@ -57,7 +57,7 @@
                                 <label>Logo Upload</label>
                                 <div style="border: 2px dashed #dee2e6; border-radius: 8px; padding: 1rem; text-align: center;">
                                     <input type="file" id="logoUpload" accept="image/*" style="display: none;">
-                                    <button class="btn btn-secondary" onclick="document.getElementById('logoUpload').click()">
+                                    <button class="btn btn-secondary" id="logoUploadBtn">
                                         <i class="fas fa-upload"></i> Upload Logo
                                     </button>
                                     <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6c757d;">PNG, JPG, or SVG (max 2MB)</p>
@@ -69,7 +69,7 @@
 
                 <!-- Header Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-window-maximize"></i> Header
                             <span class="badge">11</span>
@@ -184,7 +184,7 @@
 
                 <!-- Sidebar Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-bars"></i> Sidebar & Navigation
                             <span class="badge">6</span>
@@ -202,7 +202,7 @@
                             <div class="form-group">
                                 <label for="sidebarBg">Background Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="sidebarBg" class="setting-input" data-key="sidebar_bg_color" value="#FFFFFF" style="padding:0!important">
+                                    <input type="color" id="sidebarBg" class="setting-input" data-key="sidebar_bg" value="#FFFFFF" style="padding:0!important">
                                     <input type="text" id="sidebarBgHex" value="#FFFFFF">
                                 </div>
                                 <small>Sidebar background color</small>
@@ -244,7 +244,7 @@
 
                 <!-- Footer Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-shoe-prints"></i> Footer
                             <span class="badge">7</span>
@@ -310,7 +310,7 @@
 
                 <!-- Colors & Theme Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-palette"></i> Colors & Theme
                             <span class="badge">6</span>
@@ -329,41 +329,69 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="secondaryColor">Secondary Color</label>
+                                <label for="accentColor">Accent Color</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" id="secondaryColor" class="setting-input" data-key="secondary_color" value="#FFD700" style="padding:0!important">
-                                    <input type="text" id="secondaryColorHex" value="#FFD700">
+                                    <input type="color" id="accentColor" class="setting-input" data-key="accent_color" value="#FFD700" style="padding:0!important">
+                                    <input type="text" id="accentColorHex" value="#FFD700">
                                 </div>
                                 <small>Accent color</small>
                             </div>
 
                             <div class="form-group" style="grid-column: 1 / -1;">
-                                <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem;">Theme Presets</label>
-                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem 0;">Choose a pre-designed theme or customize your own</p>
-                                
-                                <div class="theme-gallery">
-                                    <!-- Notre Dame Theme -->
-                                    <div class="theme-preview-card" data-theme="notre-dame">
-                                        <div class="theme-preview-header" style="background: #0C2340; color: #C99700;">
-                                            <div class="theme-preview-logo">ND</div>
-                                            <div class="theme-preview-title">Notre Dame</div>
+                                <label style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Theme Presets</label>
+                                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1rem 0;">Select a pre-designed theme</p>
+
+                                <div class="theme-gallery-container">
+                                    <div class="theme-gallery">
+                                    <!-- Woodson Personal Theme (local only, remove before distribution) -->
+                                    <div class="theme-preview-card" data-theme="woodson">
+                                        <div class="theme-preview-header">
+                                            <div class="theme-preview-logo" style="background: rgba(250,204,21,0.18); color: #FACC15;">WD</div>
+                                            <div class="theme-preview-title">Woodson</div>
                                         </div>
                                         <div class="theme-preview-body">
-                                            <div class="theme-preview-sidebar" style="background: #FFFFFF; border-right: 1px solid #E5E7EB;">
-                                                <div class="theme-preview-menu-item" style="background: #F5F3E8; color: #C99700;">● Dashboard</div>
-                                                <div class="theme-preview-menu-item" style="color: #2C2C2C;">○ Settings</div>
-                                                <div class="theme-preview-menu-item" style="color: #2C2C2C;">○ Reports</div>
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
                                             </div>
                                             <div class="theme-preview-content">
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #C99700;"></div>
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #0C2340;"></div>
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
                                             </div>
                                         </div>
                                         <div class="theme-preview-footer">
                                             <div class="theme-color-dots">
-                                                <span style="background: #0C2340;" title="Navy"></span>
-                                                <span style="background: #C99700;" title="Gold"></span>
-                                                <span style="background: #FFFFFF; border: 1px solid #ddd;" title="White"></span>
+                                                <span title="Gold"></span>
+                                                <span title="Black"></span>
+                                                <span title="White"></span>
+                                            </div>
+                                            <i class="fas fa-check-circle theme-selected-icon"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Notre Dame Theme -->
+                                    <div class="theme-preview-card" data-theme="notre-dame">
+                                        <div class="theme-preview-header">
+                                            <div class="theme-preview-logo">ND</div>
+                                            <div class="theme-preview-title">Notre Dame</div>
+                                        </div>
+                                        <div class="theme-preview-body">
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
+                                            </div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-preview-footer">
+                                            <div class="theme-color-dots">
+                                                <span title="Navy"></span>
+                                                <span title="Gold"></span>
+                                                <span title="White"></span>
                                             </div>
                                             <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
@@ -371,26 +399,26 @@
 
                                     <!-- Midnight Theme -->
                                     <div class="theme-preview-card" data-theme="midnight">
-                                        <div class="theme-preview-header" style="background: #1A1A1A; color: #FFD700;">
+                                        <div class="theme-preview-header">
                                             <div class="theme-preview-logo">MN</div>
                                             <div class="theme-preview-title">Midnight</div>
                                         </div>
                                         <div class="theme-preview-body">
-                                            <div class="theme-preview-sidebar" style="background: #323130;">
-                                                <div class="theme-preview-menu-item" style="background: #FFD700; color: #1A1A1A;">● Dashboard</div>
-                                                <div class="theme-preview-menu-item" style="color: #FFFFFF;">○ Settings</div>
-                                                <div class="theme-preview-menu-item" style="color: #FFFFFF;">○ Reports</div>
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
                                             </div>
-                                            <div class="theme-preview-content" style="background: #252525;">
-                                                <div class="theme-preview-card-mini" style="background: #2C2C2C; border-left: 3px solid #FFD700;"></div>
-                                                <div class="theme-preview-card-mini" style="background: #2C2C2C; border-left: 3px solid #FFD700;"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
                                             </div>
                                         </div>
                                         <div class="theme-preview-footer">
                                             <div class="theme-color-dots">
-                                                <span style="background: #1A1A1A;" title="Dark"></span>
-                                                <span style="background: #FFD700;" title="Gold"></span>
-                                                <span style="background: #323130;" title="Gray"></span>
+                                                <span title="Dark"></span>
+                                                <span title="Gold"></span>
+                                                <span title="Gray"></span>
                                             </div>
                                             <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
@@ -398,26 +426,26 @@
 
                                     <!-- Ocean Theme -->
                                     <div class="theme-preview-card" data-theme="ocean">
-                                        <div class="theme-preview-header" style="background: #0078D4; color: #FFFFFF;">
+                                        <div class="theme-preview-header">
                                             <div class="theme-preview-logo">OB</div>
                                             <div class="theme-preview-title">Ocean Blue</div>
                                         </div>
                                         <div class="theme-preview-body">
-                                            <div class="theme-preview-sidebar" style="background: #E3F2FD;">
-                                                <div class="theme-preview-menu-item" style="background: #0078D4; color: #FFFFFF;">● Dashboard</div>
-                                                <div class="theme-preview-menu-item" style="color: #005A9E;">○ Settings</div>
-                                                <div class="theme-preview-menu-item" style="color: #005A9E;">○ Reports</div>
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
                                             </div>
                                             <div class="theme-preview-content">
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #0078D4;"></div>
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #00BCF2;"></div>
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
                                             </div>
                                         </div>
                                         <div class="theme-preview-footer">
                                             <div class="theme-color-dots">
-                                                <span style="background: #0078D4;" title="Blue"></span>
-                                                <span style="background: #00BCF2;" title="Cyan"></span>
-                                                <span style="background: #E3F2FD;" title="Light Blue"></span>
+                                                <span title="Blue"></span>
+                                                <span title="Cyan"></span>
+                                                <span title="Light Blue"></span>
                                             </div>
                                             <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
@@ -425,26 +453,26 @@
 
                                     <!-- Forest Theme -->
                                     <div class="theme-preview-card" data-theme="forest">
-                                        <div class="theme-preview-header" style="background: #107C10; color: #FFFFFF;">
+                                        <div class="theme-preview-header">
                                             <div class="theme-preview-logo">FG</div>
                                             <div class="theme-preview-title">Forest Green</div>
                                         </div>
                                         <div class="theme-preview-body">
-                                            <div class="theme-preview-sidebar" style="background: #E8F5E9;">
-                                                <div class="theme-preview-menu-item" style="background: #107C10; color: #FFFFFF;">● Dashboard</div>
-                                                <div class="theme-preview-menu-item" style="color: #1B5E20;">○ Settings</div>
-                                                <div class="theme-preview-menu-item" style="color: #1B5E20;">○ Reports</div>
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
                                             </div>
                                             <div class="theme-preview-content">
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #107C10;"></div>
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #498205;"></div>
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
                                             </div>
                                         </div>
                                         <div class="theme-preview-footer">
                                             <div class="theme-color-dots">
-                                                <span style="background: #107C10;" title="Green"></span>
-                                                <span style="background: #498205;" title="Olive"></span>
-                                                <span style="background: #E8F5E9;" title="Light Green"></span>
+                                                <span title="Green"></span>
+                                                <span title="Olive"></span>
+                                                <span title="Light Green"></span>
                                             </div>
                                             <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
@@ -452,26 +480,26 @@
 
                                     <!-- Sunset Theme -->
                                     <div class="theme-preview-card" data-theme="sunset">
-                                        <div class="theme-preview-header" style="background: #D13438; color: #FFFFFF;">
+                                        <div class="theme-preview-header">
                                             <div class="theme-preview-logo">SS</div>
                                             <div class="theme-preview-title">Sunset</div>
                                         </div>
                                         <div class="theme-preview-body">
-                                            <div class="theme-preview-sidebar" style="background: #FFF4E5;">
-                                                <div class="theme-preview-menu-item" style="background: #D13438; color: #FFFFFF;">● Dashboard</div>
-                                                <div class="theme-preview-menu-item" style="color: #C62828;">○ Settings</div>
-                                                <div class="theme-preview-menu-item" style="color: #C62828;">○ Reports</div>
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
                                             </div>
                                             <div class="theme-preview-content">
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #D13438;"></div>
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #F7630C;"></div>
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
                                             </div>
                                         </div>
                                         <div class="theme-preview-footer">
                                             <div class="theme-color-dots">
-                                                <span style="background: #D13438;" title="Red"></span>
-                                                <span style="background: #F7630C;" title="Orange"></span>
-                                                <span style="background: #FFF4E5;" title="Cream"></span>
+                                                <span title="Red"></span>
+                                                <span title="Orange"></span>
+                                                <span title="Cream"></span>
                                             </div>
                                             <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
@@ -479,26 +507,26 @@
 
                                     <!-- Custom Theme -->
                                     <div class="theme-preview-card" data-theme="custom">
-                                        <div class="theme-preview-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #FFFFFF;">
+                                        <div class="theme-preview-header">
                                             <div class="theme-preview-logo"><i class="fas fa-palette"></i></div>
                                             <div class="theme-preview-title">Custom</div>
                                         </div>
                                         <div class="theme-preview-body">
-                                            <div class="theme-preview-sidebar" style="background: #F9FAFB;">
-                                                <div class="theme-preview-menu-item" style="background: #667eea; color: #FFFFFF;">● Dashboard</div>
-                                                <div class="theme-preview-menu-item" style="color: #4B5563;">○ Settings</div>
-                                                <div class="theme-preview-menu-item" style="color: #4B5563;">○ Reports</div>
+                                            <div class="theme-preview-sidebar">
+                                                <div class="theme-preview-menu-item">● Dashboard</div>
+                                                <div class="theme-preview-menu-item">○ Settings</div>
+                                                <div class="theme-preview-menu-item">○ Reports</div>
                                             </div>
                                             <div class="theme-preview-content">
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #667eea;"></div>
-                                                <div class="theme-preview-card-mini" style="border-left: 3px solid #764ba2;"></div>
+                                                <div class="theme-preview-card-mini"></div>
+                                                <div class="theme-preview-card-mini"></div>
                                             </div>
                                         </div>
                                         <div class="theme-preview-footer">
                                             <div class="theme-color-dots">
-                                                <span style="background: #667eea;" title="Purple"></span>
-                                                <span style="background: #764ba2;" title="Violet"></span>
-                                                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Gradient"></span>
+                                                <span title="Purple"></span>
+                                                <span title="Violet"></span>
+                                                <span title="Gradient"></span>
                                             </div>
                                             <i class="fas fa-check-circle theme-selected-icon"></i>
                                         </div>
@@ -532,7 +560,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> <!-- Close .settings-section (Colors & Theme) -->
+            </div> <!-- Close #subtab-appearance -->
 
             <!-- BEHAVIOR & ACCESS TAB -->
             <div id="subtab-behavior" class="user-subtab">
@@ -540,16 +569,112 @@
                     Configure navigation behavior and access controls.
                 </p>
 
+                <!-- Authentication Section -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>
+                            <i class="fas fa-sign-in-alt"></i> Authentication & Login
+                            <span class="badge">9</span>
+                        </h3>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="settings-section-body">
+                        <div class="settings-grid">
+                            <!-- Login Methods -->
+                            <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin-bottom: 1rem;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 0.95rem;">
+                                    <i class="fas fa-key"></i> Login Methods
+                                </h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="allowLocalUsers" class="setting-input" data-key="allow_local_users">
+                                    <strong>Allow Physical Login</strong>
+                                </label>
+                                <small>Enable username/password authentication (not recommended)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableGoogleLogin" class="setting-input" data-key="enable_google_login" checked>
+                                    <strong>Enable Google OAuth</strong>
+                                </label>
+                                <small>Show "Sign in with Google" button</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableMicrosoftLogin" class="setting-input" data-key="enable_microsoft_login">
+                                    <strong>Enable Microsoft OAuth</strong>
+                                </label>
+                                <small>Show "Sign in with Microsoft" button</small>
+                            </div>
+
+                            <!-- Domain Restrictions -->
+                            <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin: 1rem 0;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 0.95rem;">
+                                    <i class="fas fa-shield-alt"></i> Domain Restrictions
+                                </h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="requireDomainMatch" class="setting-input" data-key="require_domain_match">
+                                    <strong>Require Domain Match</strong>
+                                </label>
+                                <small>Only allow users from specified email domains</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="allowedDomains">Allowed Domains</label>
+                                <input type="text" id="allowedDomains" class="setting-input" data-key="allowed_domains" placeholder="yourdomain.com, anotherdomain.org">
+                                <small>Comma-separated list of allowed email domains (e.g., woodsonisd.net, newcastleisd.net)</small>
+                            </div>
+
+                            <!-- Auto-Role Assignment -->
+                            <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin: 1rem 0;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 0.95rem;">
+                                    <i class="fas fa-users-cog"></i> Cloud Identity Groups
+                                </h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableGoogleGroups" class="setting-input" data-key="enable_google_groups">
+                                    <strong>Enable Google Groups Sync</strong>
+                                </label>
+                                <small>Auto-assign roles based on Google Workspace group membership</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableMicrosoftGroups" class="setting-input" data-key="enable_microsoft_groups">
+                                    <strong>Enable Microsoft Groups Sync</strong>
+                                </label>
+                                <small>Auto-assign roles based on Azure AD group membership</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 1rem;">
+                                <p style="margin: 0; color: #1E40AF; font-size: 0.9rem;">
+                                    <i class="fas fa-info-circle"></i> <strong>Note:</strong> Cloud group mappings are configured in 
+                                    <a href="/admin/users" style="color: #1E40AF; text-decoration: underline;">Admin → Users → Organization Roles → Cloud Groups</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Navigation Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-compass"></i> Navigation
                             <span class="badge">1</span>
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body">
+                    <div class="settings-section-body collapsed">
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label>
@@ -562,16 +687,53 @@
                     </div>
                 </div>
 
-                <!-- Management Console Section -->
+                <!-- Management Branding Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
-                            <i class="fas fa-toolbox"></i> Management Console
-                            <span class="badge">6</span>
+                            <i class="fas fa-id-badge"></i> Management Branding
+                            <span class="badge">3</span>
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body collapsed">
+                    <div class="settings-section-body">
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <label for="cc_display_name">Display Name</label>
+                                <input type="text" id="cc_display_name" name="cc_display_name" class="setting-input" data-key="cc_display_name" placeholder="Management">
+                                <small>Shown in navigation links, headers, and quick actions</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cc_icon">Navigation Icon</label>
+                                <div class="management-icon-input">
+                                    <div class="management-icon-preview">
+                                        <i id="managementIconPreview" class="bi-kanban"></i>
+                                    </div>
+                                    <input type="text" id="cc_icon" name="cc_icon" class="setting-input" data-key="cc_icon" placeholder="bi-kanban">
+                                </div>
+                                <small>Bootstrap icon class (for example <code>bi-kanban</code>, <code>bi-gear-fill</code>)</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="cc_description">Description</label>
+                                <textarea id="cc_description" name="cc_description" class="setting-input" data-key="cc_description" rows="3" placeholder="Centralized management system for tracking and processing submissions"></textarea>
+                                <small>Appears on the management landing experience and module selector</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Access Section -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>
+                            <i class="fas fa-toolbox"></i> Management Access
+                            <span class="badge">5</span>
+                        </h3>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="settings-section-body">
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label>
@@ -579,12 +741,6 @@
                                     <strong>Enable Management Console</strong>
                                 </label>
                                 <small>Activate the management interface for advanced operations</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="managementDisplayName">Display Name</label>
-                                <input type="text" id="managementDisplayName" class="setting-input" data-key="management_display_name" value="Management">
-                                <small>Label shown in navigation for management console</small>
                             </div>
 
                             <div class="form-group">
@@ -629,7 +785,7 @@
 
                 <!-- Sessions Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-clock"></i> Sessions
                             <span class="badge">1</span>
@@ -649,7 +805,7 @@
 
                 <!-- Security Section -->
                 <div class="settings-section">
-                    <div class="settings-section-header" onclick="toggleSection(this)">
+                    <div class="settings-section-header">
                         <h3>
                             <i class="fas fa-shield-alt"></i> Security
                             <span class="badge">2</span>
@@ -679,7 +835,7 @@
 
                 <!-- Danger Zone -->
                 <div class="settings-section danger-zone">
-                    <div class="settings-section-header danger" onclick="toggleSection(this)">
+                    <div class="settings-section-header danger">
                         <h3>
                             <i class="fas fa-exclamation-triangle"></i> Danger Zone
                         </h3>
@@ -706,19 +862,32 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+            </div> <!-- Close #subtab-system -->
+        </div> <!-- Close .site-settings-container -->
+    </div> <!-- Close .tab-content-scroll -->
+</div> <!-- Close .admin-tab -->
 
 <?php $__env->startPush('styles'); ?>
-<style>
-.settings-section {
+<style nonce="<?php echo CSP_NONCE; ?>">
+/* Scoped settings accordion - avoids collision with bundle's .settings-section card */
+.site-settings-container {
+    min-height: 200px; /* Prevent container collapse */
+}
+
+.site-settings-container .settings-section {
     margin-bottom: 1.5rem;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible !important; /* Ensure content not clipped */
     background: var(--bg-primary);
+    padding: 0 !important; /* Override bundle's padding: 2rem */
+}
+
+.site-settings-container .settings-section-body {
+    padding: 1.5rem;
+    max-height: 2000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
 .settings-section-header {
@@ -732,7 +901,7 @@
     user-select: none;
 }
 
-.settings-section-header:hover {
+.site-settings-container .settings-section-header:hover {
     background: var(--gray-200);
 }
 
@@ -760,20 +929,38 @@
     transition: transform 0.3s;
 }
 
-.settings-section-header.active .toggle-icon {
+.site-settings-container .settings-section-header.active .toggle-icon {
     transform: rotate(180deg);
 }
 
-.settings-section-body {
-    padding: 1.5rem;
-    max-height: 2000px;
+.site-settings-container .settings-section-body.collapsed {
+    max-height: 0;
+    padding: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.settings-section-body.collapsed {
-    max-height: 0;
-    padding: 0 1.5rem;
+.management-icon-input {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.management-icon-preview {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.management-icon-preview i {
+    line-height: 1;
 }
 
 .danger-zone {
@@ -791,33 +978,459 @@
 .danger-zone .settings-section-header.danger:hover {
     background: #FEF2F2;
 }
+
+/* Theme gallery refresh */
+.theme-gallery-container {
+    margin: 1.5rem 0 0;
+    padding: 1.75rem;
+    border-radius: 18px;
+    border: 1px solid var(--border-secondary);
+    background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(245,247,250,0.96) 100%);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+}
+
+.theme-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.theme-preview-card {
+    position: relative;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: var(--bg-primary);
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    isolation: isolate;
+}
+
+.theme-preview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(148,163,184,0.08) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+}
+
+.theme-preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+    border-color: rgba(37, 99, 235, 0.45);
+}
+
+.theme-preview-card:hover::before {
+    opacity: 1;
+}
+
+.theme-preview-card.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 18px 36px rgba(201, 151, 0, 0.28);
+}
+
+.theme-preview-card .theme-selected-icon {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 1.35rem;
+    color: var(--primary-color);
+    background: rgba(255,255,255,0.9);
+    border-radius: 999px;
+    padding: 0.25rem;
+    box-shadow: 0 6px 16px rgba(201, 151, 0, 0.22);
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.theme-preview-card.active .theme-selected-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.theme-preview-header {
+    padding: 0.95rem 1.1rem;
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+}
+
+.theme-preview-logo {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: rgba(255,255,255,0.18);
+}
+
+.theme-preview-title {
+    color: inherit;
+}
+
+.theme-preview-body {
+    padding: 1rem 1.15rem;
+    background: rgba(248, 250, 252, 0.92);
+    display: flex;
+    gap: 1rem;
+}
+
+.theme-preview-sidebar {
+    width: 68px;
+    padding: 0.55rem;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.theme-preview-menu-item {
+    border-radius: 6px;
+    font-size: 0.7rem;
+    padding: 0.38rem 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255,255,255,0.78);
+    color: #1F2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.theme-preview-menu-item::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.55;
+}
+
+.theme-preview-content {
+    flex: 1;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.theme-preview-card-mini {
+    height: 26px;
+    border-radius: 9px;
+    background: white;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.theme-preview-footer {
+    padding: 0.75rem 1.1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border-top: none;
+}
+
+.theme-color-dots {
+    display: flex;
+    gap: 0.45rem;
+}
+
+.theme-color-dots span {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    box-shadow: 0 6px 10px rgba(15, 23, 42, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.65);
+}
+
+@media (max-width: 640px) {
+    .theme-gallery-container {
+        padding: 1.25rem;
+    }
+
+    .theme-preview-card {
+        border-radius: 12px;
+    }
+
+    .theme-preview-header {
+        padding: 0.85rem 1rem;
+    }
+
+    .theme-preview-body {
+        flex-direction: column;
+        padding: 0.85rem 1rem;
+    }
+
+    .theme-preview-sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+}
 </style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>
-<script>
+<script nonce="<?php echo CSP_NONCE; ?>">
 const csrfToken = '<?php echo e(csrf_token()); ?>';
 let originalSettings = {};
 let currentSettings = {};
 
-// Section toggle
-function toggleSection(header) {
-    header.classList.toggle('active');
-    const body = header.nextElementSibling;
-    body.classList.toggle('collapsed');
+function updateManagementIconPreview(iconClass) {
+    const preview = document.getElementById('managementIconPreview');
+    if (preview) {
+        const value = (iconClass || '').trim();
+        preview.className = value !== '' ? value : 'bi-kanban';
+    }
 }
 
-// Subtab switching
-document.querySelectorAll('.subtab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const subtab = this.getAttribute('data-subtab');
-
-        document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-
-        document.querySelectorAll('.user-subtab').forEach(s => s.classList.remove('active'));
-        document.getElementById(`subtab-${subtab}`).classList.add('active');
+// Section toggle - bind event listeners instead of inline onclick
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🚀 SETTINGS PAGE DEBUG - DOM STRUCTURE CHECK');
+    console.log('═══════════════════════════════════════════════════');
+    
+    // Check container structure
+    const container = document.querySelector('.site-settings-container');
+    console.log('📦 .site-settings-container found:', !!container);
+    if (container) {
+        console.log('   Children:', container.children.length);
+        Array.from(container.children).forEach((child, i) => {
+            console.log(`   Child ${i}:`, child.tagName, child.id, child.className);
+        });
+    }
+    
+    // Check all user-subtab elements
+    const allSubtabs = document.querySelectorAll('.user-subtab');
+    console.log('\n🔍 Found .user-subtab elements:', allSubtabs.length);
+    allSubtabs.forEach((tab, i) => {
+        const sectionsInside = tab.querySelectorAll('.settings-section');
+        console.log(`   Tab ${i}: #${tab.id}`, {
+            classes: tab.className,
+            hasActive: tab.classList.contains('active'),
+            sectionsInside: sectionsInside.length,
+            parent: tab.parentElement?.className
+        });
     });
+    
+    // Check subtab buttons
+    const buttons = document.querySelectorAll('.subtab-btn');
+    console.log('\n🔘 Found .subtab-btn elements:', buttons.length);
+    buttons.forEach((btn, i) => {
+        console.log(`   Button ${i}:`, btn.getAttribute('data-subtab'), {
+            hasActive: btn.classList.contains('active'),
+            text: btn.textContent.trim()
+        });
+    });
+    
+    console.log('═══════════════════════════════════════════════════\n');
+    
+    // CSS Version Debug
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    console.log('🎨 DEBUG: CSS files loaded:');
+    links.forEach(link => {
+        const url = new URL(link.href);
+        console.log(`  ${url.pathname}${url.search}`);
+    });
+
+    // Accordion toggles
+    const allSectionHeaders = document.querySelectorAll('.settings-section-header');
+    console.log('🔧 Setting up accordion toggles for', allSectionHeaders.length, 'headers');
+    
+    document.querySelectorAll('.settings-section-header').forEach((header, index) => {
+        header.addEventListener('click', () => {
+            const wasActive = header.classList.contains('active');
+            const body = header.nextElementSibling;
+            const wasCollapsed = body?.classList.contains('collapsed');
+            const headerText = header.textContent.trim().replace(/\s+/g, ' ').substring(0, 30);
+            
+            console.log(`🔧 ACCORDION CLICK ${index}: "${headerText}"`);
+            console.log(`   Before: header.active=${wasActive}, body.collapsed=${wasCollapsed}`);
+            
+            header.classList.toggle('active');
+            body?.classList.toggle('collapsed');
+            
+            const nowActive = header.classList.contains('active');
+            const nowCollapsed = body?.classList.contains('collapsed');
+            console.log(`   After: header.active=${nowActive}, body.collapsed=${nowCollapsed}`);
+            
+            if (body) {
+                const bodyStyleImmediate = window.getComputedStyle(body);
+                console.log(`   Body IMMEDIATE: maxHeight=${bodyStyleImmediate.maxHeight}, height=${bodyStyleImmediate.height}`);
+                
+                // Check again after transition completes (350ms)
+                setTimeout(() => {
+                    const bodyStyleFinal = window.getComputedStyle(body);
+                    console.log(`   Body AFTER TRANSITION: maxHeight=${bodyStyleFinal.maxHeight}, height=${bodyStyleFinal.height}`);
+                }, 350);
+            }
+        });
+    });
+
+    // Logo upload button
+    const logoBtn = document.getElementById('logoUploadBtn');
+    const logoInput = document.getElementById('logoUpload');
+    if (logoBtn && logoInput) {
+        logoBtn.addEventListener('click', () => logoInput.click());
+    }
+
+    // Subtab switching with DEBUG
+    const subtabButtons = document.querySelectorAll('.subtab-btn');
+    console.log('🔍 DEBUG: Found subtab buttons:', subtabButtons.length);
+
+    subtabButtons.forEach((btn, index) => {
+        console.log(`🔍 DEBUG: Button ${index}:`, btn.getAttribute('data-subtab'), btn.classList.contains('active'));
+
+        btn.addEventListener('click', function() {
+            const subtab = this.getAttribute('data-subtab');
+            console.log('🔵 DEBUG: Clicked tab:', subtab);
+
+            // Remove active from all buttons
+            subtabButtons.forEach(b => {
+                b.classList.remove('active');
+                console.log(`  ❌ Removed active from button:`, b.getAttribute('data-subtab'));
+            });
+
+            // Add active to clicked button
+            this.classList.add('active');
+            console.log(`  ✅ Added active to button:`, subtab);
+
+            // Remove active from all tab content
+            const allTabs = document.querySelectorAll('.user-subtab');
+            console.log('🔍 DEBUG: Found tab contents:', allTabs.length);
+            allTabs.forEach(s => {
+                s.classList.remove('active');
+                console.log(`  ❌ Removed active from content:`, s.id);
+            });
+
+            // Add active to target tab content
+            const targetTab = document.getElementById(`subtab-${subtab}`);
+            console.log('🔍 DEBUG: Target tab element:', targetTab);
+            if (targetTab) {
+                targetTab.classList.add('active');
+                console.log(`  ✅ Added active to content:`, targetTab.id);
+
+                // Check computed styles
+                const computedStyle = window.getComputedStyle(targetTab);
+                console.log('📊 DEBUG: Computed display:', computedStyle.display);
+                console.log('📊 DEBUG: Computed visibility:', computedStyle.visibility);
+                console.log('📊 DEBUG: Computed opacity:', computedStyle.opacity);
+                console.log('📊 DEBUG: Computed height:', computedStyle.height);
+
+                // Check if content actually exists inside
+                const contentSections = targetTab.querySelectorAll('.settings-section');
+                console.log('📦 DEBUG: Sections inside tab:', contentSections.length);
+                contentSections.forEach((section, i) => {
+                    const header = section.querySelector('.settings-section-header');
+                    const body = section.querySelector('.settings-section-body');
+                    const headerText = header ? header.textContent.trim().replace(/\s+/g, ' ').substring(0, 40) : 'none';
+                    console.log(`  📦 Section ${i}: ${headerText}`, {
+                        bodyExists: !!body,
+                        bodyCollapsed: body?.classList.contains('collapsed'),
+                        bodyDisplay: body ? window.getComputedStyle(body).display : 'none',
+                        bodyHeight: body ? window.getComputedStyle(body).height : 'none',
+                        bodyMaxHeight: body ? window.getComputedStyle(body).maxHeight : 'none'
+                    });
+                });
+
+                // Check tab position and visibility
+                const rect = targetTab.getBoundingClientRect();
+                console.log('📐 DEBUG: Tab position:', {
+                    top: rect.top,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                    bottom: rect.bottom,
+                    isInViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth
+                });
+
+                // Check ALL computed styles on tab
+                const tabStyle = window.getComputedStyle(targetTab);
+                console.log('🎨 DEBUG: Tab computed styles:', {
+                    display: tabStyle.display,
+                    position: tabStyle.position,
+                    width: tabStyle.width,
+                    height: tabStyle.height,
+                    minHeight: tabStyle.minHeight,
+                    maxHeight: tabStyle.maxHeight,
+                    flex: tabStyle.flex,
+                    flexBasis: tabStyle.flexBasis,
+                    flexGrow: tabStyle.flexGrow,
+                    flexShrink: tabStyle.flexShrink
+                });
+
+                // Check first child (p tag) dimensions
+                const firstChild = targetTab.firstElementChild;
+                if (firstChild) {
+                    const childRect = firstChild.getBoundingClientRect();
+                    const childStyle = window.getComputedStyle(firstChild);
+                    console.log('📏 DEBUG: First child element:', {
+                        tagName: firstChild.tagName,
+                        rect: { width: childRect.width, height: childRect.height },
+                        display: childStyle.display,
+                        width: childStyle.width,
+                        height: childStyle.height
+                    });
+                }
+
+                // Check first .settings-section
+                const firstSection = targetTab.querySelector('.settings-section');
+                if (firstSection) {
+                    const sectionRect = firstSection.getBoundingClientRect();
+                    const sectionStyle = window.getComputedStyle(firstSection);
+                    console.log('📦 DEBUG: First .settings-section:', {
+                        rect: { width: sectionRect.width, height: sectionRect.height },
+                        display: sectionStyle.display,
+                        width: sectionStyle.width,
+                        height: sectionStyle.height,
+                        overflow: sectionStyle.overflow
+                    });
+                }
+
+                // Check parent container
+                const container = targetTab.closest('.site-settings-container');
+                if (container) {
+                    const containerStyle = window.getComputedStyle(container);
+                    const containerRect = container.getBoundingClientRect();
+                    console.log('📦 DEBUG: Container .site-settings-container:', {
+                        display: containerStyle.display,
+                        height: containerStyle.height,
+                        maxHeight: containerStyle.maxHeight,
+                        overflow: containerStyle.overflow,
+                        position: containerStyle.position,
+                        rect: { width: containerRect.width, height: containerRect.height }
+                    });
+                }
+            } else {
+                console.error('❌ ERROR: Target tab not found:', `subtab-${subtab}`);
+            }
+        });
+    });
+
+    // Ensure default active subtab content is visible
+    const initialActiveBtn = document.querySelector('.subtab-btn.active') || subtabButtons[0];
+    console.log('🔍 DEBUG: Initial active button:', initialActiveBtn?.getAttribute('data-subtab'));
+    if (initialActiveBtn) {
+        const subtab = initialActiveBtn.getAttribute('data-subtab');
+        const initialTab = document.getElementById(`subtab-${subtab}`);
+        console.log('🔍 DEBUG: Initial tab element:', initialTab);
+        if (initialTab) {
+            initialTab.classList.add('active');
+            console.log('✅ DEBUG: Set initial tab active:', subtab);
+            const computedStyle = window.getComputedStyle(initialTab);
+            console.log('📊 DEBUG: Initial display:', computedStyle.display);
+        }
+    }
 });
 
 // Load settings
@@ -827,6 +1440,7 @@ fetch('/admin/settings/get')
         originalSettings = { ...settings };
         currentSettings = { ...settings };
         populateSettings(settings);
+        highlightActiveTheme(settings);
     });
 
 function populateSettings(settings) {
@@ -834,9 +1448,32 @@ function populateSettings(settings) {
         const key = input.getAttribute('data-key');
         if (key && settings[key] !== undefined) {
             if (input.type === 'checkbox') {
-                input.checked = settings[key];
+                const value = settings[key];
+                input.checked = value === true || value === '1' || value === 1 || value === 'true';
             } else {
                 input.value = settings[key];
+            }
+
+            if (input.type === 'color') {
+                const hexInput = document.getElementById(`${input.id}Hex`);
+                if (hexInput) {
+                    hexInput.value = input.value;
+                }
+            }
+
+            if (key === 'cc_icon') {
+                if (!input.value) {
+                    input.value = 'bi-kanban';
+                    currentSettings[key] = 'bi-kanban';
+                }
+                updateManagementIconPreview(input.value);
+            } else if (key === 'cc_display_name' && !input.value) {
+                input.value = 'Management';
+                currentSettings[key] = 'Management';
+            } else if (key === 'cc_description' && !input.value) {
+                const fallback = 'Centralized management system for tracking and processing submissions';
+                input.value = fallback;
+                currentSettings[key] = fallback;
             }
         }
     });
@@ -851,12 +1488,18 @@ document.querySelectorAll('.setting-input').forEach(input => {
         } else {
             currentSettings[key] = this.value;
         }
+
+        if (key === 'cc_icon') {
+            updateManagementIconPreview(this.value);
+        }
+
+        highlightActiveTheme(currentSettings);
     });
 });
 
 // Color picker sync
 ['headerBgColor', 'headerTextColor', 'headerSubtitleColor', 'footerBgColor', 'footerTextColor',
- 'primaryColor', 'secondaryColor', 'sidebarBg', 'sidebarText'].forEach(id => {
+ 'primaryColor', 'accentColor', 'sidebarBg', 'sidebarText'].forEach(id => {
     const colorInput = document.getElementById(id);
     const hexInput = document.getElementById(id + 'Hex');
 
@@ -865,86 +1508,149 @@ document.querySelectorAll('.setting-input').forEach(input => {
         hexInput.addEventListener('input', () => {
             if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) {
                 colorInput.value = hexInput.value;
+                colorInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
     }
 });
 
+const commandCenterIconInput = document.getElementById('cc_icon');
+if (commandCenterIconInput) {
+    commandCenterIconInput.addEventListener('input', function() {
+        currentSettings['cc_icon'] = this.value;
+        updateManagementIconPreview(this.value);
+    });
+}
+
 // Theme presets
 const themePresets = {
+    // NOTE: Woodson preset is personal/local only. Remove before packaging for distribution.
+    'woodson': {
+        primary_color: '#C99700',
+        accent_color: '#111827',
+        navbar_color: '#000000',
+        background_color: '#FFFFFF',
+        header_bg_color: '#000000',
+        header_text_color: '#FFFFFF',
+        header_subtitle_color: '#C99700',
+        sidebar_bg: '#FFFFFF',
+        sidebar_text_color: '#1F2937',
+        footer_bg_color: '#111827',
+        footer_text_color: '#E5E7EB'
+    },
     'notre-dame': {
         primary_color: '#C99700',
-        secondary_color: '#0C2340',
+        accent_color: '#0C2340',
+        navbar_color: '#0C2340',
+        background_color: '#FFFFFF',
         header_bg_color: '#0C2340',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#C99700',
-        sidebar_bg_color: '#FFFFFF',
+        sidebar_bg: '#FFFFFF',
         sidebar_text_color: '#1F2937',
         footer_bg_color: '#F3F4F6',
         footer_text_color: '#6B7280'
     },
     'midnight': {
         primary_color: '#FFD700',
-        secondary_color: '#1A1A1A',
+        accent_color: '#1A1A1A',
+        navbar_color: '#1A1A1A',
+        background_color: '#1A1A1A',
         header_bg_color: '#1A1A1A',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#FFD700',
-        sidebar_bg_color: '#323130',
+        sidebar_bg: '#323130',
         sidebar_text_color: '#FFFFFF',
         footer_bg_color: '#1A1A1A',
         footer_text_color: '#C8C6C4'
     },
     'ocean': {
         primary_color: '#0078D4',
-        secondary_color: '#00BCF2',
+        accent_color: '#00BCF2',
+        navbar_color: '#0078D4',
+        background_color: '#E3F2FD',
         header_bg_color: '#0078D4',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#00BCF2',
-        sidebar_bg_color: '#E3F2FD',
+        sidebar_bg: '#E3F2FD',
         sidebar_text_color: '#005A9E',
         footer_bg_color: '#0078D4',
         footer_text_color: '#FFFFFF'
     },
     'forest': {
         primary_color: '#107C10',
-        secondary_color: '#498205',
+        accent_color: '#498205',
+        navbar_color: '#107C10',
+        background_color: '#E8F5E9',
         header_bg_color: '#107C10',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#90EE90',
-        sidebar_bg_color: '#E8F5E9',
+        sidebar_bg: '#E8F5E9',
         sidebar_text_color: '#1B5E20',
         footer_bg_color: '#F1F8F4',
         footer_text_color: '#2E7D32'
     },
     'sunset': {
         primary_color: '#D13438',
-        secondary_color: '#F7630C',
+        accent_color: '#F7630C',
+        navbar_color: '#D13438',
+        background_color: '#FFF4E5',
         header_bg_color: '#D13438',
         header_text_color: '#FFFFFF',
         header_subtitle_color: '#FFD700',
-        sidebar_bg_color: '#FFF4E5',
+        sidebar_bg: '#FFF4E5',
         sidebar_text_color: '#C62828',
         footer_bg_color: '#FFEBEE',
         footer_text_color: '#B71C1C'
     }
 };
 
+function highlightActiveTheme(settings, forceTheme = null) {
+    document.querySelectorAll('.theme-preview-card').forEach(card => card.classList.remove('active'));
+
+    if (forceTheme === 'custom') {
+        document.querySelector('.theme-preview-card[data-theme="custom"]')?.classList.add('active');
+        return;
+    }
+
+    let matchedTheme = null;
+
+    Object.entries(themePresets).forEach(([themeName, preset]) => {
+        const matches = Object.entries(preset).every(([key, presetValue]) => {
+            if (!(key in settings)) {
+                return false;
+            }
+
+            const settingValue = settings[key];
+            if (typeof presetValue === 'string' && presetValue.startsWith('#')) {
+                return String(settingValue).toUpperCase() === presetValue.toUpperCase();
+            }
+
+            return String(settingValue) === String(presetValue);
+        });
+
+        if (matches) {
+            matchedTheme = themeName;
+        }
+    });
+
+    if (matchedTheme) {
+        document.querySelector(`.theme-preview-card[data-theme="${matchedTheme}"]`)?.classList.add('active');
+    } else {
+        document.querySelector('.theme-preview-card[data-theme="custom"]')?.classList.add('active');
+    }
+}
+
 document.querySelectorAll('.theme-preview-card').forEach(card => {
     card.addEventListener('click', function() {
         const themeName = this.getAttribute('data-theme');
 
-        // Remove active from all cards
-        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-
         if (themeName === 'custom') {
-            // Don't change colors for custom theme
-            currentSettings.active_theme = 'custom';
+            highlightActiveTheme(currentSettings, 'custom');
             notyf.success('Custom theme selected - use color pickers to customize');
             return;
         }
 
-        // Apply theme preset
         const preset = themePresets[themeName];
         if (preset) {
             Object.keys(preset).forEach(key => {
@@ -953,15 +1659,23 @@ document.querySelectorAll('.theme-preview-card').forEach(card => {
                 if (input) {
                     if (input.type === 'color') {
                         input.value = preset[key];
-                        const hexInput = document.getElementById(input.id + 'Hex');
-                        if (hexInput) hexInput.value = preset[key];
+                        const hexInput = document.getElementById(`${input.id}Hex`);
+                        if (hexInput) {
+                            hexInput.value = preset[key];
+                        }
+                    } else if (input.type === 'checkbox') {
+                        input.checked = preset[key] === true || preset[key] === '1' || preset[key] === 1 || preset[key] === 'true';
                     } else {
                         input.value = preset[key];
                     }
+
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
-            currentSettings.active_theme = themeName;
-            notyf.success(`${this.querySelector('.theme-preview-title').textContent} theme applied`);
+
+            highlightActiveTheme(currentSettings);
+            const title = this.querySelector('.theme-preview-title')?.textContent ?? 'Theme';
+            notyf.success(`${title} theme applied`);
         }
     });
 });
@@ -991,6 +1705,7 @@ document.getElementById('saveSiteSettings').addEventListener('click', function()
 document.getElementById('cancelSiteSettings').addEventListener('click', function() {
     currentSettings = { ...originalSettings };
     populateSettings(originalSettings);
+    highlightActiveTheme(currentSettings);
     notyf.success('Changes discarded');
 });
 

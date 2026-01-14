@@ -571,6 +571,102 @@
                     Configure navigation behavior and access controls.
                 </p>
 
+                <!-- Authentication Section -->
+                <div class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>
+                            <i class="fas fa-sign-in-alt"></i> Authentication & Login
+                            <span class="badge">9</span>
+                        </h3>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="settings-section-body">
+                        <div class="settings-grid">
+                            <!-- Login Methods -->
+                            <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin-bottom: 1rem;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 0.95rem;">
+                                    <i class="fas fa-key"></i> Login Methods
+                                </h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="allowLocalUsers" class="setting-input" data-key="allow_local_users">
+                                    <strong>Allow Physical Login</strong>
+                                </label>
+                                <small>Enable username/password authentication (not recommended)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableGoogleLogin" class="setting-input" data-key="enable_google_login" checked>
+                                    <strong>Enable Google OAuth</strong>
+                                </label>
+                                <small>Show "Sign in with Google" button</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableMicrosoftLogin" class="setting-input" data-key="enable_microsoft_login">
+                                    <strong>Enable Microsoft OAuth</strong>
+                                </label>
+                                <small>Show "Sign in with Microsoft" button</small>
+                            </div>
+
+                            <!-- Domain Restrictions -->
+                            <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin: 1rem 0;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 0.95rem;">
+                                    <i class="fas fa-shield-alt"></i> Domain Restrictions
+                                </h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="requireDomainMatch" class="setting-input" data-key="require_domain_match">
+                                    <strong>Require Domain Match</strong>
+                                </label>
+                                <small>Only allow users from specified email domains</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label for="allowedDomains">Allowed Domains</label>
+                                <input type="text" id="allowedDomains" class="setting-input" data-key="allowed_domains" placeholder="yourdomain.com, anotherdomain.org">
+                                <small>Comma-separated list of allowed email domains (e.g., woodsonisd.net, newcastleisd.net)</small>
+                            </div>
+
+                            <!-- Auto-Role Assignment -->
+                            <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-secondary); padding-bottom: 1rem; margin: 1rem 0;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 0.95rem;">
+                                    <i class="fas fa-users-cog"></i> Cloud Identity Groups
+                                </h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableGoogleGroups" class="setting-input" data-key="enable_google_groups">
+                                    <strong>Enable Google Groups Sync</strong>
+                                </label>
+                                <small>Auto-assign roles based on Google Workspace group membership</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="enableMicrosoftGroups" class="setting-input" data-key="enable_microsoft_groups">
+                                    <strong>Enable Microsoft Groups Sync</strong>
+                                </label>
+                                <small>Auto-assign roles based on Azure AD group membership</small>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 1rem;">
+                                <p style="margin: 0; color: #1E40AF; font-size: 0.9rem;">
+                                    <i class="fas fa-info-circle"></i> <strong>Note:</strong> Cloud group mappings are configured in 
+                                    <a href="/admin/users" style="color: #1E40AF; text-decoration: underline;">Admin → Users → Organization Roles → Cloud Groups</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Navigation Section -->
                 <div class="settings-section">
                     <div class="settings-section-header">
@@ -580,7 +676,7 @@
                         </h3>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div class="settings-section-body">
+                    <div class="settings-section-body collapsed">
                         <div class="settings-grid">
                             <div class="form-group">
                                 <label>

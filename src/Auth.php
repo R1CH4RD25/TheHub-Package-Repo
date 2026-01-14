@@ -110,6 +110,9 @@ class Auth
                 $user['picture'] = $picture;
             }
 
+            // Sync organization roles based on cloud group memberships
+            $this->syncOrganizationRoles($user['id'], $email, $tokenData['access_token'] ?? null);
+
             // Set session
             $this->createSession($user);
 
@@ -262,6 +265,173 @@ class Auth
 
         } catch (\Exception $e) {
             error_log("Google Groups role check failed: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Sync organization roles based on cloud identity group membership
+     * Checks both Google Groups and Microsoft Groups if enabled
+     */
+    private function syncOrganizationRoles($userId, $userEmail, $accessToken = null)
+    {
+        try {
+            // Check if either provider is enabled
+            $googleGroupsEnabled = filter_var(
+                $_ENV['ENABLE_GOOGLE_GROUPS'] ?? 'false',
+                FILTER_VALIDATE_BOOLEAN
+            );
+            $microsoftGroupsEnabled = filter_var(
+                $_ENV['ENABLE_MICROSOFT_GROUPS'] ?? 'false',
+                FILTER_VALIDATE_BOOLEAN
+            );
+
+            if (!$googleGroupsEnabled && !$microsoftGroupsEnabled) {
+                error_log("Organization role sync skipped: No cloud providers enabled");
+                return;
+            }
+
+            $matchedOrgRoles = [];
+
+            // Get Google Groups memberships
+            if ($googleGroupsEnabled && $accessToken) {
+                $userGoogleGroups = $this->getUserGoogleGroups($userEmail);
+                
+                if (!empty($userGoogleGroups)) {
+                    // Find matching organization roles
+                    $googleRoleMappings = $this->db->fetchAll("
+                        SELECT DISTINCT org_role_id, google_group_email
+                        FROM org_role_google_groups
+                        WHERE sync_on_login = 1 AND is_active = 1
+                    ");
+
+                    foreach ($googleRoleMappings as $mapping) {
+                        foreach ($userGoogleGroups as $userGroup) {
+                            if ($this->matchesGroupPattern($userGroup, $mapping['google_group_email'])) {
+                                $matchedOrgRoles[] = $mapping['org_role_id'];
+                                error_log("User {$userEmail} matched Google group '{$mapping['google_group_email']}' -> org_role_id {$mapping['org_role_id']}");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Get Microsoft Groups memberships (if enabled and configured)
+            if ($microsoftGroupsEnabled) {
+                $userMsGroups = $this->getUserMicrosoftGroups($userEmail);
+                
+                if (!empty($userMsGroups)) {
+                    // Find matching organization roles
+                    $msRoleMappings = $this->db->fetchAll("
+                        SELECT DISTINCT org_role_id, ms_group_id
+                        FROM org_role_microsoft_groups
+                        WHERE sync_on_login = 1 AND is_active = 1
+                    ");
+
+                    foreach ($msRoleMappings as $mapping) {
+                        if (in_array($mapping['ms_group_id'], $userMsGroups)) {
+                            $matchedOrgRoles[] = $mapping['org_role_id'];
+                            error_log("User {$userEmail} matched Microsoft group ID '{$mapping['ms_group_id']}' -> org_role_id {$mapping['org_role_id']}");
+                        }
+                    }
+                }
+            }
+
+            // Remove duplicates
+            $matchedOrgRoles = array_unique($matchedOrgRoles);
+
+            if (empty($matchedOrgRoles)) {
+                error_log("No organization roles matched for {$userEmail} via cloud groups");
+                return;
+            }
+
+            // Assign organization roles using OrgRole class
+            require_once __DIR__ . '/OrgRole.php';
+            $orgRole = new OrgRole();
+            
+            // System auto-assignment (assigned_by = 0 for system)
+            $orgRole->assignToUser($userId, $matchedOrgRoles, 0);
+            
+            error_log("Synced " . count($matchedOrgRoles) . " organization roles for {$userEmail}");
+
+        } catch (\Exception $e) {
+            error_log("Organization role sync failed for {$userEmail}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get all Microsoft Groups (Azure AD) the user is a member of
+     * Returns array of group IDs (GUIDs)
+     */
+    private function getUserMicrosoftGroups($userEmail)
+    {
+        try {
+            // Check if Microsoft Graph API is configured
+            $tenantId = $_ENV['MICROSOFT_TENANT_ID'] ?? '';
+            $clientId = $_ENV['MICROSOFT_CLIENT_ID'] ?? '';
+            $clientSecret = $_ENV['MICROSOFT_CLIENT_SECRET'] ?? '';
+
+            if (empty($tenantId) || empty($clientId) || empty($clientSecret)) {
+                error_log("Microsoft Groups config missing: MICROSOFT_TENANT_ID, MICROSOFT_CLIENT_ID, or MICROSOFT_CLIENT_SECRET");
+                return [];
+            }
+
+            // Get access token for Microsoft Graph API
+            $tokenUrl = "https://login.microsoftonline.com/{$tenantId}/oauth2/v2.0/token";
+            $tokenParams = [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'scope' => 'https://graph.microsoft.com/.default',
+                'grant_type' => 'client_credentials'
+            ];
+
+            $ch = curl_init($tokenUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($tokenParams));
+            $tokenResponse = curl_exec($ch);
+            curl_close($ch);
+
+            $tokenData = json_decode($tokenResponse, true);
+            if (!isset($tokenData['access_token'])) {
+                error_log("Failed to get Microsoft Graph API token");
+                return [];
+            }
+
+            $graphAccessToken = $tokenData['access_token'];
+
+            // Get user's group memberships using Microsoft Graph API
+            $graphUrl = "https://graph.microsoft.com/v1.0/users/{$userEmail}/memberOf";
+            
+            $ch = curl_init($graphUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Authorization: Bearer {$graphAccessToken}",
+                "Content-Type: application/json"
+            ]);
+            $graphResponse = curl_exec($ch);
+            curl_close($ch);
+
+            $graphData = json_decode($graphResponse, true);
+            if (!isset($graphData['value'])) {
+                error_log("Failed to get Microsoft groups for {$userEmail}");
+                return [];
+            }
+
+            // Extract group IDs (only security groups and Office 365 groups)
+            $groupIds = [];
+            foreach ($graphData['value'] as $group) {
+                if (isset($group['id']) && in_array($group['@odata.type'], ['#microsoft.graph.group'])) {
+                    $groupIds[] = $group['id'];
+                }
+            }
+
+            error_log("User {$userEmail} is in " . count($groupIds) . " Microsoft groups");
+            return $groupIds;
+
+        } catch (\Exception $e) {
+            error_log("Microsoft Groups lookup failed for {$userEmail}: " . $e->getMessage());
             return [];
         }
     }
