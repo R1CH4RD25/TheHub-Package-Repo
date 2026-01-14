@@ -4,6 +4,49 @@
  */
 
 /**
+ * Show message notification
+ */
+function showMessage(message, type = 'success') {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.cssText = `
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        background: ${type === 'success' ? '#107C10' : type === 'error' ? '#D13438' : '#0078D4'} !important;
+        color: white !important;
+        padding: 16px 24px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
+        z-index: 10000 !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Slide in
+    setTimeout(() => {
+        toast.style.bottom = '30px !important';
+    }, 10);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.style.bottom = '-100px !important';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+/**
  * Create a modal with title and content
  */
 function createModal(title, content) {
@@ -447,8 +490,8 @@ async function manageRoleUsers(roleId, roleName) {
                         <input type="text" id="userSearchInput" class="form-control"
                                placeholder="Search by name or email..."
                                onkeyup="filterAvailableUsers()"
-                               style="padding-left: 2.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fas fa-search" style="position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
+                               style="width: 100%; padding: 0.75rem 1rem; padding-left: 2.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; line-height: 1.5; min-height: 48px; transition: all 0.2s;">
+                        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
                     </div>
                 </div>
 
