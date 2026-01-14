@@ -227,7 +227,7 @@
         @if($isSuperAdmin)
             <div id="subtab-org-roles" class="user-subtab">
                 <div class="org-roles-management">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; margin-top: 1.5rem;">
                         <div>
                             <p class="info-text">
                                 <strong>🎭 Organization Roles:</strong> Create custom roles that match your organization's structure.
