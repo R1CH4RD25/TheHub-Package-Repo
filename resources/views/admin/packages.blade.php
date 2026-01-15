@@ -630,9 +630,14 @@ async function searchRepositoryPackages() {
         });
 
         const data = await response.json();
+        
+        console.log('📦 Package Repository API Response:', data);
+        console.log('📋 Total packages found:', data.packages?.length || 0);
+        console.log('🔍 Package details:', data.packages);
 
         if (data.success) {
             discoveryPackages = data.packages;
+            console.log('✅ Packages loaded into discoveryPackages:', discoveryPackages);
 
             // Populate category dropdown
             const categories = [...new Set(data.packages.map(p => p.category || 'other'))].sort();
@@ -665,6 +670,10 @@ async function searchRepositoryPackages() {
 }
 
 function renderDiscoveryPackages(packages) {
+    console.log('🎨 Rendering packages - Total:', packages.length);
+    console.log('📊 Current filters:', currentFilter);
+    console.log('🔢 Current sort:', currentSort);
+    
     const resultsDiv = document.getElementById('discoveryResults');
 
     if (packages.length === 0) {
@@ -722,6 +731,9 @@ function renderDiscoveryPackages(packages) {
         if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
         return 0;
     });
+
+    console.log('✅ After filtering and sorting:', filtered.length, 'packages');
+    console.log('📦 Filtered package IDs:', filtered.map(p => ({ id: p.id, name: p.name, version: p.version })));
 
     if (filtered.length === 0) {
         resultsDiv.innerHTML = '<p class="text-center text-muted">No packages match your filters</p>';
