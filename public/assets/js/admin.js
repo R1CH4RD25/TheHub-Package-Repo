@@ -4468,7 +4468,10 @@ function buildPackageDiscoveryBodyHTML() {
 // Build the modal footer HTML
 function buildPackageDiscoveryFooterHTML() {
     return `
-        <div class="me-auto">
+        <div class="d-flex align-items-center gap-2 me-auto">
+            <button type="button" id="refreshPackagesBtn" class="btn btn-sm btn-outline-secondary" title="Refresh package list from repository">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
             <span id="selectedPackageCount" style="display: none;">
                 <strong>0</strong> package(s) selected
             </span>
@@ -4486,6 +4489,7 @@ function buildPackageDiscoveryFooterHTML() {
 function attachPackageDiscoveryListeners() {
     const searchInput = document.getElementById('packageSearchInput');
     const downloadBtn = document.getElementById('downloadSelectedBtn');
+    const refreshBtn = document.getElementById('refreshPackagesBtn');
 
     if (searchInput) {
         searchInput.addEventListener('input', filterDiscoveredPackages);
@@ -4493,6 +4497,17 @@ function attachPackageDiscoveryListeners() {
 
     if (downloadBtn) {
         downloadBtn.addEventListener('click', downloadSelectedPackages);
+    }
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            console.log('🔄 Manually refreshing package repository...');
+            // Clear cached state
+            window.discoveredPackages = [];
+            window.selectedPackages = new Set();
+            // Re-run search
+            searchPackages();
+        });
     }
 }
 
@@ -5285,6 +5300,21 @@ async function loadPackagePermissionsTab() {
 
             // Enable template selector
             if (templateSelector) templateSelector.disabled = false;
+
+            // Show manage forms button
+            const manageFormsBtn = document.getElementById('manageFormsBtn');
+            if (manageFormsBtn) {
+                manageFormsBtn.style.display = 'inline-block';
+                manageFormsBtn.dataset.packageSlug = packageSlug;
+                // Find the package name for the button
+                const selectedOption = selector.options[selector.selectedIndex];
+                manageFormsBtn.dataset.packageName = selectedOption.textContent;
+                // Get package ID from sections data
+                const packageSection = data.sections.find(s => s.slug === packageSlug);
+                if (packageSection) {
+                    manageFormsBtn.dataset.packageId = packageSection.id;
+                }
+            }
 
             // Show preview button
             const previewBtn = document.getElementById('previewCapabilitiesBtn');
@@ -6265,4 +6295,26 @@ function openCapabilityPreview() {
     }
 
     capabilityPreview.open(packageSlug, packageName);
+}
+
+// =============================================================================
+// Package Forms Management
+// =============================================================================
+
+/**
+ * Open form builder for selected package
+ */
+function openFormsBuilder() {
+    const btn = document.getElementById('manageFormsBtn');
+    if (!btn) return;
+
+    const packageId = btn.dataset.packageId;
+    const packageName = btn.dataset.packageName;
+
+    if (!packageId) {
+        showMessage('Please select a package first', 'error');
+        return;
+    }
+
+    loadFormBuilder(packageId, packageName);
 }
