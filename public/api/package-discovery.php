@@ -228,10 +228,20 @@ function searchGitHubDirectory($owner, $repo, $path)
         }
 
         foreach ($files as $file) {
-            // Skip archive directories and hidden directories
+            // Skip archive folder at any level (packages/archive/) and hidden directories
             $filename = $file['name'] ?? '';
+            $filePath = $file['path'] ?? '';
+            
+            // Skip if it's the archive directory or inside archive
+            if (strpos($filePath, 'packages/archive') === 0 || 
+                strpos($filePath, '/archive/') !== false ||
+                $filename === 'archive') {
+                continue;
+            }
+            
+            // Skip hidden directories and version control
             if ($file['type'] === 'dir' && (
-                in_array($filename, ['archive', 'old-versions', '.git', '.github']) ||
+                in_array($filename, ['.git', '.github', 'old-versions']) ||
                 strpos($filename, '.') === 0
             )) {
                 continue;
