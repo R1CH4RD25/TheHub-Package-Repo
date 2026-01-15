@@ -93,18 +93,44 @@ class PackageValidator
      */
     private function validateStructure(array $packageData): void
     {
-        $required = ['format_version', 'package', 'fields', 'permissions'];
+        // Check for new Hub/Management format (schemaVersion 1+)
+        $isNewFormat = isset($packageData['schemaVersion']) && $packageData['schemaVersion'] >= 1;
+        
+        if ($isNewFormat) {
+            // New format requires: schemaVersion, package
+            $required = ['schemaVersion', 'package'];
+            
+            foreach ($required as $field) {
+                if (!isset($packageData[$field])) {
+                    $this->addCheck('structure', "Required Field: $field", $field, 'missing',
+                        self::STATUS_FAIL, self::SEVERITY_CRITICAL,
+                        "Package is missing required field: $field",
+                        "Ensure package contains all required fields");
+                }
+            }
+            
+            // New format should have hub_cards OR management_sections (or both)
+            if (!isset($packageData['hub_cards']) && !isset($packageData['management_sections'])) {
+                $this->addCheck('structure', "Hub/Management Content", 'hub_cards or management_sections', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_ERROR,
+                    "Package must include either hub_cards or management_sections",
+                    "Add hub_cards for user-facing features or management_sections for admin features");
+            }
+        } else {
+            // Old format requires: format_version, package, fields, permissions
+            $required = ['format_version', 'package', 'fields', 'permissions'];
 
-        foreach ($required as $field) {
-            if (!isset($packageData[$field])) {
-                $this->addCheck('structure', "Required Field: $field", $field, 'missing',
-                    self::STATUS_FAIL, self::SEVERITY_CRITICAL,
-                    "Package is missing required field: $field",
-                    "Ensure package contains all required fields");
+            foreach ($required as $field) {
+                if (!isset($packageData[$field])) {
+                    $this->addCheck('structure', "Required Field: $field", $field, 'missing',
+                        self::STATUS_FAIL, self::SEVERITY_CRITICAL,
+                        "Package is missing required field: $field",
+                        "Ensure package contains all required fields");
+                }
             }
         }
 
-        // Check format version compatibility
+        // Check format version compatibility (for old format)
         if (isset($packageData['format_version'])) {
             $formatVersion = $packageData['format_version'];
             $supportedVersion = $this->getSystemRequirement('format_version');
@@ -347,6 +373,16 @@ class PackageValidator
      */
     private function validateFields(array $packageData): void
     {
+        // Skip field validation for new Hub/Management format
+        $isNewFormat = isset($packageData['schemaVersion']) && $packageData['schemaVersion'] >= 1;
+        if ($isNewFormat) {
+            // New format doesn't use fields, it uses hub_cards and management_sections
+            $this->addCheck('fields', 'Field Validation', 'new format', 'skipped',
+                self::STATUS_PASS, self::SEVERITY_INFO,
+                "Field validation skipped - using Hub/Management format (schemaVersion {$packageData['schemaVersion']})");
+            return;
+        }
+        
         if (!isset($packageData['fields']) || !is_array($packageData['fields'])) {
             $this->addCheck('fields', 'Field Definitions', 'array', 'missing',
                 self::STATUS_FAIL, self::SEVERITY_CRITICAL,
