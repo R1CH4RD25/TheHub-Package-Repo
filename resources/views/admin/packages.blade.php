@@ -596,8 +596,19 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
 
             document.getElementById('downloadQueueBtn')?.addEventListener('click', downloadQueuedPackages);
             document.getElementById('clearQueueBtn')?.addEventListener('click', clearDownloadQueue);
+            document.getElementById('refreshPackagesBtn')?.addEventListener('click', async function() {
+                discoveryPackages = [];
+                await searchRepositoryPackages();
+            });
         },
-        footer: '<a href="https://github.com/R1CH4RD25/TheHub-Package-Repo" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-github"></i> View on GitHub</a>'
+        footer: `<div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+            <button type="button" id="refreshPackagesBtn" class="btn btn-sm btn-outline-secondary" style="margin-right: auto;">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <a href="https://github.com/R1CH4RD25/TheHub-Package-Repo" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-github"></i> View on GitHub
+            </a>
+        </div>`
     });
 });
 
