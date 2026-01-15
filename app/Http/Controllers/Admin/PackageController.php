@@ -25,6 +25,19 @@ class PackageController extends Controller
     }
 
     /**
+     * Display package configuration interface.
+     */
+    public function configure(Request $request)
+    {
+        $currentUser = $request->attributes->get('user');
+        $isSuperAdmin = ($currentUser['role'] === 'super_admin');
+
+        return view('admin.packages-configure', [
+            'isSuperAdmin' => $isSuperAdmin
+        ]);
+    }
+
+    /**
      * List packages (installed or available).
      */
     public function list(Request $request): JsonResponse

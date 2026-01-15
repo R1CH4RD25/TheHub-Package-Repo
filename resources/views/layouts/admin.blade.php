@@ -6,40 +6,35 @@ use Hub\Database;
 // Admin context configuration
 $context = 'admin';
 
-// Check for installed packages to build Configure submenu
+// Check for installed packages to determine if Configure is needed
 $db = Database::getInstance();
-$installedPackages = $db->fetchAll(
-    "SELECT DISTINCT p.package_id, p.display_name, p.name 
-     FROM section_packages p
-     INNER JOIN section_installations i ON p.package_id = i.package_id
-     WHERE i.status = 'installed'
-     ORDER BY p.display_name"
-);
+$installedCount = $db->fetchOne(
+    "SELECT COUNT(DISTINCT package_id) as count
+     FROM section_installations
+     WHERE status = 'installed'"
+)['count'] ?? 0;
 
 // Build Package Management menu item
 $packageMenuItem = [];
-if (empty($installedPackages)) {
-    // No packages installed - simple link
-    $packageMenuItem = ['type' => 'link', 'id' => 'packages', 'label' => 'Package Management', 'url' => '/admin/packages', 'icon' => 'fas fa-box'];
-} else {
-    // Packages installed - expandable with Configure submenu
-    $submenu = [];
-    foreach ($installedPackages as $pkg) {
-        $submenu[] = [
-            'id' => 'configure-' . $pkg['name'],
-            'label' => $pkg['display_name'],
-            'url' => '/admin/packages/configure/' . $pkg['name']
-        ];
-    }
-    
+if ($installedCount > 0) {
+    // Has installed packages - expandable with Configure submenu
     $packageMenuItem = [
         'type' => 'expandable',
         'id' => 'packages',
         'label' => 'Package Management',
         'icon' => 'fas fa-box',
-        'url' => '/admin/packages',
-        'submenu' => $submenu
+        'url' => '/admin/packages', // Clickable - goes to Package Management
+        'submenu' => [
+            [
+                'id' => 'configure',
+                'label' => 'Configure',
+                'url' => '/admin/packages/configure'
+            ]
+        ]
     ];
+} else {
+    // No packages installed - simple link
+    $packageMenuItem = ['type' => 'link', 'id' => 'packages', 'label' => 'Package Management', 'url' => '/admin/packages', 'icon' => 'fas fa-box'];
 }
 
 // Build admin nav items

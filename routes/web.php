@@ -59,6 +59,7 @@ Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function (
 
     // Package Management
     Route::get('/packages', [PackageController::class, 'index'])->name('admin.packages');
+    Route::get('/packages/configure', [PackageController::class, 'configure'])->name('admin.packages.configure');
     Route::get('/packages/list', [PackageController::class, 'list'])->name('admin.packages.list');
     Route::post('/packages/upload', [PackageController::class, 'upload'])->name('admin.packages.upload');
     Route::post('/packages/{id}/install', [PackageController::class, 'install'])->name('admin.packages.install');
