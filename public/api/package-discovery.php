@@ -228,6 +228,15 @@ function searchGitHubDirectory($owner, $repo, $path)
         }
 
         foreach ($files as $file) {
+            // Skip archive directories and hidden directories
+            $filename = $file['name'] ?? '';
+            if ($file['type'] === 'dir' && (
+                in_array($filename, ['archive', 'old-versions', '.git', '.github']) ||
+                strpos($filename, '.') === 0
+            )) {
+                continue;
+            }
+            
             // If it's a directory, search recursively (any depth)
             if ($file['type'] === 'dir') {
                 $subPackages = searchGitHubDirectory($owner, $repo, $file['path']);
