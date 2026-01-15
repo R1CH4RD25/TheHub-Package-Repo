@@ -9,7 +9,7 @@ $context = 'admin';
 // Check for installed packages to build Configure submenu
 $db = Database::getInstance();
 $installedPackages = $db->fetchAll(
-    "SELECT DISTINCT p.package_id, p.display_name, p.slug 
+    "SELECT DISTINCT p.package_id, p.display_name, p.name 
      FROM section_packages p
      INNER JOIN section_installations i ON p.package_id = i.package_id
      WHERE i.status = 'installed'
@@ -26,9 +26,9 @@ if (empty($installedPackages)) {
     $submenu = [];
     foreach ($installedPackages as $pkg) {
         $submenu[] = [
-            'id' => 'configure-' . $pkg['slug'],
+            'id' => 'configure-' . $pkg['name'],
             'label' => $pkg['display_name'],
-            'url' => '/admin/packages/configure/' . $pkg['slug']
+            'url' => '/admin/packages/configure/' . $pkg['name']
         ];
     }
     
