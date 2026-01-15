@@ -115,26 +115,76 @@ class EnterpriseSidebar
                                     </span>
                                 <?php endif; ?>
                             </a>
+
+                        <?php elseif ($item['type'] === 'expandable'): ?>
+                            <div class="nav-expandable <?= $isActive ? 'expanded' : '' ?>" data-nav-item="<?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <?php if (!empty($item['url'])): ?>
+                                    <!-- Expandable with clickable URL -->
+                                    <div class="nav-expandable-wrapper">
+                                        <a href="<?= htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') ?>"
+                                            class="<?= $navLinkClass . $activeClass ?>"
+                                            title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
+                                            <?php if (!empty($item['data_tab'])): ?>
+                                            data-tab="<?= htmlspecialchars($item['data_tab'], ENT_QUOTES, 'UTF-8') ?>"
+                                            <?php endif; ?>>
+                                            <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                            <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                        </a>
+                                        <button class="nav-expand-toggle" aria-label="Toggle submenu">
+                                            <i class="fas fa-chevron-down nav-expand-icon"></i>
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- Expandable button only -->
+                                    <div class="nav-expandable-wrapper">
+                                        <button class="<?= $navLinkClass . $activeClass ?>"
+                                            title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
+                                            aria-expanded="<?= $isActive ? 'true' : 'false' ?>">
+                                            <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                            <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                        </button>
+                                        <button class="nav-expand-toggle" aria-label="Toggle submenu">
+                                            <i class="fas fa-chevron-down nav-expand-icon"></i>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($item['submenu']) && count($item['submenu']) > 0): ?>
+                                    <div class="nav-submenu" <?= $isActive ? '' : 'style="display: none;"' ?>>
+                                        <?php foreach ($item['submenu'] as $subitem): ?>
+                                            <?php
+                                            $subActive = ($subitem['id'] ?? null) === $opts['active_item'] ? ' active' : '';
+                                            ?>
+                                            <a href="<?= htmlspecialchars($subitem['url'], ENT_QUOTES, 'UTF-8') ?>"
+                                                class="<?= $navLinkClass ?> nav-sublink<?= $subActive ?>"
+                                                <?php if (!empty($subitem['data_tab'])): ?>
+                                                data-tab="<?= htmlspecialchars($subitem['data_tab'], ENT_QUOTES, 'UTF-8') ?>"
+                                                <?php endif; ?>>
+                                                <span><?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </nav>
 
             <?php if ($opts['context'] === 'admin'): ?>
-            <!-- Sidebar Footer - Dashboard Info -->
-            <div class="sidebar-footer">
-                <div class="sidebar-footer-content">
-                    <div class="footer-info">
-                        <span>&copy; <?= date('Y') ?> <?= htmlspecialchars(\Hub\SiteSettings::get('organization_name', 'Your Organization'), ENT_QUOTES, 'UTF-8') ?></span>
-                    </div>
-                    <?php
-                    $version = \Hub\SiteSettings::get('site_version', '1.0');
-                    ?>
-                    <div class="footer-version">
-                        Admin Dashboard v<?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?>
+                <!-- Sidebar Footer - Dashboard Info -->
+                <div class="sidebar-footer">
+                    <div class="sidebar-footer-content">
+                        <div class="footer-info">
+                            <span>&copy; <?= date('Y') ?> <?= htmlspecialchars(\Hub\SiteSettings::get('organization_name', 'Your Organization'), ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                        <?php
+                        $version = \Hub\SiteSettings::get('site_version', '1.0');
+                        ?>
+                        <div class="footer-version">
+                            Admin Dashboard v<?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?>
+                        </div>
                     </div>
                 </div>
-            </div>
             <?php endif; ?>
         </aside>
 
@@ -159,6 +209,37 @@ class EnterpriseSidebar
                     shell.classList.toggle('has-collapsed-sidebar');
                     const collapsed = sidebar.classList.contains('collapsed');
                     localStorage.setItem(STORAGE_KEY, collapsed);
+                });
+
+                // Expandable menu functionality
+                const expandableToggles = sidebar?.querySelectorAll('.nav-expand-toggle');
+                expandableToggles?.forEach(toggle => {
+                    toggle.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const parent = toggle.closest('.nav-expandable');
+                        const submenu = parent.querySelector('.nav-submenu');
+                        const icon = toggle.querySelector('.nav-expand-icon');
+                        const isExpanded = parent.classList.contains('expanded');
+
+                        // Close all other expandables
+                        sidebar.querySelectorAll('.nav-expandable').forEach(item => {
+                            if (item !== parent) {
+                                item.classList.remove('expanded');
+                                item.querySelector('.nav-submenu')?.style.setProperty('display', 'none');
+                                item.querySelector('.nav-expand-icon')?.style.setProperty('transform', 'rotate(0deg)');
+                            }
+                        });
+
+                        // Toggle this one
+                        parent.classList.toggle('expanded');
+                        if (submenu) {
+                            submenu.style.display = isExpanded ? 'none' : 'block';
+                        }
+                        if (icon) {
+                            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+                        }
+                    });
                 });
             })();
         </script>
