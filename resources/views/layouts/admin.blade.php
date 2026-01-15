@@ -8,7 +8,7 @@ $context = 'admin';
 $navItems = [
     ['type' => 'link', 'id' => 'home', 'label' => 'Home', 'url' => '/admin/', 'icon' => 'fas fa-home'],
     ['type' => 'link', 'id' => 'users', 'label' => 'Users', 'url' => '/admin/users', 'icon' => 'fas fa-users'],
-    ['type' => 'link', 'id' => 'packages', 'label' => 'Packages', 'url' => '/admin/packages', 'icon' => 'fas fa-box'],
+    ['type' => 'link', 'id' => 'packages', 'label' => 'Package Management', 'url' => '/admin/packages', 'icon' => 'fas fa-box'],
     ['type' => 'link', 'id' => 'settings', 'label' => 'Settings', 'url' => '/admin/settings', 'icon' => 'fas fa-cog'],
     ['type' => 'link', 'id' => 'logs', 'label' => 'Activity Logs', 'url' => '/admin/logs', 'icon' => 'fas fa-list-alt'],
     ['type' => 'link', 'id' => 'export', 'label' => 'Export Data', 'url' => '/admin/export', 'icon' => 'fas fa-download'],
