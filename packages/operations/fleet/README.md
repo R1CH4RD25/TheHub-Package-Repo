@@ -4,52 +4,62 @@ Vehicle fleet tracking, fuel logging, maintenance scheduling, and driver managem
 
 ## Packages
 
-### 🚗 Vehicle Maintenance & Fleet Tracking v1.0.0
-**Directory:** `vehicle-maintenance/`
+### 🚗 Vehicle Maintenance & Fleet Tracking v2.0.0
+**Directory:** `vehicle-maintenance-v2/`
 
-Comprehensive district-wide vehicle maintenance, fueling, and trip category tracking with templates, notifications, and role-based control.
+Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. Redesigned for v2 with improved user experience and clear separation between user-facing Hub cards and admin Management sections.
 
 **Features:**
-- Fleet inventory management (VIN, license plate, unit numbers, year/make/model)
-- Fuel logging with trip categorization (district tank or purchases)
+- **Hub Cards (User-Facing):**
+  - Fleet Management: View district fleet roster
+  - Fuel & Trip Tracking: Log fuel trips and view history
+  - Maintenance Tracking: Log maintenance events and view history
+- **Management Sections (Admin):**
+  - Full vehicle CRUD with departments and campuses
+  - Fuel analytics and district-wide reporting
+  - Maintenance templates, schedules, and analytics
+  - Trip categories configuration (11, 23, 34, 36, 41)
+  - Package settings and configuration
 - Template-based maintenance scheduling (mileage + time intervals)
-- Maintenance event tracking with invoice/photo uploads
-- Department and campus organization (optional)
-- Driver self-service logging (optional, configurable)
 - Auto-calculated next-due maintenance dates
 - Out-of-service vehicle status tracking
-- Role-based access control (5 levels: driver, crew, fleet manager, maintenance director, admin)
+- File uploads (fuel receipts, maintenance invoices, photos)
+- Role-based access control (3 roles: vm_user, vm_manager, vm_admin)
 
-**Database Entities:** 12 tables (vehicles, fuel logs, maintenance events, templates, schedules, trip categories, departments, campuses, settings)
+**Database Entities:** 11 tables (vehicles, trip_categories, fuel_logs, maintenance_items, maintenance_events, maintenance_templates, template_items, vehicle_schedules, departments, campuses, settings)
 
-**Modules:** 11 modules (dashboard, forms, tables with 5 role-based views)
+**Modules:** Hub cards (3) + Management sections (4) with subsections
 
-**Tags:** `operations`, `fleet`, `vehicles`, `maintenance`, `fuel`, `school-operations`
+**Tags:** `operations`, `fleet`, `vehicles`, `maintenance`, `fuel`, `hub-management`
 
-**For:** Transportation departments, maintenance crews, fleet managers, maintenance directors
+**For:** Transportation departments, maintenance crews, fleet managers, all Hub users
 
 **Requirements:**
-- Hub >=1.0.0 <2.0.0
+- Hub >=1.0.0 <3.0.0
 - PHP >=8.0
 - MySQL >=5.7
-- Tested on Hub 1.3.0
+- Tested on Hub 2.0.0
 
 **Installation:**
-1. Admin Dashboard → Package Manager → Upload Package
-2. Select `manifest.json` or browse package directory
-3. Click **Validate Package** (green badge 5% → 100% ✅)
-4. Review validation report
+1. Admin Dashboard → Package Manager → Browse Package Repository
+2. Select "Vehicle Maintenance & Fleet Tracking" v2.0.0
+3. Click **Download**
+4. System validates package automatically
 5. Click **Install**
-6. Configure settings (driver logging, departments, campuses, lead times)
-7. Create trip categories (11, 23, 34, 36, 41 codes)
-8. Create maintenance templates (Bus Template, Truck Template, etc.)
-9. Add vehicles and apply templates
-10. Assign roles to users (vm_driver, vm_crew, vm_fm, vm_md, vm_admin)
+6. Configure trip categories in Management → Configuration
+7. Set up maintenance items and templates
+8. Add vehicles and assign to departments/campuses
+9. Assign roles: vm_user (Hub users), vm_manager (Fleet managers), vm_admin (Full access)
 
 **Documentation:**
-- [Package README](vehicle-maintenance/README.md) - Full feature list and usage guide
-- [CHANGELOG](vehicle-maintenance/CHANGELOG.md) - Version history
-- [LICENSE](vehicle-maintenance/LICENSE) - Proprietary license
+- [Package README](vehicle-maintenance-v2/README.md) - Full feature list and usage guide
+- [CHANGELOG](vehicle-maintenance-v2/CHANGELOG.md) - Version history
+- [LICENSE](vehicle-maintenance-v2/LICENSE) - Proprietary license
+- [Database Schema](vehicle-maintenance-v2/database/schema.sql) - Complete DDL
+- [Seed Data](vehicle-maintenance-v2/database/seed.sql) - Default trip categories and maintenance items
+
+**Previous Versions:**
+- v1.0.0 archived in [`archive/operations/fleet/vehicle-maintenance/`](../../archive/operations/fleet/vehicle-maintenance/)
 
 ---
 
