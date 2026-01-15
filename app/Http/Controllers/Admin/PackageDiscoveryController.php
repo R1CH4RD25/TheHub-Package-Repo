@@ -203,8 +203,16 @@ class PackageDiscoveryController extends Controller
             }
 
             foreach ($files as $file) {
-                // Recurse into directories
+                // Skip archive directories
                 if ($file['type'] === 'dir') {
+                    $filePath = $file['path'] ?? '';
+                    
+                    // Exclude archive folders
+                    if (strpos($filePath, 'packages/archive') === 0 || strpos($filePath, '/archive/') !== false) {
+                        error_log("Package discovery: Skipping archive path: {$filePath}");
+                        continue;
+                    }
+                    
                     $subPackages = $this->searchGitHubDirectory($owner, $repo, $file['path']);
                     $packages = array_merge($packages, $subPackages);
                 }
