@@ -36,11 +36,12 @@ class PackageDiscoveryController extends Controller
         $owner = $request->input('owner', self::DEFAULT_REPO_OWNER);
         $repo = $request->input('repo', self::DEFAULT_REPO_NAME);
         $repositoryUrl = $request->input('repository_url', "https://github.com/{$owner}/{$repo}");
+        $bustCache = $request->input('bust_cache', false); // Allow cache busting
 
         try {
-            error_log("Package discovery: Searching {$owner}/{$repo}");
+            error_log("Package discovery: Searching {$owner}/{$repo}" . ($bustCache ? ' (cache bust)' : ''));
 
-            $packages = $this->searchGitHubPackages($owner, $repo);
+            $packages = $this->searchGitHubPackages($owner, $repo, $bustCache);
 
             error_log("Package discovery: Found " . count($packages) . " packages");
 
@@ -144,15 +145,20 @@ class PackageDiscoveryController extends Controller
     /**
      * Search GitHub repository for .hubpkg files
      */
-    private function searchGitHubPackages(string $owner, string $repo): array
+    private function searchGitHubPackages(string $owner, string $repo, bool $bustCache = false): array
     {
         // Try cache first
         $cacheKey = "github:packages:{$owner}/{$repo}";
-        $cached = Cache::get($cacheKey);
-
-        if ($cached !== null) {
-            error_log("Package discovery: Serving " . count($cached) . " packages from cache");
-            return $cached;
+        
+        if ($bustCache) {
+            error_log("Package discovery: Busting cache for {$owner}/{$repo}");
+            Cache::delete($cacheKey);
+        } else {
+            $cached = Cache::get($cacheKey);
+            if ($cached !== null) {
+                error_log("Package discovery: Serving " . count($cached) . " packages from cache");
+                return $cached;
+            }
         }
 
         $packages = $this->searchGitHubDirectory($owner, $repo, 'packages');

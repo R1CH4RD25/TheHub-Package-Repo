@@ -597,8 +597,9 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
             document.getElementById('downloadQueueBtn')?.addEventListener('click', downloadQueuedPackages);
             document.getElementById('clearQueueBtn')?.addEventListener('click', clearDownloadQueue);
             document.getElementById('refreshPackagesBtn')?.addEventListener('click', async function() {
+                console.log('🔄 Refresh clicked - busting cache and reloading packages');
                 discoveryPackages = [];
-                await searchRepositoryPackages();
+                await searchRepositoryPackages(true); // bust cache
             });
         },
         footer: `<div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
@@ -612,7 +613,7 @@ document.getElementById('discoverPackagesBtn')?.addEventListener('click', async 
     });
 });
 
-async function searchRepositoryPackages() {
+async function searchRepositoryPackages(bustCache = false) {
     const resultsDiv = document.getElementById('discoveryResults');
     resultsDiv.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin"></i> Searching repository...</p>';
 
@@ -625,7 +626,8 @@ async function searchRepositoryPackages() {
             },
             body: JSON.stringify({
                 owner: 'R1CH4RD25',
-                repo: 'TheHub-Package-Repo'
+                repo: 'TheHub-Package-Repo',
+                bust_cache: bustCache
             })
         });
 
