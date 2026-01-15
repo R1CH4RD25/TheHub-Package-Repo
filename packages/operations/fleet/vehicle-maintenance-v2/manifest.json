@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "package": {
-    "id": "com.woodson.vehicle-maintenance-v2",
-    "name": "vehicle-maintenance-v2",
+    "id": "com.woodson.vehicle-maintenance",
+    "name": "vehicle-maintenance",
     "namespace": "vm",
-    "display_name": "Vehicle Maintenance & Fleet Tracking v2",
-    "description": "Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. User-friendly forms for Hub users, full configuration for Management.",
+    "display_name": "Vehicle Maintenance & Fleet Tracking",
+    "description": "Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. Redesigned for v2 with improved user experience.",
     "version": "2.0.0",
     "author": "Woodson ISD Technology Department",
     "author_email": "tech@woodsonisd.net",
@@ -24,14 +24,12 @@
     "homepage": "https://github.com/R1CH4RD25/TheHub-Package-Repo/tree/main/packages/operations/fleet/vehicle-maintenance-v2",
     "support": "https://github.com/R1CH4RD25/TheHub-Package-Repo/issues"
   },
-
   "compatibility": {
     "hub_version": ">=1.0.0 <3.0.0",
     "php_version": ">=8.0",
     "mysql_version": ">=5.7",
     "tested_up_to": "2.0.0"
   },
-
   "capabilities": [
     "forms",
     "tables",
@@ -39,7 +37,6 @@
     "analytics",
     "hub-management-separation"
   ],
-
   "settings": {
     "allow_driver_logging": true,
     "enable_departments": true,
@@ -47,7 +44,6 @@
     "maintenance_lead_days": 30,
     "maintenance_lead_miles": 500
   },
-
   "database": {
     "tables": [
       "vm_vehicles",
@@ -66,7 +62,6 @@
       "database/schema.sql"
     ]
   },
-
   "hub_cards": [
     {
       "id": "fleet-management",
@@ -74,7 +69,9 @@
       "description": "View district fleet roster",
       "icon": "fa-solid fa-car-side",
       "route": "/pkg/vm/fleet-roster",
-      "access": ["user"],
+      "access": [
+        "user"
+      ],
       "type": "table"
     },
     {
@@ -83,7 +80,9 @@
       "description": "Log fuel trips and view your fuel history",
       "icon": "fa-solid fa-gas-pump",
       "route": "/pkg/vm/fuel-log",
-      "access": ["user"],
+      "access": [
+        "user"
+      ],
       "type": "form"
     },
     {
@@ -92,11 +91,12 @@
       "description": "Log maintenance events and view your maintenance history",
       "icon": "fa-solid fa-wrench",
       "route": "/pkg/vm/maintenance-log",
-      "access": ["user"],
+      "access": [
+        "user"
+      ],
       "type": "form"
     }
   ],
-
   "management_sections": [
     {
       "id": "vm-vehicles",
@@ -104,7 +104,10 @@
       "description": "Manage fleet inventory",
       "icon": "fa-solid fa-truck-pickup",
       "route": "/management/vm/vehicles",
-      "access": ["vm_manager", "vm_admin"],
+      "access": [
+        "vm_manager",
+        "vm_admin"
+      ],
       "subsections": [
         {
           "id": "vehicle-list",
@@ -124,7 +127,10 @@
       "description": "View and analyze all fuel logs",
       "icon": "fa-solid fa-gas-pump",
       "route": "/management/vm/fuel",
-      "access": ["vm_manager", "vm_admin"],
+      "access": [
+        "vm_manager",
+        "vm_admin"
+      ],
       "subsections": [
         {
           "id": "fuel-logs",
@@ -144,7 +150,10 @@
       "description": "Schedules, templates, and maintenance history",
       "icon": "fa-solid fa-screwdriver-wrench",
       "route": "/management/vm/maintenance",
-      "access": ["vm_manager", "vm_admin"],
+      "access": [
+        "vm_manager",
+        "vm_admin"
+      ],
       "subsections": [
         {
           "id": "maintenance-logs",
@@ -169,7 +178,9 @@
       "description": "Trip categories, departments, campuses, settings",
       "icon": "fa-solid fa-gear",
       "route": "/management/vm/config",
-      "access": ["vm_admin"],
+      "access": [
+        "vm_admin"
+      ],
       "subsections": [
         {
           "id": "trip-categories",
@@ -199,7 +210,6 @@
       ]
     }
   ],
-
   "roles": [
     {
       "id": "vm_user",
@@ -237,7 +247,6 @@
       ]
     }
   ],
-
   "installation": {
     "steps": [
       "Run database migrations",
@@ -248,10 +257,10 @@
     ],
     "post_install_message": "Vehicle Maintenance v2 installed successfully! Configure trip categories and maintenance items in Management > Configuration."
   },
-
   "dependencies": [],
-  "conflicts": ["vehicle-maintenance"],
-
+  "conflicts": [
+    "com.woodson.vehicle-maintenance@1.0.0"
+  ],
   "changelog_url": "https://github.com/R1CH4RD25/TheHub-Package-Repo/blob/main/packages/operations/fleet/vehicle-maintenance-v2/CHANGELOG.md",
   "readme_url": "https://github.com/R1CH4RD25/TheHub-Package-Repo/blob/main/packages/operations/fleet/vehicle-maintenance-v2/README.md"
 }
