@@ -1269,9 +1269,12 @@
 }
 
 .nav-expandable-trigger.active {
-    /* Parent is highlighted when section is collapsed */
-    background: var(--nd-gold);
+    /* Parent is highlighted when section is collapsed - Google Admin style with border */
+    background: rgba(201, 151, 0, 0.15); /* Light gold background */
     color: white;
+    border: 2px solid rgba(201, 151, 0, 0.5); /* Gold border for emphasis */
+    border-radius: 6px; /* Rounded corners like Google */
+    margin: 2px 4px; /* Spacing for border visibility */
 }
 
 .nav-expandable-trigger.active .nav-expand-icon {
