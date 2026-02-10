@@ -401,6 +401,117 @@ Use emoji prefixes for commit clarity:
 
 ---
 
+## 🧭 Navigation & UI Standards
+
+### Navigation Architecture Rules
+
+**Maximum Navigation Levels:** 2 (sidebar → page)
+
+**Allowed:**
+- Sidebar groups (expandable containers)
+- Direct page links in sidebar
+- Entity-specific tabs (e.g., user detail page with Profile/Roles/Activity tabs)
+
+**Forbidden:**
+- On-page tabs that duplicate sidebar submenu items
+- More than 2 levels of navigation (sidebar → submenu → on-page tabs is BANNED)
+- Query parameter-based navigation (`?tab=pending` is legacy and deprecated)
+
+**Exception for Entity Tabs:**
+- Tabs are allowed ONLY for single-entity views (e.g., `/admin/users/:id/roles`)
+- These tabs MUST be deep-linkable routes, not client-side JavaScript navigation
+- These tabs are about viewing different aspects of ONE entity, not navigating between entity lists
+
+### Routing Requirements
+
+**All routes must:**
+- Use named routes via `Route::name('section.subsection.action')`
+- Use route groups with middleware for permission enforcement
+- Provide 301 permanent redirects for legacy URLs
+
+**Example:**
+```php
+// ✅ CORRECT: Named routes in grouped hierarchy
+Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function () {
+    Route::prefix('users')->name('admin.users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/pending', [UserController::class, 'pending'])->name('pending');
+    });
+});
+
+// ❌ WRONG: Flat routes with query params
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users?tab=pending', ...); // Query params are not routes!
+```
+
+### Sidebar Implementation
+
+**Sidebar navigation must:**
+- Use `route()` helper for all URLs: `route('admin.users.pending')`
+- Use `request()->routeIs('admin.users.*')` for active state detection
+- Never hardcode URLs like `/admin/users?tab=pending`
+- Never use string matching (`strpos($url, '/admin/users')`) for active state
+
+**Example:**
+```php
+$navItems = [
+    [
+        'type' => 'expandable',
+        'id' => 'users',
+        'label' => 'Users',
+        'active' => request()->routeIs('admin.users.*'),
+        'submenu' => [
+            [
+                'label' => 'Pending Approvals',
+                'url' => route('admin.users.pending'),
+                'active' => request()->routeIs('admin.users.pending')
+            ]
+        ]
+    ]
+];
+```
+
+### View Requirements
+
+**No duplicate navigation:**
+- If sidebar has submenu items, DO NOT replicate them as on-page tabs
+- Users should navigate via sidebar, not click tabs within a page to change content sections
+- Views should show ONE thing per route, controlled by `$activeTab` variable from controller
+
+**Client-side tab switching is BANNED for navigation:**
+- Remove `data-tab` and `data-subtab` attributes used for navigation
+- Remove JavaScript event listeners for tab button clicks
+- Tab visibility controlled by server-side routing, not client-side JavaScript
+
+**Example:**
+```blade
+{{-- ✅ CORRECT: No tab buttons, content determined by route --}}
+@php
+    $activeTab = $activeTab ?? 'index';
+@endphp
+
+<div id="content-active-users" class="content-section {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}">
+    <!-- Active users content -->
+</div>
+
+{{-- ❌ WRONG: Tab buttons duplicate sidebar navigation --}}
+<div class="tabs">
+    <button data-tab="active-users">Active Users</button>
+    <button data-tab="pending-users">Pending Approvals</button>
+</div>
+```
+
+### Deep Linking & Bookmarking
+
+**All navigation targets must:**
+- Be directly accessible via URL (deep linking)
+- Work when bookmarked and loaded later
+- Show correct active state when loaded directly
+
+**Test:** Can you paste `/admin/users/invitations` into browser and get the correct page with correct sidebar highlight? If no, fix it.
+
+---
+
 ## 📦 Package Development Standards
 
 ### Package Structure
