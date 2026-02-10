@@ -1,0 +1,29 @@
+/* Navigation Emoji Styling
+ * Makes emojis in navigation look better - uniform size and spacing
+ */
+
+.nav-emoji {
+    display: inline-block;
+    font-size: 1.25rem;
+    line-height: 1;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+
+/* Make sure emojis don't inherit icon styles */
+.nav-emoji:before,
+.nav-emoji:after {
+    content: none !important;
+}
+
+/* Header navigation emojis */
+header .user-nav a .nav-emoji {
+    margin-right: 0.5rem;
+}
+
+/* Ensure consistent rendering across browsers */
+.nav-emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
