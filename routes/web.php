@@ -32,55 +32,143 @@ Route::get('/laravel/health', function () {
     return response()->json(['status' => 'ok']);
 });
 
-// Admin routes (Laravel migration proof-of-concept)
+// Admin routes (Laravel migration - refactored to 2-level navigation)
 // Requires authentication: admin, super_admin
-Route::prefix('admin')->middleware(['auth:admin,super_admin'])->group(function () {
+Route::prefix('admin')->middleware(['web', 'auth:admin,super_admin'])->group(function () {
+    
     // Admin Dashboard - shows overview with links to all sections
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
-
-    // Users Management
-    Route::get('/users', [UserController::class, 'index'])->name('admin.users');
-    Route::get('/users/list', [UserController::class, 'list'])->name('admin.users.list');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
-    Route::get('/invitations', [UserController::class, 'invitations'])->name('admin.invitations');
-    Route::post('/invitations', [UserController::class, 'sendInvitation'])->name('admin.invitations.send');
-    Route::delete('/invitations/{id}', [UserController::class, 'revokeInvitation'])->name('admin.invitations.revoke');
-
-    // Role & Permission Management
-    Route::get('/roles', [RoleController::class, 'index'])->name('admin.roles.index');
-    Route::get('/roles/{id}', [RoleController::class, 'show'])->name('admin.roles.show');
-    Route::post('/roles', [RoleController::class, 'store'])->name('admin.roles.store');
-    Route::put('/roles/{id}', [RoleController::class, 'update'])->name('admin.roles.update');
-    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('admin.roles.destroy');
-    Route::get('/permissions', [RoleController::class, 'permissions'])->name('admin.permissions');
-    Route::post('/roles/assign-user', [RoleController::class, 'assignToUser'])->name('admin.roles.assign');
-    Route::delete('/roles/remove-user', [RoleController::class, 'removeFromUser'])->name('admin.roles.remove');
-    Route::get('/users/{id}/permissions', [RoleController::class, 'userPermissions'])->name('admin.users.permissions');
-
-    // Package Management
-    Route::get('/packages', [PackageController::class, 'index'])->name('admin.packages');
-    Route::get('/packages/configure', [PackageController::class, 'configure'])->name('admin.packages.configure');
-    Route::get('/packages/list', [PackageController::class, 'list'])->name('admin.packages.list');
-    Route::post('/packages/upload', [PackageController::class, 'upload'])->name('admin.packages.upload');
-    Route::post('/packages/{id}/install', [PackageController::class, 'install'])->name('admin.packages.install');
-    Route::delete('/packages/{id}', [PackageController::class, 'delete'])->name('admin.packages.delete');
-    Route::delete('/packages/{packageId}/uninstall', [PackageController::class, 'uninstall'])->name('admin.packages.uninstall');
-    Route::get('/packages/{id}/validation', [PackageController::class, 'validation'])->name('admin.packages.validation');
-    Route::post('/packages/discovery/search', [PackageDiscoveryController::class, 'search'])->name('admin.packages.discovery.search');
-    Route::post('/packages/discovery/download', [PackageDiscoveryController::class, 'download'])->name('admin.packages.discovery.download');
-
-    // Site Settings (Super Admin Only)
-    Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
-    Route::get('/settings/get', [SettingsController::class, 'get'])->name('admin.settings.get');
-    Route::post('/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
-    Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('admin.settings.reset');
-
-    // Activity Logs (Super Admin Only)
-    Route::get('/logs', [LogsController::class, 'index'])->name('admin.logs');
-    Route::get('/logs/list', [LogsController::class, 'list'])->name('admin.logs.list');
-
-    // Export Data
+    
+    // ========================================
+    // USERS GROUP - Nested routes with naming
+    // ========================================
+    Route::prefix('users')->name('admin.users.')->group(function () {
+        // User list pages (views)
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/pending', [UserController::class, 'pending'])->name('pending');
+        Route::get('/invitations', [UserController::class, 'invitations'])->name('invitations');
+        
+        // User management APIs
+        Route::get('/list', [UserController::class, 'list'])->name('list');
+        Route::get('/invitations/list', [UserController::class, 'invitationsList'])->name('invitations.list');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::post('/invite', [UserController::class, 'sendInvitation'])->name('invite');
+        Route::delete('/invitations/{id}', [UserController::class, 'revokeInvitation'])->name('invitations.revoke');
+        Route::get('/{id}/permissions', [RoleController::class, 'userPermissions'])->name('permissions');
+    });
+    
+    // ========================================
+    // ROLES GROUP - Organization roles (Super Admin only for role CRUD)
+    // ========================================
+    Route::prefix('roles')->name('admin.roles.')->group(function () {
+        // Role list page (accessible to all admins)
+        Route::get('/', [UserController::class, 'roles'])->name('index');
+        
+        // Role CRUD (Super Admin only via middleware in controller)
+        Route::get('/{id}', [RoleController::class, 'show'])->name('show');
+        Route::post('/', [RoleController::class, 'store'])->name('store');
+        Route::put('/{id}', [RoleController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
+        
+        // Permission management
+        Route::get('/permissions/list', [RoleController::class, 'permissions'])->name('permissions');
+        Route::post('/assign-user', [RoleController::class, 'assignToUser'])->name('assign');
+        Route::delete('/remove-user', [RoleController::class, 'removeFromUser'])->name('remove');
+    });
+    
+    // ========================================
+    // PACKAGES GROUP - Nested routes with naming
+    // ========================================
+    Route::prefix('packages')->name('admin.packages.')->group(function () {
+        // Package list pages (views)
+        Route::get('/available', [PackageController::class, 'available'])->name('available');
+        Route::get('/installed', [PackageController::class, 'installed'])->name('installed');
+        Route::get('/updates', [PackageController::class, 'updates'])->name('updates');
+        
+        // Package configuration
+        Route::get('/configure', [PackageController::class, 'configure'])->name('configure');
+        Route::get('/{packageId}/configure', [PackageController::class, 'configurePackage'])->name('configure.detail');
+        
+        // Package operations
+        Route::get('/list', [PackageController::class, 'list'])->name('list');
+        Route::post('/upload', [PackageController::class, 'upload'])->name('upload');
+        Route::post('/{id}/install', [PackageController::class, 'install'])->name('install');
+        Route::delete('/{id}', [PackageController::class, 'delete'])->name('delete');
+        Route::delete('/{packageId}/uninstall', [PackageController::class, 'uninstall'])->name('uninstall');
+        Route::get('/{id}/validation', [PackageController::class, 'validation'])->name('validation');
+        
+        // Package discovery
+        Route::post('/discovery/search', [PackageDiscoveryController::class, 'search'])->name('discovery.search');
+        Route::post('/discovery/download', [PackageDiscoveryController::class, 'download'])->name('discovery.download');
+        
+        // Legacy redirect: /admin/packages → /admin/packages/available (default view)
+        Route::get('/', fn() => redirect()->route('admin.packages.available', [], 301));
+    });
+    
+    // ========================================
+    // SETTINGS GROUP - Super Admin only
+    // ========================================
+    Route::prefix('settings')->name('admin.settings.')
+        ->middleware('role:super_admin')
+        ->group(function () {
+            // Settings pages (views) - to be created in Phase 4
+            Route::get('/general', [SettingsController::class, 'general'])->name('general');
+            Route::get('/auth', [SettingsController::class, 'auth'])->name('auth');
+            Route::get('/modules', [SettingsController::class, 'modules'])->name('modules');
+            Route::get('/theme', [SettingsController::class, 'theme'])->name('theme');
+            Route::get('/layout', [SettingsController::class, 'layout'])->name('layout');
+            
+            // Settings API
+            Route::get('/get', [SettingsController::class, 'get'])->name('get');
+            Route::post('/update', [SettingsController::class, 'update'])->name('update');
+            Route::post('/reset', [SettingsController::class, 'reset'])->name('reset');
+            
+            // Legacy index route (temp compatibility until views created)
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
+        });
+    
+    // ========================================
+    // ACTIVITY LOGS - Super Admin only
+    // ========================================
+    Route::get('/logs', [LogsController::class, 'index'])
+        ->middleware('role:super_admin')
+        ->name('admin.logs');
+    Route::get('/logs/list', [LogsController::class, 'list'])
+        ->middleware('role:super_admin')
+        ->name('admin.logs.list');
+    
+    // ========================================
+    // EXPORT DATA
+    // ========================================
     Route::get('/export', [ExportController::class, 'index'])->name('admin.export');
     Route::get('/export/download', [ExportController::class, 'export'])->name('admin.export.download');
     Route::post('/export', [ExportController::class, 'export'])->name('admin.export.process');
+    
+    // ========================================
+    // LEGACY REDIRECTS (301 Permanent)
+    // ========================================
+    Route::get('/users-legacy', function () {
+        $tab = request()->query('tab');
+        if ($tab === 'pending') return redirect()->route('admin.users.pending', [], 301);
+        if ($tab === 'invitations') return redirect()->route('admin.users.invitations', [], 301);
+        if ($tab === 'roles') return redirect()->route('admin.roles.index', [], 301);
+        return redirect()->route('admin.users.index', [], 301);
+    })->name('admin.users.legacy');
+    
+    Route::get('/packages-legacy', function () {
+        $view = request()->query('view');
+        if ($view === 'installed') return redirect()->route('admin.packages.installed', [], 301);
+        if ($view === 'updates') return redirect()->route('admin.packages.updates', [], 301);
+        return redirect()->route('admin.packages.available', [], 301);
+    })->name('admin.packages.legacy');
+    
+    Route::get('/settings-legacy', function () {
+        $tab = request()->query('tab');
+        if ($tab === 'appearance' || $tab === 'behavior') return redirect()->route('admin.settings.general', [], 301);
+        if ($tab === 'auth') return redirect()->route('admin.settings.auth', [], 301);
+        if ($tab === 'modules') return redirect()->route('admin.settings.modules', [], 301);
+        if ($tab === 'theme') return redirect()->route('admin.settings.theme', [], 301);
+        if ($tab === 'header' || $tab === 'footer') return redirect()->route('admin.settings.layout', [], 301);
+        return redirect()->route('admin.settings.general', [], 301);
+    })->name('admin.settings.legacy');
 });

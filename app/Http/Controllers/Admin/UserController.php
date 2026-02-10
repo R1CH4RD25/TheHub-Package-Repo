@@ -20,7 +20,50 @@ class UserController extends Controller
         $isSuperAdmin = ($currentUser['role'] === 'super_admin');
 
         return view('admin.users', [
-            'isSuperAdmin' => $isSuperAdmin
+            'isSuperAdmin' => $isSuperAdmin,
+            'activeTab' => 'active' // Default tab
+        ]);
+    }
+
+    /**
+     * Display pending users page.
+     */
+    public function pending(Request $request)
+    {
+        $currentUser = $request->attributes->get('user');
+        $isSuperAdmin = ($currentUser['role'] === 'super_admin');
+
+        return view('admin.users', [
+            'isSuperAdmin' => $isSuperAdmin,
+            'activeTab' => 'pending'
+        ]);
+    }
+
+    /**
+     * Display invitations page.
+     */
+    public function invitations(Request $request)
+    {
+        $currentUser = $request->attributes->get('user');
+        $isSuperAdmin = ($currentUser['role'] === 'super_admin');
+
+        return view('admin.users', [
+            'isSuperAdmin' => $isSuperAdmin,
+            'activeTab' => 'invitations'
+        ]);
+    }
+
+    /**
+     * Display organization roles page.
+     */
+    public function roles(Request $request)
+    {
+        $currentUser = $request->attributes->get('user');
+        $isSuperAdmin = ($currentUser['role'] === 'super_admin');
+
+        return view('admin.users', [
+            'isSuperAdmin' => $isSuperAdmin,
+            'activeTab' => 'roles'
         ]);
     }
 
@@ -193,9 +236,9 @@ class UserController extends Controller
     }
 
     /**
-     * Get invitations list.
+     * Get invitations list (API endpoint).
      */
-    public function invitations(Request $request): JsonResponse
+    public function invitationsList(Request $request): JsonResponse
     {
         $invitation = new Invitation();
         $invites = $invitation->getAll();
