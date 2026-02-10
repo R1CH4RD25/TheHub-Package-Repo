@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load active users
 function loadActiveUsers() {
     console.log('Loading active users...');
-    fetch('/admin/users/list')
+    fetch('/api/users.php')
         .then(r => {
             console.log('Response received:', r.status);
             return r.json();
@@ -612,7 +612,7 @@ function loadActiveUsers() {
 
 // Load pending users
 function loadPendingUsers() {
-    fetch('/admin/users/list?pending=true')
+    fetch('/api/users.php?pending=true')
         .then(r => r.json())
         .then(users => {
             renderPendingTable(users);
@@ -625,7 +625,7 @@ function loadPendingUsers() {
 
 // Load invitations
 function loadInvitations() {
-    fetch('/admin/invitations')
+    fetch('/api/invitations.php')
         .then(r => r.json())
         .then(invites => {
             renderInvitationsTable(invites);
@@ -846,7 +846,7 @@ function bulkSuspendUsers(userIds) {
         if (result.isConfirmed) {
             // Call API for each user
             const promises = userIds.map(userId =>
-                fetch(`/admin/users/${userId}`, {
+                fetch(`/api/users.php?id=${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -882,7 +882,7 @@ function bulkActivateUsers(userIds) {
         if (result.isConfirmed) {
             // Call API for each user
             const promises = userIds.map(userId =>
-                fetch(`/admin/users/${userId}`, {
+                fetch(`/api/users.php?id=${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1041,7 +1041,7 @@ function deleteUser(userId) {
 }
 
 function updateUser(userId, action, extraData = {}) {
-    fetch(`/admin/users/${userId}`, {
+    fetch(`/api/users.php?id=${userId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -1079,7 +1079,7 @@ function revokeInvitation(invitationId) {
         confirmButtonText: 'Yes, revoke'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/admin/invitations/${invitationId}`, {
+            fetch(`/api/invitations.php?id=${invitationId}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken
@@ -1125,7 +1125,7 @@ document.getElementById('sendInvitation').addEventListener('click', function() {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('/admin/invitations', {
+            fetch('/api/invitations.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
