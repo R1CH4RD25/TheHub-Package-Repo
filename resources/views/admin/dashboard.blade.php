@@ -6,7 +6,7 @@
 <!-- Admin Modules Grid - Clean like Google Admin Console -->
 <div class="mgmt-modules-grid admin-responsive">
     <!-- User Management Module -->
-        <a href="{{ route('admin.users') }}" class="mgmt-module-card">
+        <a href="{{ route('admin.users.index') }}" class="mgmt-module-card">
             <div class="module-header">
                 <div class="module-icon blue">
                     <i class="fas fa-users"></i>
@@ -17,7 +17,7 @@
         </a>
 
         <!-- Package Management Module -->
-        <a href="{{ route('admin.packages') }}" class="mgmt-module-card">
+        <a href="{{ route('admin.packages.available') }}" class="mgmt-module-card">
             <div class="module-header">
                 <div class="module-icon purple">
                     <i class="fas fa-box"></i>
@@ -28,7 +28,7 @@
         </a>
 
         <!-- Site Settings Module -->
-        <a href="{{ route('admin.settings') }}" class="mgmt-module-card">
+        <a href="{{ route('admin.settings.general') }}" class="mgmt-module-card">
             <div class="module-header">
                 <div class="module-icon orange">
                     <i class="fas fa-cog"></i>
