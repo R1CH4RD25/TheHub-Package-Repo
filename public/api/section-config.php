@@ -10,6 +10,7 @@ use Hub\Auth;
 use Hub\Database;
 use Hub\AuditLogger;
 use Hub\SectionPermissions;
+use Hub\SectionRoleAccess;
 
 header('Content-Type: application/json');
 
@@ -26,6 +27,14 @@ try {
         case 'GET':
             if (isset($_GET['section_id'])) {
                 handleGetSectionConfig($db, $_GET['section_id']);
+            } elseif (isset($_GET['section_slug'])) {
+                // Get section ID from slug first
+                $section = $db->fetchOne("SELECT id FROM sections WHERE slug = ? AND is_active = TRUE", [$_GET['section_slug']]);
+                if ($section) {
+                    handleGetSectionConfig($db, $section['id']);
+                } else {
+                    jsonResponse(['error' => 'Section not found'], 404);
+                }
             } elseif (isset($_GET['validate'])) {
                 handleValidateSection($db, $_GET['section_id']);
             } else {
@@ -163,6 +172,25 @@ function handleGetSectionConfig($db, $sectionId)
     // Get all available roles for dropdowns
     $rolesStmt = $db->query("SELECT DISTINCT role FROM users WHERE role IS NOT NULL ORDER BY role");
     $section['available_roles'] = $rolesStmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Get permission summary (who has access to this section)
+    $sectionRoleAccess = new \Hub\SectionRoleAccess();
+    $section['permission_summary'] = $sectionRoleAccess->getPermissionSummary($sectionId);
+    $section['users_with_access'] = $sectionRoleAccess->getUsersWithAccess($sectionId);
+    
+    // Get module access (for The Hub display) - if this section is also a module
+    $moduleStmt = $pdo->prepare("SELECT id FROM modules WHERE slug = :slug AND is_active = TRUE");
+    $moduleStmt->execute(['slug' => $section['slug']]);
+    $module = $moduleStmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($module) {
+        $moduleModel = new \Hub\Module();
+        $section['module_users'] = $moduleModel->getModuleUsers($module['id']);
+        $section['is_module'] = true;
+    } else {
+        $section['module_users'] = [];
+        $section['is_module'] = false;
+    }
     
     jsonResponse([
         'success' => true,

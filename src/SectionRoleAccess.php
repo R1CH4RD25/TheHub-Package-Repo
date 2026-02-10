@@ -171,4 +171,93 @@ class SectionRoleAccess
 
         return $section !== null;
     }
+
+    /**
+     * Get all users who have access to a section (via role)
+     * Including both primary role and global roles
+     * 
+     * @param int $sectionId Section ID
+     * @return array Array of users with access details
+     */
+    public function getUsersWithAccess(int $sectionId): array
+    {
+        // Get roles that have access to this section
+        $roles = $this->getSectionRoles($sectionId);
+        
+        if (empty($roles)) {
+            return [];
+        }
+
+        // Build query to find all users with these roles (primary role OR global role)
+        $rolePlaceholders = implode(',', array_fill(0, count($roles), '?'));
+        
+        $sql = "
+            SELECT DISTINCT
+                u.id,
+                u.name,
+                u.email,
+                u.picture,
+                u.role as primary_role,
+                GROUP_CONCAT(DISTINCT ugr.role ORDER BY ugr.role) as global_roles,
+                GROUP_CONCAT(DISTINCT sra.role ORDER BY sra.role) as matching_roles
+            FROM users u
+            LEFT JOIN user_global_roles ugr ON u.id = ugr.user_id
+            LEFT JOIN section_role_access sra ON sra.section_id = ? 
+                AND (sra.role = u.role OR sra.role = ugr.role)
+            WHERE u.is_active = TRUE
+              AND u.role != 'pending'
+              AND (u.role IN ($rolePlaceholders) OR ugr.role IN ($rolePlaceholders))
+            GROUP BY u.id, u.name, u.email, u.picture, u.role
+            ORDER BY u.name
+        ";
+        
+        $params = array_merge([$sectionId], $roles, $roles);
+        return $this->db->fetchAll($sql, $params);
+    }
+
+    /**
+     * Get permission summary for a section
+     * Shows which roles have access and how many users have each role
+     * 
+     * @param int $sectionId Section ID
+     * @return array Permission summary with roles and counts
+     */
+    public function getPermissionSummary(int $sectionId): array
+    {
+        // Get roles that have access
+        $roles = $this->getSectionRoles($sectionId);
+        
+        $summary = [
+            'roles' => $roles,
+            'role_counts' => [],
+            'total_users' => 0
+        ];
+
+        if (empty($roles)) {
+            return $summary;
+        }
+
+        // Count users per role
+        $rolePlaceholders = implode(',', array_fill(0, count($roles), '?'));
+        
+        foreach ($roles as $role) {
+            $sql = "
+                SELECT COUNT(DISTINCT u.id) as count
+                FROM users u
+                LEFT JOIN user_global_roles ugr ON u.id = ugr.user_id
+                WHERE u.is_active = TRUE
+                  AND u.role != 'pending'
+                  AND (u.role = ? OR ugr.role = ?)
+            ";
+            
+            $result = $this->db->fetchOne($sql, [$role, $role]);
+            $count = $result['count'] ?? 0;
+            
+            $summary['role_counts'][$role] = $count;
+            $summary['total_users'] += $count;
+        }
+
+        return $summary;
+    }
 }
+

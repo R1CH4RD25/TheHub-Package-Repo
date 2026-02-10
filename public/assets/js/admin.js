@@ -5545,7 +5545,7 @@ async function loadPackageConfigTab() {
                 // Fetch package config + capability summary in parallel
                 const [configResp, capsResp] = await Promise.all([
                     fetch(`/api/section-config.php?section_slug=${packageSlug}`),
-                    fetch(`/api/package-permissions.php?package=${packageSlug}`)
+                    fetch(`/api/package-permissions.php? ${packageSlug}`)
                 ]);
 
                 const configData = await configResp.json();
@@ -5554,7 +5554,15 @@ async function loadPackageConfigTab() {
                 renderPackageConfigForm(packageSlug, configData, capsData);
 
             } catch (error) {
-                container.innerHTML = `<div class="alert alert-error">Error loading configuration: ${error.message}</div>`;
+                console.error('Config load error:', error);
+                // Even if caps endpoint fails, try to render with config data
+                try {
+                    const configResp = await fetch(`/api/section-config.php?section_slug=${packageSlug}`);
+                    const configData = await configResp.json();
+                    renderPackageConfigForm(packageSlug, configData, {});
+                } catch (err) {
+                    container.innerHTML = `<div class="alert alert-error">Error loading configuration: ${error.message}</div>`;
+                }
             }
         });
 
@@ -5571,6 +5579,284 @@ function renderPackageConfigForm(packageSlug, configData, capsData) {
 
     const capabilities = capsData.capabilities || [];
     const assignments = capsData.assignments || {};
+    
+    // Get permission summary from configData
+    const section = configData.section || {};
+    const permissionSummary = section.permission_summary || { roles: [], role_counts: {}, total_users: 0 };
+    const usersWithAccess = section.users_with_access || [];
+    const moduleUsers = section.module_users || [];
+    const isModule = section.is_module || false;
+
+    // Build Management Access Display
+    let managementAccessHtml = '';
+    if (permissionSummary.roles && permissionSummary.roles.length > 0) {
+        managementAccessHtml = `
+            <div style="margin-bottom: 1rem;">
+                <strong style="display: block; margin-bottom: 0.5rem;">
+                    <i class="bi bi-kanban"></i> Management Console Access
+                </strong>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    ${permissionSummary.roles.map(role => {
+                        const count = permissionSummary.role_counts[role] || 0;
+                        return `
+                            <span class="nd-pill" style="background-color: var(--nd-gold); font-size: 0.85rem;">
+                                ${role} (${count} user${count !== 1 ? 's' : ''})
+                            </span>
+                        `;
+                    }).join('')}
+                </div>
+                <div style="font-size: 0.85rem; color: var(--gray-600);">
+                    <strong>${permissionSummary.total_users}</strong> total user${permissionSummary.total_users !== 1 ? 's' : ''} 
+                    can access this package in Management
+                </div>
+            </div>
+        `;
+    } else {
+        managementAccessHtml = `
+            <div class="info-box warning" style="margin-bottom: 1rem;">
+                <strong>⚠️ No Management Access</strong>
+                <p>No roles have been granted access to this package in the Management Console.</p>
+            </div>
+        `;
+    }
+
+    // Build Hub Access Display
+    let hubAccessHtml = '';
+    if (isModule && moduleUsers.length > 0) {
+        hubAccessHtml = `
+            <div style="margin-bottom: 1rem;">
+                <strong style="display: block; margin-bottom: 0.5rem;">
+                    <i class="bi bi-app"></i> Hub Access (Individual Users)
+                </strong>
+                <div style="max-height: 150px; overflow-y: auto; border: 1px solid var(--gray-300); border-radius: 4px; padding: 0.5rem;">
+                    ${moduleUsers.map(user => `
+                        <div style="padding: 0.25rem 0.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200);">
+                            <span>${user.user_name}</span>
+                            <span class="nd-chip" style="background-color: var(--info); font-size: 0.75rem;">
+                                ${user.module_role}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 0.5rem;">
+                    <strong>${moduleUsers.length}</strong> user${moduleUsers.length !== 1 ? 's' : ''} 
+                    can access this package in The Hub
+                </div>
+            </div>
+        `;
+    } else if (isModule) {
+        hubAccessHtml = `
+            <div class="info-box warning" style="margin-bottom: 1rem;">
+                <strong>⚠️ No Hub Access</strong>
+                <p>No users have been assigned direct access to this module in The Hub.</p>
+            </div>
+        `;
+    } else {
+        hubAccessHtml = `
+            <div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--gray-100); border-radius: 4px; font-size: 0.85rem; color: var(--gray-600);">
+                <i class="bi bi-info-circle"></i> This package is only available in the Management Console, not The Hub.
+            </div>
+        `;
+    }
+
+    // Build capability summary
+    let capSummaryHtml = '';
+    if (capabilities.length === 0) {
+        capSummaryHtml = `
+            <div class="info-box warning">
+                <strong>⚠️ No capabilities defined</strong>
+                <p>This package doesn't have any capabilities configured. Users won't be able to access it.</p>
+            </div>
+        `;
+    } else {
+        capSummaryHtml = '<div class="capability-summary-grid">';
+        capabilities.forEach(cap => {
+            const roleCount = Object.keys(assignments).filter(role =>
+                assignments[role].includes(cap.key)
+            ).length;
+
+            const icon = cap.type === 'action' ? '⚡' :
+                cap.type === 'read' ? '👁️' :
+                    cap.type === 'admin' ? '⚙️' : '📊';
+
+            const statusClass = roleCount === 0 ? 'no-access' : 'has-access';
+
+            capSummaryHtml += `
+                <div class="capability-summary-item ${statusClass}">
+                    <span class="capability-icon">${icon}</span>
+                    <div class="capability-info">
+                        <strong>${cap.label}</strong>
+                        <span class="role-count">
+                            ${roleCount === 0 ? '⚠️ No roles' : `${roleCount} roles`}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+        capSummaryHtml += '</div>';
+
+        // Add warnings for unconfigured capabilities
+        const warnings = capabilities.filter(cap => {
+            const roleCount = Object.keys(assignments).filter(role =>
+                assignments[role].includes(cap.key)
+            ).length;
+            return roleCount === 0;
+        });
+
+        if (warnings.length > 0) {
+            capSummaryHtml += '<div class="capability-warnings">';
+            warnings.forEach(cap => {
+                capSummaryHtml += `<div class="alert alert-warning">⚠️ No roles have "${cap.label}" capability. This feature is inaccessible.</div>`;
+            });
+            capSummaryHtml += '</div>';
+        }
+    }
+
+    const html = `
+        <!-- Access Permissions Overview (NEW!) -->
+        <div class="config-section">
+            <h4>👥 Access Permissions</h4>
+            <p class="info-text" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                Control who can access this package in Management and The Hub. 
+                <strong>More advanced permission configuration available in Admin → Permissions</strong>
+            </p>
+
+            ${managementAccessHtml}
+            ${hubAccessHtml}
+
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-300);">
+                <button class="btn btn-sm btn-primary" onclick="openPermissionsSubtab('${packageSlug}')">
+                    <i class="bi bi-shield-lock"></i> Configure Permissions
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="viewAllUsersWithAccess('${packageSlug}')" style="margin-left: 0.5rem;">
+                    <i class="bi bi-people"></i> View All Users
+                </button>
+            </div>
+        </div>
+
+        <!-- Category Assignment -->
+        <div class="config-section">
+            <h4>📂 Category</h4>
+            <p class="info-text" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                Categories group similar packages together and determine default capabilities.
+            </p>
+            <select id="package-category" class="form-control">
+                <option value="">-- Select Category --</option>
+                <option value="reporting">📊 Reporting</option>
+                <option value="communication">💬 Communication</option>
+                <option value="administrative">⚙️ Administrative</option>
+                <option value="resource">📚 Resource Management</option>
+                <option value="safety">🚨 Safety & Compliance</option>
+            </select>
+        </div>
+
+        <!-- Capability Summary -->
+        ${capabilities.length > 0 ? `
+            <div class="config-section">
+                <h4>⚡ Package Capabilities</h4>
+                <p class="info-text" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                    Granular permissions are managed in the <strong>Permissions</strong> subtab. This shows the current status.
+                </p>
+
+                <div class="capability-summary">
+                    ${capSummaryHtml}
+                </div>
+            </div>
+        ` : ''}
+
+        <!-- Notification Rules -->
+        <div class="config-section">
+            <h4>📧 Notification Rules</h4>
+            <p class="info-text" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                Configure email notifications for package events.
+            </p>
+            <div style="padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                <em>Notification configuration coming soon...</em>
+            </div>
+        </div>
+
+        <!-- Guidelines -->
+        <div class="config-section">
+            <h4>📝 User Guidelines</h4>
+            <p class="info-text" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                Provide instructions that users will see when using this package.
+            </p>
+            <textarea id="package-guidelines" class="form-control" rows="4"
+                placeholder="Enter user-facing guidelines and instructions..."></textarea>
+        </div>
+
+        <!-- Additional Options -->
+        <div class="config-section">
+            <h4>⚙️ Additional Options</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="enable-status-tracking">
+                    <span>Enable status tracking</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="enable-attachments">
+                    <span>Allow file attachments</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="enable-priority">
+                    <span>Enable priority levels</span>
+                </label>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+function viewAllUsersWithAccess(packageSlug) {
+    // Show a modal with all users who have access
+    fetch(`/api/section-config.php?section_slug=${packageSlug}`)
+        .then(r => r.json())
+        .then(data => {
+            const users = data.section?.users_with_access || [];
+            
+            let userListHtml = users.map(user => `
+                <tr>
+                    <td>
+                        ${user.picture ? `<img src="${user.picture}" style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; margin-right: 0.5rem;">` : ''}
+                        ${user.name}
+                    </td>
+                    <td><small>${user.email}</small></td>
+                    <td><span class="nd-pill" style="background-color: var(--nd-gold); font-size: 0.75rem;">${user.matching_roles}</span></td>
+                </tr>
+            `).join('');
+
+            if (users.length === 0) {
+                userListHtml = '<tr><td colspan="3" style="text-align: center; color: var(--gray-500);">No users have access to this package</td></tr>';
+            }
+
+            Swal.fire({
+                title: '👥 Users with Access',
+                html: `
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="nd-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Via Roles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${userListHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `,
+                width: '600px',
+                showConfirmButton: true,
+                confirmButtonText: 'Close'
+            });
+        })
+        .catch(err => {
+            showMessage('Error: ' + err.message, 'error');
+        });
+}
 
     // Build capability summary
     let capSummaryHtml = '';
