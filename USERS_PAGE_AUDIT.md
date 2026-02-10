@@ -1,0 +1,226 @@
+# Users Page Audit - Layout Break Analysis
+
+**Date:** February 10, 2026 17:40 CST  
+**Issue:** Role filter panel extending full width, breaking page layout  
+**File:** `resources/views/admin/users.blade.php`  
+**Severity:** 🔴 CRITICAL - Renders page unusable
+
+---
+
+## 🐛 Issue Identified
+
+**Line 25:** Missing closing `>` bracket on div element
+
+### Current (BROKEN):
+```html
+<div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}"
+    <div class="users-layout">
+```
+
+### Should Be (FIXED):
+```html
+<div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}">
+    <div class="users-layout">
+```
+
+**Root Cause:** During Phase 5 navigation refactor, when updating the div to use `$activeTab` variable, the closing `>` bracket was accidentally removed.
+
+**Impact:**
+- ❌ Invalid HTML structure
+- ❌ `.users-layout` container not properly scoped
+- ❌ `.role-filter-panel` sidebar extends full width
+- ❌ Layout grid breaks completely
+
+---
+
+## 📋 Current Structure Analysis
+
+### Active Users Page Structure
+```
+admin-main-content
+└── content-header (✅ OK)
+    ├── h1: User Management
+    └── button: Send Invitation
+└── content-body (✅ OK)
+    └── #subtab-active-users (🔴 BROKEN - missing closing >)
+        └── .users-layout (⚠️ Not functioning as grid container)
+            ├── .role-filter-panel (LEFT SIDEBAR - extends full width due to parent error)
+            │   ├── .panel-header
+            │   ├── .panel-content
+            │   │   ├── .role-selection-mode (radio buttons)
+            │   │   ├── .role-search
+            │   │   ├── .role-tree
+            │   │   │   └── .role-group (x3: Administration, Maintenance, Support)
+            │   │   └── .manage-roles-link
+            └── .users-content (RIGHT CONTENT - collapsed due to parent error)
+                ├── #expandRolesBtn
+                ├── .content-header
+                ├── .table-controls
+                ├── #usersTable
+                └── #actionPanel
+```
+
+### Pending Users Page
+```
+#subtab-pending-users (✅ OK)
+└── #pendingTable.data-table-container
+    └── p: "Loading pending approvals..."
+```
+
+### Invitations Page
+```
+#subtab-invitations (✅ OK)
+└── #invitationsTable.data-table-container
+    └── p: "Loading invitations..."
+```
+
+### Organization Roles Page
+```
+#subtab-org-roles (✅ OK - Only visible to super admins)
+└── .org-roles-management
+    ├── header (info text + "New Role" button)
+    └── .table-responsive
+        └── table.data-table
+            ├── thead (Role Name, Description, Assigned Users, Google Groups, Actions)
+            └── tbody#orgRolesTableBody
+```
+
+---
+
+## 🎯 Expected Layout Behavior
+
+### CSS Grid Structure (when working correctly):
+```css
+.users-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Sidebar 280px, content fills remaining */
+    gap: 0;
+    width: 100%;
+}
+```
+
+**Left Column:** `.role-filter-panel` (280px fixed width)
+**Right Column:** `.users-content` (flexible, fills remaining space)
+
+### Current Behavior (with bug):
+- `.users-layout` div is not recognized as a proper container
+- Grid layout fails to apply
+- `.role-filter-panel` defaults to full width (100%)
+- `.users-content` pushed down or hidden
+
+---
+
+## 🔧 Fix Required
+
+**File:** `resources/views/admin/users.blade.php`  
+**Line:** 25  
+**Change:** Add missing `>` character
+
+### Before:
+```html
+<div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}"
+```
+
+### After:
+```html
+<div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}">
+```
+
+---
+
+## ✅ Verification Steps
+
+After fix:
+1. ✅ HTML validates (no unclosed tags)
+2. ✅ `.users-layout` recognized as grid container
+3. ✅ `.role-filter-panel` stays at 280px width on left
+4. ✅ `.users-content` fills remaining space on right
+5. ✅ Role tree collapsible/expandable
+6. ✅ User table displays correctly
+7. ✅ Action panel slides in when users selected
+
+---
+
+## 📊 Affected Routes
+
+All these routes use the same users.blade.php template:
+- `/admin/users` (Active Users) - 🔴 BROKEN
+- `/admin/users/pending` (Pending Approvals) - ✅ OK (different structure)
+- `/admin/users/invitations` (Invitations) - ✅ OK (different structure)
+- `/admin/roles` (Organization Roles) - ✅ OK (different structure)
+
+**Only Active Users page affected** due to unique 2-column layout.
+
+---
+
+## 🎨 CSS Dependencies
+
+The layout depends on these CSS classes (located in admin bundle):
+```css
+.users-layout { /* Grid container */ }
+.role-filter-panel { /* Left sidebar */ }
+.users-content { /* Right content area */ }
+.role-filter-panel.collapsed { /* Collapsed state */ }
+.expand-roles-btn { /* Expand button when collapsed */ }
+```
+
+All CSS is correctly defined - issue is purely HTML syntax error preventing grid from working.
+
+---
+
+## 🚨 Priority
+
+**CRITICAL FIX REQUIRED**  
+This is a blocker for admin user management functionality.
+
+**Estimated Time:** 30 seconds (1 character addition)  
+**Risk:** Zero (simple syntax correction)  
+**Testing:** Visual inspection after fix
+
+---
+
+## 📝 Related Files
+
+- ✅ `resources/views/admin/users.blade.php` - NEEDS FIX
+- ✅ `resources/views/admin/packages.blade.php` - OK (no similar issue)
+- ✅ `resources/views/admin/settings.blade.php` - OK (no similar issue)
+- ✅ `app/Http/Controllers/Admin/UserController.php` - OK (controller logic unaffected)
+
+---
+
+## 🔍 How This Happened
+
+During Phase 5 of navigation refactor (commit `d4a6de1`), when updating the subtab divs to use `$activeTab` variable for visibility control, the closing `>` bracket was inadvertently removed during the edit operation.
+
+**Original line (before refactor):**
+```html
+<div id="subtab-active-users" class="user-subtab active">
+```
+
+**Target line (after refactor):**
+```html
+<div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}">
+```
+
+**Actual line (buggy):**
+```html
+<div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}"
+```
+
+The edit was successful in adding the conditional logic but the closing bracket got lost in the replacement.
+
+---
+
+## 📌 Recommendation
+
+**IMMEDIATE:** Fix the syntax error by adding the missing `>` character.
+
+**FOLLOW-UP (optional):**
+- Run HTML validator on all blade templates
+- Add pre-commit hook to catch unclosed tags
+- Consider automated template testing
+
+---
+
+**Audit Complete**  
+Ready to apply fix.

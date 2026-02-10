@@ -3,8 +3,12 @@
 @section('title', 'User Management')
 
 @section('content')
-<div class="admin-tab active">
-    <div class="tab-header">
+@php
+    // Default to 'active' tab if not specified
+    $activeTab = $activeTab ?? 'active';
+@endphp
+<div class="admin-main-content">
+    <div class="content-header">
         <div>
             <h1><i class="fas fa-users"></i> User Management</h1>
             <p class="text-muted">Manage users, invitations, and roles</p>
@@ -14,19 +18,11 @@
         </button>
     </div>
 
-    <div class="tab-content-scroll">
-        <!-- User Sub-tabs -->
-        <div class="user-subtabs">
-            <button class="subtab-btn active" data-subtab="active-users">Active Users</button>
-            <button class="subtab-btn" data-subtab="pending-users">Pending Approvals</button>
-            <button class="subtab-btn" data-subtab="invitations">Invitations</button>
-            @if($isSuperAdmin)
-                <button class="subtab-btn" data-subtab="org-roles">Organization Roles</button>
-            @endif
-        </div>
+    <div class="content-body">
+        <!-- Navigation now in sidebar - tabs removed per Phase 5 -->
 
         <!-- Active Users Subtab -->
-        <div id="subtab-active-users" class="user-subtab active">
+        <div id="subtab-active-users" class="user-subtab {{ $activeTab === 'active' ? 'active' : '' }}" style="{{ $activeTab === 'active' ? '' : 'display:none;' }}">
             <div class="users-layout">
                 <!-- Left Sidebar - Role Filter Panel -->
                 <div class="role-filter-panel">
@@ -210,14 +206,14 @@
         </div> <!-- #subtab-active-users -->
 
         <!-- Pending Users Subtab -->
-        <div id="subtab-pending-users" class="user-subtab">
+        <div id="subtab-pending-users" class="user-subtab {{ $activeTab === 'pending' ? 'active' : '' }}" style="{{ $activeTab === 'pending' ? '' : 'display:none;' }}">
             <div id="pendingTable" class="data-table-container">
                 <p class="text-center">Loading pending approvals...</p>
             </div>
         </div>
 
         <!-- Invitations Subtab -->
-        <div id="subtab-invitations" class="user-subtab">
+        <div id="subtab-invitations" class="user-subtab {{ $activeTab === 'invitations' ? 'active' : '' }}" style="{{ $activeTab === 'invitations' ? '' : 'display:none;' }}">
             <div id="invitationsTable" class="data-table-container">
                 <p class="text-center">Loading invitations...</p>
             </div>
@@ -225,7 +221,7 @@
 
         <!-- Organization Roles Subtab (Super Admin Only) -->
         @if($isSuperAdmin)
-            <div id="subtab-org-roles" class="user-subtab">
+            <div id="subtab-org-roles" class="user-subtab {{ $activeTab === 'roles' ? 'active' : '' }}" style="{{ $activeTab === 'roles' ? '' : 'display:none;' }}">
                 <div class="org-roles-management">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; margin-top: 1.5rem;">
                         <div>
@@ -563,41 +559,35 @@ function filterUsersByRole(role) {
     renderUsersTable(filteredUsers, 'usersTable');
 }
 
-// Subtab switching
-document.querySelectorAll('.subtab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const subtab = this.getAttribute('data-subtab');
+// Load data for current active tab (determined by route, not client-side switching)
+// Subtab switching removed in Phase 5 - navigation now handled by sidebar links
 
-        // Update buttons
-        document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-
-        // Update subtabs
-        document.querySelectorAll('.user-subtab').forEach(s => s.classList.remove('active'));
-        document.getElementById(`subtab-${subtab}`).classList.add('active');
-
-        // Load data for the active subtab
-        loadSubtabData(subtab);
-    });
-});
-
-// Load subtab data
+// Load subtab data based on active tab from controller
 function loadSubtabData(subtab) {
     switch(subtab) {
         case 'active-users':
+        case 'active': // Match controller $activeTab value
             loadActiveUsers();
             break;
         case 'pending-users':
+        case 'pending': // Match controller $activeTab value
             loadPendingUsers();
             break;
         case 'invitations':
             loadInvitations();
             break;
         case 'org-roles':
+        case 'roles': // Match controller $activeTab value
             loadOrgRoles();
             break;
     }
 }
+
+// Auto-load data for active tab on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const activeTab = '{{ $activeTab }}';
+    loadSubtabData(activeTab);
+});
 
 // Load active users
 function loadActiveUsers() {
