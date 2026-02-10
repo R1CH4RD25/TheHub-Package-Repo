@@ -1,6 +1,6 @@
 /**
  * Hub Bundle - Concatenated CSS
- * Generated: Tue Feb 10 08:03:02 PM UTC 2026
+ * Generated: Tue Feb 10 08:04:21 PM UTC 2026
  */
 
 
@@ -1820,7 +1820,7 @@ html {
 /* Expanded section indicator (for sections you manually expand that aren't active) */
 .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
     border: 2px solid rgba(201, 151, 0, 0.6) !important; /* Gold border */
-    border-radius: 0 6px 6px 0 !important; /* Round only right side */
+    border-radius: 0 12px 12px 0 !important; /* Flat left, more rounded right */
     margin: 2px 4px !important;
 }
 
