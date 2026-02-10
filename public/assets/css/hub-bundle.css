@@ -1,6 +1,6 @@
 /**
  * Hub Bundle - Concatenated CSS
- * Generated: Tue Feb 10 07:41:13 PM UTC 2026
+ * Generated: Tue Feb 10 07:43:34 PM UTC 2026
  */
 
 
@@ -1805,14 +1805,19 @@ html {
 
 .nav-expandable-trigger.active {
     /* Parent is highlighted when section is collapsed - Google Admin style with border */
-    background: rgba(201, 151, 0, 0.15); /* Light gold background */
-    color: white;
-    border: 2px solid rgba(201, 151, 0, 0.5); /* Gold border for emphasis */
-    border-radius: 6px; /* Rounded corners like Google */
-    margin: 2px 4px; /* Spacing for border visibility */
+    background: rgba(201, 151, 0, 0.2) !important; /* Light gold background - higher opacity */
+    color: white !important;
+    border: 3px solid rgba(201, 151, 0, 0.8) !important; /* Stronger gold border - more visible */
+    border-radius: 8px !important; /* More rounded corners like Google */
+    margin: 2px 4px !important; /* Spacing for border visibility */
+    box-shadow: 0 0 0 1px rgba(201, 151, 0, 0.3) !important; /* Outer glow for emphasis */
 }
 
 .nav-expandable-trigger.active .nav-expand-icon {
+    color: white !important;
+}
+
+.nav-expandable-trigger.active i:not(.nav-expand-icon) {
     color: white !important;
 }
 

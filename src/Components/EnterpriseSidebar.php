@@ -248,6 +248,14 @@ class EnterpriseSidebar
                             // Only highlight child if section is expanded AND nav isn't collapsed
                             const highlightChild = !isNavCollapsed && isSectionExpanded;
                             
+                            log(`  ${parentId}:`, {
+                                hasActiveChild,
+                                isSectionExpanded,
+                                isNavCollapsed,
+                                highlightChild,
+                                willHighlight: highlightChild ? 'CHILD' : 'PARENT'
+                            });
+                            
                             if (highlightChild) {
                                 // Section open: highlight the active submenu item
                                 activeChild.classList.add('active');
@@ -255,6 +263,7 @@ class EnterpriseSidebar
                             } else {
                                 // Section closed or nav collapsed: highlight parent only
                                 parentBtn?.classList.add('active');
+                                log(`  ✓ Added 'active' class to ${parentId} parent button`);
                             }
                         }
                     });
