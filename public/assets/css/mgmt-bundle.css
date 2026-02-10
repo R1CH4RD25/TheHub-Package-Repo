@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Feb 10 08:06:01 PM UTC 2026
+ * Generated: Tue Feb 10 08:07:26 PM UTC 2026
  */
 
 
@@ -1790,7 +1790,9 @@ html {
     opacity: 1;
     font-weight: var(--font-medium) !important; /* Slightly bolder for readability */
     color: #2D1F05; /* Dark brown/black for contrast against gold background */
-    border-radius: 12px; /* More rounded pill like Google */
+    border-radius: 0 999px 999px 0; /* Flat left, perfect half-circle right */
+    margin-left: -8px; /* Extend to left edge */
+    padding-left: calc(var(--space-10) + 8px); /* Compensate for negative margin */
     margin-right: var(--space-2); /* Slight margin for pill effect */
 }
 
@@ -1807,8 +1809,10 @@ html {
     /* Parent gets SOLID highlight when section is collapsed but has active child */
     background: var(--nd-gold) !important; /* Solid gold like before */
     color: white !important;
-    border-radius: 12px !important; /* Rounded like Google */
-    margin: 2px 4px !important; /* Spacing for rounded edges */
+    border-radius: 0 999px 999px 0 !important; /* Flat left, perfect half-circle right */
+    margin-left: -8px !important; /* Extend to left edge */
+    padding-left: calc(var(--space-4) + 8px) !important; /* Compensate for negative margin */
+    margin-right: 4px !important; /* Spacing on right */
 }
 
 .nav-expandable-trigger.active .nav-expand-icon {
@@ -1822,8 +1826,11 @@ html {
 /* Expanded section indicator (for sections you manually expand that aren't active) */
 .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
     border: 2px solid rgba(201, 151, 0, 0.6) !important; /* Gold border */
-    border-radius: 0 12px 12px 0 !important; /* Flat left, more rounded right */
-    margin: 2px 4px !important;
+    border-radius: 0 999px 999px 0 !important; /* Flat left, perfect half-circle right */
+    border-left: none !important; /* No border on left side */
+    margin-left: -8px !important; /* Extend to left edge */
+    padding-left: calc(var(--space-4) + 8px) !important; /* Compensate for negative margin */
+    margin-right: 4px !important;
 }
 
 /* Collapsed sidebar handling */
