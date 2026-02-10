@@ -1269,20 +1269,17 @@
 }
 
 .nav-expandable-trigger.active {
-    /* Parent gets subtle border when section is collapsed but active - Google Admin style */
-    background: transparent !important; /* Keep normal background */
-    color: inherit !important; /* Keep normal text color */
-    border: 2px solid rgba(201, 151, 0, 0.6) !important; /* Just a gold border outline */
-    border-radius: 6px !important; /* Rounded corners */
-    margin: 2px 4px !important; /* Spacing for border visibility */
+    /* Parent gets SOLID highlight when section is collapsed but has active child */
+    background: var(--nd-gold) !important; /* Solid gold like before */
+    color: white !important;
 }
 
 .nav-expandable-trigger.active .nav-expand-icon {
-    color: inherit !important; /* Keep normal icon color */
+    color: white !important;
 }
 
 .nav-expandable-trigger.active i:not(.nav-expand-icon) {
-    color: inherit !important; /* Keep normal icon color */
+    color: white !important;
 }
 
 /* Collapsed sidebar handling */
