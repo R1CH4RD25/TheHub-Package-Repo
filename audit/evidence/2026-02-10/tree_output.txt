@@ -1,0 +1,776 @@
+.
+├── ADMIN_REFACTORING_PHASE1_COMPLETE.md
+├── ADMIN_REFACTORING_PLAN.md
+├── ADMIN_USERS_GOOGLE_REDESIGN.md
+├── ADMIN_VS_MANAGEMENT_SEPARATION.md
+├── AI_SESSION_CONTEXT.md
+├── apache
+│   ├── hub.example.com.conf
+│   ├── hub.woodsonisd.net.conf
+│   └── maintenance.woodsonisd.net.conf
+├── app
+│   ├── Helpers
+│   │   └── SessionBridge.php
+│   ├── Http
+│   │   ├── Controllers
+│   │   └── Middleware
+│   ├── Models
+│   │   ├── AuditLog.php
+│   │   ├── Module.php
+│   │   ├── PackageInstall.php
+│   │   ├── Package.php
+│   │   ├── PackageReview.php
+│   │   ├── SectionAccess.php
+│   │   ├── Section.php
+│   │   ├── UserModuleAccess.php
+│   │   └── User.php
+│   ├── Providers
+│   │   └── AppServiceProvider.php
+│   └── Session
+│       └── PhpSessionHandler.php
+├── artisan
+├── AUDIT_DOCS.md
+├── AUTHENTICATION_SETTINGS_INTEGRATION.md
+├── backups
+│   ├── css-modern-archived-20251107
+│   │   ├── admin-modern.css
+│   │   ├── hub-modern.css
+│   │   └── login-modern.css
+│   ├── db-20260111.sql.gz
+│   ├── db-20260118.sql.gz
+│   ├── db-20260125.sql.gz
+│   ├── db-20260201.sql.gz
+│   ├── db-20260208.sql.gz
+│   └── sections-20251022
+│       ├── RESTORE_INSTRUCTIONS.md
+│       └── sections_backup_20251022_204534.sql
+├── BONUS_LIBRARIES.md
+├── bootstrap
+│   ├── app.php
+│   ├── app.php.fresh
+│   ├── cache
+│   │   ├── packages.php
+│   │   └── services.php
+│   └── providers.php
+├── BUG_FIX_PACKAGE_CACHE.md
+├── build-css-bundles.sh
+├── build-css-production.sh
+├── build-css.sh
+├── CHECKPOINT_2025-10-31.md
+├── CI_STATUS.md
+├── CLEANUP_ANALYSIS.md
+├── CLEANUP_COMPLETE.md
+├── cleanup-comprehensive.sh
+├── cleanup-next.sh
+├── cleanup-packages.php
+├── cleanup-report-v2.json
+├── cleanup-safe.sh
+├── cli
+│   ├── apply-md3-all-css.py
+│   ├── apply-md3-motion.py
+│   ├── audit-css-conflicts.py
+│   ├── check-dependencies.php
+│   ├── cleanup-analyzer.py
+│   ├── cleanup-orphaned-sections.php
+│   ├── CRON_SETUP.md
+│   ├── db-maintenance.sh
+│   ├── migrate-capabilities.php
+│   ├── migrate-command-center.php
+│   ├── migrate-dynamic-sections.php
+│   ├── migrate-management-center.php
+│   ├── migrate-modules.php
+│   ├── migrate-package-forms.php
+│   ├── migrate-package-permissions.php
+│   ├── migrate.php
+│   ├── migrate-sections.php
+│   ├── mysqltuner.pl
+│   ├── pkg-build.php
+│   ├── pkg-lint.php
+│   ├── pkg-migrate.php
+│   ├── pkg-scaffold.php
+│   ├── pwa-optimize-css.py
+│   ├── remove-fuel-system.php
+│   ├── replace-css-colors.sh
+│   ├── revalidate-packages.php
+│   ├── scope-enterprise-css.py
+│   ├── setup.php
+│   ├── test-enable-disable.php
+│   └── test-package-validation.php
+├── COMMAND_TO_MANAGEMENT_MIGRATION.md
+├── composer.json
+├── composer.lock
+├── config
+│   ├── app.php
+│   ├── business-admin-471017-bb0091315e03.json
+│   ├── cache.php
+│   ├── database.php
+│   ├── filesystems.php
+│   ├── .gitignore
+│   ├── logging.php
+│   ├── mail.php
+│   ├── queue.php
+│   ├── services.php
+│   ├── session.php
+│   └── view.php
+├── coverage-email
+│   ├── AuditLogger.php.html
+│   ├── Auth.php.html
+│   ├── bootstrap.php.html
+│   ├── Cache.php.html
+│   ├── _css
+│   │   ├── bootstrap.min.css
+│   │   ├── custom.css
+│   │   ├── nv.d3.min.css
+│   │   ├── octicons.css
+│   │   └── style.css
+│   ├── CSSBuilder.php.html
+│   ├── dashboard.html
+│   ├── Database.php.html
+│   ├── Email.php.html
+│   ├── _icons
+│   │   ├── file-code.svg
+│   │   └── file-directory.svg
+│   ├── index.html
+│   ├── Invitation.php.html
+│   ├── _js
+│   │   ├── bootstrap.min.js
+│   │   ├── d3.min.js
+│   │   ├── file.js
+│   │   ├── jquery.min.js
+│   │   ├── nv.d3.min.js
+│   │   └── popper.min.js
+│   ├── Layout.php.html
+│   ├── Module.php.html
+│   ├── Modules
+│   │   ├── ActionRenderer.php.html
+│   │   ├── AnalyticsRenderer.php.html
+│   │   ├── CalendarRenderer.php.html
+│   │   ├── ComputationRenderer.php.html
+│   │   ├── dashboard.html
+│   │   ├── DashboardRenderer.php.html
+│   │   ├── EmailNotificationRenderer.php.html
+│   │   ├── FileManagerRenderer.php.html
+│   │   ├── FormRenderer.php.html
+│   │   ├── index.html
+│   │   ├── KanbanRenderer.php.html
+│   │   ├── ModuleFactory.php.html
+│   │   ├── ModuleInterface.php.html
+│   │   ├── PDFGeneratorRenderer.php.html
+│   │   ├── ReportRenderer.php.html
+│   │   ├── TableViewRenderer.php.html
+│   │   └── WorkflowRenderer.php.html
+│   ├── NotificationService.php.html
+│   ├── OAuthClient.php.html
+│   ├── PackageManager.php.html
+│   ├── PackageValidator.php.html
+│   ├── Roles.php.html
+│   ├── SectionAccess.php.html
+│   ├── SectionPermissions.php.html
+│   ├── SectionRoleAccess.php.html
+│   ├── SectionType.php.html
+│   ├── SiteSettings.php.html
+│   ├── Theme.php.html
+│   └── User.php.html
+├── CSP_CONFIGURATION_GUIDE.md
+├── CSS_AUDIT_COMPLETE.md
+├── css-audit-results.json
+├── CSS_CACHE_ISSUE_REPORT.md
+├── database
+│   ├── complete-schema.sql
+│   ├── dynamic-sections-schema.sql
+│   ├── migrations
+│   │   ├── 001_add_local_auth_support.sql
+│   │   ├── 002_create_sections_and_role_access.sql
+│   │   ├── 003_add_section_types_and_notifications.sql
+│   │   ├── 004_create_bullying_reports.sql
+│   │   ├── 005_add_role_management.sql
+│   │   ├── 006_add_header_settings.sql
+│   │   ├── 007_add_sidebar_settings.sql
+│   │   ├── 008_add_footer_settings.sql
+│   │   ├── 009_add_unsaved_changes_glow_color.sql
+│   │   ├── 010_add_header_footer_colors.sql
+│   │   ├── 011_add_package_alerts.sql
+│   │   ├── 012_add_missing_ui_settings.sql
+│   │   ├── add_active_menu_settings.sql
+│   │   ├── add_auth_settings.sql
+│   │   ├── add_file_hash_column.sql
+│   │   ├── add_hub_tile_icon_settings.sql
+│   │   ├── add_landing_page_settings.sql
+│   │   ├── add_role_badge_colors.sql
+│   │   ├── add_site_settings_table.sql
+│   │   ├── add_themes_system.sql
+│   │   ├── fix_admin_dashboard_url.sql
+│   │   └── hide_admin_dashboard_card.sql
+│   ├── modules-schema.sql
+│   ├── package-forms-schema.sql
+│   ├── package-management-schema.sql
+│   ├── package-permissions-schema.sql
+│   ├── packages-schema.sql
+│   ├── permissions-schema.sql
+│   ├── schema.sql
+│   ├── section-permissions-schema.sql
+│   └── sections-schema.sql
+├── DEPLOYMENT.md
+├── DEVELOPMENT_LOG_2025-10-28.md
+├── DEVELOPMENT_LOG_2025-10-29.md
+├── DEVELOPMENT_LOG_2025-11-07.md
+├── docs
+│   ├── ADDING_NEW_ROLES.md
+│   ├── ADVANCED_USER_FILTERING.md
+│   ├── archive
+│   │   ├── ADMIN_REFACTORING_PHASE1_COMPLETE.md
+│   │   ├── ADMIN_REFACTORING_PLAN.md
+│   │   ├── ADMIN_VS_MANAGEMENT_SEPARATION.md
+│   │   ├── BONUS_LIBRARIES.md
+│   │   ├── BUG_FIX_PACKAGE_CACHE.md
+│   │   ├── CHECKPOINT_2025-10-31.md
+│   │   ├── CI_STATUS.md
+│   │   ├── CLEANUP_ANALYSIS.md
+│   │   ├── CLEANUP_COMPLETE.md
+│   │   ├── COMMAND_TO_MANAGEMENT_MIGRATION.md
+│   │   ├── CSP_CONFIGURATION_GUIDE.md
+│   │   ├── CSS_AUDIT_COMPLETE.md
+│   │   ├── DEVELOPMENT_LOG_2025-10-28.md
+│   │   ├── DEVELOPMENT_LOG_2025-10-29.md
+│   │   ├── DEVELOPMENT_LOG_2025-11-07.md
+│   │   ├── ENTERPRISE_ADMIN_DESIGN_SYSTEM.md
+│   │   ├── ENTERPRISE_IMPLEMENTATION_PLAN.md
+│   │   ├── FINAL_CLEANUP_VERIFICATION.md
+│   │   ├── FIXES_2025-10-22.md
+│   │   ├── FRONTEND_INTEGRATION.md
+│   │   ├── FRONTEND_MODERNIZATION.md
+│   │   ├── FRONTEND_SESSION_2025-11-06.md
+│   │   ├── GITHUB_API_SCALING.md
+│   │   ├── GITHUB_TOKEN_SETUP.md
+│   │   ├── INSTALLATION_DEFAULTS.md
+│   │   ├── INTEGRATION_COMPLETE.md
+│   │   ├── LAYOUT_SECURITY_QUICKREF.md
+│   │   ├── LAYOUT_SECURITY_REFACTOR_PLAN.md
+│   │   ├── LIBRARY_OPTIMIZATION_PLAN.md
+│   │   ├── MANAGEMENT_CONSOLE_IMPLEMENTATION_ANALYSIS.md
+│   │   ├── MANAGEMENT_SYSTEM_VERIFICATION.md
+│   │   ├── MICROSOFT_OAUTH.md
+│   │   ├── MOBILE_AND_SERVER_LIBRARIES.md
+│   │   ├── MODAL_AUDIT_REPORT.md
+│   │   ├── MODAL_AUDIT_SUMMARY.md
+│   │   ├── MODAL_MIGRATION_PLAN.md
+│   │   ├── MODAL_SYSTEM_ARCHITECTURE.md
+│   │   ├── OAUTH_PHASE_3_COMPLETE.md
+│   │   ├── OAUTH_TESTING_COMPLETE.md
+│   │   ├── OPTIMIZATION_RESULTS.md
+│   │   ├── OPTION_A_IMPLEMENTATION_PLAN.md
+│   │   ├── PACKAGE_AUDIT_CHECKLIST.md
+│   │   ├── PACKAGE_CONFIGURATION_AUDIT.md
+│   │   ├── PACKAGE_MANAGEMENT_AUDIT.md
+│   │   ├── PACKAGE_WORKFLOW_COMPREHENSIVE_AUDIT.md
+│   │   ├── PHASE_1_CAPABILITY_FOUNDATION_COMPLETE.md
+│   │   ├── PHASE1_IMPLEMENTATION_COMPLETE.md
+│   │   ├── PHASE_2_API_ENDPOINTS_COMPLETE.md
+│   │   ├── PHASE2_IMPLEMENTATION_COMPLETE.md
+│   │   ├── PRIORITY_IMPLEMENTATION_SUMMARY.md
+│   │   ├── RELEASE_NOTES_V1.2.md
+│   │   ├── SECTION_CONFIG_GUIDE.md
+│   │   ├── SECTION_PERMISSIONS_COMPLETE.md
+│   │   ├── TIER_2_SETUP_WIZARD_COMPLETE.md
+│   │   ├── TODO_OLD.md
+│   │   └── UI_IMPROVEMENTS_2025-10-29.md
+│   ├── AUDIT_LOGGING.md
+│   ├── AUDIT_REPORT_V1.2.md
+│   ├── CACHING_SYSTEM.md
+│   ├── CASCADING_DEPENDENCIES.md
+│   ├── CASCADING_DEPENDENCIES_QUICKREF.md
+│   ├── COLOR_SCHEME_QUICKSTART.md
+│   ├── COLOR_SCHEME_TAB_NEW.html
+│   ├── COMMAND_CENTER_ARCHITECTURE.md
+│   ├── COMMAND_CENTER_PACKAGE_INTEGRATION.md
+│   ├── COMPREHENSIVE_AUDIT_V1.2.md
+│   ├── CSS_ARCHITECTURE.md
+│   ├── CSS_BUILD_QUICKSTART.md
+│   ├── DATABASE_COLUMN_REFERENCE.md
+│   ├── DATABASE_MAINTENANCE_SETUP.md
+│   ├── DYNAMIC_SECTIONS_ROADMAP.md
+│   ├── DYNAMIC_SECTIONS_STATUS.md
+│   ├── EMAIL_MODULE_EXAMPLES.md
+│   ├── FRONTEND_LIBRARIES.md
+│   ├── GIT_WORKTREE_SETUP.md
+│   ├── GOOGLE_GROUPS_SETUP.md
+│   ├── HUB_THEME_VARIABLES.md
+│   ├── INVITATION_SYSTEM.md
+│   ├── LARAVEL_PACKAGE_MIGRATION.md
+│   ├── MANAGEMENT_QUICK_START.md
+│   ├── MANAGEMENT_SYSTEM_TESTING_GUIDE.md
+│   ├── MANAGEMENT_THEME_INTEGRATION_SUMMARY.md
+│   ├── MIGRATION_GUIDE.md
+│   ├── MODULAR_ARCHITECTURE.md
+│   ├── MODULE_CATALOG_V2.md
+│   ├── OAUTH_TESTING.md
+│   ├── PACKAGE_CONFIGURATION.md
+│   ├── PACKAGE_CONTRIBUTING.md
+│   ├── PACKAGE_CREATION_GUIDE.md
+│   ├── PACKAGE_FORMS_GUIDE.md
+│   ├── PACKAGE_PERMISSIONS_QUICKREF.md
+│   ├── PACKAGE_REPOSITORY_GUIDE.md
+│   ├── PACKAGE_REPOSITORY_SYSTEM.md
+│   ├── PACKAGE_SPECIFICATION_V2.md
+│   ├── PACKAGE_SYSTEM_BUILD_COMPLETE.md
+│   ├── PACKAGE_SYSTEM_STATUS.md
+│   ├── PACKAGE_TAGGING_GUIDE.md
+│   ├── PACKAGE_THEME_GUIDELINES.md
+│   ├── PWA_QUICKSTART.md
+│   ├── PWA_ROADMAP.md
+│   ├── README.md
+│   ├── ROLE_PERMISSIONS.md
+│   ├── ROLES_DOCUMENTATION.md
+│   ├── SECTION_ACCESS.md
+│   ├── SECURITY.md
+│   ├── THEME_MANAGEMENT.md
+│   ├── THEME_VARIABLES_QUICK_REF.md
+│   └── WORKFLOW_MODULE_EXAMPLES.md
+├── ENTERPRISE_ADMIN_DESIGN_SYSTEM.md
+├── ENTERPRISE_IMPLEMENTATION_PLAN.md
+├── .env
+├── .env.backup.2025-11-13_13-07-53
+├── .env.example
+├── FINAL_CLEANUP_VERIFICATION.md
+├── FIXES_2025-10-22.md
+├── fix-indentation.php
+├── FRONTEND_INTEGRATION.md
+├── FRONTEND_MODERNIZATION.md
+├── frontend-quickref.sh
+├── FRONTEND_SESSION_2025-11-06.md
+├── .github
+│   ├── copilot-instructions.md
+│   └── workflows
+│       └── ci.yml
+├── GITHUB_API_SCALING.md
+├── GITHUB_TOKEN_SETUP.md
+├── .gitignore
+├── INSTALLATION_DEFAULTS.md
+├── INSTALLATION.md
+├── install-packages.sh
+├── INTEGRATION_COMPLETE.md
+├── LAYOUT_SECURITY_QUICKREF.md
+├── LAYOUT_SECURITY_REFACTOR_PLAN.md
+├── LIBRARY_OPTIMIZATION_PLAN.md
+├── MANAGEMENT_CONSOLE_IMPLEMENTATION_ANALYSIS.md
+├── MANAGEMENT_SYSTEM_VERIFICATION.md
+├── MICROSOFT_OAUTH.md
+├── migrate-db-name.sh
+├── migrate-to-thehub.sh
+├── MOBILE_AND_SERVER_LIBRARIES.md
+├── MODAL_AUDIT_REPORT.md
+├── MODAL_AUDIT_RESULTS.json
+├── MODAL_AUDIT_SUMMARY.md
+├── MODAL_MIGRATION_PLAN.md
+├── MODAL_SYSTEM_ARCHITECTURE.md
+├── OAUTH_PHASE_3_COMPLETE.md
+├── OAUTH_TESTING_COMPLETE.md
+├── OPTIMIZATION_RESULTS.md
+├── OPTION_A_IMPLEMENTATION_PLAN.md
+├── PACKAGE_AUDIT_CHECKLIST.md
+├── PACKAGE_CONFIGURATION_AUDIT.md
+├── PACKAGE_DISCOVERY_SYSTEM.md
+├── PACKAGE_DISCOVERY_UI_REDESIGN.md
+├── package.json
+├── PACKAGE_MANAGEMENT_AUDIT.md
+├── packages
+│   ├── bullying-report
+│   │   ├── config.php
+│   │   └── index.php
+│   ├── .gitignore
+│   ├── imported
+│   │   └── .gitkeep
+│   ├── local
+│   │   ├── com.woodson.bullying-report_1.0.0.hubpkg
+│   │   ├── com.woodson.vehicle-maintenance_1.0.0.hubpkg
+│   │   ├── com.woodson.vehicle-maintenance_2.0.0.hubpkg
+│   │   ├── com.woodson.vehicle-request-form_1.0.0.hubpkg
+│   │   ├── contact-form-v1.0.0.hubpkg
+│   │   ├── .gitkeep
+│   │   ├── operations-fleet-maintenance
+│   │   ├── reimbursement-request
+│   │   ├── simple-survey-v1.0.0.hubpkg
+│   │   ├── vehicle-maintenance
+│   │   └── vehicle-request-form
+│   ├── marketplace
+│   │   └── .gitkeep
+│   ├── README.md
+│   └── temp
+│       └── .gitkeep
+├── packages.txt
+├── PACKAGE_SYSTEM_ARCHITECTURE.md
+├── PACKAGE_WORKFLOW_COMPREHENSIVE_AUDIT.md
+├── PHASE_1_CAPABILITY_FOUNDATION_COMPLETE.md
+├── PHASE1_IMPLEMENTATION_COMPLETE.md
+├── PHASE_2_API_ENDPOINTS_COMPLETE.md
+├── PHASE2_IMPLEMENTATION_COMPLETE.md
+├── phpstan.neon
+├── .phpunit.cache
+│   ├── code-coverage
+│   │   ├── 0022b2f958703c68c47e9ca4ba80d158
+│   │   ├── 0135db59246e693d87da5ab63bc9191b
+│   │   ├── 021b3436d15dc34d0d7a34a151de6398
+│   │   ├── 07b65b902408c03ab214df05753d7aef
+│   │   ├── 07c26e2523fae0ab6c2ba7dfc443131a
+│   │   ├── 16c53dc88d59a8bd9cb36a06dad75062
+│   │   ├── 17e37e306d4004de43f6b417d83ede71
+│   │   ├── 181e250f5eb124674769519345187d0a
+│   │   ├── 18c82a45bdb1aa9d6473b17834fc10f3
+│   │   ├── 1b3aa0e86b0c08f04c77e9181f1d6781
+│   │   ├── 1fe8b9dbb5b1e657fc004a57b38b30d3
+│   │   ├── 219eae54ae8ce5e661f75d9d16f72e5a
+│   │   ├── 2977d5f11f7de6bc6e27f2fa7a946127
+│   │   ├── 2ac336686bd6813bb5c088395f191d7a
+│   │   ├── 2b3e9cc96701f992f2d04365d3cb6d59
+│   │   ├── 2f7dfdaed3492df0a490bf8b99c258ee
+│   │   ├── 39b496187d7f56800bc9a31865815d9e
+│   │   ├── 3f7fbb03f1558c39583b317cfb273c10
+│   │   ├── 3ff4059a7a0f62b126b73b89d5208c6e
+│   │   ├── 487a538417258cb57a2c48676b7a494c
+│   │   ├── 5251ce67239a5a393c6e3a709c35f636
+│   │   ├── 548c90846c2b6216f3e37d72273933b7
+│   │   ├── 54dc5dfadfe8c80dfaea675b117588de
+│   │   ├── 593b8659d652e3ffceb4e968e6b6d8eb
+│   │   ├── 5c26b0ff71d267d82e86816111a72921
+│   │   ├── 5fa7048ab609163da115311a11ecd3a8
+│   │   ├── 61b9a2a05f73732ea019e819f488349a
+│   │   ├── 693a02b6abd0dde50dbf06ab27f06b93
+│   │   ├── 6a19c30a43a8de15112947c94a686b1d
+│   │   ├── 6fc6d8487e3465f66e461296d09e47e4
+│   │   ├── 7110d1325f78f9830cb1931344abf140
+│   │   ├── 724ea1ef895762ee8744dd94c4a1e28a
+│   │   ├── 7623c8d36635998738998f68d0518aa4
+│   │   ├── 779a31466e801747586d85a1d07ec9bc
+│   │   ├── 77a2ce6b563538a8c5ea71abc4c69c72
+│   │   ├── 7a9d1b4083e5a9cd6e65add49592db47
+│   │   ├── 81bca3f9c77c86eacdebeb813926dd61
+│   │   ├── 8d74c2f22292fdc3bab031c0c0e6f77b
+│   │   ├── 945e68622ab5b0370f79d94db0a0705d
+│   │   ├── 955f7141edc98f49c1e51448f0caaac2
+│   │   ├── 986afd71caf00ce43bc81b911f2af4fa
+│   │   ├── a09528360cf13bcb431b5819a993601e
+│   │   ├── a22909f0e00f97b5c17e73960478e298
+│   │   ├── a2daee0931949f6a5457f0fcefd20f0f
+│   │   ├── a8d7fc831b5e0201657500cf183f612b
+│   │   ├── a8eb0c5e58fcea112ef1644c5d795d07
+│   │   ├── aa169e7ff397ae189a9d86cb358b7d08
+│   │   ├── ab3b4024a298498cb5b5dc33a03ed898
+│   │   ├── ae75b88f743306a86f4002070d32965b
+│   │   ├── b05a9a0ad49b50e1caab16fa7f11e697
+│   │   ├── b2af92075dfec1d5280bad35c0d43d73
+│   │   ├── c0a344f2b24a5ba2f154ad691c226014
+│   │   ├── c6bb06a82969728874990740586458ae
+│   │   ├── cb1a18932308f01c32025191b3ceb0c9
+│   │   ├── d326828f544ef61bc5d11dbf0b3d27a3
+│   │   ├── d4f52b3eee2a6a20852f55fa1a5d3848
+│   │   ├── dad0ecf2a401f9a916a3bc1873b4cea8
+│   │   ├── e00bf8e5ad66ebbf978efa168364cace
+│   │   ├── e01c1ca75ac2a569cdb9a732f58b56db
+│   │   ├── e06af1612d2ef6cfc921ccdb4420e2ac
+│   │   ├── e7e0780376b762c22a9a7f893c517ae8
+│   │   ├── e7ea805b764731c0fd415194a68d5d94
+│   │   ├── ea015ecca348cf6bafa6f98062bc5875
+│   │   ├── ea17dec3dd927adff3681e89e8eacd75
+│   │   ├── ef2a1eee6ae985613160500509bc1900
+│   │   ├── efbaba0ebeb77241bc470bc0ccd024cf
+│   │   └── f3cb82064cd493e4626922c6f0b636bd
+│   └── test-results
+├── phpunit-renderers.xml
+├── phpunit.xml
+├── PRIORITY_IMPLEMENTATION_SUMMARY.md
+├── public
+│   ├── accept-invite.php
+│   ├── admin
+│   │   ├── diagnostic.html
+│   │   ├── form-builder.php
+│   │   ├── index.php
+│   │   ├── index.php.backup-20251022-201048
+│   │   ├── index.php.backup-before-advanced-update
+│   │   ├── index.php.backup-refactoring-20251119-203337
+│   │   ├── load-permission-matrix.php
+│   │   ├── MIGRATION_COMPLETE.md
+│   │   ├── package-config-subtab.php
+│   │   ├── package-library-subtab.php
+│   │   ├── package-permissions-subtab.php
+│   │   ├── partials
+│   │   ├── section-config-tab.php
+│   │   └── tabs
+│   ├── api
+│   │   ├── audit-logs.php
+│   │   ├── export.php
+│   │   ├── invitations.php
+│   │   ├── org-roles.php
+│   │   ├── package-alerts.php
+│   │   ├── package-discovery.php
+│   │   ├── package-forms.php
+│   │   ├── package-permissions.php
+│   │   ├── packages.php
+│   │   ├── profile.php
+│   │   ├── role-management.php
+│   │   ├── roles.php
+│   │   ├── section-access.php
+│   │   ├── section-config.php
+│   │   ├── section-role-access.php
+│   │   ├── sections.php
+│   │   ├── section-submissions.php
+│   │   ├── site-settings.php
+│   │   ├── switch-role.php
+│   │   ├── system-config.php
+│   │   ├── system-config.php.bak
+│   │   ├── theme-css.php
+│   │   ├── themes.php
+│   │   ├── upload-branding.php
+│   │   ├── user-roles.php
+│   │   └── users.php
+│   ├── assets
+│   │   ├── css
+│   │   ├── images
+│   │   └── js
+│   ├── auth
+│   │   └── callback.php
+│   ├── command
+│   │   ├── api
+│   │   ├── index.php
+│   │   ├── section.php
+│   │   └── submission.php
+│   ├── frontend-demo.html
+│   ├── google_login.php
+│   ├── .htaccess
+│   ├── hub.php
+│   ├── index.php
+│   ├── laravel-diagnostic.php
+│   ├── laravel.php
+│   ├── laravel-test.php
+│   ├── login.php
+│   ├── logout.php
+│   ├── management
+│   │   ├── api
+│   │   ├── index.php
+│   │   ├── index.php.backup-20251119-204436
+│   │   ├── section.php
+│   │   └── submission.php
+│   ├── modules
+│   │   └── sections
+│   ├── partials
+│   │   ├── footer.php
+│   │   └── header.php
+│   ├── privacy-policy.php
+│   ├── profile.php
+│   ├── sections.php
+│   ├── session-debug.php
+│   ├── test
+│   │   ├── form-builder-demo-backup.php
+│   │   └── form-builder-demo.php
+│   └── uploads
+│       └── packages
+├── QUICKSTART.md
+├── README.md
+├── RELEASE_NOTES_V1.2.md
+├── REQUIREMENTS.md
+├── requirements.txt
+├── resources
+│   └── views
+│       ├── admin
+│       └── layouts
+├── RESPONSIVE_FIXES_2025-01-13.md
+├── ROADMAP.md
+├── ROLE_DISPLAY_IMPROVEMENTS.md
+├── ROLE_MANAGEMENT_IMPLEMENTATION.md
+├── routes
+│   ├── api.php
+│   ├── console.php
+│   └── web.php
+├── SECTION_CONFIG_GUIDE.md
+├── SECTION_PERMISSIONS_COMPLETE.md
+├── SESSION_SUMMARY.txt
+├── SETTINGS_AUDIT_2026-01-08.md
+├── setup-frontend.sh
+├── src
+│   ├── AuditLogger.php
+│   ├── Auth.php
+│   ├── bootstrap.php
+│   ├── Cache.php
+│   ├── CommandCenter.php
+│   ├── components
+│   │   ├── EnterpriseFooter.php
+│   │   ├── EnterpriseHeader.php
+│   │   ├── EnterpriseSidebar.php
+│   │   ├── USER_PROFILE_COMPONENT_GUIDE.md
+│   │   └── UserProfileDropdown.php
+│   ├── Components
+│   │   ├── EnterpriseFooter.php
+│   │   ├── EnterpriseHeader.php
+│   │   ├── EnterpriseSidebar.php
+│   │   └── UserProfileDropdown.php
+│   ├── CSSBuilder.php
+│   ├── Database.php
+│   ├── Database.php.bak
+│   ├── DynamicFormRenderer.php
+│   ├── Email.php
+│   ├── Helpers.php
+│   ├── Invitation.php
+│   ├── Layout.php
+│   ├── ManagementCenter.php
+│   ├── Module.php
+│   ├── Modules
+│   │   ├── ActionRenderer.php
+│   │   ├── AnalyticsRenderer.php
+│   │   ├── CalendarRenderer.php
+│   │   ├── ComputationRenderer.php
+│   │   ├── DashboardRenderer.php
+│   │   ├── EmailNotificationRenderer.php
+│   │   ├── FileManagerRenderer.php
+│   │   ├── FormRenderer.php
+│   │   ├── KanbanRenderer.php
+│   │   ├── ModuleFactory.php
+│   │   ├── ModuleInterface.php
+│   │   ├── PDFGeneratorRenderer.php
+│   │   ├── ReportRenderer.php
+│   │   ├── TableViewRenderer.php
+│   │   └── WorkflowRenderer.php
+│   ├── NotificationService.php
+│   ├── OAuthClient.php
+│   ├── OrgRole.php
+│   ├── PackageAccess.php
+│   ├── PackageCapability.php
+│   ├── PackageForm.php
+│   ├── PackageManager.php
+│   ├── PackageRole.php
+│   ├── PackageValidator.php
+│   ├── Roles.php
+│   ├── SectionAccess.php
+│   ├── SectionPermissions.php
+│   ├── SectionRoleAccess.php
+│   ├── SectionType.php
+│   ├── SiteSettings.php
+│   ├── Submission.php
+│   ├── Theme.php
+│   └── User.php
+├── temp
+│   ├── audit-schema.sh
+│   ├── cache
+│   │   ├── 27098be1346be8086552ee874edc8f15.cache
+│   │   ├── 7ecfe70f9d4598ad6e8a598c53d55571.cache
+│   │   └── b2094469f2c032d5f70db5d18630529e.cache
+│   ├── CONTRIBUTING.md
+│   ├── GITHUB_SETUP_GUIDE.md
+│   ├── github-upload
+│   │   ├── bullying-report-CHANGELOG.md
+│   │   ├── bullying-report-README.md
+│   │   └── PULL_REQUEST_TEMPLATE.md
+│   ├── .gitkeep
+│   ├── PACKAGE_REPO_README.md
+│   ├── PACKAGE_REPO_STRUCTURE.md
+│   ├── PACKAGE_SUBMISSION_TEMPLATE.md
+│   └── READY_TO_DEPLOY.md
+├── tests
+│   ├── apply-csp-nonce.py
+│   ├── bootstrap.php
+│   ├── coverage
+│   │   ├── AuditLogger.php.html
+│   │   ├── Auth.php.html
+│   │   ├── bootstrap.php.html
+│   │   ├── Cache.php.html
+│   │   ├── _css
+│   │   ├── CSSBuilder.php.html
+│   │   ├── dashboard.html
+│   │   ├── Database.php.html
+│   │   ├── Email.php.html
+│   │   ├── _icons
+│   │   ├── index.html
+│   │   ├── Invitation.php.html
+│   │   ├── _js
+│   │   ├── Layout.php.html
+│   │   ├── Module.php.html
+│   │   ├── Modules
+│   │   ├── NotificationService.php.html
+│   │   ├── OAuthClient.php.html
+│   │   ├── PackageManager.php.html
+│   │   ├── PackageValidator.php.html
+│   │   ├── Roles.php.html
+│   │   ├── SectionAccess.php.html
+│   │   ├── SectionPermissions.php.html
+│   │   ├── SectionRoleAccess.php.html
+│   │   ├── SectionType.php.html
+│   │   ├── SiteSettings.php.html
+│   │   ├── Theme.php.html
+│   │   └── User.php.html
+│   ├── csp-implementation-test.php
+│   ├── helpers
+│   │   ├── safe_edit_verify.sh
+│   │   └── verify_file_content.sh
+│   ├── Helpers
+│   │   ├── AuthMock.php
+│   │   └── TestDatabase.php
+│   ├── Integration
+│   │   ├── AnalyticsRendererIntegrationTest.php
+│   │   ├── AnalyticsRendererIntegrationTest.php.backup.1761916683
+│   │   ├── AuthIntegrationTest.php
+│   │   ├── DashboardRendererIntegrationTest.php
+│   │   ├── DebugEnvTest.php
+│   │   ├── FormRendererIntegrationTest.php
+│   │   ├── InvitationIntegrationTest.php
+│   │   ├── PlaceholderTest.php
+│   │   ├── SectionIntegrationTest.php
+│   │   ├── TableViewRendererIntegrationTest.php
+│   │   ├── ThemeIntegrationTest.php
+│   │   └── WorkflowRendererIntegrationTest.php
+│   ├── mobile-menu-test.html
+│   ├── Mocks
+│   │   └── OAuth
+│   ├── Security
+│   │   └── SecurityTest.php
+│   ├── security-helpers-test.php
+│   └── Unit
+│       ├── AuditLoggerTest.php
+│       ├── AuthAdvancedSecurityTest.php
+│       ├── AuthComprehensiveTest.php
+│       ├── AuthLoginSecurityTest.php
+│       ├── AuthOAuthFlowTest.php
+│       ├── AuthSectionSecurityTest.php
+│       ├── AuthSecurityTest.php
+│       ├── AuthStaticMethodsTest.php
+│       ├── AuthTest.php
+│       ├── CacheTest.php
+│       ├── CsrfSecurityTest.php
+│       ├── CSSBuilderTest.php
+│       ├── DatabaseTest.php
+│       ├── EmailTest.php
+│       ├── InvitationTest.php
+│       ├── LayoutTest.php
+│       ├── MicrosoftOAuthTest.php
+│       ├── Modules
+│       ├── ModuleTest.php
+│       ├── NotificationServiceTest.php
+│       ├── OAuthClientTest.php
+│       ├── OAuthMockProvidersTest.php
+│       ├── PackageManagerTest.php
+│       ├── PackageValidatorTest.php
+│       ├── RolesTest.php
+│       ├── SectionAccessTest.php
+│       ├── SectionConfigTest.php
+│       ├── SectionPermissionsTest.php
+│       ├── SectionRoleAccessTest.php
+│       ├── SectionTypeTest.php
+│       ├── SiteSettingsTest.php
+│       ├── ThemeTest.php
+│       └── UserTest.php
+├── thehub.code-workspace
+├── TIER_2_SETUP_WIZARD_COMPLETE.md
+├── TODO.md
+├── TODO_OLD.md
+├── UI_IMPROVEMENTS_2025-10-29.md
+├── uploads
+│   ├── Bullying_Report.hubpkg
+│   ├── .gitkeep
+│   └── sections
+│       ├── attachments
+│       ├── exports
+│       ├── imports
+│       └── README.md
+├── .vscode
+│   ├── settings.json
+│   └── tasks.json
+└── webpack.config.js
+
+92 directories, 682 files

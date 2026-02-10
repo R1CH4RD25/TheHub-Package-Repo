@@ -1,0 +1,61 @@
+The Hub - Security Controls Evidence
+Generated: February 10, 2026
+
+CREDENTIALS MANAGEMENT:
+- Location: /config/ directory
+- Files: *.json (Google service account), *.env (environment variables)
+- Version Control: EXCLUDED via .gitignore (config/*.json, .env, .env.*)
+- Verification: git ls-files config/*.json returns empty (not tracked)
+- Storage: Local server only, injected via environment/filesystem
+- Example: business-admin-471017-bb0091315e03.json (Google service account)
+
+GITIGNORE VERIFICATION:
+```
+.env
+.env.*
+!.env.example
+config/*.json
+!config/.gitkeep
+```
+
+DATABASE BACKUPS:
+- Location: /backups/ directory
+- Files: db-YYYYMMDD.sql.gz (weekly automated backups)
+- Version Control: EXCLUDED via .gitignore (backups/)
+- Verification: git ls-files backups/ returns empty (not tracked)
+- Storage: Local server filesystem only
+- Retention: Weekly backups (last 5 weeks visible)
+- Encryption: File-level permissions (www-data group)
+- Remote Storage: Not configured (local development environment)
+
+BACKUP FILES PRESENT (NOT IN REPO):
+- db-20260111.sql.gz (44KB)
+- db-20260118.sql.gz (171KB)
+- db-20260125.sql.gz (176KB)
+- db-20260201.sql.gz (176KB)
+- db-20260208.sql.gz (176KB)
+- css-modern-archived-20251107/ (archived CSS)
+- sections-20251022/ (section backup with RESTORE_INSTRUCTIONS.md)
+
+CONTROL SUMMARY:
+✅ No credentials committed to version control
+✅ No database backups committed to version control
+✅ .gitignore properly configured
+✅ All sensitive files exist on filesystem only
+✅ Environment variables sourced from .env (not tracked)
+
+OAUTH CREDENTIALS:
+- Google OAuth: Client ID/Secret in .env
+- Microsoft OAuth: Client ID/Secret in .env
+- Google Service Account: JSON file in config/ (gitignored)
+- Redirect URIs: Configured via environment variables
+
+PRODUCTION DEPLOYMENT NOTE:
+For production deployment, credentials should be managed via:
+- Secret manager (AWS Secrets Manager, Google Secret Manager, etc.)
+- Environment variable injection (Kubernetes secrets, Docker secrets)
+- Encrypted configuration management (Ansible Vault, etc.)
+
+Current setup is appropriate for development/staging environments with filesystem-level access control.
+
+See GOVERNANCE.md → Security Standards for complete security controls.
