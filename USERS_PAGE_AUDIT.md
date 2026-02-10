@@ -250,6 +250,37 @@ After fixing the syntax error, testing revealed **JavaScript API endpoint issues
 
 All API calls now use correct endpoints. Users page fully functional.
 
+## 🔧 Issue #3: Roles Page Returning Raw JSON (Commit: 55f18c4)
+
+**Problem:** Navigating to `/admin/roles` (Organization Roles) displayed raw JSON instead of the page view.
+
+**JSON Output:**
+```json
+[{"id":1,"name":"super_admin","display_name":"Super Administrator",...}]
+```
+
+**Root Cause:** Route was calling `RoleController::index()` which has return type `JsonResponse` - designed for API calls, not page views.
+
+**Fix Applied:**
+1. ✅ Added `roles()` method to UserController (consistent with `pending()`, `invitations()`)
+2. ✅ Method returns `view('admin.users', ['activeTab' => 'roles'])`
+3. ✅ Updated route from `RoleController::index` to `UserController::roles`
+4. ✅ RoleController::index remains available for API usage if needed
+5. ✅ JavaScript already using correct `/api/org-roles.php` endpoint
+
+**Route Pattern (now consistent):**
+- `/admin/users` → UserController::index (activeTab='active')  
+- `/admin/users/pending` → UserController::pending (activeTab='pending')  
+- `/admin/users/invitations` → UserController::invitations (activeTab='invitations')  
+- `/admin/roles` → UserController::roles (activeTab='roles')  
+
+Organization Roles now renders properly as a subtab within the Users page.
+
+---
+
+All API calls now use correct endpoints. Users page fully functional.
+
+
 ---
 
 **Resolution:** 
