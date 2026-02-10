@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Feb 10 07:32:22 PM UTC 2026
+ * Generated: Tue Feb 10 07:40:01 PM UTC 2026
  */
 
 
@@ -1788,8 +1788,8 @@ html {
     /* Google Admin style: Light gold pill background for active submenu */
     background: rgba(201, 151, 0, 0.2); /* Gold with 20% opacity */
     opacity: 1;
-    font-weight: var(--font-normal) !important;
-    color: #FFD700; /* Brighter gold text */
+    font-weight: var(--font-medium) !important; /* Slightly bolder for readability */
+    color: #2D1F05; /* Dark brown/black for contrast against gold background */
     border-radius: 4px; /* Pill shape */
     margin-right: var(--space-2); /* Slight margin for pill effect */
 }
