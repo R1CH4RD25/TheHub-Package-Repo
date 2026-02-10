@@ -117,45 +117,45 @@ class EnterpriseSidebar
                             </a>
 
                         <?php elseif ($item['type'] === 'expandable'): ?>
-                            <div class="nav-expandable <?= $isActive ? 'expanded' : '' ?>" data-nav-item="<?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>">
-                                <?php if (!empty($item['url'])): ?>
-                                    <!-- Expandable with clickable URL -->
-                                    <div class="nav-expandable-wrapper">
-                                        <a href="<?= htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') ?>"
-                                            class="<?= $navLinkClass . $activeClass ?>"
-                                            title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
-                                            <?php if (!empty($item['data_tab'])): ?>
-                                            data-tab="<?= htmlspecialchars($item['data_tab'], ENT_QUOTES, 'UTF-8') ?>"
-                                            <?php endif; ?>>
-                                            <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
-                                            <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
-                                        </a>
-                                        <button class="nav-expand-toggle" aria-label="Toggle submenu">
-                                            <i class="fas fa-chevron-down nav-expand-icon"></i>
-                                        </button>
-                                    </div>
-                                <?php else: ?>
-                                    <!-- Expandable button only -->
-                                    <div class="nav-expandable-wrapper">
-                                        <button class="<?= $navLinkClass . $activeClass ?>"
-                                            title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
-                                            aria-expanded="<?= $isActive ? 'true' : 'false' ?>">
-                                            <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
-                                            <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
-                                        </button>
-                                        <button class="nav-expand-toggle" aria-label="Toggle submenu">
-                                            <i class="fas fa-chevron-down nav-expand-icon"></i>
-                                        </button>
-                                    </div>
-                                <?php endif; ?>
+                            <?php
+                            // Check if any submenu item is active
+                            $hasActiveChild = false;
+                            $activeChildId = null;
+                            if (!empty($item['submenu'])) {
+                                foreach ($item['submenu'] as $subitem) {
+                                    if (($subitem['active'] ?? false) === true) {
+                                        $hasActiveChild = true;
+                                        $activeChildId = $subitem['id'] ?? null;
+                                        break;
+                                    }
+                                }
+                            }
+                            $parentId = $item['id'];
+                            ?>
+                            <div class="nav-expandable <?= $hasActiveChild ? 'expanded has-active-child' : '' ?>" 
+                                 data-nav-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
+                                <!-- Google-style expandable: chevron on left, parent highlights only when collapsed -->
+                                <button class="<?= $navLinkClass ?> nav-expandable-trigger"
+                                    title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
+                                    aria-expanded="<?= $hasActiveChild ? 'true' : 'false' ?>"
+                                    data-parent-id="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
+                                    <i class="fas fa-caret-right nav-expand-icon"></i>
+                                    <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                    <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                </button>
                                 <?php if (!empty($item['submenu']) && count($item['submenu']) > 0): ?>
-                                    <div class="nav-submenu" <?= $isActive ? '' : 'style="display: none;"' ?>>
+                                    <div class="nav-submenu" 
+                                         data-nav-submenu="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
+                                         <?= $hasActiveChild ? '' : 'style="display: none;"' ?>>
                                         <?php foreach ($item['submenu'] as $subitem): ?>
                                             <?php
-                                            $subActive = ($subitem['id'] ?? null) === $opts['active_item'] ? ' active' : '';
+                                            $isSubitemActive = ($subitem['active'] ?? false) === true;
                                             ?>
                                             <a href="<?= htmlspecialchars($subitem['url'], ENT_QUOTES, 'UTF-8') ?>"
-                                                class="<?= $navLinkClass ?> nav-sublink<?= $subActive ?>"
+                                                class="<?= $navLinkClass ?> nav-sublink"
+                                                data-nav-child
+                                                data-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
+                                                data-active="<?= $isSubitemActive ? 'true' : 'false' ?>"
                                                 <?php if (!empty($subitem['data_tab'])): ?>
                                                 data-tab="<?= htmlspecialchars($subitem['data_tab'], ENT_QUOTES, 'UTF-8') ?>"
                                                 <?php endif; ?>>
@@ -164,7 +164,8 @@ class EnterpriseSidebar
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
-                            </div>
+                            </div> <!-- Close nav-expandable -->
+
                         <?php endif; ?>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -191,16 +192,22 @@ class EnterpriseSidebar
         <!-- Sidebar Toggle Script -->
         <script nonce="<?php echo CSP_NONCE; ?>">
             (function() {
+                const DEBUG = true; // Set to false to disable logging
+                const log = (...args) => DEBUG && console.log('🔧 SIDEBAR:', ...args);
+                
                 const sidebar = document.querySelector('[data-sidebar="enterprise"]');
                 const toggle = sidebar?.querySelector('.sidebar-toggle');
                 const shell = document.querySelector('.admin-shell');
                 const STORAGE_KEY = 'enterprise-sidebar-collapsed';
+
+                log('Initialized', { sidebar: !!sidebar, toggle: !!toggle, shell: !!shell });
 
                 // Restore saved state
                 const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
                 if (isCollapsed && sidebar && shell) {
                     sidebar.classList.add('collapsed');
                     shell.classList.add('has-collapsed-sidebar');
+                    log('Restored collapsed state');
                 }
 
                 // Toggle functionality
@@ -209,25 +216,78 @@ class EnterpriseSidebar
                     shell.classList.toggle('has-collapsed-sidebar');
                     const collapsed = sidebar.classList.contains('collapsed');
                     localStorage.setItem(STORAGE_KEY, collapsed);
+                    log('Toggle clicked', { collapsed });
                 });
 
-                // Expandable menu functionality
-                const expandableToggles = sidebar?.querySelectorAll('.nav-expand-toggle');
-                expandableToggles?.forEach(toggle => {
-                    toggle.addEventListener('click', (e) => {
+                // Expandable menu functionality (Google Admin style)
+                const expandableTriggers = sidebar?.querySelectorAll('.nav-expandable-trigger');
+                log('Found expandable triggers:', expandableTriggers?.length);
+                
+                // Google Admin Pattern: Sync active highlights based on expanded state
+                function syncActiveHighlights() {
+                    const isNavCollapsed = sidebar?.classList.contains('collapsed');
+                    
+                    sidebar?.querySelectorAll('[data-nav-parent]').forEach(expandableSection => {
+                        const parentId = expandableSection.dataset.navParent;
+                        const parentBtn = expandableSection.querySelector('.nav-expandable-trigger');
+                        const submenu = expandableSection.querySelector('.nav-submenu');
+                        const isSectionExpanded = expandableSection.classList.contains('expanded');
+                        
+                        // Find active child
+                        const activeChild = expandableSection.querySelector('[data-nav-child][data-active="true"]');
+                        const hasActiveChild = !!activeChild;
+                        
+                        // Clear existing highlights
+                        parentBtn?.classList.remove('active', 'has-active-descendant');
+                        expandableSection.querySelectorAll('[data-nav-child]').forEach(child => {
+                            child.classList.remove('active');
+                        });
+                        
+                        if (hasActiveChild) {
+                            // KEY RULE (Google Admin style):
+                            // Only highlight child if section is expanded AND nav isn't collapsed
+                            const highlightChild = !isNavCollapsed && isSectionExpanded;
+                            
+                            if (highlightChild) {
+                                // Section open: highlight the active submenu item
+                                activeChild.classList.add('active');
+                                parentBtn?.classList.add('has-active-descendant'); // subtle state
+                            } else {
+                                // Section closed or nav collapsed: highlight parent only
+                                parentBtn?.classList.add('active');
+                            }
+                        }
+                    });
+                    
+                    log('Active highlights synced', { isNavCollapsed });
+                }
+                
+                // Initial sync on page load
+                syncActiveHighlights();
+                
+                expandableTriggers?.forEach((trigger, index) => {
+                    const parent = trigger.closest('.nav-expandable');
+                    const itemLabel = trigger.querySelector('span')?.textContent?.trim();
+                    log(`Setup trigger ${index}:`, itemLabel);
+                    
+                    trigger.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const parent = toggle.closest('.nav-expandable');
+                        
+                        const parent = trigger.closest('.nav-expandable');
                         const submenu = parent.querySelector('.nav-submenu');
-                        const icon = toggle.querySelector('.nav-expand-icon');
+                        const icon = trigger.querySelector('.nav-expand-icon');
                         const isExpanded = parent.classList.contains('expanded');
+                        
+                        log('Click on:', itemLabel, { wasExpanded: isExpanded });
 
                         // Close all other expandables
                         sidebar.querySelectorAll('.nav-expandable').forEach(item => {
                             if (item !== parent) {
                                 item.classList.remove('expanded');
                                 item.querySelector('.nav-submenu')?.style.setProperty('display', 'none');
-                                item.querySelector('.nav-expand-icon')?.style.setProperty('transform', 'rotate(0deg)');
+                                const otherIcon = item.querySelector('.nav-expand-icon');
+                                if (otherIcon) otherIcon.style.setProperty('transform', 'rotate(0deg)');
                             }
                         });
 
@@ -237,9 +297,19 @@ class EnterpriseSidebar
                             submenu.style.display = isExpanded ? 'none' : 'block';
                         }
                         if (icon) {
-                            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+                            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
                         }
+                        
+                        // Re-sync highlights after toggle
+                        syncActiveHighlights();
+                        
+                        log('Toggled to:', parent.classList.contains('expanded'));
                     });
+                });
+                
+                // Re-sync highlights when sidebar is collapsed/expanded
+                toggle?.addEventListener('click', () => {
+                    setTimeout(syncActiveHighlights, 50); // Small delay for transition
                 });
             })();
         </script>

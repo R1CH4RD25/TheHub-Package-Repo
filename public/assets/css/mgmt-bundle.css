@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Wed Jan 14 05:11:25 PM UTC 2026
+ * Generated: Tue Feb 10 07:29:11 PM UTC 2026
  */
 
 
@@ -1691,6 +1691,129 @@ html {
     max-width: 480px;
 }
 
+/* SIDEBAR NAVIGATION LINKS */
+.admin-nav-link,
+.mgmt-nav-link {
+    padding-left: 14px; /* Space for chevron on expandable items */
+}
+
+/* Expandable items: chevron at very left edge, minimal padding */
+.nav-expandable .admin-nav-link,
+.nav-expandable .mgmt-nav-link {
+    padding-left: 8px; /* Adjusted for negative margin on caret */
+}
+
+/* ========================================
+   EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
+   ======================================== */
+
+.nav-expandable {
+    position: relative;
+    overflow: visible;
+    margin: 0;
+    margin-left: -18px; /* CRITICAL: Required for proper alignment with sidebar edge */
+    padding: 0;
+}
+
+.nav-expandable-trigger {
+    width: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0;
+    margin: 0;
+}
+
+/* Chevron icon on LEFT side - Google style (solid filled triangle) */
+.nav-expand-icon {
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    color: #6B7280 !important;
+    transition: transform 0.15s ease;
+    margin-right: -11px; /* CRITICAL: Required for precise icon spacing and alignment */
+    flex-shrink: 0;
+}
+
+.nav-expandable.expanded .nav-expand-icon {
+    transform: rotate(90deg);
+}
+
+.nav-expandable-trigger:hover .nav-expand-icon {
+    color: #374151 !important; /* Darker on hover */
+}
+
+/* Main icon after chevron */
+.nav-expandable-trigger > i:not(.nav-expand-icon) {
+    margin-right: var(--space-1);
+}
+
+.nav-submenu {
+    background: transparent;
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.admin-nav-link.nav-sublink,
+.mgmt-nav-link.nav-sublink {
+    padding-left: var(--space-10) !important; /* Deep indent like Google */
+    font-size: var(--text-md) !important; /* Same size as parent, just not bold */
+    font-weight: var(--font-normal) !important; /* Not bold - 400 */
+    opacity: 0.85;
+}
+
+.admin-nav-link.nav-sublink span,
+.mgmt-nav-link.nav-sublink span {
+    font-weight: var(--font-normal) !important; /* Not bold - 400 */
+}
+
+.admin-nav-link.nav-sublink i,
+.mgmt-nav-link.nav-sublink i {
+    display: none; /* Hide submenu icons */
+}
+
+.admin-nav-link.nav-sublink:hover,
+.mgmt-nav-link.nav-sublink:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+    font-weight: var(--font-normal) !important;
+}
+
+.admin-nav-link.nav-sublink.active,
+.mgmt-nav-link.nav-sublink.active {
+    background: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+    font-weight: var(--font-normal) !important; /* Keep normal weight even when active */
+}
+
+/* Google Admin Pattern: Parent button highlighting
+ * - When section expanded: highlight child, parent gets subtle state
+ * - When section collapsed: highlight parent only
+ */
+.nav-expandable-trigger.has-active-descendant {
+    /* Subtle indication that a child is active (only when section is expanded) */
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-expandable-trigger.active {
+    /* Parent is highlighted when section is collapsed */
+    background: var(--nd-gold);
+    color: white;
+}
+
+.nav-expandable-trigger.active .nav-expand-icon {
+    color: white !important;
+}
+
+/* Collapsed sidebar handling */
+.admin-sidebar.collapsed .nav-submenu {
+    display: none !important;
+}
+
 /* ========== admin/admin-layout.css ========== */
 
 /**
@@ -1830,7 +1953,6 @@ html {
     text-decoration: none;
     color: var(--gray-800);
     font-size: var(--text-md);
-    font-weight: var(--font-medium, 500);
     transition: all var(--transition-fast);
     cursor: pointer;
     border: none;
@@ -2396,13 +2518,50 @@ html {
     z-index: 1;
 }
 
-.admin-tab.active {
+/* Main content area (replaces tab system with sidebar navigation) */
+.admin-main-content {
     display: flex;
+    flex-direction: column;
     opacity: 1;
     padding: var(--space-4);
+    height: 100%;
 }
 
-/* Fixed tab header - stays at top */
+/* Fixed content header - stays at top */
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem var(--space-4);
+    margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0;
+    background: white;
+    border-bottom: 2px solid var(--border-primary);
+    flex-shrink: 0;
+    min-height: 60px;
+}
+
+.content-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.content-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Legacy tab class names - map to new names for backwards compatibility */
+.admin-tab.active {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    padding: var(--space-4);
+    height: 100%;
+}
+
 .tab-header {
     display: flex;
     justify-content: space-between;
@@ -2428,28 +2587,30 @@ html {
     flex-shrink: 0;
 }
 
-/* Scrollable content area */
+/* Scrollable content body */
+.content-body,
 .tab-content-scroll {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0;
+    padding-top: var(--space-4);
     background: white;
     min-width: 0;
 }
 
-/* Package Manager tab - content should not stretch vertically */
+/* Package Manager - content should not stretch vertically */
+#tab-packages .content-body,
 #tab-packages .tab-content-scroll {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     padding: 1.5rem;
-    /* Reduce padding for more compact layout */
 }
 
+#tab-packages .content-body>*:last-child,
 #tab-packages .tab-content-scroll>*:last-child {
     flex: 0 0 auto;
-    /* Don't stretch, use natural height */
 }
 
 /* Reduce spacing in Package Manager for more compact layout */
@@ -2461,18 +2622,21 @@ html {
 
 /* Wider padding on large screens for better content framing */
 @media (min-width: 1600px) {
+    .content-body,
     .tab-content-scroll {
         padding: 2.5rem 3rem;
     }
 }
 
 @media (min-width: 2000px) {
+    .content-body,
     .tab-content-scroll {
         padding: 3rem 4rem;
     }
 }
 
 /* Ensure all direct children respect container width */
+.content-body>*,
 .tab-content-scroll>* {
     max-width: 100%;
 }

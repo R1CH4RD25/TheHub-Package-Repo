@@ -923,3 +923,67 @@
     margin-bottom: var(--space-6);
     max-width: 480px;
 }
+
+/* ========================================
+   EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
+   ======================================== */
+
+.nav-expandable {
+    position: relative;
+}
+
+.nav-expandable-trigger {
+    width: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+/* Hide the chevron icon completely */
+.nav-expand-icon {
+    display: none !important;
+}
+
+.nav-submenu {
+    background: transparent;
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.admin-nav-link.nav-sublink {
+    padding-left: var(--space-10) !important; /* Deep indent like Google */
+    font-size: var(--text-sm) !important;
+    font-weight: var(--font-normal) !important; /* Not bold - 400 */
+    opacity: 0.85;
+}
+
+.admin-nav-link.nav-sublink span,
+.mgmt-nav-link.nav-sublink span {
+    font-weight: var(--font-normal) !important; /* Not bold - 400 */
+}
+
+.admin-nav-link.nav-sublink i,
+.mgmt-nav-link.nav-sublink i {
+    display: none; /* Hide submenu icons */
+}
+
+.admin-nav-link.nav-sublink:hover,
+.mgmt-nav-link.nav-sublink:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+    font-weight: var(--font-normal) !important;
+}
+
+.admin-nav-link.nav-sublink.active,
+.mgmt-nav-link.nav-sublink.active {
+    background: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+    font-weight: var(--font-normal) !important; /* Keep normal weight even when active */
+}
+
+/* Collapsed sidebar handling */
+.admin-sidebar.collapsed .nav-submenu {
+    display: none !important;
+}

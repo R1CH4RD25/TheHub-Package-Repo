@@ -1156,54 +1156,28 @@
     max-width: 480px;
 }
 
+/* SIDEBAR NAVIGATION LINKS */
+.admin-nav-link,
+.mgmt-nav-link {
+    padding-left: 14px; /* Space for chevron on expandable items */
+}
+
+/* Expandable items: chevron at very left edge, minimal padding */
+.nav-expandable .admin-nav-link,
+.nav-expandable .mgmt-nav-link {
+    padding-left: 8px; /* Adjusted for negative margin on caret */
+}
+
 /* ========================================
    EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
    ======================================== */
 
 .nav-expandable {
     position: relative;
-}
-
-.nav-expandable-wrapper {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    position: relative;
-}
-
-.nav-expandable-wrapper > a,
-.nav-expandable-wrapper > button {
-    flex: 1;
-}
-
-.nav-expand-toggle {
-    position: absolute;
-    right: var(--space-2);
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: var(--radius-base);
-    transition: background-color 0.15s ease;
-    z-index: 10;
-}
-
-.nav-expand-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.nav-expand-icon {
-    font-size: 12px;
-    color: var(--gray-100);
-    transition: transform 0.2s ease;
-}
-
-.nav-expandable.expanded .nav-expand-icon {
-    transform: rotate(180deg);
+    overflow: visible;
+    margin: 0;
+    margin-left: -18px; /* CRITICAL: Required for proper alignment with sidebar edge */
+    padding: 0;
 }
 
 .nav-expandable-trigger {
@@ -1212,11 +1186,34 @@
     background: transparent;
     cursor: pointer;
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0;
+    margin: 0;
 }
 
-/* Hide the old chevron icon completely (legacy) */
-.nav-expandable-trigger .nav-expand-icon {
-    display: none !important;
+/* Chevron icon on LEFT side - Google style (solid filled triangle) */
+.nav-expand-icon {
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    color: #6B7280 !important;
+    transition: transform 0.15s ease;
+    margin-right: -11px; /* CRITICAL: Required for precise icon spacing and alignment */
+    flex-shrink: 0;
+}
+
+.nav-expandable.expanded .nav-expand-icon {
+    transform: rotate(90deg);
+}
+
+.nav-expandable-trigger:hover .nav-expand-icon {
+    color: #374151 !important; /* Darker on hover */
+}
+
+/* Main icon after chevron */
+.nav-expandable-trigger > i:not(.nav-expand-icon) {
+    margin-right: var(--space-1);
 }
 
 .nav-submenu {
@@ -1256,6 +1253,25 @@
     background: rgba(255, 255, 255, 0.15);
     opacity: 1;
     font-weight: var(--font-normal) !important; /* Keep normal weight even when active */
+}
+
+/* Google Admin Pattern: Parent button highlighting
+ * - When section expanded: highlight child, parent gets subtle state
+ * - When section collapsed: highlight parent only
+ */
+.nav-expandable-trigger.has-active-descendant {
+    /* Subtle indication that a child is active (only when section is expanded) */
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-expandable-trigger.active {
+    /* Parent is highlighted when section is collapsed */
+    background: var(--nd-gold);
+    color: white;
+}
+
+.nav-expandable-trigger.active .nav-expand-icon {
+    color: white !important;
 }
 
 /* Collapsed sidebar handling */
