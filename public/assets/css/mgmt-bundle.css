@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Tue Feb 10 07:29:11 PM UTC 2026
+ * Generated: Tue Feb 10 07:32:22 PM UTC 2026
  */
 
 
@@ -1785,9 +1785,13 @@ html {
 
 .admin-nav-link.nav-sublink.active,
 .mgmt-nav-link.nav-sublink.active {
-    background: rgba(255, 255, 255, 0.15);
+    /* Google Admin style: Light gold pill background for active submenu */
+    background: rgba(201, 151, 0, 0.2); /* Gold with 20% opacity */
     opacity: 1;
-    font-weight: var(--font-normal) !important; /* Keep normal weight even when active */
+    font-weight: var(--font-normal) !important;
+    color: #FFD700; /* Brighter gold text */
+    border-radius: 4px; /* Pill shape */
+    margin-right: var(--space-2); /* Slight margin for pill effect */
 }
 
 /* Google Admin Pattern: Parent button highlighting
