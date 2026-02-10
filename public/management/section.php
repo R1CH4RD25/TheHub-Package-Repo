@@ -42,121 +42,179 @@ $statuses = $mc->getStatuses($section['id']);
 
 // Get Management branding
 $mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
+$mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
+
+// Get sections for sidebar
+if ($userRole === 'super_admin') {
+    $sections = $mc->getSectionsWithCounts();
+} else {
+    $sections = $mc->getSectionsWithCounts($userId);
+}
+
+// Build navigation items for sidebar
+$navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections, $slug);
 
 $pageTitle = $mgmtDisplayName . ' - ' . $section['name'];
+$siteName = SiteSettings::get('site_name', 'The Hub');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php Hub\Layout::renderHead($pageTitle, 'command'); ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($pageTitle) ?> - <?= htmlspecialchars($siteName) ?></title>
+
+    <!-- MGMT BUNDLE (Enterprise Design) -->
+    <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
 </head>
-<body>
+<body class="admin-root">
+    <div class="admin-shell">
+        <?php
+        // Render Enterprise Sidebar
+        \Hub\Components\EnterpriseSidebar::render($user, $userRole, [
+            'context' => 'management',
+            'title' => $mgmtDisplayName,
+            'icon' => $mgmtIcon,
+            'logo_url' => '/management/',
+            'nav_items' => $navItems,
+            'active_item' => $slug
+        ]);
 
-<?php Hub\Layout::renderHeader($user, $userRole, 'command'); ?>
+        // Render Enterprise Header
+        \Hub\Components\EnterpriseHeader::render($user, $userRole, [
+            'context' => 'management',
+            'breadcrumbs' => [
+                ['label' => 'Home', 'url' => '/hub.php'],
+                ['label' => $mgmtDisplayName, 'url' => '/management/'],
+                ['label' => $section['name']]
+            ],
+            'show_notifications' => true
+        ]);
+        ?>
 
-<!-- Styles loaded from management.css -->
-}
-</style>
+        <!-- Main Content Area -->
+        <main class="admin-main">
+            <div class="admin-page-header">
+                <div class="admin-page-header-content">
+                    <?php if ($section['icon']): ?>
+                        <div class="admin-page-icon">
+                            <i class="<?= htmlspecialchars($section['icon']) ?>"></i>
+                        </div>
+                    <?php endif; ?>
+                    <div>
+                        <div class="admin-page-subtitle"><?= htmlspecialchars($mgmtDisplayName) ?></div>
+                        <h1 class="admin-page-title"><?= htmlspecialchars($section['name']) ?></h1>
+                    </div>
+                </div>
+                <div class="admin-page-actions">
+                    <a href="/management/" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
 
-<div class="mgmt-section-container">
-    <!-- Section Header with Back Button -->
-    <div class="mgmt-section-header">
-        <div class="mgmt-section-info">
-            <a href="/management/" class="btn btn-outline-secondary me-3" title="Back to Section Selector">
-                <i class="bi bi-arrow-left"></i> Back
-            </a>
-            <?php if ($section['icon']): ?>
-            <div class="mgmt-section-icon-large"><i class="<?= htmlspecialchars($section['icon']) ?>"></i></div>
-            <?php endif; ?>
-                        <div class="mgmt-section-details">
-                <div class="mgmt-section-subtitle"><?= htmlspecialchars($mgmtDisplayName) ?></div>
-                <h1><?= htmlspecialchars($section['name']) ?></h1>
+            <!-- Filters Bar -->
+            <div class="nd-command-bar">
+                <div class="nd-command-bar-section">
+                    <div class="nd-filter-group">
+                        <label class="nd-filter-label">Status</label>
+                        <select id="filter-status" class="nd-filter-select">
+                            <option value="">All Statuses</option>
+                            <?php foreach ($statuses as $status): ?>
+                            <option value="<?= $status['id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="nd-filter-group">
+                        <label class="nd-filter-label">Priority</label>
+                        <select id="filter-priority" class="nd-filter-select">
+                            <option value="">All Priorities</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="high">High</option>
+                            <option value="normal">Normal</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="nd-filter-group">
+                        <label class="nd-filter-label">Date From</label>
+                        <input type="date" id="filter-date-from" class="nd-filter-input">
+                    </div>
+                    <div class="nd-filter-group">
+                        <label class="nd-filter-label">Date To</label>
+                        <input type="date" id="filter-date-to" class="nd-filter-input">
+                    </div>
+                </div>
+                <div class="nd-command-bar-section">
+                    <button id="btn-apply-filters" class="btn btn-sm btn-primary">
+                        <i class="bi bi-funnel-fill"></i> Apply
+                    </button>
+                    <button id="btn-clear-filters" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </button>
+                </div>
             </div>
-        </div>
-        </div>
-    </div>
 
-    <!-- Filters -->
-    <div class="mgmt-filters-bar">
-        <div class="mgmt-filters-row">
-            <div class="mgmt-filter-group">
-                <label>Status</label>
-                <select id="filter-status" class="form-select">
-                    <option value="">All Statuses</option>
-                    <?php foreach ($statuses as $status): ?>
-                    <option value="<?= $status['id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <!-- Bulk Actions Bar -->
+            <div class="nd-bulk-actions" id="bulk-actions-bar" style="display: none;">
+                <div class="nd-bulk-actions-inner">
+                    <div class="nd-bulk-actions-label">
+                        <i class="bi bi-check-square"></i> <span id="selected-count">0</span> selected
+                    </div>
+                    <select id="bulk-action" class="nd-filter-select" style="width: 200px;">
+                        <option value="">Bulk Actions...</option>
+                        <option value="assign">Assign To...</option>
+                        <option value="status">Change Status...</option>
+                        <option value="delete">Delete Selected</option>
+                    </select>
+                    <button id="btn-apply-bulk" class="btn btn-sm btn-warning">Apply</button>
+                    <button id="btn-cancel-bulk" class="btn btn-sm btn-secondary">Cancel</button>
+                </div>
             </div>
-            <div class="mgmt-filter-group">
-                <label>Priority</label>
-                <select id="filter-priority" class="form-select">
-                    <option value="">All Priorities</option>
-                    <option value="urgent">Urgent</option>
-                    <option value="high">High</option>
-                    <option value="normal">Normal</option>
-                    <option value="low">Low</option>
-                </select>
-            </div>
-            <div class="mgmt-filter-group">
-                <label>Date From</label>
-                <input type="date" id="filter-date-from" class="form-control">
-            </div>
-            <div class="mgmt-filter-group">
-                <label>Date To</label>
-                <input type="date" id="filter-date-to" class="form-control">
-            </div>
-            <div class="mgmt-filter-group">
-                <label>Actions</label>
-                <button id="btn-apply-filters" class="btn btn-primary w-100">
-                    <i class="bi bi-funnel-fill"></i> Apply Filters
-                </button>
-            </div>
-            <div class="mgmt-filter-group">
-                <label>&nbsp;</label>
-                <button id="btn-clear-filters" class="btn btn-secondary w-100">
-                    <i class="bi bi-x-circle-fill"></i> Clear Filters
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Bulk Actions Bar -->
-    <div class="mgmt-bulk-actions" id="bulk-actions-bar">
-        <div class="mgmt-bulk-actions-label">
-            <i class="bi bi-check-square"></i> <span id="selected-count">0</span> selected
-        </div>
-        <select id="bulk-action" class="form-select" style="width: auto;">
-            <option value="">Bulk Actions...</option>
-            <option value="assign">Assign To...</option>
-            <option value="status">Change Status...</option>
-            <option value="delete">Delete Selected</option>
-        </select>
-        <button id="btn-apply-bulk" class="btn btn-warning btn-sm">Apply</button>
-        <button id="btn-cancel-bulk" class="btn btn-outline-secondary btn-sm">Cancel</button>
-    </div>
+            <!-- Submissions Table -->
+            <div class="nd-card">
+                <table id="submissions-table" class="nd-table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th width="40"><input type="checkbox" id="select-all"></th>
+                            <th>Display ID</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Submitted By</th>
+                            <th>Assigned To</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by DataTables -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
 
-    <!-- Submissions Table -->
-    <div class="submissions-table-container">
-        <table id="submissions-table" class="table table-hover" style="width:100%">
-            <thead>
-                <tr>
-                    <th width="40"><input type="checkbox" id="select-all"></th>
-                    <th>Display ID</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Submitted By</th>
-                    <th>Assigned To</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Populated by DataTables -->
-            </tbody>
-        </table>
-    </div>
-</div>
+        <?php
+        // Render Enterprise Footer
+        \Hub\Components\EnterpriseFooter::render($user, [
+            'context' => 'management',
+            'show_version' => true,
+            'show_user' => false,
+            'show_custom_text' => true
+        ]);
+        ?>
+    </div><!-- end admin-shell -->
 
 <script nonce="<?php echo CSP_NONCE; ?>">
 document.addEventListener('DOMContentLoaded', function() {
@@ -168,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '/command/api/submissions.php',
+            url: '/management/api/submissions.php',
             type: 'GET',
             data: function(d) {
                 d.section_id = sectionId;
@@ -189,19 +247,25 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 data: 'display_id',
                 render: function(data, type, row) {
-                    return `<a href="/command/submission.php?id=${row.id}" class="display-id">${data || row.id}</a>`;
+                    return `<a href="/management/submission.php?id=${row.id}" class="display-id">${data || row.id}</a>`;
                 }
             },
             {
                 data: 'status_name',
                 render: function(data, type, row) {
-                    return `<span class="mgmt-status-badge" style="background-color: ${row.status_color}">${data}</span>`;
+                    return `<span class="nd-pill" style="background-color: ${row.status_color}">${data}</span>`;
                 }
             },
             {
                 data: 'priority',
                 render: function(data) {
-                    return `<span class="priority-badge priority-${data}">${data.toUpperCase()}</span>`;
+                    const colors = {
+                        urgent: 'var(--error)',
+                        high: 'var(--warning)',
+                        normal: 'var(--gray-600)',
+                        low: 'var(--gray-400)'
+                    };
+                    return `<span class="nd-chip" style="background-color: ${colors[data] || colors.normal}">${data.toUpperCase()}</span>`;
                 }
             },
             {
@@ -228,11 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 orderable: false,
                 render: function(data) {
                     return `
-                        <div class="mgmt-action-buttons">
-                            <a href="/command/submission.php?id=${data}" class="btn btn-primary btn-sm" title="View">
+                        <div class="btn-group btn-group-sm">
+                            <a href="/management/submission.php?id=${data}" class="btn btn-sm btn-primary" title="View">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <button class="btn btn-outline-secondary btn-sm btn-assign" data-id="${data}" title="Assign">
+                            <button class="btn btn-sm btn-outline-secondary btn-assign" data-id="${data}" title="Assign">
                                 <i class="bi bi-person-plus"></i>
                             </button>
                         </div>
@@ -282,9 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
     $(document).on('change', '.row-select', function() {
         const id = $(this).val();
         if ($(this).prop('checked')) {
-            selectedRows.add(id);
+            selectedRows.add(id);css('display', 'block');
         } else {
-            selectedRows.delete(id);
+            $('#bulk-actions-bar').css('display', 'non
             $('#select-all').prop('checked', false);
         }
         updateBulkActions();
@@ -326,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function applyBulkAction(action, ids) {
-        fetch('/command/api/submissions.php', {
+        fetch('/management/api/submissions.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({action: action, ids: ids})
@@ -347,6 +411,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php Hub\Layout::renderFooter($user, 'command'); ?>
+    <!-- jQuery & DataTables -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- Management JS -->
+    <script src="/assets/js/management.js"></script>
 </body>
 </html>
