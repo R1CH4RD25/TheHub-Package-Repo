@@ -223,4 +223,38 @@ The edit was successful in adding the conditional logic but the closing bracket 
 ---
 
 **Audit Complete**  
-Ready to apply fix.
+**Status:** ✅ FIXED
+
+## 🔧 Additional Issues Found & Fixed
+
+After fixing the syntax error, testing revealed **JavaScript API endpoint issues**:
+
+**Problem:** All JavaScript fetch calls were using `/admin/invitations` and `/admin/users/*` endpoints that no longer exist after the navigation refactor.
+
+**Errors in Console:**
+- `GET /admin/invitations 404` - Invitations not loading
+- `GET /admin/users/list 404` - Active users not loading  
+- `PUT /admin/users/{id} 404` - User updates failing
+
+**Root Cause:** Navigation refactor changed page routes but didn't update API endpoints in JavaScript.
+
+**Fixes Applied (Commit: 269ea62):**
+1. ✅ `loadInvitations()`: `/admin/invitations` → `/api/invitations.php`
+2. ✅ `loadActiveUsers()`: `/admin/users/list` → `/api/users.php`
+3. ✅ `loadPendingUsers()`: `/admin/users/list?pending=true` → `/api/users.php?pending=true`
+4. ✅ `updateUser()`: `/admin/users/${userId}` → `/api/users.php?id=${userId}`
+5. ✅ Bulk deactivate: `/admin/users/${userId}` → `/api/users.php?id=${userId}`
+6. ✅ Bulk reactivate: `/admin/users/${userId}` → `/api/users.php?id=${userId}`
+7. ✅ Revoke invitation: `/admin/invitations/${id}` → `/api/invitations.php?id=${id}`
+8. ✅ Send invitation: `/admin/invitations` → `/api/invitations.php`
+
+All API calls now use correct endpoints. Users page fully functional.
+
+---
+
+**Resolution:** 
+- ✅ Syntax error fixed in commit `582ed65`
+- ✅ API endpoints fixed in commit `269ea62`
+- ✅ All user management features working
+- ✅ Layout renders correctly
+- ✅ No more 404 errors
