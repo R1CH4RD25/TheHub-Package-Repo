@@ -1,6 +1,6 @@
 /**
  * Hub Bundle - Concatenated CSS
- * Generated: Tue Feb 10 08:04:21 PM UTC 2026
+ * Generated: Tue Feb 10 08:06:01 PM UTC 2026
  */
 
 
@@ -1790,7 +1790,7 @@ html {
     opacity: 1;
     font-weight: var(--font-medium) !important; /* Slightly bolder for readability */
     color: #2D1F05; /* Dark brown/black for contrast against gold background */
-    border-radius: 4px; /* Pill shape */
+    border-radius: 12px; /* More rounded pill like Google */
     margin-right: var(--space-2); /* Slight margin for pill effect */
 }
 
@@ -1807,6 +1807,8 @@ html {
     /* Parent gets SOLID highlight when section is collapsed but has active child */
     background: var(--nd-gold) !important; /* Solid gold like before */
     color: white !important;
+    border-radius: 12px !important; /* Rounded like Google */
+    margin: 2px 4px !important; /* Spacing for rounded edges */
 }
 
 .nav-expandable-trigger.active .nav-expand-icon {
