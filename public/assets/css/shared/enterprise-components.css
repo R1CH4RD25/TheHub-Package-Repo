@@ -1285,7 +1285,7 @@
 /* Expanded section indicator (for sections you manually expand that aren't active) */
 .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
     border: 2px solid rgba(201, 151, 0, 0.6) !important; /* Gold border */
-    border-radius: 6px !important;
+    border-radius: 0 6px 6px 0 !important; /* Round only right side */
     margin: 2px 4px !important;
 }
 
