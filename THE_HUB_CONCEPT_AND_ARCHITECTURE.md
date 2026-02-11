@@ -1,9 +1,9 @@
 # The Hub: Modular School District Platform
 **Comprehensive Overview for External Auditors**
 
-**Document Version:** 1.0  
-**Last Updated:** February 11, 2026  
-**Author:** Woodson ISD Technology Department  
+**Document Version:** 1.0
+**Last Updated:** February 11, 2026
+**Author:** Woodson ISD Technology Department
 **Status:** Active Development
 
 ---
@@ -53,21 +53,161 @@ Each functional area (vehicle maintenance, bullying reports, reimbursements) is 
 - Removed cleanly if no longer needed
 - Developed by different teams
 
-#### 3. **Role-Based Access Control**
+#### 3. **Three-Layer Operational Model**
+Distinct access levels with clear governance boundaries:
+- **Layer 1 (Hub):** End users submit data via quick-access forms
+- **Layer 2 (Management):** Managers review, edit, and report on submitted data
+- **Layer 3 (Administrator):** System admins configure platform and permissions
+
+#### 4. **Role-Based Access Control**
 Granular permissions at three levels:
 - **Global Roles:** Admin, Super Admin, Staff, Student
 - **Section Access:** Which modules a user can see
 - **Module Permissions:** What actions they can perform within each module
 
-#### 4. **Hub & Management Separation**
-- **Hub Interface:** User-facing tools for daily tasks (submit forms, view data)
-- **Management Console:** Administrative configuration, reporting, analytics
+#### 5. **Hub & Management Separation**
+- **Hub Interface:** User-facing tools for daily tasks (submit forms, view own data)
+- **Management Console:** Operational oversight (review all submissions, run reports, edit records with audit trail)
+- **Admin Dashboard:** Platform governance (install packages, configure roles, manage system settings)
 
 ---
 
 ## System Architecture
 
-### Three-Layer Design
+### Three-Layer Operational Model
+
+The Hub implements a **three-layer operational architecture** that separates data submission, operational oversight, and platform governance into distinct access levels with clear boundaries.
+
+#### Layer 1: Hub (End User Frontend)
+**Purpose:** Data submission and record viewing  
+**Who Uses It:** End users (staff, students, drivers)  
+**Capabilities:**
+- Submit records via quick-access card objects
+- View own submissions and history
+- Upload supporting documents (receipts, photos)
+- Track submission status
+- Fast, focused workflows designed for daily operations
+
+**Access Pattern:**
+```
+User logs in → hub.php → Click module card → Submit form → Confirmation
+```
+
+**Examples:**
+- Driver submits fuel log
+- Staff member submits bullying incident report
+- Teacher submits reimbursement request
+
+#### Layer 2: Management (Operational Oversight)
+**Purpose:** Review, edit, report on submitted data  
+**Who Uses It:** Assigned managers, supervisors, department heads  
+**Capabilities:**
+- ✅ View all submitted records in their domain
+- ✅ Edit/correct submitted data (with audit trail)
+- ✅ Run reports and analytics
+- ✅ Approve/reject workflow submissions
+- ✅ Export data to Excel/CSV
+- ❌ Cannot install packages
+- ❌ Cannot modify system configuration
+- ❌ Cannot change user roles or permissions
+
+**Manager Role Classes:**
+- `management_crew` - Operational access to specific modules
+- `management_director` - Department-wide oversight
+- `management_fleet_manager` - Domain-specific management
+- `management_supervisor` - Approval authority
+
+**Access Pattern:**
+```
+Manager logs in → Management Console → Select module → View/edit records → Audit logged
+```
+
+**Key Difference from Hub Users:**
+- Hub users → Submit own records
+- Managers → Review/edit all records in their domain
+
+**Audit Trail Protection:**
+Every manager edit creates an audit log entry with:
+- Who made the change (manager ID)
+- What was changed (before/after values)
+- When it was changed (timestamp)
+- Why it was changed (optional reason field)
+- Original submitter preserved
+
+#### Layer 3: Administrator (Platform Governance)
+**Purpose:** System setup, configuration, access control  
+**Who Uses It:** IT administrators, super admins  
+**Capabilities:**
+- ✅ Install/remove packages
+- ✅ Assign user roles and permissions
+- ✅ Configure sections and access control
+- ✅ Manage site settings and branding
+- ✅ Review audit logs
+- ✅ Backup/restore system
+- ❌ Should not routinely edit operational data
+
+**Access Pattern:**
+```
+Admin logs in → Admin Dashboard → Configure system → Changes reflected system-wide
+```
+
+**Critical Distinction:**
+- **Managers** = Operational oversight (edit data within their domain)
+- **Administrators** = Platform governance (configure the system itself)
+
+---
+
+### Operational Layer Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  LAYER 3: ADMINISTRATOR                          │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  Admin Dashboard (Platform Governance)                     │ │
+│  │  • Install packages                                        │ │
+│  │  • Configure roles and permissions                         │ │
+│  │  • Manage site settings                                    │ │
+│  │  • Review audit logs                                       │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  LAYER 2: MANAGEMENT                             │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  Management Console (Operational Oversight)                │ │
+│  │  • View all submissions in domain                          │ │
+│  │  • Edit/correct submitted records                          │ │
+│  │  • Run analytics and reports                               │ │
+│  │  • Approve/reject workflows                                │ │
+│  │  ✓ All edits logged to audit trail                         │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  LAYER 1: HUB (END USERS)                        │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  Hub Interface (Data Submission)                           │ │
+│  │  • Submit records via module cards                         │ │
+│  │  • View own submission history                             │ │
+│  │  • Upload supporting documents                             │ │
+│  │  • Track submission status                                 │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      DATABASE LAYER                              │
+│  • User submissions (with original submitter preserved)         │
+│  • Edit history (before/after snapshots)                        │
+│  • Audit trail (who/what/when for all mutations)                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Technical Layer Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -127,10 +267,21 @@ Granular permissions at three levels:
 - Update/uninstall packages safely
 
 #### Role Management (`src/Roles.php`, `SectionRoleAccess.php`)
-- Global roles (super_admin, admin, staff, student, etc.)
+- **3-Layer Role Hierarchy:**
+  - **Layer 1 (Hub):** `staff`, `student` - Submit data, view own records
+  - **Layer 2 (Management):** `manager`, `director`, `supervisor` - View/edit submissions, run reports
+  - **Layer 3 (Admin):** `admin`, `super_admin` - Platform configuration, system governance
 - Section-level access control
-- Module-specific permissions
-- "View As" capability for super admins
+- Module-specific permissions with edit authority
+- "View As" capability for super admins (operational testing)
+- **Manager Role Definition:**
+  - ✅ Can view all submissions within assigned modules
+  - ✅ Can edit/correct submitted records (with audit trail)
+  - ✅ Can run operational reports and analytics
+  - ✅ Can approve/deny workflow requests
+  - ❌ Cannot install packages or modify system configuration
+  - ❌ Cannot alter RBAC settings or assign roles
+  - ❌ Cannot modify audit logs or system settings
 
 #### Layout System (`src/Layout.php`)
 - Enterprise Microsoft 365-style design
@@ -145,8 +296,8 @@ Granular permissions at three levels:
 The Hub uses **two separate GitHub repositories** with distinct purposes:
 
 ### Repository 1: TheHub (Core Platform)
-**URL:** https://github.com/R1CH4RD25/TheHub  
-**Branch:** `laravel-migration` (active development)  
+**URL:** https://github.com/R1CH4RD25/TheHub
+**Branch:** `laravel-migration` (active development)
 **Purpose:** Core platform infrastructure
 
 #### Contains:
@@ -188,8 +339,8 @@ The Hub uses **two separate GitHub repositories** with distinct purposes:
 ---
 
 ### Repository 2: TheHub-Package-Repo (Package Ecosystem)
-**URL:** https://github.com/R1CH4RD25/TheHub-Package-Repo  
-**License:** MIT (open for community contributions)  
+**URL:** https://github.com/R1CH4RD25/TheHub-Package-Repo
+**License:** MIT (open for community contributions)
 **Purpose:** Validated package library
 
 #### Contains:
@@ -229,11 +380,11 @@ TheHub-Package-Repo/
    - Fuel logging with trip categorization
    - Maintenance scheduling and tracking
    - Fleet roster management
-   
+
 2. **Bullying Report System** `v1.0.0`
    - Anonymous incident reporting
    - Admin review and tracking
-   
+
 3. **Reimbursement Request & Fuel Tracking** `v1.0.0`
    - Monetary reimbursement workflows
    - Fuel trip tracking with approval process
@@ -497,9 +648,18 @@ Updates? → New version → Repeat cycle
 - **Session Security** (PHP sessions with HTTP-only cookies)
 - **CSRF Protection** (tokens on all POST/PUT/DELETE)
 - **SSL/TLS Required** (HTTPS enforced)
-
-### Authorization Controls
-- **Role-Based Access Control (RBAC)** - Granular permissions
+Manager Edit Authority Tracking:**
+  - When a manager edits a submitted record:
+    - Original state logged
+    - Modified state logged
+    - Actor (manager) recorded
+    - Timestamp recorded
+    - Reason for change (if provided)
+  - **Control Mechanism:** Managers can correct operational errors with full transparency
+  - **Accountability:** Every edit is traceable and reversible
+- **Database Tables**: `audit_logs` (core), package-specific logs
+- **Retention**: Indefinite (compliance requirement)
+- **Review Interface**: Admin Dashboard → Activity Logs (filterable by actor, action, date)ssions
 - **Section-Level Access** - Users only see authorized modules
 - **Module-Level Permissions** - Read vs. write vs. admin
 - **Super Admin "View As"** - Impersonation for support
@@ -709,15 +869,15 @@ POST   /api/packages.php?action=install -- Install package
 
 ## Appendix C: Contact Information
 
-**Woodson ISD Technology Department**  
-**Project Lead:** Richard Sullivan  
-**Email:** richard.sullivan@woodsonisd.net  
+**Woodson ISD Technology Department**
+**Project Lead:** Richard Sullivan
+**Email:** richard.sullivan@woodsonisd.net
 **Project Website:** https://hub.woodsonisd.net (in development)
 
-**For External Auditors:**  
+**For External Auditors:**
 Technical questions, security documentation, or system access requests should be directed to the project lead.
 
 ---
 
-**Document End**  
+**Document End**
 *This document is maintained in: `/var/www/woodson/thehub/THE_HUB_CONCEPT_AND_ARCHITECTURE.md`*
