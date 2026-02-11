@@ -500,13 +500,16 @@ Upload Package → Validation
        │               ├─── Validate structure
        │               ├─── Verify compatibility
        │               ├─── Security scan
-       │               ├─── Layer 2 compliance check:
-       │               │     • If hub_cards exists → require workflow_states
-       │               │     • If hub_cards exists → require manager_actions
-       │               │     • If hub_cards exists → require audit_events
-       │               │     • Validate state transition logic
-       │               │     • Verify editable_fields have validation rules
-       │               │     • Check audit event required_fields completeness
+       │               ├─── Layer 2 compliance check (if hub_cards exists):
+       │               │     • REQUIRE entities block
+       │               │     • REQUIRE workflow_states block
+       │               │     • REQUIRE manager_actions block
+       │               │     • REQUIRE audit_events block
+       │               │     • Validate workflow has no orphaned states
+       │               │     • Verify entity references valid tables/fields
+       │               │     • Check editable_fields have validation rules
+       │               │     • Confirm audit events specify required_fields
+       │               │     • Ensure permissions block has workflow_actions
        │               └─── Database schema validation
        │
        ▼
@@ -552,13 +555,16 @@ Packages use a JSON-based `.hubpkg` format with comprehensive metadata. The spec
 | **Required Fields** | All | Package identity, versioning, compatibility | ✅ Always |
 | **hub_cards** | Layer 1 | User-facing submission entry points | ✅ For user-facing packages |
 | **management_sections** | Layer 2 | Manager oversight/review interfaces | ✅ If hub_cards exists |
+| **entities** | Layer 2 | Governed database objects (tables/records) | ✅ If hub_cards exists |
 | **workflow_states** | Layer 2 | Submission lifecycle (SUBMITTED→APPROVED) | ✅ If hub_cards exists |
-| **manager_actions** | Layer 2 | Edit boundaries, field-level permissions | ✅ If hub_cards exists |
+| **manager_actions** | Layer 2 | Field-level edit constraints | ✅ If hub_cards exists |
 | **audit_events** | Layer 2 | Required logging taxonomy | ✅ If hub_cards exists |
 | **database** | All | Schema provisioning | ✅ For packages with data storage |
-| **permissions** | All | Role-to-capability mapping | ✅ Always |
+| **permissions** | All | Role-to-capability mapping (single source of truth) | ✅ Always |
 
-**Validation Rule:** Packages with `hub_cards` (Layer 1 submission entry points) **MUST** include `workflow_states`, `manager_actions`, and `audit_events` to support the Management Layer (Layer 2).
+**Validation Rule:** Packages with `hub_cards` (Layer 1 submission entry points) **MUST** include `entities`, `workflow_states`, `manager_actions`, and `audit_events` to support the Management Layer (Layer 2).
+
+**Platform Enforcement:** TheHub's PackageManager validates these requirements at install time and rejects non-compliant packages.
 
 ---
 
@@ -636,9 +642,38 @@ Packages use a JSON-based `.hubpkg` format with comprehensive metadata. The spec
 
 ### Management Layer Specification (Layer 2 Support)
 
-To formally support **manager oversight, edit authority, and audit-grade workflows**, packages must define three additional blocks:
+To formally support **manager oversight, edit authority, and audit-grade workflows**, packages must define four additional blocks:
 
-#### 1. Workflow States (Submission Lifecycle)
+#### 1. Entities (Governed Objects)
+Defines **which database tables/records are subject to workflow and manager oversight**:
+
+```json
+"entities": [
+  {
+    "id": "fuel_log",
+    "label": "Fuel Log Entry",
+    "table": "vm_fuel_logs",
+    "primary_key": "id",
+    "owner_field": "created_by_user_id",
+    "status_field": "status",
+    "workflow": "fuel_log_workflow",
+    "description": "User-submitted fuel purchase records requiring manager review"
+  }
+]
+```
+
+**Purpose:** Explicitly declares which tables contain submission data subject to Layer 2 oversight. Links workflow states, manager actions, and audit events to specific database entities.
+
+**Required Fields:**
+- `id` - Unique entity identifier
+- `table` - Database table name
+- `owner_field` - Column storing original submitter (immutable)
+- `status_field` - Column tracking workflow state
+- `workflow` - References a workflow_states definition
+
+---
+
+#### 2. Workflow States (Submission Lifecycle)
 Defines the lifecycle states a record can have and which transitions are allowed:
 
 ```json
@@ -701,7 +736,9 @@ Defines the lifecycle states a record can have and which transitions are allowed
 
 **Purpose:** Makes submission lifecycle explicit and enforceable. Platform can validate state transitions and prevent invalid operations.
 
-#### 2. Manager Actions (Edit Boundaries)
+---
+
+#### 3. Manager Actions (Edit Boundaries)
 Defines **what managers can edit, when they can edit it, and what restrictions apply**:
 
 ```json
@@ -740,36 +777,17 @@ Defines **what managers can edit, when they can edit it, and what restrictions a
     "created_by_user_id",
     "vehicle_id",
     "original_submission_data"
-  ],
-  "capabilities_by_role": {
-    "management_crew": {
-      "can_edit": true,
-      "can_approve": false,
-      "can_reject": false,
-      "can_delete": false,
-      "can_export": true
-    },
-    "management_director": {
-      "can_edit": true,
-      "can_approve": true,
-      "can_reject": true,
-      "can_delete": false,
-      "can_export": true
-    },
-    "management_admin": {
-      "can_edit": true,
-      "can_approve": true,
-      "can_reject": true,
-      "can_delete": true,
-      "can_export": true
-    }
-  }
+  ]
 }
 ```
 
 **Purpose:** Creates an **explicit edit authority boundary** that administrators can review and auditors can verify. Makes "manager can correct errors" a first-class, enforceable concept.
 
-#### 3. Audit Events (Logging Taxonomy)
+**Note:** Role-based capabilities (who can edit/approve/reject) are defined in the `permissions` block, not duplicated here. This block focuses solely on **field-level constraints**.
+
+---
+
+#### 4. Audit Events (Logging Taxonomy)
 Defines **what events must be logged and what data must be captured**:
 
 ```json
@@ -816,13 +834,58 @@ Defines **what events must be logged and what data must be captured**:
   "audit_requirements": {
     "retention_days": null,
     "immutable": true,
-    "log_table": "vm_audit_logs",
-    "global_log": true
+    "package_log_table": "vm_audit_logs",
+    "use_global_log": true
   }
 }
 ```
 
 **Purpose:** Standardizes audit logging across packages. Platform can validate that required events are logged and required fields are captured. Provides **audit-grade traceability** for manager actions.
+
+**Audit Storage:**
+- `use_global_log: true` (required) - All events MUST be logged to core `audit_logs` table
+- `package_log_table` (optional) - Package may maintain additional domain-specific audit table
+
+---
+
+### Package Specification vs Platform Validation
+
+**Important Distinction:**
+
+| Aspect | .hubpkg Specification | Platform Validator |
+|--------|----------------------|--------------------|
+| **What it is** | Declarations in package.json | TheHub's PackageManager enforcement |
+| **Purpose** | Package author declares structure | Platform verifies and enforces at install/runtime |
+| **Examples** | `workflow_states`, `manager_actions` blocks | Validates state transitions, checks field constraints |
+| **Auditor view** | "Declared controls" | "Enforced controls" |
+
+**Declared Controls (.hubpkg file):**
+```json
+{
+  "entities": [...],
+  "workflow_states": {...},
+  "manager_actions": {...},
+  "audit_events": {...}
+}
+```
+
+**Enforced Controls (PackageManager.php):**
+```php
+// At install time:
+- Validate hub_cards → require entities, workflow_states, manager_actions, audit_events
+- Verify workflow transitions have no orphaned states
+- Check editable_fields have validation rules
+- Confirm audit events specify required_fields
+
+// At runtime (via package code):
+- Enforce state transitions via WorkflowValidator
+- Validate field edits against manager_actions
+- Log all mutations to global audit_logs table
+- Require correction reasons when specified
+```
+
+**Why This Matters:**
+Auditors need to see both (1) what the package declares it will do and (2) what the platform actually enforces. This separation makes controls auditable.
 
 ---
 
@@ -837,7 +900,7 @@ Defines **what events must be logged and what data must be captured**:
   "description": "Fleet management with fuel logging, maintenance tracking, and manager oversight",
   "category": "operations",
   "hub_version_min": "1.0.0",
-  
+
   "hub_cards": [
     {
       "id": "submit-fuel-log",
@@ -848,7 +911,7 @@ Defines **what events must be logged and what data must be captured**:
       "modules": ["fuel-entry-form"]
     }
   ],
-  
+
   "management_sections": [
     {
       "id": "fuel-management",
@@ -859,13 +922,27 @@ Defines **what events must be logged and what data must be captured**:
       "modules": ["fuel-log-review", "fuel-log-reports"]
     }
   ],
-  
+
+  "entities": [
+    {
+      "id": "fuel_log",
+      "label": "Fuel Log Entry",
+      "table": "vm_fuel_logs",
+      "primary_key": "id",
+      "owner_field": "created_by_user_id",
+      "status_field": "status",
+      "workflow": "fuel_log_workflow",
+      "description": "User-submitted fuel purchase records"
+    }
+  ],
+
   "workflow_states": {
+    "id": "fuel_log_workflow",
     "states": [
-      { "id": "SUBMITTED", "label": "Submitted", "color": "#0d6efd", "terminal": false },
-      { "id": "IN_REVIEW", "label": "In Review", "color": "#ffc107", "terminal": false },
-      { "id": "CORRECTED", "label": "Corrected", "color": "#fd7e14", "terminal": false },
-      { "id": "APPROVED", "label": "Approved", "color": "#198754", "terminal": true }
+      { "id": "SUBMITTED", "label": "Submitted", "terminal": false },
+      { "id": "IN_REVIEW", "label": "In Review", "terminal": false },
+      { "id": "CORRECTED", "label": "Corrected", "terminal": false },
+      { "id": "APPROVED", "label": "Approved", "terminal": true }
     ],
     "transitions": [
       { "from": "SUBMITTED", "to": "IN_REVIEW", "actor": "manager" },
@@ -875,7 +952,7 @@ Defines **what events must be logged and what data must be captured**:
     ],
     "default_state": "SUBMITTED"
   },
-  
+
   "manager_actions": {
     "editable_fields": [
       {
@@ -891,13 +968,9 @@ Defines **what events must be logged and what data must be captured**:
         "requires_reason": false
       }
     ],
-    "immutable_fields": ["created_by_user_id", "vehicle_id", "created_at"],
-    "capabilities_by_role": {
-      "management_crew": { "can_edit": true, "can_approve": false },
-      "management_director": { "can_edit": true, "can_approve": true }
-    }
+    "immutable_fields": ["created_by_user_id", "vehicle_id", "created_at"]
   },
-  
+
   "audit_events": {
     "events": [
       {
@@ -914,12 +987,12 @@ Defines **what events must be logged and what data must be captured**:
       }
     ]
   },
-  
+
   "database": {
     "schema_file": "database/schema.sql",
     "tables": ["vm_fuel_logs", "vm_vehicles", "vm_audit_logs"]
   },
-  
+
   "permissions": {
     "hub_user": {
       "description": "Can submit fuel logs",
@@ -927,22 +1000,30 @@ Defines **what events must be logged and what data must be captured**:
     },
     "management_crew": {
       "description": "Can review and edit fuel logs",
-      "capabilities": ["view_all_logs", "edit_fuel_logs", "run_reports"]
+      "capabilities": ["view_all_logs", "edit_fuel_logs", "export_reports"],
+      "workflow_actions": ["review", "correct"]
     },
     "management_director": {
       "description": "Full oversight authority",
-      "capabilities": ["*"]
+      "capabilities": ["view_all_logs", "edit_fuel_logs", "export_reports", "delete_logs"],
+      "workflow_actions": ["review", "correct", "approve", "reject"]
+    },
+    "management_admin": {
+      "description": "Complete administrative access",
+      "capabilities": ["*"],
+      "workflow_actions": ["*"]
     }
   }
 }
 ```
 
 **Key Benefits of This Specification:**
-1. ✅ **Explicit Manager Authority** - `manager_actions` makes edit boundaries auditor-visible
-2. ✅ **Enforceable Workflows** - Platform can validate state transitions
-3. ✅ **Guaranteed Auditability** - Required audit events ensure compliance
-4. ✅ **Layer Separation** - Clear distinction between Layer 1 (submit) and Layer 2 (review/edit)
-5. ✅ **Validation Ready** - Installation can check completeness before deploying
+1. ✅ **Explicit Manager Authority** - `manager_actions` + `permissions.workflow_actions` make edit boundaries auditor-visible
+2. ✅ **Enforceable Workflows** - Platform validates state transitions via `workflow_states`
+3. ✅ **Guaranteed Auditability** - Required audit events + global log ensure compliance
+4. ✅ **Entity-Linked Controls** - `entities` block connects workflows to actual database tables
+5. ✅ **Declared vs Enforced Controls** - Clear separation between package spec and platform validation
+6. ✅ **No Permission Duplication** - Single source of truth in `permissions` block
 
 ---
 
@@ -964,15 +1045,15 @@ Defines **what events must be logged and what data must be captured**:
 
 Defines which packages **require** vs **optionally support** the Management Layer specification:
 
-| Package Type | `workflow_states` | `manager_actions` | `audit_events` | Rationale |
-|--------------|-------------------|-------------------|----------------|-----------|
-| **User Submissions** (fuel logs, incident reports, reimbursements) | **Required** | **Required** | **Required** | Users submit data that managers must review/correct |
-| **Management Tools** (fleet roster, vehicle assignments) | Optional | Optional | Recommended | Managers create/edit directly (not reviewing submissions) |
-| **Reporting Only** (dashboards, analytics) | Not Required | Not Required | Not Required | Read-only data visualization |
-| **Forms/Workflows** (approval processes) | **Required** | **Required** | **Required** | Explicit approval workflows with state transitions |
-| **Configuration Tools** (settings, lookups) | Not Required | Not Required | Recommended | Admin-only configuration changes |
+| Package Type | `entities` | `workflow_states` | `manager_actions` | `audit_events` | Rationale |
+|--------------|------------|-------------------|-------------------|----------------|-----------|
+| **User Submissions** (fuel logs, incident reports, reimbursements) | **Required** | **Required** | **Required** | **Required** | Users submit data that managers must review/correct |
+| **Management Tools** (fleet roster, vehicle assignments) | Optional | Optional | Optional | Recommended | Managers create/edit directly (not reviewing submissions) |
+| **Reporting Only** (dashboards, analytics) | Not Required | Not Required | Not Required | Not Required | Read-only data visualization |
+| **Forms/Workflows** (approval processes) | **Required** | **Required** | **Required** | **Required** | Explicit approval workflows with state transitions |
+| **Configuration Tools** (settings, lookups) | Not Required | Not Required | Not Required | Recommended | Admin-only configuration changes |
 
-**Validation Rule:** If a package defines `hub_cards` (Layer 1 submission entry points), it **MUST** define all three Management Layer blocks (`workflow_states`, `manager_actions`, `audit_events`).
+**Validation Rule:** If a package defines `hub_cards` (Layer 1 submission entry points), it **MUST** define all four Management Layer blocks (`entities`, `workflow_states`, `manager_actions`, `audit_events`).
 
 ---
 
@@ -1026,18 +1107,9 @@ Updates? → New version → Repeat cycle
 - **Session Security** (PHP sessions with HTTP-only cookies)
 - **CSRF Protection** (tokens on all POST/PUT/DELETE)
 - **SSL/TLS Required** (HTTPS enforced)
-Manager Edit Authority Tracking:**
-  - When a manager edits a submitted record:
-    - Original state logged
-    - Modified state logged
-    - Actor (manager) recorded
-    - Timestamp recorded
-    - Reason for change (if provided)
-  - **Control Mechanism:** Managers can correct operational errors with full transparency
-  - **Accountability:** Every edit is traceable and reversible
-- **Database Tables**: `audit_logs` (core), package-specific logs
-- **Retention**: Indefinite (compliance requirement)
-- **Review Interface**: Admin Dashboard → Activity Logs (filterable by actor, action, date)ssions
+
+### Authorization & Access Control
+- **3-Layer Role Hierarchy** - Hub users, Managers, Administrators
 - **Section-Level Access** - Users only see authorized modules
 - **Module-Level Permissions** - Read vs. write vs. admin
 - **Super Admin "View As"** - Impersonation for support
@@ -1046,9 +1118,18 @@ Manager Edit Authority Tracking:**
 ### Audit Logging
 - **All Mutations Logged** (`AuditLogger` class)
 - **Who, What, When, Before/After** - Complete audit trail
-- **Database Tables**: `audit_logs` (core), package-specific logs
+- **Manager Edit Authority Tracking:**
+  - When a manager edits a submitted record:
+    - Original state logged
+    - Modified state logged
+    - Actor (manager) recorded
+    - Timestamp recorded
+    - Reason for change (if provided)
+  - **Control Mechanism:** Managers can correct operational errors with full transparency
+  - **Accountability:** Every edit is traceable and reversible
+- **Database Tables**: `audit_logs` (core), optional package-specific logs
 - **Retention**: Indefinite (compliance requirement)
-- **Review Interface**: Admin Dashboard → Activity Logs
+- **Review Interface**: Admin Dashboard → Activity Logs (filterable by actor, action, date)
 
 ### Package Validation
 Before installation, packages pass **10+ security checks**:
@@ -1226,20 +1307,23 @@ POST   /api/packages.php?action=install -- Install package
 |------|------------|
 | **Hub** | Landing page showing available modules (hub.php) |
 | **Hub Layer** | Layer 1 - End user data submission interface |
-| **Management Layer** | Layer 2 - Operational oversight with edit authority |  
+| **Management Layer** | Layer 2 - Operational oversight with edit authority |
 | **Administrator Layer** | Layer 3 - Platform governance and system configuration |
 | **Module** | Self-contained functional unit (package) |
 | **Package** | `.hubpkg` file containing module code and metadata |
 | **Section** | Database representation of an installed package |
 | **Hub Card** | User-facing module feature shown on hub.php |
 | **Management Section** | Operational oversight interface for managers |
+| **Entity** | Database table/record type governed by workflow (e.g., fuel_log, incident_report) |
 | **Workflow State** | Lifecycle stage of a submission (SUBMITTED, IN_REVIEW, APPROVED, etc.) |
-| **Manager Actions** | Defined edit boundaries for operational oversight roles |
+| **Manager Actions** | Field-level edit constraints and validation rules for operational oversight |
 | **Audit Events** | Standardized log entries for package-specific mutations |
 | **Edit Authority** | Permission to modify submitted records (tracked in audit log) |
-| **Immutable Field** | Data field that cannot be changed after creation |
-| **State Transition** | Movement from one workflow state to another |
+| **Immutable Field** | Data field that cannot be changed after creation (e.g., created_by_user_id) |
+| **State Transition** | Movement from one workflow state to another (e.g., SUBMITTED → IN_REVIEW) |
 | **Terminal State** | Final state that cannot transition further (APPROVED, REJECTED) |
+| **Declared Controls** | What package specifies in .hubpkg file |
+| **Enforced Controls** | What platform validates and enforces at install/runtime |
 | **Role** | Permission level (staff, manager, admin, super_admin, etc.) |
 | **Section Access** | Permission to see a specific module |
 | **Super Admin** | Highest privilege level with "View As" capability |
@@ -1259,30 +1343,30 @@ Your package must define a `status` column to track workflow states:
 ```sql
 CREATE TABLE vm_fuel_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  
+
   -- Submission data
   user_id INT NOT NULL,
   vehicle_id INT NOT NULL,
   fuel_gallons DECIMAL(6,2) NOT NULL,
   odometer INT NOT NULL,
-  
+
   -- Workflow tracking
-  status ENUM('DRAFT','SUBMITTED','IN_REVIEW','CORRECTED','APPROVED','REJECTED') 
+  status ENUM('DRAFT','SUBMITTED','IN_REVIEW','CORRECTED','APPROVED','REJECTED')
     DEFAULT 'DRAFT' NOT NULL,
   status_changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   status_changed_by INT NULL,
-  
+
   -- Audit fields
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   created_by_user_id INT NOT NULL,  -- Original submitter (IMMUTABLE)
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   updated_by_user_id INT NULL,      -- Last editor (manager or user)
-  
+
   -- Optional workflow fields
   reviewed_by_manager_id INT NULL,
   review_notes TEXT NULL,
   correction_reason TEXT NULL,
-  
+
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (created_by_user_id) REFERENCES users(id),
   INDEX idx_status (status),
@@ -1304,33 +1388,33 @@ CREATE TABLE vm_fuel_logs (
 // File: /pkg/vm/controllers/FuelLogController.php
 
 class FuelLogController {
-    
+
     public function updateRecord(int $logId, array $updates, int $managerId): bool {
         // 1. Load current record and package spec
         $log = $this->db->query("SELECT * FROM vm_fuel_logs WHERE id = ?", [$logId])->fetch();
         $spec = json_decode(file_get_contents(__DIR__ . '/../package.json'), true);
-        
+
         // 2. Validate current state allows editing
         $managerActions = $spec['manager_actions'];
-        
+
         foreach ($updates as $field => $newValue) {
             // Check if field is immutable
             if (in_array($field, $managerActions['immutable_fields'])) {
                 throw new Exception("Field '{$field}' cannot be modified");
             }
-            
+
             // Check if field is editable in current state
             $fieldConfig = $this->getFieldConfig($managerActions, $field);
             if (!in_array($log['status'], $fieldConfig['allowed_states'])) {
                 throw new Exception("Field '{$field}' cannot be edited in state '{$log['status']}'");
             }
-            
+
             // If reason required, ensure it's provided
             if ($fieldConfig['requires_reason'] && empty($updates['_correction_reason'])) {
                 throw new Exception("Correction reason required for field '{$field}'");
             }
         }
-        
+
         // 3. Log the edit event BEFORE making changes
         $this->auditLog([
             'event_type' => 'FUEL_LOG_CORRECTED',
@@ -1342,20 +1426,20 @@ class FuelLogController {
             'new_value' => json_encode($updates),
             'correction_reason' => $updates['_correction_reason'] ?? null
         ]);
-        
+
         // 4. Perform the update
         $this->db->update('vm_fuel_logs', $updates, ['id' => $logId]);
-        
+
         // 5. Update workflow tracking
         $this->db->update('vm_fuel_logs', [
             'status' => 'CORRECTED',
             'updated_by_user_id' => $managerId,
             'correction_reason' => $updates['_correction_reason'] ?? null
         ], ['id' => $logId]);
-        
+
         return true;
     }
-    
+
     private function getFieldConfig($managerActions, $field) {
         foreach ($managerActions['editable_fields'] as $config) {
             if ($config['field'] === $field) {
@@ -1364,7 +1448,7 @@ class FuelLogController {
         }
         throw new Exception("Field '{$field}' not defined in manager_actions");
     }
-    
+
     private function auditLog(array $event) {
         // Log to both package-specific and global audit tables
         $this->db->insert('vm_audit_logs', $event);
@@ -1380,41 +1464,41 @@ class FuelLogController {
 // File: /pkg/vm/helpers/WorkflowValidator.php
 
 class WorkflowValidator {
-    
+
     public static function canTransition(string $currentState, string $targetState, string $actorRole): bool {
         $spec = json_decode(file_get_contents(__DIR__ . '/../package.json'), true);
         $transitions = $spec['workflow_states']['transitions'];
-        
+
         foreach ($transitions as $transition) {
-            if ($transition['from'] === $currentState && 
+            if ($transition['from'] === $currentState &&
                 $transition['to'] === $targetState &&
                 self::actorMatches($transition['actor'], $actorRole)) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     private static function actorMatches(string $requiredActor, string $actualRole): bool {
         $actorMap = [
             'submitter' => ['hub_user'],
             'manager' => ['management_crew', 'management_director', 'management_admin'],
             'admin' => ['admin', 'super_admin']
         ];
-        
+
         return in_array($actualRole, $actorMap[$requiredActor] ?? []);
     }
-    
+
     public static function isTerminalState(string $state): bool {
         $spec = json_decode(file_get_contents(__DIR__ . '/../package.json'), true);
-        
+
         foreach ($spec['workflow_states']['states'] as $stateConfig) {
             if ($stateConfig['id'] === $state) {
                 return $stateConfig['terminal'] ?? false;
             }
         }
-        
+
         return false;
     }
 }
@@ -1435,7 +1519,7 @@ $isTerminal = in_array($log['status'], ['APPROVED', 'REJECTED']);
     <div class="status-badge status-<?= strtolower($log['status']) ?>">
         <?= $log['status'] ?>
     </div>
-    
+
     <table class="table">
         <tr>
             <td>Original Submitter:</td>
@@ -1445,13 +1529,13 @@ $isTerminal = in_array($log['status'], ['APPROVED', 'REJECTED']);
             <td>Submitted:</td>
             <td><?= date('M d, Y g:i A', strtotime($log['created_at'])) ?></td>
         </tr>
-        
+
         <!-- Editable Fields -->
         <tr>
             <td>Fuel Gallons:</td>
             <td>
                 <?php if ($canEdit): ?>
-                    <input type="number" name="fuel_gallons" value="<?= $log['fuel_gallons'] ?>" 
+                    <input type="number" name="fuel_gallons" value="<?= $log['fuel_gallons'] ?>"
                            min="0.1" max="150" step="0.01" class="form-control">
                     <small class="text-muted">Manager can correct if error found</small>
                 <?php else: ?>
@@ -1462,7 +1546,7 @@ $isTerminal = in_array($log['status'], ['APPROVED', 'REJECTED']);
                 <?php endif; ?>
             </td>
         </tr>
-        
+
         <!-- Immutable Fields -->
         <tr>
             <td>Vehicle:</td>
@@ -1472,13 +1556,13 @@ $isTerminal = in_array($log['status'], ['APPROVED', 'REJECTED']);
             </td>
         </tr>
     </table>
-    
+
     <?php if ($canEdit): ?>
         <div class="correction-reason">
             <label>Reason for Changes (required if editing):</label>
             <textarea name="correction_reason" class="form-control" rows="3"></textarea>
         </div>
-        
+
         <div class="actions mt-3">
             <button class="btn btn-warning" onclick="saveCorrections()">
                 Save Corrections
