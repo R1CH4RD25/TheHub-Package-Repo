@@ -140,6 +140,9 @@ if (!function_exists('e')) {
     }
 }
 
+// Initialize request context (correlation IDs for audit tracing)
+Hub\RequestContext::init();
+
 // Bootstrap Laravel application if not already loaded
 if (!isset($GLOBALS['laravelApp'])) {
     $laravelBootstrap = __DIR__ . '/../bootstrap/app.php';

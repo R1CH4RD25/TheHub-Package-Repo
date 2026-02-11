@@ -188,7 +188,7 @@ class QueryRouter
                 'parameters' => json_encode($params),
                 'correlation_id' => $correlationId,
                 'execution_time_ms' => round($executionTime * 1000, 2),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'ip_address' => \Hub\RequestContext::getIpAddress(),
             ]
         );
     }
@@ -222,9 +222,8 @@ class QueryRouter
                 'query_name' => $queryName,
                 'parameters' => json_encode($params),
                 'correlation_id' => $correlationId,
-                'error_message' => $error->getMessage(),
-                'error_trace' => $error->getTraceAsString(),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                ...\Hub\AuditLogger::sanitizeException($error),
+                'ip_address' => \Hub\RequestContext::getIpAddress(),
             ]
         );
     }
@@ -232,10 +231,12 @@ class QueryRouter
     /**
      * Generate correlation ID for request tracing
      * 
-     * @return string Unique correlation ID
+     * Uses RequestContext for UUID v4 generation (better than uniqid)
+     * 
+     * @return string UUID v4 correlation ID
      */
     private function generateCorrelationId(): string
     {
-        return uniqid('query-', true);
+        return \Hub\RequestContext::getCorrelationId();
     }
 }

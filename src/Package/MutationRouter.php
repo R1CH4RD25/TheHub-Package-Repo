@@ -329,7 +329,7 @@ class MutationRouter
                 'success' => $result['success'],
                 'correlation_id' => $correlationId,
                 'execution_time_ms' => round($executionTime * 1000, 2),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'ip_address' => \Hub\RequestContext::getIpAddress(),
             ]
         );
     }
@@ -365,9 +365,8 @@ class MutationRouter
                 'mutation_name' => $mutationName,
                 'input' => json_encode($sanitizedInput),
                 'correlation_id' => $correlationId,
-                'error_message' => $error->getMessage(),
-                'error_trace' => $error->getTraceAsString(),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                ...\Hub\AuditLogger::sanitizeException($error),
+                'ip_address' => \Hub\RequestContext::getIpAddress(),
             ]
         );
     }
@@ -375,38 +374,26 @@ class MutationRouter
     /**
      * Sanitize data for audit logging (remove passwords, tokens, etc.)
      * 
-     * @param array $data Data to sanitize
+     * Uses AuditLogger::sanitizeForLogging for consistency and expanded key list.
      * 
-     * @return array Sanitized data
+     * @param mixed $data Data to sanitize
+     * 
+     * @return mixed Sanitized data
      */
-    private function sanitizeForLogging(array $data): array
+    private function sanitizeForLogging($data)
     {
-        $sensitiveKeys = ['password', 'token', 'secret', 'api_key', 'csrf_token'];
-
-        foreach ($data as $key => $value) {
-            $lowerKey = strtolower($key);
-            foreach ($sensitiveKeys as $sensitive) {
-                if (str_contains($lowerKey, $sensitive)) {
-                    $data[$key] = '[REDACTED]';
-                    break;
-                }
-            }
-
-            if (is_array($value)) {
-                $data[$key] = $this->sanitizeForLogging($value);
-            }
-        }
-
-        return $data;
+        return \Hub\AuditLogger::sanitizeForLogging($data);
     }
 
     /**
      * Generate correlation ID for request tracing
      * 
-     * @return string Unique correlation ID
+     * Uses RequestContext for UUID v4 generation (better than uniqid)
+     * 
+     * @return string UUID v4 correlation ID
      */
     private function generateCorrelationId(): string
     {
-        return uniqid('mutation-', true);
+        return \Hub\RequestContext::getCorrelationId();
     }
 }
