@@ -12,8 +12,9 @@
 - **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - AI agent guide, project orientation
 
 ### 2. Recent Work (Read These!)
+- **[HANDOFF_2026-02-11_SPRINT0_SECURITY.md](HANDOFF_2026-02-11_SPRINT0_SECURITY.md)** ⭐ **LATEST!** - Sprint 0 Platform Contract + P0 Security Hardening (complete handoff)
 - **[AUDIT_SYSTEM_CHANGELOG.md](AUDIT_SYSTEM_CHANGELOG.md)** ⭐ **NEW!** - Single source of truth for audit system evolution, Sprint 0 enhancements
-- **[HANDOFF_2026-02-10_NAVIGATION_ICONS.md](HANDOFF_2026-02-10_NAVIGATION_ICONS.md)** - Latest session work (navigation icon system, header layout, CSS fixes)
+- **[HANDOFF_2026-02-10_NAVIGATION_ICONS.md](HANDOFF_2026-02-10_NAVIGATION_ICONS.md)** - Previous session work (navigation icon system, header layout, CSS fixes)
 - **[CSS_ARCHITECTURE.md](CSS_ARCHITECTURE.md)** - CSS file structure, build system, gotchas
 
 ### 3. Architecture & Design
