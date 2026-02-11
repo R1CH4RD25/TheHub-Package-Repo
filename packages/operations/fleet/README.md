@@ -4,10 +4,10 @@ Vehicle fleet tracking, fuel logging, maintenance scheduling, and driver managem
 
 ## Packages
 
-### 🚗 Vehicle Maintenance & Fleet Tracking v2.0.0
-**Directory:** `vehicle-maintenance-v2/`
+### 🚗 Vehicle Maintenance & Fleet Tracking v2.1.0
+**Directory:** `vehicle-maintenance/`
 
-Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. Redesigned for v2 with improved user experience and clear separation between user-facing Hub cards and admin Management sections.
+Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. **Layer 2 compliant** with audit-grade manager oversight, field-level edit boundaries, and formal workflow state machines.
 
 **Features:**
 - **Hub Cards (User-Facing):**
@@ -25,8 +25,9 @@ Hub/Management separated fleet management with vehicle tracking, fuel logging, a
 - Out-of-service vehicle status tracking
 - File uploads (fuel receipts, maintenance invoices, photos)
 - Role-based access control (3 roles: vm_user, vm_manager, vm_admin)
+- **Layer 2 Compliance:** Workflow states, manager edit boundaries, audit events with required fields
 
-**Database Entities:** 11 tables (vehicles, trip_categories, fuel_logs, maintenance_items, maintenance_events, maintenance_templates, template_items, vehicle_schedules, departments, campuses, settings)
+**Database Entities:** 12 tables (vehicles, trip_categories, fuel_logs, maintenance_items, maintenance_events, maintenance_templates, template_items, vehicle_schedules, departments, campuses, settings, audit_logs)
 
 **Modules:** Hub cards (3) + Management sections (4) with subsections
 
@@ -42,9 +43,9 @@ Hub/Management separated fleet management with vehicle tracking, fuel logging, a
 
 **Installation:**
 1. Admin Dashboard → Package Manager → Browse Package Repository
-2. Select "Vehicle Maintenance & Fleet Tracking" v2.0.0
+2. Select "Vehicle Maintenance & Fleet Tracking" v2.1.0
 3. Click **Download**
-4. System validates package automatically
+4. System validates package automatically (includes Layer 2 compliance checks)
 5. Click **Install**
 6. Configure trip categories in Management → Configuration
 7. Set up maintenance items and templates
@@ -52,13 +53,14 @@ Hub/Management separated fleet management with vehicle tracking, fuel logging, a
 9. Assign roles: vm_user (Hub users), vm_manager (Fleet managers), vm_admin (Full access)
 
 **Documentation:**
-- [Package README](vehicle-maintenance-v2/README.md) - Full feature list and usage guide
-- [CHANGELOG](vehicle-maintenance-v2/CHANGELOG.md) - Version history
-- [LICENSE](vehicle-maintenance-v2/LICENSE) - Proprietary license
-- [Database Schema](vehicle-maintenance-v2/database/schema.sql) - Complete DDL
-- [Seed Data](vehicle-maintenance-v2/database/seed.sql) - Default trip categories and maintenance items
+- [Package README](vehicle-maintenance/README.md) - Full feature list and usage guide
+- [CHANGELOG](vehicle-maintenance/CHANGELOG.md) - Version history
+- [LICENSE](vehicle-maintenance/LICENSE) - Proprietary license
+- [Database Schema](vehicle-maintenance/database/schema.sql) - Complete DDL
+- [Seed Data](vehicle-maintenance/database/seed.sql) - Default trip categories and maintenance items
 
 **Previous Versions:**
+- v2.0.0 - Hub/Management separation (no Layer 2 compliance)
 - v1.0.0 archived in [`archive/operations/fleet/vehicle-maintenance/`](../../archive/operations/fleet/vehicle-maintenance/)
 
 ---

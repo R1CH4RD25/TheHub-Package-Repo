@@ -1,0 +1,704 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "id": "com.woodson.vehicle-maintenance",
+    "name": "vehicle-maintenance",
+    "namespace": "vm",
+    "display_name": "Vehicle Maintenance & Fleet Tracking",
+    "description": "Hub/Management separated fleet management with vehicle tracking, fuel logging, and maintenance scheduling. Redesigned for v2 with improved user experience and Layer 2 compliance.",
+    "version": "2.1.0",
+    "author": "Woodson ISD Technology Department",
+    "author_email": "tech@woodsonisd.net",
+    "license": "Proprietary",
+    "category": "operations",
+    "tags": [
+      "fleet",
+      "vehicles",
+      "maintenance",
+      "fuel",
+      "school-operations"
+    ],
+    "icon": "fa-solid fa-truck-pickup",
+    "base_url": "/pkg/vm/",
+    "repository": "https://github.com/R1CH4RD25/TheHub-Package-Repo",
+    "homepage": "https://github.com/R1CH4RD25/TheHub-Package-Repo/tree/main/packages/operations/fleet/vehicle-maintenance-v2",
+    "support": "https://github.com/R1CH4RD25/TheHub-Package-Repo/issues"
+  },
+  "compatibility": {
+    "hub_version": ">=1.0.0 <3.0.0",
+    "php_version": ">=8.0",
+    "mysql_version": ">=5.7",
+    "tested_up_to": "2.0.0"
+  },
+  "capabilities": [
+    "forms",
+    "tables",
+    "file-uploads",
+    "analytics",
+    "hub-management-separation",
+    "layer2-compliant"
+  ],
+  "settings": {
+    "allow_driver_logging": true,
+    "enable_departments": true,
+    "enable_campuses": true,
+    "maintenance_lead_days": 30,
+    "maintenance_lead_miles": 500
+  },
+  "database": {
+    "tables": [
+      "vm_vehicles",
+      "vm_trip_categories",
+      "vm_fuel_logs",
+      "vm_maintenance_events",
+      "vm_maintenance_items",
+      "vm_maintenance_templates",
+      "vm_template_items",
+      "vm_vehicle_schedules",
+      "vm_departments",
+      "vm_campuses",
+      "vm_settings",
+      "vm_audit_logs"
+    ],
+    "migrations": [
+      "database/schema.sql"
+    ]
+  },
+  "hub_cards": [
+    {
+      "id": "fleet-management",
+      "title": "Fleet Management",
+      "description": "View district fleet roster",
+      "icon": "fa-solid fa-car-side",
+      "route": "/pkg/vm/fleet-roster",
+      "access": [
+        "vm_user",
+        "vm_manager",
+        "vm_admin"
+      ],
+      "type": "table"
+    },
+    {
+      "id": "fuel-tracking",
+      "title": "Fuel & Trip Tracking",
+      "description": "Log fuel trips and view your fuel history",
+      "icon": "fa-solid fa-gas-pump",
+      "route": "/pkg/vm/fuel-log",
+      "access": [
+        "vm_user",
+        "vm_manager",
+        "vm_admin"
+      ],
+      "type": "form"
+    },
+    {
+      "id": "maintenance-tracking",
+      "title": "Maintenance Tracking",
+      "description": "Log maintenance events and view your maintenance history",
+      "icon": "fa-solid fa-wrench",
+      "route": "/pkg/vm/maintenance-log",
+      "access": [
+        "vm_user",
+        "vm_manager",
+        "vm_admin"
+      ],
+      "type": "form"
+    }
+  ],
+  "management_sections": [
+    {
+      "id": "vm-vehicles",
+      "title": "Vehicles",
+      "description": "Manage fleet inventory",
+      "icon": "fa-solid fa-truck-pickup",
+      "route": "/management/vm/vehicles",
+      "access": [
+        "vm_manager",
+        "vm_admin"
+      ],
+      "subsections": [
+        {
+          "id": "vehicle-list",
+          "title": "Vehicle List",
+          "route": "/management/vm/vehicles"
+        },
+        {
+          "id": "add-vehicle",
+          "title": "Add Vehicle",
+          "route": "/management/vm/vehicles/add"
+        }
+      ]
+    },
+    {
+      "id": "vm-fuel-management",
+      "title": "Fuel Management",
+      "description": "Review, correct, and analyze all fuel logs",
+      "icon": "fa-solid fa-gas-pump",
+      "route": "/management/vm/fuel",
+      "access": [
+        "vm_manager",
+        "vm_admin"
+      ],
+      "subsections": [
+        {
+          "id": "fuel-logs",
+          "title": "All Fuel Logs",
+          "route": "/management/vm/fuel"
+        },
+        {
+          "id": "fuel-analytics",
+          "title": "Fuel Analytics",
+          "route": "/management/vm/fuel/analytics"
+        }
+      ]
+    },
+    {
+      "id": "vm-maintenance-management",
+      "title": "Maintenance Management",
+      "description": "Review maintenance logs, schedules, and templates",
+      "icon": "fa-solid fa-screwdriver-wrench",
+      "route": "/management/vm/maintenance",
+      "access": [
+        "vm_manager",
+        "vm_admin"
+      ],
+      "subsections": [
+        {
+          "id": "maintenance-logs",
+          "title": "All Maintenance Logs",
+          "route": "/management/vm/maintenance"
+        },
+        {
+          "id": "maintenance-templates",
+          "title": "Maintenance Templates",
+          "route": "/management/vm/maintenance/templates"
+        },
+        {
+          "id": "maintenance-schedules",
+          "title": "Vehicle Schedules",
+          "route": "/management/vm/maintenance/schedules"
+        }
+      ]
+    },
+    {
+      "id": "vm-configuration",
+      "title": "Configuration",
+      "description": "Trip categories, departments, campuses, settings",
+      "icon": "fa-solid fa-gear",
+      "route": "/management/vm/config",
+      "access": [
+        "vm_admin"
+      ],
+      "subsections": [
+        {
+          "id": "trip-categories",
+          "title": "Trip Categories",
+          "route": "/management/vm/config/trip-categories"
+        },
+        {
+          "id": "maintenance-items",
+          "title": "Maintenance Items",
+          "route": "/management/vm/config/maintenance-items"
+        },
+        {
+          "id": "departments",
+          "title": "Departments",
+          "route": "/management/vm/config/departments"
+        },
+        {
+          "id": "campuses",
+          "title": "Campuses",
+          "route": "/management/vm/config/campuses"
+        },
+        {
+          "id": "settings",
+          "title": "Package Settings",
+          "route": "/management/vm/config/settings"
+        }
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "id": "fuel_log",
+      "label": "Fuel Log Entry",
+      "table": "vm_fuel_logs",
+      "primary_key": "id",
+      "owner_field": "created_by_user_id",
+      "status_field": "status",
+      "workflow": "fuel_log_workflow",
+      "description": "User-submitted fuel purchase records requiring manager review"
+    },
+    {
+      "id": "maintenance_event",
+      "label": "Maintenance Event",
+      "table": "vm_maintenance_events",
+      "primary_key": "id",
+      "owner_field": "created_by_user_id",
+      "status_field": "status",
+      "workflow": "maintenance_workflow",
+      "description": "User-submitted maintenance records requiring manager review"
+    }
+  ],
+  "workflow_states": [
+    {
+      "id": "fuel_log_workflow",
+      "entity": "fuel_log",
+      "states": [
+        {
+          "id": "SUBMITTED",
+          "label": "Submitted",
+          "description": "Pending manager review",
+          "terminal": false
+        },
+        {
+          "id": "IN_REVIEW",
+          "label": "In Review",
+          "description": "Manager actively reviewing",
+          "terminal": false
+        },
+        {
+          "id": "CORRECTED",
+          "label": "Corrected",
+          "description": "Manager corrected errors",
+          "terminal": false
+        },
+        {
+          "id": "APPROVED",
+          "label": "Approved",
+          "description": "Manager approved",
+          "terminal": true
+        },
+        {
+          "id": "REJECTED",
+          "label": "Rejected",
+          "description": "Manager rejected",
+          "terminal": true
+        }
+      ],
+      "transitions": [
+        {
+          "from": "SUBMITTED",
+          "to": "IN_REVIEW",
+          "actor": "manager"
+        },
+        {
+          "from": "IN_REVIEW",
+          "to": "CORRECTED",
+          "actor": "manager"
+        },
+        {
+          "from": "IN_REVIEW",
+          "to": "APPROVED",
+          "actor": "manager"
+        },
+        {
+          "from": "IN_REVIEW",
+          "to": "REJECTED",
+          "actor": "manager"
+        },
+        {
+          "from": "CORRECTED",
+          "to": "APPROVED",
+          "actor": "manager"
+        },
+        {
+          "from": "CORRECTED",
+          "to": "REJECTED",
+          "actor": "manager"
+        }
+      ],
+      "default_state": "SUBMITTED"
+    },
+    {
+      "id": "maintenance_workflow",
+      "entity": "maintenance_event",
+      "states": [
+        {
+          "id": "SUBMITTED",
+          "label": "Submitted",
+          "description": "Pending manager review",
+          "terminal": false
+        },
+        {
+          "id": "IN_REVIEW",
+          "label": "In Review",
+          "description": "Manager actively reviewing",
+          "terminal": false
+        },
+        {
+          "id": "CORRECTED",
+          "label": "Corrected",
+          "description": "Manager corrected errors",
+          "terminal": false
+        },
+        {
+          "id": "APPROVED",
+          "label": "Approved",
+          "description": "Manager approved",
+          "terminal": true
+        },
+        {
+          "id": "REJECTED",
+          "label": "Rejected",
+          "description": "Manager rejected",
+          "terminal": true
+        }
+      ],
+      "transitions": [
+        {
+          "from": "SUBMITTED",
+          "to": "IN_REVIEW",
+          "actor": "manager"
+        },
+        {
+          "from": "IN_REVIEW",
+          "to": "CORRECTED",
+          "actor": "manager"
+        },
+        {
+          "from": "IN_REVIEW",
+          "to": "APPROVED",
+          "actor": "manager"
+        },
+        {
+          "from": "IN_REVIEW",
+          "to": "REJECTED",
+          "actor": "manager"
+        },
+        {
+          "from": "CORRECTED",
+          "to": "APPROVED",
+          "actor": "manager"
+        },
+        {
+          "from": "CORRECTED",
+          "to": "REJECTED",
+          "actor": "manager"
+        }
+      ],
+      "default_state": "SUBMITTED"
+    }
+  ],
+  "manager_actions": {
+    "fuel_log": {
+      "editable_fields": [
+        {
+          "field": "fuel_gallons",
+          "label": "Fuel Gallons",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": true,
+          "validation": {
+            "type": "number",
+            "min": 0.1,
+            "max": 150
+          }
+        },
+        {
+          "field": "odometer_reading",
+          "label": "Odometer Reading",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": true,
+          "validation": {
+            "type": "number",
+            "min": 0
+          }
+        },
+        {
+          "field": "trip_category_id",
+          "label": "Trip Category",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": false,
+          "validation": {
+            "type": "foreign_key",
+            "table": "vm_trip_categories"
+          }
+        },
+        {
+          "field": "fuel_cost",
+          "label": "Fuel Cost",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": true,
+          "validation": {
+            "type": "number",
+            "min": 0
+          }
+        }
+      ],
+      "immutable_fields": [
+        "id",
+        "created_at",
+        "created_by_user_id",
+        "vehicle_id",
+        "fuel_date"
+      ]
+    },
+    "maintenance_event": {
+      "editable_fields": [
+        {
+          "field": "odometer_reading",
+          "label": "Odometer Reading",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": true,
+          "validation": {
+            "type": "number",
+            "min": 0
+          }
+        },
+        {
+          "field": "maintenance_cost",
+          "label": "Maintenance Cost",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": true,
+          "validation": {
+            "type": "number",
+            "min": 0
+          }
+        },
+        {
+          "field": "notes",
+          "label": "Notes",
+          "allowed_states": [
+            "SUBMITTED",
+            "IN_REVIEW",
+            "CORRECTED"
+          ],
+          "requires_reason": false,
+          "validation": {
+            "type": "text",
+            "max_length": 5000
+          }
+        }
+      ],
+      "immutable_fields": [
+        "id",
+        "created_at",
+        "created_by_user_id",
+        "vehicle_id",
+        "maintenance_date"
+      ]
+    }
+  },
+  "audit_events": {
+    "events": [
+      {
+        "event_type": "FUEL_LOG_SUBMITTED",
+        "description": "User submitted a fuel log",
+        "severity": "info",
+        "required_fields": [
+          "user_id",
+          "vehicle_id",
+          "fuel_gallons",
+          "odometer_reading",
+          "trip_category_id"
+        ]
+      },
+      {
+        "event_type": "FUEL_LOG_REVIEWED",
+        "description": "Manager marked fuel log as in review",
+        "severity": "info",
+        "required_fields": [
+          "manager_id",
+          "fuel_log_id"
+        ]
+      },
+      {
+        "event_type": "FUEL_LOG_CORRECTED",
+        "description": "Manager corrected fuel log data",
+        "severity": "warning",
+        "required_fields": [
+          "manager_id",
+          "fuel_log_id",
+          "field_name",
+          "old_value",
+          "new_value",
+          "correction_reason"
+        ]
+      },
+      {
+        "event_type": "FUEL_LOG_APPROVED",
+        "description": "Manager approved fuel log",
+        "severity": "info",
+        "required_fields": [
+          "manager_id",
+          "fuel_log_id"
+        ]
+      },
+      {
+        "event_type": "FUEL_LOG_REJECTED",
+        "description": "Manager rejected fuel log",
+        "severity": "warning",
+        "required_fields": [
+          "manager_id",
+          "fuel_log_id",
+          "rejection_reason"
+        ]
+      },
+      {
+        "event_type": "MAINTENANCE_EVENT_SUBMITTED",
+        "description": "User submitted maintenance event",
+        "severity": "info",
+        "required_fields": [
+          "user_id",
+          "vehicle_id",
+          "maintenance_item_id",
+          "odometer_reading"
+        ]
+      },
+      {
+        "event_type": "MAINTENANCE_EVENT_REVIEWED",
+        "description": "Manager marked maintenance event as in review",
+        "severity": "info",
+        "required_fields": [
+          "manager_id",
+          "maintenance_event_id"
+        ]
+      },
+      {
+        "event_type": "MAINTENANCE_EVENT_CORRECTED",
+        "description": "Manager corrected maintenance event data",
+        "severity": "warning",
+        "required_fields": [
+          "manager_id",
+          "maintenance_event_id",
+          "field_name",
+          "old_value",
+          "new_value",
+          "correction_reason"
+        ]
+      },
+      {
+        "event_type": "MAINTENANCE_EVENT_APPROVED",
+        "description": "Manager approved maintenance event",
+        "severity": "info",
+        "required_fields": [
+          "manager_id",
+          "maintenance_event_id"
+        ]
+      },
+      {
+        "event_type": "MAINTENANCE_EVENT_REJECTED",
+        "description": "Manager rejected maintenance event",
+        "severity": "warning",
+        "required_fields": [
+          "manager_id",
+          "maintenance_event_id",
+          "rejection_reason"
+        ]
+      }
+    ],
+    "audit_requirements": {
+      "retention_days": null,
+      "immutable": true,
+      "package_log_table": "vm_audit_logs",
+      "use_global_log": true
+    }
+  },
+  "permissions": {
+    "vm_user": {
+      "description": "Can submit fuel and maintenance logs, view own records",
+      "capabilities": [
+        "vm.fuel.create",
+        "vm.fuel.view_own",
+        "vm.maintenance.create",
+        "vm.maintenance.view_own",
+        "vm.fleet.view"
+      ],
+      "workflow_actions": []
+    },
+    "vm_manager": {
+      "description": "Can review, correct, and approve submissions; manage fleet",
+      "capabilities": [
+        "vm.fuel.create",
+        "vm.fuel.view_all",
+        "vm.fuel.edit",
+        "vm.fuel.export",
+        "vm.maintenance.create",
+        "vm.maintenance.view_all",
+        "vm.maintenance.edit",
+        "vm.maintenance.export",
+        "vm.fleet.view",
+        "vm.fleet.manage",
+        "vm.templates.manage",
+        "vm.schedules.manage"
+      ],
+      "workflow_actions": [
+        "review",
+        "correct",
+        "approve",
+        "reject"
+      ]
+    },
+    "vm_admin": {
+      "description": "Full access to all vehicle maintenance features and configuration",
+      "capabilities": [
+        "vm.*"
+      ],
+      "workflow_actions": [
+        "*"
+      ]
+    }
+  },
+  "roles": [
+    {
+      "id": "vm_user",
+      "name": "VM User",
+      "description": "Can submit fuel and maintenance logs, view own records",
+      "maps_to_global_role": "staff"
+    },
+    {
+      "id": "vm_manager",
+      "name": "Fleet Manager",
+      "description": "Can manage vehicles, review/correct logs, configure templates and schedules",
+      "maps_to_global_role": "maintenance_staff"
+    },
+    {
+      "id": "vm_admin",
+      "name": "Fleet Administrator",
+      "description": "Full access to all vehicle maintenance features and configuration",
+      "maps_to_global_role": "maintenance_director"
+    }
+  ],
+  "installation": {
+    "steps": [
+      "Run database migrations",
+      "Seed default trip categories (11, 23, 34, 36, 41)",
+      "Seed default maintenance items",
+      "Configure package settings",
+      "Assign user roles",
+      "Initialize workflow states in database"
+    ],
+    "post_install_message": "Vehicle Maintenance v2.1 installed successfully! This package is Layer 2 compliant with audit-grade manager oversight. Configure trip categories and maintenance items in Management > Configuration."
+  },
+  "dependencies": [],
+  "conflicts": [
+    "com.woodson.vehicle-maintenance@1.0.0",
+    "com.woodson.vehicle-maintenance@2.0.0"
+  ],
+  "changelog_url": "https://github.com/R1CH4RD25/TheHub-Package-Repo/blob/main/packages/operations/fleet/vehicle-maintenance-v2/CHANGELOG.md",
+  "readme_url": "https://github.com/R1CH4RD25/TheHub-Package-Repo/blob/main/packages/operations/fleet/vehicle-maintenance-v2/README.md"
+}

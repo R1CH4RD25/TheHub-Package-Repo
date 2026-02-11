@@ -5,6 +5,67 @@ All notable changes to the Vehicle Maintenance & Fleet Tracking package will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-11
+
+### Added
+- **Layer 2 Compliance (Audit-Grade Manager Oversight)**
+  - `entities` block - Links workflows to database tables (fuel_log, maintenance_event)
+  - `workflow_states` block - Formal state machines (SUBMITTED → IN_REVIEW → CORRECTED → APPROVED/REJECTED)
+  - `manager_actions` block - Field-level edit boundaries with editable/immutable field definitions
+  - `audit_events` block - Required logging taxonomy with required_fields for each event type
+  - `vm_audit_logs` table for package-specific audit trail
+  - `layer2-compliant` capability flag
+
+- **Workflow States:**
+  - Fuel Logs: SUBMITTED → IN_REVIEW → CORRECTED → APPROVED/REJECTED
+  - Maintenance Events: SUBMITTED → IN_REVIEW → CORRECTED → APPROVED/REJECTED
+
+- **Manager Edit Controls:**
+  - Editable fields: fuel_gallons, odometer_reading, fuel_cost, trip_category_id (fuel logs)
+  - Editable fields: odometer_reading, maintenance_cost, notes (maintenance events)
+  - Immutable fields: id, created_at, created_by_user_id, vehicle_id, fuel_date, maintenance_date
+  - Reason requirements: All numeric/financial edits require correction_reason
+
+- **Audit Events (10 types):**
+  - FUEL_LOG_SUBMITTED, FUEL_LOG_REVIEWED, FUEL_LOG_CORRECTED, FUEL_LOG_APPROVED, FUEL_LOG_REJECTED
+  - MAINTENANCE_EVENT_SUBMITTED, MAINTENANCE_EVENT_REVIEWED, MAINTENANCE_EVENT_CORRECTED, MAINTENANCE_EVENT_APPROVED, MAINTENANCE_EVENT_REJECTED
+  - All events include required_fields enforcement (manager_id, before/after values, correction reasons)
+
+### Changed
+- **Fixed access model** - Hub cards now use package-specific roles (vm_user, vm_manager, vm_admin) instead of generic "user"
+- **Consolidated permissions** - Single `permissions` block with `workflow_actions` array (removed duplicate capabilities_by_role)
+- **Upgraded roles** - Added `maps_to_global_role` field for platform role mapping
+- **Package version** - 2.0.0 → 2.1.0
+- **Database** - Added `vm_audit_logs` table (12 tables total, up from 11)
+
+### Migration from 2.0.0
+- v2.0.0 had UI separation (Hub cards + Management sections) but lacked formal enforcement blocks
+- v2.1.0 adds Layer 2 compliance making "managers can correct submissions with audit-grade traceability" provable and validator-enforceable
+- Declared controls (package JSON) now match Enforced controls (PackageValidator)
+- Installation requires PackageValidator Layer 2 compliance checks to pass
+
+### Validation
+- PackageValidator enforces Layer 2 compliance at install time
+- Packages with hub_cards must include entities, workflow_states, manager_actions, audit_events blocks
+- `use_global_log: true` is mandatory (CRITICAL severity if false)
+- Workflow states validated for orphaned transitions
+- Manager actions validated for editable_fields and immutable_fields completeness
+
+## [2.0.0] - 2026-02-08
+
+### Added
+- **Hub/Management Separation Architecture**
+- Complete redesign with clear separation between user-facing Hub cards and Management sections
+- 3 Hub cards for user access (fleet roster, fuel tracking, maintenance tracking)
+- 4 Management sections with subsections (vehicles, fuel management, maintenance management, configuration)
+- Improved role structure (vm_user, vm_manager, vm_admin)
+
+### Changed
+- Simplified role model from 5 roles to 3 roles
+- Updated access patterns to align with Hub/Management paradigm
+- Namespace changed to `vm` for consistency
+- Package ID updated to `com.woodson.vehicle-maintenance`
+
 ## [1.0.0] - 2026-01-14
 
 ### Added

@@ -1,14 +1,17 @@
 # Vehicle Maintenance & Fleet Tracking Package
 
-**Version:** 1.0.0  
+**Version:** 2.1.0  
 **Author:** Woodson ISD Technology Department  
 **License:** Proprietary  
 **Category:** Operations  
-**Package ID:** `operations-fleet-maintenance`
+**Package ID:** `com.woodson.vehicle-maintenance`  
+**Compliance:** Layer 2 Compliant (Audit-Grade Manager Oversight)
 
 ## Overview
 
-The Vehicle Maintenance & Fleet Tracking package provides comprehensive district-wide vehicle management, fuel tracking with trip categorization, and maintenance scheduling. Designed for The Hub's dual-access model, it separates user-facing data entry (Hub) from administrative configuration (Management), ensuring streamlined workflows for both staff and administrators.
+The Vehicle Maintenance & Fleet Tracking package provides comprehensive district-wide vehicle management, fuel tracking with trip categorization, and maintenance scheduling. Designed for The Hub's 3-layer operational model, it separates user submissions (Hub Layer 1) from manager oversight (Management Layer 2) and platform configuration (Administrator Layer 3), ensuring audit-grade traceability for all manager corrections.
+
+**v2.1.0 introduces Layer 2 compliance** with formal workflow state machines, field-level edit boundaries, and required audit event logging, making this package suitable for external audits and compliance reviews.
 
 ## Features
 
@@ -48,17 +51,57 @@ The Vehicle Maintenance & Fleet Tracking package provides comprehensive district
 - Trip category analysis and reporting
 
 ### 🔐 Role-Based Access Control
-- **Hub User:** View fleet, submit fuel/maintenance logs
-- **Management Crew:** Log maintenance for all vehicles
-- **Management Fleet Manager:** Manage assigned vehicles and schedules
-- **Management Director:** District-wide control, configure settings
-- **Management Admin:** Full package administration
+- **vm_user (Hub User):** View fleet, submit fuel/maintenance logs, view own records
+- **vm_manager (Fleet Manager):** Review, correct, and approve all submissions; manage fleet, templates, schedules
+- **vm_admin (Fleet Administrator):** Full package administration, configure categories, departments, campuses, settings
+
+### 🔒 Layer 2 Compliance (Audit-Grade Manager Oversight)
+
+**What is Layer 2?** This package implements formal workflows, edit boundaries, and audit trails that make manager corrections provable and validator-enforceable. Every manager edit is logged with before/after values and correction reasons.
+
+#### Workflow State Machines
+Both fuel logs and maintenance events follow formal state transitions:
+- **SUBMITTED** - User creates record (default state)
+- **IN_REVIEW** - Manager begins review
+- **CORRECTED** - Manager corrects errors in submission
+- **APPROVED** - Manager approves (terminal state)
+- **REJECTED** - Manager rejects (terminal state)
+
+#### Manager Edit Boundaries
+Managers can edit specific fields only in allowed states:
+
+**Fuel Logs (Editable with Reason):**
+- `fuel_gallons` - Corrects user entry errors
+- `odometer_reading` - Fixes odometer mistakes
+- `fuel_cost` - Corrects pricing errors
+- `trip_category_id` - Recategorizes trips
+
+**Fuel Logs (Immutable):**
+- `id`, `created_at`, `created_by_user_id`, `vehicle_id`, `fuel_date`
+
+**Maintenance Events (Editable with Reason):**
+- `odometer_reading` - Fixes odometer mistakes
+- `maintenance_cost` - Corrects cost errors
+- `notes` - Adds clarification
+
+**Maintenance Events (Immutable):**
+- `id`, `created_at`, `created_by_user_id`, `vehicle_id`, `maintenance_date`
+
+#### Audit Event Logging
+All actions generate audit events with required fields:
+- **FUEL_LOG_SUBMITTED** - Logs user_id, vehicle_id, fuel_gallons, odometer_reading, trip_category_id
+- **FUEL_LOG_CORRECTED** - Logs manager_id, fuel_log_id, field_name, old_value, new_value, correction_reason
+- **FUEL_LOG_APPROVED/REJECTED** - Logs manager_id, fuel_log_id, (rejection_reason if rejected)
+- *Same pattern for MAINTENANCE_EVENT_* events
+
+All audit events write to global `audit_logs` table (immutable, indefinite retention) and optional package-specific `vm_audit_logs` table.
 
 ## Requirements
 
 ### Hub Core
-- Hub Version: >=1.0.0 <2.0.0
-- Tested up to: 1.3.0
+- Hub Version: >=1.0.0 <3.0.0
+- Tested up to: 2.0.0
+- PackageValidator with Layer 2 compliance enforcement
 
 ### Server Environment
 - PHP: 8.0 or higher
@@ -76,22 +119,24 @@ The Vehicle Maintenance & Fleet Tracking package provides comprehensive district
 ### 1. Upload Package
 - Navigate to **Management → Packages** in The Hub
 - Click **Upload Package**
-- Select the `operations-fleet-maintenance` package file or directory
-- System will validate manifest structure and compatibility
+- Select the `com.woodson.vehicle-maintenance` package file (v2.1.0)
+- System will validate manifest structure, compatibility, and **Layer 2 compliance**
+- PackageValidator checks: entities, workflow_states, manager_actions, audit_events, use_global_log requirement
 
 ### 2. Database Migration
-The package will automatically create 11 tables:
+The package will automatically create 12 tables:
 - `vm_vehicles` - Fleet inventory
-- `vm_trip_categories` - Trip classification codes
-- `vm_fuel_logs` - Fuel and trip entries
+- `vm_trip_categories` - Trip classification codes (11, 23, 34, 36, 41)
+- `vm_fuel_logs` - Fuel and trip entries with workflow status
 - `vm_maintenance_items` - Master list of maintenance types
-- `vm_maintenance_events` - Completed maintenance logs
+- `vm_maintenance_events` - Completed maintenance logs with workflow status
 - `vm_maintenance_templates` - Reusable maintenance plans
 - `vm_template_items` - Items within each template
 - `vm_vehicle_schedules` - Per-vehicle maintenance schedules
 - `vm_departments` - Department assignments (optional)
 - `vm_campuses` - Campus assignments (optional)
 - `vm_settings` - Package-wide configuration
+- `vm_audit_logs` - **NEW:** Package-specific audit trail (Layer 2 compliance)
 
 ### 3. Initial Configuration
 After installation:
