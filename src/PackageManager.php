@@ -247,9 +247,50 @@ class PackageManager
             // Install permissions (role access)
             $this->installPermissions($sectionId, $permissions, $installedBy);
 
-            // Install menu items
+            // V2 Spec: Process hub_cards access to create section_role_access entries
+            if (!empty($packageData['hub_cards'])) {
+                $this->installHubCardAccess($sectionId, $packageData['hub_cards'], $installedBy);
+            }
+
+            // Install menu items - support both legacy and v2 spec
+            $menuOrder = 1;
+            
+            // Legacy: menu_items array
             foreach ($menuItems as $menuItem) {
-                $this->installMenuItem($sectionId, $menuItem);
+                $normalized = $this->normalizeMenuItem($menuItem, $menuOrder++);
+                $this->installMenuItem($sectionId, $normalized);
+            }
+            
+            // V2 Spec: hub_cards → menu items
+            if (!empty($packageData['hub_cards'])) {
+                foreach ($packageData['hub_cards'] as $card) {
+                    $normalized = $this->normalizeMenuItem([
+                        'label' => $card['title'] ?? 'Untitled',
+                        'route' => $card['route'] ?? '#',
+                        'icon' => $card['icon'] ?? 'fa-circle',
+                        'required_permission' => $card['access'][0] ?? null
+                    ], $menuOrder++);
+                    $this->installMenuItem($sectionId, $normalized);
+                }
+            }
+            
+            // V2 Spec: management_sections → menu items (or skip for separate management nav)
+            // Decision: install to main nav for now; can split later
+            if (!empty($packageData['management_sections'])) {
+                foreach ($packageData['management_sections'] as $section) {
+                    $normalized = $this->normalizeMenuItem([
+                        'label' => $section['title'] ?? 'Untitled',
+                        'route' => $section['route'] ?? '#',
+                        'icon' => $section['icon'] ?? 'fa-gear',
+                        'required_permission' => $section['access'][0] ?? null
+                    ], $menuOrder++);
+                    $this->installMenuItem($sectionId, $normalized);
+                }
+            }
+            
+            // Warn if no menu items created
+            if ($menuOrder === 1) {
+                error_log("PackageManager: Warning - No menu items created for package {$pkg['id']}");
             }
 
             // Store installation in package_installs table for history
@@ -739,25 +780,120 @@ class PackageManager
     }
 
     /**
+     * Install hub card access (V2 spec)
+     * Processes hub_cards[].access arrays and creates section_role_access entries
+     * Maps custom role names to database ENUM values
+     */
+    private function installHubCardAccess(int $sectionId, array $hubCards, int $installedBy): void
+    {
+        // Valid database roles from ENUM
+        $validDbRoles = [
+            'staff', 'student', 'maintenance_staff', 'custodial', 'cafeteria',
+            'custodial_manager', 'maintenance_director', 'business_manager',
+            'substitute_manager', 'counselor', 'principal', 'admin', 'super_admin'
+        ];
+
+        // Map custom role names to database ENUM roles
+        $roleMap = [
+            // Hub package standard roles
+            'hub_user' => 'staff',
+            'hub_student' => 'student',
+            
+            // Management roles
+            'management_crew' => 'maintenance_staff',
+            'management_custodial' => 'custodial',
+            'management_cafeteria' => 'cafeteria',
+            'management_fleet_manager' => 'maintenance_director',
+            'management_director' => 'maintenance_director',
+            'management_business_manager' => 'business_manager',
+            'management_substitute_manager' => 'substitute_manager',
+            'management_counselor' => 'counselor',
+            'management_principal' => 'principal',
+            'management_admin' => 'admin',
+            
+            // Direct database role names (pass through)
+            'staff' => 'staff',
+            'student' => 'student',
+            'maintenance_staff' => 'maintenance_staff',
+            'custodial' => 'custodial',
+            'cafeteria' => 'cafeteria',
+            'custodial_manager' => 'custodial_manager',
+            'maintenance_director' => 'maintenance_director',
+            'business_manager' => 'business_manager',
+            'substitute_manager' => 'substitute_manager',
+            'counselor' => 'counselor',
+            'principal' => 'principal',
+            'admin' => 'admin',
+            'super_admin' => 'super_admin'
+        ];
+
+        // Collect all unique roles from all hub cards
+        $rolesToGrant = [];
+        foreach ($hubCards as $card) {
+            if (!empty($card['access']) && is_array($card['access'])) {
+                foreach ($card['access'] as $customRole) {
+                    // Map custom role to database role
+                    if (isset($roleMap[$customRole])) {
+                        $dbRole = $roleMap[$customRole];
+                        $rolesToGrant[$dbRole] = true;
+                    } else {
+                        error_log("PackageManager: Unknown hub_card role '{$customRole}' - skipping");
+                    }
+                }
+            }
+        }
+
+        // Always grant super_admin access
+        $rolesToGrant['super_admin'] = true;
+
+        // Insert section_role_access entries
+        foreach (array_keys($rolesToGrant) as $role) {
+            if (in_array($role, $validDbRoles, true)) {
+                $this->db->insert('section_role_access', [
+                    'section_id' => $sectionId,
+                    'role' => $role,
+                    'granted_by' => $installedBy,
+                    'granted_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+
+        error_log("PackageManager: Created " . count($rolesToGrant) . " role access entries for section {$sectionId}");
+    }
+
+    /**
+     * Normalize menu item data from various formats
+     */
+    private function normalizeMenuItem(array $raw, int $defaultOrder): array
+    {
+        return [
+            'label' => $raw['label'] ?? $raw['title'] ?? 'Untitled',
+            'route' => $raw['route'] ?? $raw['url'] ?? '#',
+            'icon' => $raw['icon'] ?? 'fa-circle',
+            'sort_order' => $raw['sort_order'] ?? $raw['order'] ?? $defaultOrder,
+            'parent_id' => $raw['parent_id'] ?? null,
+            'required_permission' => $raw['minimum_role'] ?? $raw['required_permission'] ?? null,
+            'is_active' => $raw['is_active'] ?? 1
+        ];
+    }
+
+    /**
      * Install menu item
      */
     private function installMenuItem(int $sectionId, array $menuItem): void
     {
-        // Truncate icon to fit varchar(10) column
-        $icon = $menuItem['icon'] ?? 'bi-circle';
-        if (strlen($icon) > 10) {
-            $icon = substr($icon, 0, 10);
-        }
+        // Icon column now VARCHAR(50) - no need to truncate
+        $icon = $menuItem['icon'] ?? 'fa-circle';
 
         $this->db->insert('section_menu_items', [
             'section_id' => $sectionId,
             'label' => $menuItem['label'],
-            'route' => $menuItem['url'] ?? $menuItem['route'] ?? '',
+            'route' => $menuItem['route'],
             'icon' => $icon,
             'parent_id' => $menuItem['parent_id'] ?? null,
-            'sort_order' => $menuItem['order'] ?? $menuItem['sort_order'] ?? 0,
-            'required_permission' => $menuItem['minimum_role'] ?? $menuItem['required_permission'] ?? null,
-            'is_active' => 1
+            'sort_order' => $menuItem['sort_order'] ?? 0,
+            'required_permission' => $menuItem['required_permission'] ?? null,
+            'is_active' => $menuItem['is_active'] ?? 1
         ]);
     }
 
@@ -959,5 +1095,111 @@ class PackageManager
         ];
 
         return $errors[$errorCode] ?? 'Unknown upload error';
+    }
+
+    /**
+     * Rebuild menu items for a package (idempotent recovery tool)
+     * 
+     * @param string $packageId Package identifier
+     * @param int $rebuiltBy User ID performing the action
+     * @return array Result with success status
+     */
+    public function rebuildMenuItems(string $packageId, int $rebuiltBy): array
+    {
+        try {
+            // Get installation and package data
+            $installation = $this->db->fetchOne(
+                "SELECT si.*, s.id as section_id, sp.package_data 
+                 FROM section_installations si 
+                 JOIN sections s ON si.section_id = s.id 
+                 JOIN section_packages sp ON si.package_record_id = sp.id
+                 WHERE si.package_id = ?",
+                [$packageId]
+            );
+            
+            if (!$installation) {
+                throw new Exception('Package not installed');
+            }
+            
+            $sectionId = $installation['section_id'];
+            $packageData = json_decode($installation['package_data'], true);
+            
+            if (!$packageData) {
+                throw new Exception('Invalid package data');
+            }
+            
+            // Delete existing menu items for this section
+            $this->db->execute(
+                "DELETE FROM section_menu_items WHERE section_id = ?",
+                [$sectionId]
+            );
+            
+            // Rebuild menu items using same logic as install
+            $menuOrder = 1;
+            $itemsCreated = 0;
+            
+            // Legacy: menu_items array
+            if (!empty($packageData['menu_items'])) {
+                foreach ($packageData['menu_items'] as $menuItem) {
+                    $normalized = $this->normalizeMenuItem($menuItem, $menuOrder++);
+                    $this->installMenuItem($sectionId, $normalized);
+                    $itemsCreated++;
+                }
+            }
+            
+            // V2 Spec: hub_cards
+            if (!empty($packageData['hub_cards'])) {
+                foreach ($packageData['hub_cards'] as $card) {
+                    $normalized = $this->normalizeMenuItem([
+                        'label' => $card['title'] ?? 'Untitled',
+                        'route' => $card['route'] ?? '#',
+                        'icon' => $card['icon'] ?? 'fa-circle',
+                        'required_permission' => $card['access'][0] ?? null
+                    ], $menuOrder++);
+                    $this->installMenuItem($sectionId, $normalized);
+                    $itemsCreated++;
+                }
+            }
+            
+            // V2 Spec: management_sections
+            if (!empty($packageData['management_sections'])) {
+                foreach ($packageData['management_sections'] as $section) {
+                    $normalized = $this->normalizeMenuItem([
+                        'label' => $section['title'] ?? 'Untitled',
+                        'route' => $section['route'] ?? '#',
+                        'icon' => $section['icon'] ?? 'fa-gear',
+                        'required_permission' => $section['access'][0] ?? null
+                    ], $menuOrder++);
+                    $this->installMenuItem($sectionId, $normalized);
+                    $itemsCreated++;
+                }
+            }
+            
+            // Log rebuild
+            $this->auditLogger->log(
+                'package_menu_rebuild',
+                'section_menu_items',
+                $sectionId,
+                null,
+                [
+                    'package_id' => $packageId,
+                    'items_created' => $itemsCreated,
+                    'rebuilt_by' => $rebuiltBy
+                ],
+                $rebuiltBy
+            );
+            
+            return [
+                'success' => true,
+                'message' => "Rebuilt {$itemsCreated} menu items for package {$packageId}",
+                'items_created' => $itemsCreated
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
     }
 }
