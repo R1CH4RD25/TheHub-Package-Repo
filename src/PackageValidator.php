@@ -56,27 +56,30 @@ class PackageValidator
             // 1. Validate package structure
             $this->validateStructure($packageData);
 
-            // 2. Check system requirements
+            // 2. Validate Layer 2 compliance (Management Layer requirements)
+            $this->validateLayer2Compliance($packageData);
+
+            // 3. Check system requirements
             $this->checkSystemRequirements($packageData);
 
-            // 3. Check dependencies
+            // 4. Check dependencies
             $this->checkDependencies($packageData);
 
-            // 4. Check for conflicts
+            // 5. Check for conflicts
             $this->checkConflicts($packageData);
 
-            // 5. Validate fields and schema
+            // 6. Validate fields and schema
             $this->validateFields($packageData);
 
-            // 6. Check migrations (if upgrade)
+            // 7. Check migrations (if upgrade)
             if ($installType === 'upgrade' || $installType === 'downgrade') {
                 $this->validateMigrations($packageData, $installType);
             }
 
-            // 7. Security scan
+            // 8. Security scan
             $this->securityScan($packageData);
 
-            // 8. Resource check (disk space, etc.)
+            // 9. Resource check (disk space, etc.)
             $this->checkResources($packageData);
 
         } catch (Exception $e) {
@@ -179,7 +182,180 @@ class PackageValidator
                 }
             }
         }
-    }    /**
+    }
+
+    /**
+     * Validate Layer 2 (Management Layer) compliance
+     * 
+     * Packages with hub_cards MUST include:
+     * - entities (governed database objects)
+     * - workflow_states (submission lifecycle)
+     * - manager_actions (field-level edit constraints)
+     * - audit_events (required logging taxonomy)
+     * - permissions with workflow_actions
+     */
+    private function validateLayer2Compliance(array $packageData): void
+    {
+        // Check if this package has Layer 1 submission entry points
+        $hasHubCards = isset($packageData['hub_cards']) && !empty($packageData['hub_cards']);
+        
+        if (!$hasHubCards) {
+            $this->addCheck('layer2', 'Layer 2 Compliance', 'not required', 'skipped',
+                self::STATUS_PASS, self::SEVERITY_INFO,
+                "Package has no hub_cards - Layer 2 compliance checks skipped");
+            return;
+        }
+
+        // If hub_cards exist, validate required Layer 2 blocks
+        $requiredBlocks = [
+            'entities' => 'Governed database objects linking workflows to tables',
+            'workflow_states' => 'Submission lifecycle states and transitions',
+            'manager_actions' => 'Field-level edit boundaries and constraints',
+            'audit_events' => 'Required logging taxonomy for manager actions',
+            'permissions' => 'Role-to-capability mapping'
+        ];
+
+        foreach ($requiredBlocks as $block => $description) {
+            if (!isset($packageData[$block]) || empty($packageData[$block])) {
+                $this->addCheck('layer2', "Layer 2 Block: $block", 'required', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_CRITICAL,
+                    "Package has hub_cards but missing required Layer 2 block: $block",
+                    "Add $block block to package.json - $description");
+            } else {
+                $this->addCheck('layer2', "Layer 2 Block: $block", 'required', 'present',
+                    self::STATUS_PASS, self::SEVERITY_INFO,
+                    "Layer 2 block present: $block");
+            }
+        }
+
+        // Validate entities structure
+        if (isset($packageData['entities']) && is_array($packageData['entities'])) {
+            foreach ($packageData['entities'] as $index => $entity) {
+                $entityId = $entity['id'] ?? "entity_$index";
+                $requiredEntityFields = ['id', 'table', 'owner_field', 'status_field', 'workflow'];
+                
+                foreach ($requiredEntityFields as $field) {
+                    if (empty($entity[$field])) {
+                        $this->addCheck('layer2', "Entity '$entityId' Field: $field", 'required', 'missing',
+                            self::STATUS_FAIL, self::SEVERITY_ERROR,
+                            "Entity '$entityId' missing required field: $field");
+                    }
+                }
+            }
+        }
+
+        // Validate workflow_states structure
+        if (isset($packageData['workflow_states']) && is_array($packageData['workflow_states'])) {
+            $workflowId = $packageData['workflow_states']['id'] ?? 'workflow';
+            
+            if (empty($packageData['workflow_states']['states'])) {
+                $this->addCheck('layer2', "Workflow States", 'states array', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_ERROR,
+                    "workflow_states must include 'states' array");
+            } else {
+                // Check for orphaned states in transitions
+                $states = array_column($packageData['workflow_states']['states'], 'id');
+                $transitions = $packageData['workflow_states']['transitions'] ?? [];
+                
+                foreach ($transitions as $transition) {
+                    if (!in_array($transition['from'] ?? '', $states)) {
+                        $this->addCheck('layer2', "Workflow Transition", 'valid', 'orphaned',
+                            self::STATUS_FAIL, self::SEVERITY_ERROR,
+                            "Transition references non-existent state: {$transition['from']}");
+                    }
+                    if (!in_array($transition['to'] ?? '', $states)) {
+                        $this->addCheck('layer2', "Workflow Transition", 'valid', 'orphaned',
+                            self::STATUS_FAIL, self::SEVERITY_ERROR,
+                            "Transition references non-existent state: {$transition['to']}");
+                    }
+                }
+            }
+        }
+
+        // Validate manager_actions structure
+        if (isset($packageData['manager_actions']) && is_array($packageData['manager_actions'])) {
+            if (empty($packageData['manager_actions']['editable_fields'])) {
+                $this->addCheck('layer2', "Manager Actions", 'editable_fields', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_ERROR,
+                    "manager_actions must include 'editable_fields' array",
+                    "Define which fields managers can edit and under what conditions");
+            } else {
+                // Validate each editable field has validation rules
+                foreach ($packageData['manager_actions']['editable_fields'] as $field) {
+                    $fieldName = $field['field'] ?? 'unnamed';
+                    
+                    if (empty($field['allowed_states'])) {
+                        $this->addCheck('layer2', "Editable Field: $fieldName", 'allowed_states', 'missing',
+                            self::STATUS_FAIL, self::SEVERITY_ERROR,
+                            "Field '$fieldName' must specify allowed_states");
+                    }
+
+                    if (isset($field['requires_reason']) && $field['requires_reason'] === true) {
+                        $this->addCheck('layer2', "Editable Field: $fieldName", 'requires_reason', 'true',
+                            self::STATUS_PASS, self::SEVERITY_INFO,
+                            "Field '$fieldName' requires correction reason - good for audit trail");
+                    }
+                }
+            }
+
+            if (empty($packageData['manager_actions']['immutable_fields'])) {
+                $this->addCheck('layer2', "Manager Actions", 'immutable_fields', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_ERROR,
+                    "manager_actions must include 'immutable_fields' array",
+                    "Define fields that cannot be changed (e.g., created_by_user_id, created_at)");
+            }
+        }
+
+        // Validate audit_events structure
+        if (isset($packageData['audit_events']) && is_array($packageData['audit_events'])) {
+            if (empty($packageData['audit_events']['events'])) {
+                $this->addCheck('layer2', "Audit Events", 'events', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_ERROR,
+                    "audit_events must include 'events' array");
+            } else {
+                // Validate each event has required_fields
+                foreach ($packageData['audit_events']['events'] as $event) {
+                    $eventType = $event['event_type'] ?? 'unknown';
+                    
+                    if (empty($event['required_fields'])) {
+                        $this->addCheck('layer2', "Audit Event: $eventType", 'required_fields', 'missing',
+                            self::STATUS_FAIL, self::SEVERITY_ERROR,
+                            "Event '$eventType' must specify required_fields for logging");
+                    }
+                }
+            }
+
+            // Validate global audit log is enabled
+            $auditReqs = $packageData['audit_events']['audit_requirements'] ?? [];
+            if (empty($auditReqs['use_global_log']) || $auditReqs['use_global_log'] !== true) {
+                $this->addCheck('layer2', "Audit Requirements", 'use_global_log', 'false or missing',
+                    self::STATUS_FAIL, self::SEVERITY_CRITICAL,
+                    "audit_requirements must have 'use_global_log: true' for compliance",
+                    "All packages MUST log to core audit_logs table");
+            }
+        }
+
+        // Validate permissions include workflow_actions
+        if (isset($packageData['permissions']) && is_array($packageData['permissions'])) {
+            $hasWorkflowActions = false;
+            
+            foreach ($packageData['permissions'] as $role => $config) {
+                if (isset($config['workflow_actions']) && !empty($config['workflow_actions'])) {
+                    $hasWorkflowActions = true;
+                    break;
+                }
+            }
+
+            if (!$hasWorkflowActions) {
+                $this->addCheck('layer2', "Permissions", 'workflow_actions', 'missing',
+                    self::STATUS_FAIL, self::SEVERITY_ERROR,
+                    "permissions must include 'workflow_actions' for at least one role",
+                    "Define which roles can perform workflow actions (review, correct, approve, reject)");
+            }
+        }
+    }
+
+    /**
      * Check system requirements (Hub, PHP, MySQL versions)
      */
     private function checkSystemRequirements(array $packageData): void
