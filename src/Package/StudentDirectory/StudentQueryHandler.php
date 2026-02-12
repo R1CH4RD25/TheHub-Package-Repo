@@ -22,7 +22,7 @@ class StudentQueryHandler
      *   - graduation_year: int
      *   - page: int (default 1)
      *   - per_page: int (default 50, max 200)
-     *   - sort: string (default 'last_name')
+     *   - sort: string (default 'grade')
      *   - direction: string (ASC|DESC, default ASC)
      * @return array ['data' => [...], 'pagination' => [...]]
      */
@@ -35,7 +35,7 @@ class StudentQueryHandler
         $gradYear = (int) ($params['graduation_year'] ?? 0);
         $page = max(1, (int) ($params['page'] ?? 1));
         $perPage = min(200, max(1, (int) ($params['per_page'] ?? 50)));
-        $sort = $params['sort'] ?? 'last_name';
+        $sort = $params['sort'] ?? 'grade';
         $direction = strtoupper($params['direction'] ?? 'ASC') === 'DESC' ? 'DESC' : 'ASC';
 
         // Build WHERE clauses
@@ -80,7 +80,8 @@ class StudentQueryHandler
         // Fetch page
         $offset = ($page - 1) * $perPage;
         $sql = "SELECT student_id, grade, first_name, last_name, nickname,
-                       chromebook_login, group_email, graduation_year,
+                       CONCAT(first_name, ' ', last_name) AS full_name,
+                       chromebook_login, password, group_email, graduation_year,
                        ou_for_google, created_at, updated_at
                 FROM students
                 {$whereClause}

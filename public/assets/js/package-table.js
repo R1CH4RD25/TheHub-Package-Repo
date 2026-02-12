@@ -10,6 +10,22 @@ document.addEventListener('DOMContentLoaded', function () {
     // ========================================
     // SORTING
     // ========================================
+
+    // Apply default sort indicators on load
+    document.querySelectorAll('.pkg-table').forEach(function (table) {
+        var tableId = table.id;
+        var config = (window.__pkgTableConfig || {})[tableId];
+        if (config && config.defaultSort) {
+            var col = config.defaultSort.column;
+            var dir = config.defaultSort.direction || 'asc';
+            var th = table.querySelector('.pkg-col-sortable[data-sort-key="' + col + '"]');
+            if (th) {
+                th.classList.add('sort-' + dir);
+                th.dataset.sortDir = dir;
+            }
+        }
+    });
+
     document.querySelectorAll('.pkg-col-sortable').forEach(function (th) {
         th.addEventListener('click', function () {
             var key = this.dataset.sortKey;
@@ -91,7 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Clear filters
     document.querySelectorAll('.pkg-clear-filters').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
             var container = this.closest('.pkg-filters');
             container.querySelectorAll('.pkg-filter-input').forEach(function (input) {
                 if (input.type === 'checkbox') {
@@ -100,10 +117,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     input.value = '';
                 }
             });
-            var targetTable = container.dataset.targetTable;
-            if (targetTable) {
-                pkgTableReload(targetTable, { page: 1 });
-            }
+            // Navigate to page without filter params
+            window.location.href = window.location.pathname;
         });
     });
 
@@ -420,6 +435,67 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(function () { toast.remove(); }, 300);
         }, 4000);
     };
+
+    // ========================================
+    // SHOW/HIDE MASKED VALUES (Passwords)
+    // Works on both desktop (click) and mobile (touch)
+    // ========================================
+    function handleMaskedToggle(e) {
+        var btn = e.target.closest('.pkg-show-btn');
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Find the masked element — it's a sibling span inside the same <td>
+        var td = btn.closest('td');
+        if (!td) return;
+        var maskedEl = td.querySelector('.pkg-masked-value');
+        if (!maskedEl) return;
+
+        var actual = maskedEl.dataset.actual || '';
+        var isShowing = btn.classList.contains('active');
+
+        if (isShowing) {
+            // Hide it
+            maskedEl.textContent = actual ? '\u2022'.repeat(Math.min(actual.length, 8)) : '\u2022\u2022\u2022\u2022\u2022\u2022';
+            btn.innerHTML = '<i class="fas fa-eye"></i> Show';
+            btn.classList.remove('active');
+        } else {
+            // Show it
+            maskedEl.textContent = actual || '(empty)';
+            btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
+            btn.classList.add('active');
+        }
+    }
+
+    // Listen to both click and touchend for mobile compatibility
+    document.addEventListener('click', handleMaskedToggle);
+    document.addEventListener('touchend', function (e) {
+        var btn = e.target.closest('.pkg-show-btn');
+        if (!btn) return;
+        // Prevent the subsequent click event from firing (avoids double-toggle)
+        e.preventDefault();
+        handleMaskedToggle(e);
+    });
+
+    // ========================================
+    // FILTER FORM SUBMIT (prevent page reload, use AJAX)
+    // ========================================
+    document.querySelectorAll('.pkg-filters form, form.pkg-filters-row').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var container = this.closest('.pkg-filters') || this;
+            var filters = collectFilters(container);
+            // Build URL with filter params for server-side filtering
+            var params = new URLSearchParams();
+            Object.keys(filters).forEach(function (key) {
+                if (filters[key]) params.set(key, filters[key]);
+            });
+            var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            window.location.href = newUrl;
+        });
+    });
 
     // ========================================
     // UTILITIES

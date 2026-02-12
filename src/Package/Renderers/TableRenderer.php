@@ -3,6 +3,7 @@
 namespace Hub\Package\Renderers;
 
 use Hub\Package\Contracts\ComponentRendererInterface;
+use Hub\Package\IconMapper;
 
 /**
  * Table Renderer
@@ -57,9 +58,9 @@ class TableRenderer implements ComponentRendererInterface
         $html .= '<span class="count-label">Showing <strong>' . count($rows) . '</strong> of <strong>' . (int)$total . '</strong> records</span>';
         $html .= '</div>';
 
-        // Bulk actions
+        // Bulk actions (hidden on mobile)
         if (!empty($bulkActions)) {
-            $html .= '<div class="pkg-bulk-actions" style="display:none;" id="' . e($componentId) . '-bulk">';
+            $html .= '<div class="pkg-bulk-actions pkg-hide-mobile" style="display:none;" id="' . e($componentId) . '-bulk">';
             $html .= '<span class="bulk-count">0 selected</span>';
             foreach ($bulkActions as $action) {
                 $accessRoles = $action['access'] ?? [];
@@ -86,9 +87,9 @@ class TableRenderer implements ComponentRendererInterface
         // Header
         $html .= '<thead><tr>';
 
-        // Checkbox column for bulk actions
+        // Checkbox column for bulk actions (hidden on mobile)
         if (!empty($bulkActions)) {
-            $html .= '<th class="pkg-col-checkbox"><input type="checkbox" class="pkg-select-all" data-table="' . e($componentId) . '"></th>';
+            $html .= '<th class="pkg-col-checkbox pkg-hide-mobile"><input type="checkbox" class="pkg-select-all" data-table="' . e($componentId) . '"></th>';
         }
 
         foreach ($columns as $col) {
@@ -130,6 +131,7 @@ class TableRenderer implements ComponentRendererInterface
             'query' => $queryName,
             'packageId' => $packageId,
             'columns' => array_map(fn($c) => ['key' => $c['key'], 'sortable' => $c['sortable'] ?? false], $columns),
+            'defaultSort' => $config['defaultSort'] ?? null,
             'pagination' => $pagination,
             'csrfToken' => $csrfToken,
             'baseUrl' => $baseUrl,
@@ -144,6 +146,7 @@ class TableRenderer implements ComponentRendererInterface
         $label = $col['label'] ?? $key;
         $sortable = $col['sortable'] ?? false;
         $width = $col['width'] ?? '';
+        $responsive = $col['responsive'] ?? '';
 
         $classes = ['pkg-col'];
         $attrs = '';
@@ -151,6 +154,13 @@ class TableRenderer implements ComponentRendererInterface
         if ($sortable) {
             $classes[] = 'pkg-col-sortable';
             $attrs .= ' data-sort-key="' . e($key) . '" role="button" tabindex="0"';
+        }
+
+        // Responsive visibility classes
+        if ($responsive === 'hide-mobile') {
+            $classes[] = 'pkg-hide-mobile';
+        } elseif ($responsive === 'hide-tablet') {
+            $classes[] = 'pkg-hide-tablet';
         }
 
         if ($width) {
@@ -165,9 +175,9 @@ class TableRenderer implements ComponentRendererInterface
         $rowId = $row['id'] ?? $row['student_id'] ?? uniqid();
         $html = '<tr data-row-id="' . e($rowId) . '">';
 
-        // Checkbox
+        // Checkbox (hidden on mobile)
         if (!empty($bulkActions)) {
-            $html .= '<td class="pkg-col-checkbox"><input type="checkbox" class="pkg-row-select" value="' . e($rowId) . '" data-table="' . e($componentId) . '"></td>';
+            $html .= '<td class="pkg-col-checkbox pkg-hide-mobile"><input type="checkbox" class="pkg-row-select" value="' . e($rowId) . '" data-table="' . e($componentId) . '"></td>';
         }
 
         // Data cells
@@ -196,18 +206,32 @@ class TableRenderer implements ComponentRendererInterface
         $style = $col['style'] ?? 'text';
         $value = $row[$key] ?? $col['value'] ?? '';
         $copyable = $col['copyable'] ?? false;
+        $responsive = $col['responsive'] ?? '';
 
-        $html = '<td class="pkg-cell pkg-cell-' . e($style) . '">';
+        $cellClasses = ['pkg-cell', 'pkg-cell-' . e($style)];
+        if ($responsive === 'hide-mobile') {
+            $cellClasses[] = 'pkg-hide-mobile';
+        } elseif ($responsive === 'hide-tablet') {
+            $cellClasses[] = 'pkg-hide-tablet';
+        }
+
+        $html = '<td class="' . implode(' ', $cellClasses) . '">';
 
         switch ($style) {
             case 'badge':
-                $color = $col['badgeColor'] ?? 'primary';
-                $html .= '<span class="badge badge-' . e($color) . '">' . e($value) . '</span>';
+                $color = $col['badgeColor'] ?? $this->inferBadgeColor($key, $value);
+                $html .= '<span class="badge pkg-grade-badge pkg-badge-' . e($color) . '">' . e($value) . '</span>';
                 break;
 
             case 'masked':
-                $maskedValue = $col['value'] ?? '••••••';
-                $html .= '<span class="pkg-masked-value">' . e($maskedValue) . '</span>';
+                $actualValue = $row[$key] ?? '';
+                $maskedDisplay = $actualValue ? str_repeat('•', min(strlen($actualValue), 8)) : '••••••';
+                $html .= '<span class="pkg-masked-value" data-actual="' . e($actualValue) . '">' . e($maskedDisplay) . '</span>';
+                $html .= ' <button type="button" class="btn btn-xs btn-outline-warning pkg-show-btn" title="Show/Hide">';
+                $html .= '<i class="fas fa-eye"></i> Show</button>';
+                if ($copyable && $actualValue) {
+                    $html .= ' <button class="btn-copy pkg-copy-btn" data-value="' . e($actualValue) . '" title="Copy"><i class="bi bi-clipboard"></i></button>';
+                }
                 break;
 
             case 'link':
@@ -249,13 +273,44 @@ class TableRenderer implements ComponentRendererInterface
         return $html;
     }
 
+    /**
+     * Infer badge color based on field key and value
+     */
+    private function inferBadgeColor(string $key, string $value): string
+    {
+        // Grade-specific colors
+        if ($key === 'grade') {
+            $grade = strtoupper($value);
+            return match ($grade) {
+                'PK'  => 'olive',
+                'KG'  => 'gold',
+                '1', '2', '3' => 'teal',
+                '4', '5' => 'blue',
+                '6', '7', '8' => 'purple',
+                '9', '10' => 'orange',
+                '11', '12' => 'red',
+                default => 'secondary',
+            };
+        }
+
+        // School/OU colors
+        if ($key === 'ou_for_google' || $key === 'school') {
+            return 'info';
+        }
+
+        return 'primary';
+    }
+
     private function renderRowAction(array $action, array $row, array $context): string
     {
         $id = $action['id'] ?? '';
         $label = $action['label'] ?? $id;
         $icon = $action['icon'] ?? '';
         $type = $action['type'] ?? 'route';
-        $variant = $action['variant'] ?? 'secondary';
+        $variant = $action['variant'] ?? $action['style'] ?? 'warning';
+
+        // Map lucide icons to FontAwesome
+        $icon = IconMapper::map($icon);
 
         $rowId = $row['id'] ?? $row['student_id'] ?? '';
 
@@ -263,7 +318,7 @@ class TableRenderer implements ComponentRendererInterface
 
         if ($type === 'route') {
             // Navigation action
-            $to = $action['to'] ?? '#';
+            $to = $action['to'] ?? $action['route'] ?? '#';
             // Replace route params, e.g., {student_id} → actual value
             $to = preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($row) {
                 return $row[$matches[1]] ?? $matches[0];
@@ -311,10 +366,11 @@ class TableRenderer implements ComponentRendererInterface
     private function renderBulkAction(array $action, string $componentId, string $csrfToken): string
     {
         $label = $action['label'] ?? '';
-        $icon = $action['icon'] ?? '';
+        $icon = IconMapper::map($action['icon'] ?? '');
         $mutation = $action['mutation'] ?? '';
+        $variant = $action['variant'] ?? 'secondary';
 
-        return '<button class="btn btn-sm btn-outline-secondary pkg-bulk-action" ' .
+        return '<button class="btn btn-sm btn-outline-' . e($variant) . ' pkg-bulk-action" ' .
             'data-action="bulk-mutation" data-mutation="' . e($mutation) . '" ' .
             'data-table="' . e($componentId) . '" data-csrf="' . e($csrfToken) . '">' .
             ($icon ? '<i class="' . e($icon) . '"></i> ' : '') . e($label) .
