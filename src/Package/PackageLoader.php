@@ -84,44 +84,56 @@ class PackageLoader
     }
 
     /**
-     * Load package from filesystem (packages/local/ directory)
+     * Load package from filesystem (packages/ directories)
+     *
+     * Searches multiple package directories:
+     * - packages/local/   — locally developed packages
+     * - packages/district/ — district-level packages (student directory, etc.)
      */
     private function loadFromFilesystem(string $packageId): ?array
     {
-        $basePath = dirname(__DIR__, 2) . '/packages/local/';
+        $rootPath = dirname(__DIR__, 2) . '/packages/';
+        $searchDirs = ['local', 'district'];
 
-        // Try manifest.json first, then package.json
-        $searchPaths = [
-            $basePath . $packageId . '/manifest.json',
-            $basePath . $packageId . '/package.json',
-        ];
+        foreach ($searchDirs as $dir) {
+            $basePath = $rootPath . $dir . '/';
+            if (!is_dir($basePath)) {
+                continue;
+            }
 
-        // Also search by folder name match (id might differ from folder)
-        $folders = glob($basePath . '*', GLOB_ONLYDIR);
-        foreach ($folders as $folder) {
+            // Try direct ID match first
             foreach (['manifest.json', 'package.json'] as $fileName) {
-                $path = $folder . '/' . $fileName;
+                $path = $basePath . $packageId . '/' . $fileName;
                 if (file_exists($path)) {
                     $data = json_decode(file_get_contents($path), true);
-                    if ($data && ($data['package']['id'] ?? $data['package']['package_id'] ?? '') === $packageId) {
+                    if ($data) {
                         $data['_installed'] = false;
                         $data['_source'] = 'filesystem';
-                        $data['_path'] = $folder;
+                        $data['_path'] = dirname($path);
                         return $data;
                     }
                 }
             }
-        }
 
-        // Direct path check
-        foreach ($searchPaths as $path) {
-            if (file_exists($path)) {
-                $data = json_decode(file_get_contents($path), true);
-                if ($data) {
-                    $data['_installed'] = false;
-                    $data['_source'] = 'filesystem';
-                    $data['_path'] = dirname($path);
-                    return $data;
+            // Search by folder name (id might differ from folder name)
+            $folders = glob($basePath . '*', GLOB_ONLYDIR);
+            foreach ($folders as $folder) {
+                foreach (['manifest.json', 'package.json'] as $fileName) {
+                    $path = $folder . '/' . $fileName;
+                    if (file_exists($path)) {
+                        $data = json_decode(file_get_contents($path), true);
+                        if (!$data) continue;
+                        $pkgId = $data['package']['id']
+                            ?? $data['package']['package_id']
+                            ?? $data['id']
+                            ?? '';
+                        if ($pkgId === $packageId) {
+                            $data['_installed'] = false;
+                            $data['_source'] = 'filesystem';
+                            $data['_path'] = $folder;
+                            return $data;
+                        }
+                    }
                 }
             }
         }

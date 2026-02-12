@@ -65,6 +65,12 @@ $router->registerHandler('com.woodson.user-directory', function (string $queryNa
     return $userDirHandler->execute($queryName, $params, $context);
 });
 
+// Student Directory handler — bridges to StudentQueryHandler/StudentMutationHandler
+$studentDirHandler = new \Hub\Package\StudentDirectory\StudentDirectoryHandler();
+$router->registerHandler('district.student-directory', function (string $queryName, array $params, array $context) use ($studentDirHandler) {
+    return $studentDirHandler->executeQuery($queryName, $params, $context);
+});
+
 $result = $router->handle($packageId, $pageId, $userArray, $params);
 
 // Handle non-200 responses
