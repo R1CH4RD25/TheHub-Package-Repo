@@ -4124,104 +4124,11 @@ button[data-bs-dismiss="modal"] i {
 /* ========== hub/hub-pages.css ========== */
 
 /* ==========================================================================
-   HUB PAGE STYLES
-   Landing page with section tiles
+   HUB PAGES — Tooltip & Module Page Styles
+   Hub card styles are in hub-animations.css (hub-modern.css source)
    ========================================================================== */
 
-/* Full-width hub background on main-content */
-.main-content.hub-page {
-    background: var(--hub-page-bg, #FFFFFF);
-}
-
-/* Hub Container */
-.hub-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-}
-
-/* Hub Header */
-.hub-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.hub-header-icon {
-    font-size: 4rem;
-    margin-bottom: 10px;
-    line-height: 1;
-}
-
-.hub-header h1 {
-    font-size: 3rem;
-    margin-bottom: 10px;
-    color: var(--hub-title-color, #000);
-}
-
-.hub-header p {
-    font-size: 1.2rem;
-    color: var(--hub-subtitle-color, #666);
-}
-
-/* Sections Grid */
-.sections-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-}
-
-/* Section Cards */
-.section-card {
-    background: var(--hub-tile-bg, white);
-    border-radius: 20px;
-    padding: 30px 20px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--hub-tile-text, #333);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.section-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.section-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-.section-card:hover::before {
-    transform: scaleX(1);
-}
-
-.section-icon {
-    font-size: 4rem;
-    margin-bottom: 15px;
-    display: block;
-}
-
-.section-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: var(--hub-tile-text, #333);
-}
-
-/* .section-description moved to hub-modern.css for hover effects */
-
+/* ── Tooltip for truncated descriptions ──────────────────────────── */
 .section-title-tooltip {
     font-size: 0.9rem;
     color: var(--primary-color, #C99700);
@@ -4248,7 +4155,6 @@ button[data-bs-dismiss="modal"] i {
     min-width: 250px;
     max-width: 400px;
     z-index: 10002;
-    /* Reduced from 9999999 - tooltips should be on top */
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     line-height: 1.6;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -4256,366 +4162,8 @@ button[data-bs-dismiss="modal"] i {
     backdrop-filter: blur(10px);
 }
 
-/* No Sections Message */
-.no-sections {
-    text-align: center;
-    padding: 60px 20px;
-    background: var(--hub-no-sections-bg, #F9FAFB);
-    border-radius: 20px;
-    color: var(--hub-subtitle-color, #666);
-    box-shadow: 0 4px 12px var(--hub-no-sections-shadow, rgba(0, 0, 0, 0.08));
-}
-
-.no-sections h3 {
-    color: var(--hub-tile-text, #333);
-    margin-bottom: 10px;
-}
-
 /* ==========================================================================
-   MOBILE RESPONSIVE
-   ========================================================================== */
-
-/* Tablets and smaller */
-@media (max-width: 1024px) {
-    .section-description {
-        font-size: 0.8rem;
-    }
-}
-
-/* Mobile - hide descriptions completely */
-@media (max-width: 768px) {
-    .hub-header h1 {
-        font-size: 2rem;
-    }
-
-    .sections-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .section-description {
-        display: none;
-    }
-}
-
-/* ==========================================================================
-   MODERN HUB STYLES - Enhanced with animations and effects
-   ========================================================================== */
-
-/* Full-width hub background on main-content */
-.main-content.hub-page {
-    background: var(--hub-page-bg, #FFFFFF);
-    position: relative;
-}
-
-}
-
-/* Animated particle background - fully customizable via Site Settings */
-.hub-page::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: var(--hub-particle-display, block);
-    /* Use color-mix to add opacity to hex colors from settings */
-    background:
-        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
-            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
-            transparent 50%),
-        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
-            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
-            transparent 50%);
-    filter: blur(var(--hub-particle-blur, 150px));
-    z-index: 0;
-    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
-}
-
-}
-
-/* Hub Container */
-.hub-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Hub Header - Enhanced with animations */
-.hub-header {
-    text-align: center;
-    margin-bottom: 50px;
-    opacity: 0;
-    animation: fadeInDown 0.8s ease-out forwards;
-}
-
-}
-
-.hub-header-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    line-height: 1;
-    animation: bounceIn 1s ease-out;
-}
-
-}
-
-.hub-header h1 {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: var(--hub-title-color, #000);
-    font-weight: 800;
-    animation: slideInLeft 0.8s ease-out 0.2s both;
-}
-/**
- * ============================================================================
- * SECTIONS SELECTION PAGE STYLES
- * ============================================================================
- * All styles for section selection page (public/sections.php)
- * Includes: section cards, grid layout, icons, hover effects
- * ============================================================================
- */
-
-}
-
-/* Sections Grid - Staggered animation */
-.sections-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    margin-top: 30px;
-}
-
-/* Section Cards - Modern glassmorphism design */
-.section-card {
-    background: var(--hub-tile-bg, rgba(255, 255, 255, 0.95));
-    border-radius: 20px;
-    padding: 30px 20px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--hub-tile-text, #333);
-    display: flex;
-    flex-direction: column;
-    box-shadow:
-        0 4px 20px var(--hub-card-shadow, rgba(0, 0, 0, 0.08)),
-        0 0 0 1px var(--hub-card-border, rgba(0, 0, 0, 0.05));
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    cursor: pointer;
-    opacity: 0;
-    animation: fadeInUp 0.8s ease-out forwards;
-    transform: translateY(30px);
-}
-
-/* Staggered animation for cards */
-.section-card:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.section-card:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.section-card:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.section-card:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.section-card:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.section-card:nth-child(6) {
-    animation-delay: 0.6s;
-}
-
-.section-card:nth-child(7) {
-    animation-delay: 0.7s;
-}
-
-.section-card:nth-child(8) {
-    animation-delay: 0.8s;
-}
-
-}
-
-/* Gradient border on top */
-.section-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: var(--gold-gradient, linear-gradient(90deg, #C99700 0%, #FFD700 100%));
-    transform: scaleX(0);
-    transition: transform 0.4s ease;
-    border-radius: 20px 20px 0 0;
-}
-
-/* Animated background gradient */
-.section-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center,
-            var(--hub-card-glow-center, rgba(201, 151, 0, 0.03)) 0%,
-            var(--hub-card-glow-edge, rgba(255, 215, 0, 0.03)) 100%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    border-radius: 20px;
-    z-index: 0;
-}
-
-/* Allow tooltip to be hovered without blocking card link */
-.section-title-tooltip {
-    pointer-events: auto;
-}
-
-.section-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow:
-        0 20px 40px color-mix(in srgb, var(--hub-card-hover-shadow, #c4b454) 20%, transparent),
-        0 0 0 2px var(--hub-card-hover-border, #d4c77a);
-}
-
-.section-card:hover::before {
-    transform: scaleX(1);
-    animation: gradientSlide 2s linear infinite;
-}
-
-}
-
-.section-card:hover::after {
-    opacity: 1;
-}
-
-/* Section Icon - 3D tilt effect ready */
-.section-icon {
-    font-size: 4.5rem;
-    margin-bottom: 20px;
-    display: block;
-    position: relative;
-    z-index: 1;
-    color: var(--hub-icon-color, #C99700);
-    transition: transform 0.4s ease, color 0.3s ease;
-    filter: drop-shadow(0 4px 8px var(--hub-icon-shadow, rgba(0, 0, 0, 0.1)));
-}
-
-.section-card:hover .section-icon {
-    transform: scale(1.1) rotateZ(-5deg);
-    color: var(--hub-icon-hover-color, #FFD700);
-    animation: iconBounce 0.6s ease;
-}
-
-}
-
-/* Section Title - Enhanced typography */
-.section-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--hub-tile-text, var(--text-primary, #333));
-    position: relative;
-    z-index: 1;
-    transition: color 0.3s ease;
-}
-
-.section-card:hover .section-title {
-    color: var(--hub-card-hover-title, var(--primary-color, #C99700));
-    animation: titlePulse 0.6s ease;
-}
-
-}
-
-/* Section Description */
-.section-description {
-    font-size: 0.95rem;
-    color: var(--hub-card-description, var(--text-muted, #666));
-    line-height: 1.6;
-    position: relative;
-    z-index: 1;
-    transition: color 0.3s ease, opacity 0.3s ease;
-}
-
-.section-card:hover .section-description {
-    color: var(--hub-card-hover-description, rgba(255, 255, 255, 0.95)) !important;
-    text-shadow: none !important;
-    opacity: 1 !important;
-    font-weight: 500 !important;
-}
-
-/* Empty state */
-.no-sections {
-    text-align: center;
-    padding: 60px 20px;
-    background: var(--hub-no-sections-bg, white);
-    border-radius: 20px;
-    box-shadow: 0 4px 20px var(--hub-no-sections-shadow, rgba(0, 0, 0, 0.08));
-    animation: fadeInUp 0.8s ease-out;
-}
-
-.no-sections h3 {
-    color: var(--primary-color, #C99700);
-    font-size: 1.8rem;
-    margin-bottom: 15px;
-}
-
-.no-sections p {
-    color: var(--text-muted, #666);
-    font-size: 1.1rem;
-}
-
-.sections-grid {
-    grid-template-columns: 1fr;
-        gap: 20px;
-}
-
-.section-card {
-    padding: 25px;
-}
-
-.section-icon {
-    font-size: 3.5rem;
-}
-
-.section-title {
-    color: var(--hub-tile-text, #fff);
-}
-
-.section-description {
-    color: var(--hub-card-description, #aaa);
-}
-
-}
-
-/* Success state animation */
-.section-card.clicked {
-    animation: cardClick 0.3s ease;
-}
-
-/* Cards - Flip and Zoom In */
-.admin-card,
-.section-card,
-.package-card {
-    opacity: 0;
-    transform: perspective(1000px) rotateX(-15deg) scale(0.9);
-}
-
-.admin-card.animate-in,
-.section-card.animate-in,
-.package-card.animate-in {
-    animation: flipZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-/* ==========================================================================
-   MODERN MODULES PAGE - Enhanced with cutting-edge animations
+   MODULES PAGE (separate from hub landing)
    ========================================================================== */
 
 .modules-page {
@@ -4625,22 +4173,15 @@ button[data-bs-dismiss="modal"] i {
     overflow: hidden;
 }
 
-/* Animated background particles */
 .modules-page::before {
     content: '';
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: 
+    background-image:
         radial-gradient(circle at 10% 20%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
         radial-gradient(circle at 90% 80%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
         radial-gradient(circle at 50% 50%, rgba(201, 151, 0, 0.03) 0%, transparent 30%);
-    animation: particleFloat 20s ease-in-out infinite;
-}
-
-@keyframes particleFloat {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-20px) scale(1.05); }
 }
 
 .modules-container {
@@ -4651,299 +4192,123 @@ button[data-bs-dismiss="modal"] i {
     z-index: 1;
 }
 
-/* Modules Header - Enhanced */
 .modules-header {
     text-align: center;
     margin-bottom: 4rem;
-    opacity: 0;
-    animation: fadeInDown 0.8s ease-out forwards;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .modules-header h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: white;
     margin-bottom: 1rem;
-    font-weight: 800;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    animation: slideInLeft 0.8s ease-out 0.2s both;
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    font-weight: 700;
 }
 
 .modules-header p {
-    font-size: 1.3rem;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    animation: slideInLeft 0.8s ease-out 0.4s both;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
 }
 
-/* Modules Grid - Staggered animations */
+/* Module Cards Grid */
 .modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
     margin-bottom: 3rem;
 }
 
-/* Module Cards - Glassmorphism with 3D effects */
 .module-card {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 2.5rem;
-    box-shadow: 
-        0 8px 32px rgba(0,0,0,0.2),
-        0 0 0 1px rgba(255,255,255,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     text-decoration: none;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 2px solid transparent;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    opacity: 0;
-    transform: translateY(30px) rotateX(10deg);
-    animation: cardEntrance 0.6s ease-out forwards;
-    transform-style: preserve-3d;
-    perspective: 1000px;
-}
-
-/* Staggered card animations */
-.module-card:nth-child(1) { animation-delay: 0.1s; }
-.module-card:nth-child(2) { animation-delay: 0.2s; }
-.module-card:nth-child(3) { animation-delay: 0.3s; }
-.module-card:nth-child(4) { animation-delay: 0.4s; }
-.module-card:nth-child(5) { animation-delay: 0.5s; }
-.module-card:nth-child(6) { animation-delay: 0.6s; }
-
-@keyframes cardEntrance {
-    to {
-        opacity: 1;
-        transform: translateY(0) rotateX(0deg);
-    }
-}
-
-/* Shimmer effect on cards */
-.module-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
-    transition: left 0.5s ease;
-}
-
-.module-card:hover::before {
-    left: 100%;
-}
-
-/* Gradient border animation */
-.module-card::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(
-        135deg,
-        var(--primary-color, #C99700),
-        var(--primary-dark, #A07800),
-        #FFD700,
-        var(--primary-color, #C99700)
-    );
-    background-size: 300% 300%;
-    border-radius: 24px;
-    z-index: -1;
-    opacity: 0;
-    animation: gradientRotate 4s linear infinite;
-    transition: opacity 0.3s ease;
-}
-
-@keyframes gradientRotate {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 .module-card:hover {
-    transform: translateY(-12px) scale(1.03);
-    box-shadow: 
-        0 20px 60px rgba(0,0,0,0.3),
-        0 0 0 1px rgba(102, 126, 234, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
 }
 
-.module-card:hover::after {
-    opacity: 1;
-}
-
-/* Module Icon - Enhanced with 3D effects */
 .module-icon {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    transition: all 0.4s ease;
+    font-size: 3rem;
+    margin-bottom: 1.25rem;
     display: inline-block;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
-}
-
-.module-card:hover .module-icon {
-    transform: scale(1.2) rotateY(360deg);
-    filter: drop-shadow(0 8px 20px rgba(201, 151, 0, 0.4));
-}
-
-/* Module Title - Gradient text on hover */
-.module-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--secondary-color, #2c3e50);
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.module-card:hover .module-title {
     color: var(--primary-color, #C99700);
-    transform: translateX(5px);
 }
 
-/* Module Description */
+.module-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--secondary-color, #2c3e50);
+    margin-bottom: 0.75rem;
+}
+
 .module-description {
     color: #666;
-    line-height: 1.8;
+    line-height: 1.6;
     flex: 1;
-    margin-bottom: 1.5rem;
-    transition: color 0.3s ease;
+    margin-bottom: 1.25rem;
 }
 
-.module-card:hover .module-description {
-    color: #444;
-}
-
-/* Module Role Badge - Animated */
 .module-role {
     display: inline-block;
-    padding: 0.5rem 1.25rem;
+    padding: 0.4rem 1rem;
     background: var(--gold-gradient, linear-gradient(135deg, #C99700 0%, #FFD700 100%));
     color: var(--secondary-color, #000);
-    border-radius: 25px;
-    font-size: 0.9rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
     font-weight: 600;
     text-transform: capitalize;
-    box-shadow: 0 4px 12px rgba(201, 151, 0, 0.3);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
-.module-role::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-.module-card:hover .module-role {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.5);
-}
-
-.module-card:hover .module-role::before {
-    width: 300px;
-    height: 300px;
-}
-
-/* Empty state - Enhanced */
+/* Modules Empty State */
 .modules-empty-state {
     text-align: center;
     padding: 4rem 2rem;
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .modules-empty-state p:first-of-type {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--primary-color, #C99700);
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .modules-empty-state p:last-of-type {
     color: #666;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
-/* Responsive Design */
+/* Modules Responsive */
 @media (max-width: 768px) {
     .modules-header h1 {
-        font-size: 2rem;
-    }
-
-    .modules-header p {
-        font-size: 1.1rem;
+        font-size: 1.75rem;
     }
 
     .modules-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1.25rem;
     }
 
     .module-card {
-        padding: 2rem;
+        padding: 1.5rem;
     }
 
     .module-icon {
-        font-size: 3rem;
+        font-size: 2.5rem;
     }
 
     .module-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 }
 
@@ -4957,111 +4322,39 @@ button[data-bs-dismiss="modal"] i {
 
 .modules-loading::after {
     content: '';
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
     border-top-color: white;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Click ripple effect */
-.module-card.clicked {
-    animation: cardClick 0.4s ease;
-}
-
-@keyframes cardClick {
-    0% { transform: translateY(-12px) scale(1.03); }
-    50% { transform: translateY(-8px) scale(0.98); }
-    100% { transform: translateY(-12px) scale(1.03); }
-}
-
-/* Accessibility: Reduce motion for users who prefer it */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+    .modules-loading::after {
+        animation: none;
     }
 }
-/**
- * Hub Frontend Responsive Styles
- * Mobile-first media queries for student/staff hub
- */
-
-/* No hub-specific media queries yet */
 
 /* ========== hub/hub-animations.css ========== */
 
 /* ==========================================================================
-   MODERN HUB STYLES - Enhanced with animations and effects
+   HUB LANDING PAGE — Clean, Professional Card Layout
    ========================================================================== */
 
-/* Full-width hub background on main-content */
+/* Full-width hub background */
 .main-content.hub-page {
-    background: var(--hub-page-bg, #FFFFFF);
+    background: var(--hub-page-bg, #f5f5f7);
     position: relative;
+    min-height: calc(100vh - 70px);
 }
 
-/* Header first-load animation - only on initial page load */
-.navbar {
-    transform-origin: top;
-}
-
-/* Animate only if not already shown in this session */
-html:not(.animations-played) .navbar {
-    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    opacity: 0;
-}
-
-html.animations-played .navbar {
-    opacity: 1;
-}
-
-@keyframes slideDownFade {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Footer first-load animation */
-html:not(.animations-played) .admin-footer,
-html:not(.animations-played) footer {
-    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 0.2s;
-    opacity: 0;
-}
-
-html.animations-played .admin-footer,
-html.animations-played footer {
-    opacity: 1;
-}
-
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Animated particle background - fully customizable via Site Settings */
+/* Subtle ambient background — no pulsing, no blur jank */
 .hub-page::before {
     content: '';
     position: absolute;
@@ -5070,344 +4363,282 @@ html.animations-played footer {
     right: 0;
     bottom: 0;
     display: var(--hub-particle-display, block);
-    /* Use color-mix to add opacity to hex colors from settings */
     background:
-        radial-gradient(circle var(--hub-particle-size, 600px) at 20% 50%,
-            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
-            transparent 50%),
-        radial-gradient(circle var(--hub-particle-size, 600px) at 80% 80%,
-            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) calc(var(--hub-particle-opacity, 0.15) * 100%), transparent) 0%,
-            transparent 50%);
-    filter: blur(var(--hub-particle-blur, 150px));
+        radial-gradient(ellipse 800px 600px at 15% 30%,
+            color-mix(in srgb, var(--hub-particle-glow-1, #C99700) 6%, transparent) 0%,
+            transparent 70%),
+        radial-gradient(ellipse 600px 800px at 85% 70%,
+            color-mix(in srgb, var(--hub-particle-glow-2, #FFD700) 5%, transparent) 0%,
+            transparent 70%);
     z-index: 0;
-    animation: backgroundPulse var(--hub-particle-speed, 20s) ease-in-out infinite;
+    pointer-events: none;
 }
 
-@keyframes backgroundPulse {
-
-    0%,
-    100% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
-    }
-}
-
-/* Hub Container */
+/* ── Hub Container ───────────────────────────────────────────────── */
 .hub-container {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 48px 24px 64px;
     position: relative;
     z-index: 1;
 }
 
-/* Hub Header - Enhanced with animations */
+/* ── Hub Header ──────────────────────────────────────────────────── */
 .hub-header {
     text-align: center;
-    margin-bottom: 50px;
-    opacity: 0;
-    animation: fadeInDown 0.8s ease-out forwards;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    margin-bottom: 48px;
 }
 
 .hub-header-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     line-height: 1;
-    animation: bounceIn 1s ease-out;
 }
 
-@keyframes bounceIn {
-    0% {
-        opacity: 0;
-        transform: scale(0.3);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-
-    70% {
-        transform: scale(0.9);
-    }
-
-    100% {
-        transform: scale(1);
-    }
+.hub-header-icon img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
 }
 
 .hub-header h1 {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: var(--hub-title-color, #000);
-    font-weight: 800;
-    animation: slideInLeft 0.8s ease-out 0.2s both;
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--hub-title-color, #1d1d1f);
+    letter-spacing: -0.02em;
 }
 
 .hub-header p {
-    font-size: 1.2rem;
-    color: var(--hub-subtitle-color, #666);
-    animation: slideInLeft 0.8s ease-out 0.4s both;
+    font-size: 1.1rem;
+    color: var(--hub-subtitle-color, #6e6e73);
+    max-width: 480px;
+    margin: 0 auto;
 }
 
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Sections Grid - Staggered animation */
+/* ── Sections Grid ───────────────────────────────────────────────── */
 .sections-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    margin-top: 30px;
+    gap: 24px;
 }
 
-/* Section Cards - Modern glassmorphism design */
+/* ── Section Cards ───────────────────────────────────────────────── */
 .section-card {
-    background: var(--hub-tile-bg, rgba(255, 255, 255, 0.95));
-    border-radius: 20px;
-    padding: 30px 20px;
+    background: var(--hub-tile-bg, #fff);
+    border-radius: 16px;
+    padding: 32px 24px 28px;
     text-align: center;
     text-decoration: none;
-    color: var(--hub-tile-text, #333);
+    color: var(--hub-tile-text, #1d1d1f);
     display: flex;
     flex-direction: column;
-    box-shadow:
-        0 4px 20px var(--hub-card-shadow, rgba(0, 0, 0, 0.08)),
-        0 0 0 1px var(--hub-card-border, rgba(0, 0, 0, 0.05));
+    align-items: center;
+    border: 1px solid var(--hub-card-border, rgba(0, 0, 0, 0.06));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04),
+                0 4px 12px rgba(0, 0, 0, 0.03);
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
-    opacity: 0;
-    animation: fadeInUp 0.8s ease-out forwards;
-    transform: translateY(30px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-/* Staggered animation for cards */
-.section-card:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.section-card:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.section-card:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.section-card:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.section-card:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.section-card:nth-child(6) {
-    animation-delay: 0.6s;
-}
-
-.section-card:nth-child(7) {
-    animation-delay: 0.7s;
-}
-
-.section-card:nth-child(8) {
-    animation-delay: 0.8s;
-}
-
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Gradient border on top */
+/* Top accent line — visible by default, subtle */
 .section-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 5px;
+    height: 3px;
     background: var(--gold-gradient, linear-gradient(90deg, #C99700 0%, #FFD700 100%));
-    transform: scaleX(0);
-    transition: transform 0.4s ease;
-    border-radius: 20px 20px 0 0;
+    opacity: 0.4;
+    transition: opacity 0.25s ease;
+    border-radius: 16px 16px 0 0;
 }
 
-/* Animated background gradient */
-.section-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center,
-            var(--hub-card-glow-center, rgba(201, 151, 0, 0.03)) 0%,
-            var(--hub-card-glow-edge, rgba(255, 215, 0, 0.03)) 100%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    border-radius: 20px;
-    z-index: 0;
-}
-
-/* Allow tooltip to be hovered without blocking card link */
-.section-title-tooltip {
-    pointer-events: auto;
-}
-
+/* ── Hover — clean lift ──────────────────────────────────────────── */
 .section-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow:
-        0 20px 40px color-mix(in srgb, var(--hub-card-hover-shadow, #c4b454) 20%, transparent),
-        0 0 0 2px var(--hub-card-hover-border, #d4c77a);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+                0 12px 28px rgba(0, 0, 0, 0.08);
+    border-color: var(--hub-card-hover-border, rgba(201, 151, 0, 0.25));
 }
 
 .section-card:hover::before {
-    transform: scaleX(1);
-    animation: gradientSlide 2s linear infinite;
-}
-
-@keyframes gradientSlide {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    100% {
-        background-position: 200% 50%;
-    }
-}
-
-.section-card:hover::after {
     opacity: 1;
 }
 
-/* Section Icon - 3D tilt effect ready */
+/* Active / click feedback */
+.section-card:active {
+    transform: translateY(-1px);
+    transition-duration: 0.1s;
+}
+
+/* ── Section Icon ────────────────────────────────────────────────── */
 .section-icon {
-    font-size: 4.5rem;
-    margin-bottom: 20px;
-    display: block;
-    position: relative;
-    z-index: 1;
+    font-size: 2.75rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--hub-icon-color, #C99700) 8%, transparent);
     color: var(--hub-icon-color, #C99700);
-    transition: transform 0.4s ease, color 0.3s ease;
-    filter: drop-shadow(0 4px 8px var(--hub-icon-shadow, rgba(0, 0, 0, 0.1)));
+    transition: background 0.25s ease, color 0.25s ease;
+    filter: none;
+}
+
+.section-icon i {
+    font-size: 1.75rem;
 }
 
 .section-card:hover .section-icon {
-    transform: scale(1.1) rotateZ(-5deg);
-    color: var(--hub-icon-hover-color, #FFD700);
-    animation: iconBounce 0.6s ease;
+    background: color-mix(in srgb, var(--hub-icon-hover-color, #C99700) 14%, transparent);
+    color: var(--hub-icon-hover-color, #B8860B);
 }
 
-@keyframes iconBounce {
-
-    0%,
-    100% {
-        transform: scale(1.1) rotateZ(-5deg);
-    }
-
-    50% {
-        transform: scale(1.2) rotateZ(5deg);
-    }
-}
-
-/* Section Title - Enhanced typography */
+/* ── Section Title ───────────────────────────────────────────────── */
 .section-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--hub-tile-text, var(--text-primary, #333));
-    position: relative;
-    z-index: 1;
-    transition: color 0.3s ease;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--hub-tile-text, #1d1d1f);
+    line-height: 1.3;
 }
 
-.section-card:hover .section-title {
-    color: var(--hub-card-hover-title, var(--primary-color, #C99700));
-    animation: titlePulse 0.6s ease;
+.section-title-tooltip {
+    pointer-events: auto;
+    font-size: 0.8rem;
+    color: var(--text-muted, #999);
+    margin-left: 4px;
+    vertical-align: middle;
 }
 
-@keyframes titlePulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-/* Section Description */
+/* ── Section Description ─────────────────────────────────────────── */
 .section-description {
-    font-size: 0.95rem;
-    color: var(--hub-card-description, var(--text-muted, #666));
-    line-height: 1.6;
-    position: relative;
-    z-index: 1;
-    transition: color 0.3s ease, opacity 0.3s ease;
+    font-size: 0.875rem;
+    color: var(--hub-card-description, #6e6e73);
+    line-height: 1.5;
 }
 
 .section-card:hover .section-description {
-    color: var(--hub-card-hover-description, rgba(255, 255, 255, 0.95)) !important;
-    text-shadow: none !important;
-    opacity: 1 !important;
-    font-weight: 500 !important;
+    color: var(--hub-card-description, #6e6e73);
 }
 
-/* Empty state */
+/* Info icon in description — shows full text on hover */
+.section-desc-tooltip {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--primary-color, #C99700);
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    position: relative;
+    z-index: 10;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.section-desc-tooltip:hover {
+    opacity: 1;
+    color: var(--hub-icon-hover-color, #B8860B);
+}
+
+.section-desc-tooltip:hover::after {
+    content: attr(data-full-text);
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 30, 30, 0.97);
+    color: #f5f5f7;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    font-style: normal;
+    white-space: normal;
+    min-width: 240px;
+    max-width: 380px;
+    z-index: 10002;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+/* Hide info tooltip icon on mobile — hover doesn't work on touch */
+@media (max-width: 768px) {
+    .section-desc-tooltip {
+        display: none !important;
+    }
+}
+
+/* ── Empty State ─────────────────────────────────────────────────── */
 .no-sections {
     text-align: center;
-    padding: 60px 20px;
-    background: var(--hub-no-sections-bg, white);
-    border-radius: 20px;
-    box-shadow: 0 4px 20px var(--hub-no-sections-shadow, rgba(0, 0, 0, 0.08));
-    animation: fadeInUp 0.8s ease-out;
+    padding: 64px 24px;
+    background: var(--hub-no-sections-bg, #fff);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .no-sections h3 {
     color: var(--primary-color, #C99700);
-    font-size: 1.8rem;
-    margin-bottom: 15px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 .no-sections p {
-    color: var(--text-muted, #666);
-    font-size: 1.1rem;
+    color: var(--text-muted, #6e6e73);
+    font-size: 1rem;
 }
 
-/* Responsive Design */
+/* ── Entrance Animation — simple fade, once ──────────────────────── */
+@keyframes hubFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.hub-header {
+    animation: hubFadeIn 0.5s ease-out both;
+}
+
+.section-card {
+    opacity: 0;
+    animation: hubFadeIn 0.4s ease-out both;
+}
+
+/* Stagger cards — short, snappy */
+.section-card:nth-child(1)  { animation-delay: 0.06s; }
+.section-card:nth-child(2)  { animation-delay: 0.12s; }
+.section-card:nth-child(3)  { animation-delay: 0.18s; }
+.section-card:nth-child(4)  { animation-delay: 0.24s; }
+.section-card:nth-child(5)  { animation-delay: 0.30s; }
+.section-card:nth-child(6)  { animation-delay: 0.36s; }
+.section-card:nth-child(7)  { animation-delay: 0.42s; }
+.section-card:nth-child(8)  { animation-delay: 0.48s; }
+.section-card:nth-child(9)  { animation-delay: 0.54s; }
+.section-card:nth-child(10) { animation-delay: 0.60s; }
+.section-card:nth-child(11) { animation-delay: 0.66s; }
+.section-card:nth-child(12) { animation-delay: 0.72s; }
+
+/* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+    .hub-container {
+        padding: 32px 16px 48px;
+    }
+
+    .hub-header {
+        margin-bottom: 32px;
+    }
+
     .hub-header h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 
     .hub-header p {
@@ -5416,123 +4647,96 @@ html.animations-played footer {
 
     .sections-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 16px;
     }
 
     .section-card {
-        padding: 25px;
+        padding: 24px 20px;
+        flex-direction: row;
+        text-align: left;
+        gap: 16px;
     }
 
     .section-icon {
-        font-size: 3.5rem;
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        font-size: 2rem;
+        margin-bottom: 0;
+        border-radius: 12px;
     }
-}
 
-/* Dark mode support */
-/* Dark mode support - respects Site Settings theme variables */
-@media (prefers-color-scheme: dark) {
-    .section-card {
-        /* Use the theme variable, fallback to dark if not set */
-        background: var(--hub-tile-bg, rgba(30, 30, 30, 0.95));
-        color: var(--hub-tile-text, #fff);
+    .section-icon i {
+        font-size: 1.4rem;
+    }
+
+    .section-card > div {
+        flex: 1;
     }
 
     .section-title {
-        color: var(--hub-tile-text, #fff);
+        margin-bottom: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hub-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .sections-grid {
+        gap: 12px;
+    }
+
+    .section-card {
+        padding: 20px 16px;
+    }
+}
+
+/* ── Dark Mode ───────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    .section-card {
+        background: var(--hub-tile-bg, rgba(30, 30, 30, 0.95));
+        border-color: rgba(255, 255, 255, 0.08);
+        color: var(--hub-tile-text, #f5f5f7);
+    }
+
+    .section-card:hover {
+        border-color: rgba(201, 151, 0, 0.35);
+    }
+
+    .section-title {
+        color: var(--hub-tile-text, #f5f5f7);
     }
 
     .section-description {
-        color: var(--hub-card-description, #aaa);
+        color: var(--hub-card-description, #a1a1a6);
+    }
+
+    .section-icon {
+        background: color-mix(in srgb, var(--hub-icon-color, #C99700) 12%, transparent);
     }
 }
 
-/* Loading animation (can be triggered via JS) */
-.hub-loading {
-    opacity: 0;
-    animation: fadeIn 0.6s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
-}
-
-/* Add pulse effect to cards on page load */
-@keyframes cardPulse {
-    0% {
-        transform: scale(1);
+/* ── Reduced Motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .hub-header,
+    .section-card {
+        animation: none !important;
+        opacity: 1 !important;
     }
 
-    50% {
-        transform: scale(1.05);
+    .section-card {
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
     }
 
-    100% {
-        transform: scale(1);
+    .section-card:hover {
+        transform: none;
     }
-}
-
-/* Success state animation */
-.section-card.clicked {
-    animation: cardClick 0.3s ease;
-}
-
-@keyframes cardClick {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(0.95);
-    }
-}
-
-.menu-group.collapsed .menu-group-arrow {
-    transform: rotate(-90deg);
-}
-
-.menu-group-items {
-    list-style: none;
-    padding-left: 15px;
-    margin: 0;
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
-    opacity: 1;
-}
-
-.menu-group.collapsed .menu-group-items {
-    max-height: 0;
-    opacity: 0;
-}
-
-.menu-group-items li {
-    margin: 0;
-}
-
-.menu-group-items li a {
-    padding: 10px 20px;
-    font-size: 0.95em;
-}
-
-/* Menu spacer to push items to bottom */
-.menu-spacer {
-    flex: 1;
-    min-height: 20px;
-}
-
-/* Make sidebar flex column to support spacer */
-.admin-sidebar .admin-menu {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
 }
 
 /* ==========================================================================
-   USER PROFILE DROPDOWN
+   NAVIGATION DROPDOWN (shared component used on hub page)
    ========================================================================== */
 
 .nav-user-dropdown {
@@ -5549,7 +4753,7 @@ html.animations-played footer {
     cursor: pointer;
     padding: 5px 10px;
     border-radius: 8px;
-    transition: background 0.3s ease;
+    transition: background 0.2s ease;
 }
 
 .nav-user-trigger:hover {
@@ -5558,12 +4762,13 @@ html.animations-played footer {
 
 .nav-user-arrow {
     font-size: 0.7em;
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
     color: var(--primary-text, #333);
+    display: none !important;
 }
 
 .nav-user-dropdown.active .nav-user-arrow,
-.nav-user-menu.show~.nav-user-trigger .nav-user-arrow {
+.nav-user-menu.show ~ .nav-user-trigger .nav-user-arrow {
     transform: rotate(180deg);
 }
 
@@ -5571,16 +4776,17 @@ html.animations-played footer {
     position: absolute;
     top: 100%;
     right: 0;
-    margin-top: 10px;
+    margin-top: 8px;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
     min-width: 220px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1000;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    z-index: 9999;
 }
 
 .nav-user-menu.show {
@@ -5593,10 +4799,10 @@ html.animations-played footer {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 10px 16px;
     color: var(--primary-text, #333);
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
 }
 
 .user-menu-item:hover {
@@ -5604,28 +4810,28 @@ html.animations-played footer {
 }
 
 .user-menu-item:first-child {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .user-menu-item:last-child {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 .user-menu-icon {
-    font-size: 1.2em;
-    width: 24px;
+    font-size: 1.1em;
+    width: 22px;
     text-align: center;
+    color: var(--text-muted, #666);
 }
 
 .user-menu-divider {
     height: 1px;
-    background: var(--border-color, #e0e0e0);
-    margin: 5px 0;
+    background: var(--border-color, #e5e5e7);
+    margin: 4px 0;
 }
 
-/* Adjust nav-user-profile to work with dropdown */
 .nav-user-info {
     display: flex;
     flex-direction: column;
@@ -5634,434 +4840,64 @@ html.animations-played footer {
 
 .nav-user-name {
     font-weight: 600;
-    color: var(--primary-text, #333);
+    color: var(--header-subtitle-color, var(--primary-color, #007bff));
 }
 
 .nav-user-role {
     font-size: 0.85em;
-    color: var(--secondary-text, #666);
+    color: var(--secondary-text, #6e6e73);
 }
 
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-    .nav-user-info {
-        display: none;
-    }
-
-    .nav-user-arrow {
-        display: none;
-    }
-
-    .nav-user-menu {
-        right: -10px;
-    }
-
-    .menu-group-header {
-        font-size: 0.9em;
-        padding: 10px 15px;
-    }
+/* ── Sidebar / Menu Groups ───────────────────────────────────────── */
+.menu-group.collapsed .menu-group-arrow {
+    transform: rotate(-90deg);
 }
 
-
-/* Override nav-user-name to match header subtitle color */
-.nav-user-name {
-    font-weight: 600;
-    color: var(--header-subtitle-color, var(--primary-color, #007bff));
+.menu-group-items {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.25s ease;
+    opacity: 1;
 }
 
-
-/* Hide the user dropdown arrow */
-.nav-user-arrow {
-    display: none !important;
+.menu-group.collapsed .menu-group-items {
+    max-height: 0;
+    opacity: 0;
 }
 
-/* Increase z-index for user dropdown menu */
-.nav-user-menu {
-    z-index: 9999 !important;
+.menu-group-items li { margin: 0; }
+.menu-group-items li a {
+    padding: 10px 20px;
+    font-size: 0.95em;
 }
 
+.menu-spacer {
+    flex: 1;
+    min-height: 20px;
+}
 
-/* Icon spacing and sizing for sidebar and dropdown */
+.admin-sidebar .admin-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .menu-group-header i,
-.admin-menu>li>a i {
+.admin-menu > li > a i {
     margin-right: 8px;
     width: 16px;
     text-align: center;
 }
-/* ==========================================================================
-   MODERN MODULES PAGE - Enhanced with cutting-edge animations
-   ========================================================================== */
 
-.modules-page {
-    min-height: 100vh;
-    background: var(--secondary-color, #000000);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Animated background particles */
-.modules-page::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(201, 151, 0, 0.06) 0%, transparent 20%),
-        radial-gradient(circle at 50% 50%, rgba(201, 151, 0, 0.03) 0%, transparent 30%);
-    animation: particleFloat 20s ease-in-out infinite;
-}
-
-@keyframes particleFloat {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-20px) scale(1.05); }
-}
-
-.modules-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 3rem 1rem;
-    position: relative;
-    z-index: 1;
-}
-
-/* Modules Header - Enhanced */
-.modules-header {
-    text-align: center;
-    margin-bottom: 4rem;
-    opacity: 0;
-    animation: fadeInDown 0.8s ease-out forwards;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.modules-header h1 {
-    font-size: 3rem;
-    color: white;
-    margin-bottom: 1rem;
-    font-weight: 800;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    animation: slideInLeft 0.8s ease-out 0.2s both;
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.modules-header p {
-    font-size: 1.3rem;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    animation: slideInLeft 0.8s ease-out 0.4s both;
-}
-
-/* Modules Grid - Staggered animations */
-.modules-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2.5rem;
-    margin-bottom: 3rem;
-}
-
-/* Module Cards - Glassmorphism with 3D effects */
-.module-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 2.5rem;
-    box-shadow: 
-        0 8px 32px rgba(0,0,0,0.2),
-        0 0 0 1px rgba(255,255,255,0.3);
-    text-decoration: none;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 2px solid transparent;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(30px) rotateX(10deg);
-    animation: cardEntrance 0.6s ease-out forwards;
-    transform-style: preserve-3d;
-    perspective: 1000px;
-}
-
-/* Staggered card animations */
-.module-card:nth-child(1) { animation-delay: 0.1s; }
-.module-card:nth-child(2) { animation-delay: 0.2s; }
-.module-card:nth-child(3) { animation-delay: 0.3s; }
-.module-card:nth-child(4) { animation-delay: 0.4s; }
-.module-card:nth-child(5) { animation-delay: 0.5s; }
-.module-card:nth-child(6) { animation-delay: 0.6s; }
-
-@keyframes cardEntrance {
-    to {
-        opacity: 1;
-        transform: translateY(0) rotateX(0deg);
-    }
-}
-
-/* Shimmer effect on cards */
-.module-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
-    transition: left 0.5s ease;
-}
-
-.module-card:hover::before {
-    left: 100%;
-}
-
-/* Gradient border animation */
-.module-card::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(
-        135deg,
-        var(--primary-color, #C99700),
-        var(--primary-dark, #A07800),
-        #FFD700,
-        var(--primary-color, #C99700)
-    );
-    background-size: 300% 300%;
-    border-radius: 24px;
-    z-index: -1;
-    opacity: 0;
-    animation: gradientRotate 4s linear infinite;
-    transition: opacity 0.3s ease;
-}
-
-@keyframes gradientRotate {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.module-card:hover {
-    transform: translateY(-12px) scale(1.03);
-    box-shadow: 
-        0 20px 60px rgba(0,0,0,0.3),
-        0 0 0 1px rgba(102, 126, 234, 0.5);
-}
-
-.module-card:hover::after {
-    opacity: 1;
-}
-
-/* Module Icon - Enhanced with 3D effects */
-.module-icon {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    transition: all 0.4s ease;
-    display: inline-block;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
-}
-
-.module-card:hover .module-icon {
-    transform: scale(1.2) rotateY(360deg);
-    filter: drop-shadow(0 8px 20px rgba(201, 151, 0, 0.4));
-}
-
-/* Module Title - Gradient text on hover */
-.module-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--secondary-color, #2c3e50);
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.module-card:hover .module-title {
-    color: var(--primary-color, #C99700);
-    transform: translateX(5px);
-}
-
-/* Module Description */
-.module-description {
-    color: #666;
-    line-height: 1.8;
-    flex: 1;
-    margin-bottom: 1.5rem;
-    transition: color 0.3s ease;
-}
-
-.module-card:hover .module-description {
-    color: #444;
-}
-
-/* Module Role Badge - Animated */
-.module-role {
-    display: inline-block;
-    padding: 0.5rem 1.25rem;
-    background: var(--gold-gradient, linear-gradient(135deg, #C99700 0%, #FFD700 100%));
-    color: var(--secondary-color, #000);
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: capitalize;
-    box-shadow: 0 4px 12px rgba(201, 151, 0, 0.3);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.module-role::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-.module-card:hover .module-role {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(201, 151, 0, 0.5);
-}
-
-.module-card:hover .module-role::before {
-    width: 300px;
-    height: 300px;
-}
-
-/* Empty state - Enhanced */
-.modules-empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.modules-empty-state p:first-of-type {
-    font-size: 1.3rem;
-    color: var(--primary-color, #C99700);
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.modules-empty-state p:last-of-type {
-    color: #666;
-    font-size: 1.1rem;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
-    .modules-header h1 {
-        font-size: 2rem;
-    }
-
-    .modules-header p {
-        font-size: 1.1rem;
-    }
-
-    .modules-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .module-card {
-        padding: 2rem;
-    }
-
-    .module-icon {
-        font-size: 3rem;
-    }
-
-    .module-title {
-        font-size: 1.5rem;
-    }
-}
-
-/* Loading state */
-.modules-loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-}
-
-.modules-loading::after {
-    content: '';
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Click ripple effect */
-.module-card.clicked {
-    animation: cardClick 0.4s ease;
-}
-
-@keyframes cardClick {
-    0% { transform: translateY(-12px) scale(1.03); }
-    50% { transform: translateY(-8px) scale(0.98); }
-    100% { transform: translateY(-12px) scale(1.03); }
-}
-
-/* Accessibility: Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+    .nav-user-info { display: none; }
+    .nav-user-menu { right: -10px; }
+    .menu-group-header {
+        font-size: 0.9em;
+        padding: 10px 15px;
     }
 }
 

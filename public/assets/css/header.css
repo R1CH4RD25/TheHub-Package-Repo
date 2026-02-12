@@ -235,6 +235,7 @@
 @media (max-width: 768px) {
     .nav-content {
         padding: 0 1rem;
+        flex-wrap: wrap;
     }
 
     .nav-brand-subtitle {
@@ -245,17 +246,84 @@
         display: none;
     }
 
-    .nav-links>a {
-        padding: 0.5rem 10px;
-        font-size: 0.9rem;
+    .nav-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        order: 2;
     }
 
-    .nav-toggle {
-        display: block;
+    /* Hide nav links by default on mobile — show when toggled */
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        order: 3;
+        background: var(--header-bg-color, var(--navbar-color, var(--secondary-color)));
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 0;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links > a {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        width: 100%;
+    }
+
+    .nav-links > a:last-of-type {
+        border-right: none;
+    }
+
+    /* User profile in mobile dropdown */
+    .nav-user-dropdown {
+        width: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-user-trigger {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        justify-content: flex-start;
     }
 
     .mobile-menu {
         display: block;
+    }
+
+    /* Hamburger animation */
+    .nav-toggle span {
+        transition: all 0.3s ease;
+    }
+
+    .nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
+}
+
+/* Prevent body scroll when mobile nav is open */
+body.nav-open {
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        height: auto;
+        max-height: none;
+        min-height: var(--header-height, 80px);
     }
 }
 
@@ -266,10 +334,6 @@
 
     .nav-brand img {
         height: calc(var(--logo-height, 50px) * 0.8) !important;
-    }
-
-    .nav-links>a span {
-        display: none;
     }
 }
 
@@ -392,4 +456,10 @@
 @media (max-width: 768px) {
     .nav-user-info {
         display: none;
+    }
+
+    .nav-user-menu {
+        right: 0;
+        min-width: 180px;
+    }
 }
