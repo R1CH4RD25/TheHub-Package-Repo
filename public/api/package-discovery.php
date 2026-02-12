@@ -175,19 +175,36 @@ function searchGitHubPackages($owner, $repo)
     // Search in packages/ subdirectory
     $packages = array_merge($packages, searchGitHubDirectory($owner, $repo, 'packages'));
 
-    // Deduplicate packages by download_url (in case same package exists in multiple locations)
-    $uniquePackages = [];
-    $seenUrls = [];
+    // Deduplicate packages by package ID, keeping only the LATEST version.
+    // When a package is updated, older versions are automatically hidden.
+    // Old .hubpkg files should be moved to packages/archive/ in the GitHub repo.
+    $latestByPackageId = [];
 
     foreach ($packages as $package) {
-        $url = $package['download_url'] ?? '';
-        if (!isset($seenUrls[$url])) {
-            $seenUrls[$url] = true;
-            $uniquePackages[] = $package;
+        $pkgId = $package['id'] ?? '';
+        if (empty($pkgId)) {
+            continue;
+        }
+
+        if (!isset($latestByPackageId[$pkgId])) {
+            // First time seeing this package ID
+            $latestByPackageId[$pkgId] = $package;
+        } else {
+            // Compare versions — keep the higher one
+            $existingVersion = $latestByPackageId[$pkgId]['version'] ?? '0.0.0';
+            $newVersion = $package['version'] ?? '0.0.0';
+
+            if (version_compare($newVersion, $existingVersion, '>')) {
+                // Newer version found — archive the old one conceptually
+                error_log("Package '{$pkgId}': Showing v{$newVersion}, hiding older v{$existingVersion}");
+                $latestByPackageId[$pkgId] = $package;
+            } else {
+                error_log("Package '{$pkgId}': Keeping v{$existingVersion}, hiding older v{$newVersion}");
+            }
         }
     }
 
-    return $uniquePackages;
+    return array_values($latestByPackageId);
 }
 
 function searchGitHubDirectory($owner, $repo, $path)
@@ -391,26 +408,63 @@ function downloadPackageFromGitHub($downloadUrl, $packageName)
     $description = $pkg['description'] ?? 'Downloaded from repository';
     $packageId = $pkg['id'] ?? $safePackageName;
 
-    // Insert into database
+    // Insert or update in database (upsert — if a newer version is downloaded, update the existing record)
     $db = Database::getInstance();
+    $pdo = $db->getConnection();
 
-    $dbPackageId = $db->insert('section_packages', [
-        'package_id' => $packageId,
-        'name' => $pkg['name'] ?? $safePackageName,
-        'display_name' => $displayName,
-        'version' => $version,
-        'description' => $description,
-        'author' => $pkg['author'] ?? 'Unknown',
-        'license' => $pkg['license'] ?? 'Unknown',
-        'uploaded_by' => Auth::getCurrentUser()['id'],
-        'uploaded_at' => date('Y-m-d H:i:s'),
-        'file_path' => $filePath,
-        'file_size' => strlen($fileContent),
-        'file_hash' => hash('sha256', $fileContent),
-        'package_data' => $fileContent,
-        'validation_status' => 'pending',
-        'can_install' => 0
+    $now = date('Y-m-d H:i:s');
+    $userId = Auth::getCurrentUser()['id'];
+    $fileSize = strlen($fileContent);
+    $fileHash = hash('sha256', $fileContent);
+    $name = $pkg['name'] ?? $safePackageName;
+    $author = $pkg['author'] ?? 'Unknown';
+    $license = $pkg['license'] ?? 'Unknown';
+
+    $stmt = $pdo->prepare("
+        INSERT INTO section_packages 
+            (package_id, name, display_name, version, description, author, license,
+             uploaded_by, uploaded_at, file_path, file_size, file_hash, package_data,
+             validation_status, can_install)
+        VALUES 
+            (:package_id, :name, :display_name, :version, :description, :author, :license,
+             :uploaded_by, :uploaded_at, :file_path, :file_size, :file_hash, :package_data,
+             'pending', 0)
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            display_name = VALUES(display_name),
+            version = VALUES(version),
+            description = VALUES(description),
+            author = VALUES(author),
+            license = VALUES(license),
+            uploaded_by = VALUES(uploaded_by),
+            uploaded_at = VALUES(uploaded_at),
+            file_path = VALUES(file_path),
+            file_size = VALUES(file_size),
+            file_hash = VALUES(file_hash),
+            package_data = VALUES(package_data),
+            validation_status = 'pending',
+            can_install = 0
+    ");
+
+    $stmt->execute([
+        ':package_id' => $packageId,
+        ':name' => $name,
+        ':display_name' => $displayName,
+        ':version' => $version,
+        ':description' => $description,
+        ':author' => $author,
+        ':license' => $license,
+        ':uploaded_by' => $userId,
+        ':uploaded_at' => $now,
+        ':file_path' => $filePath,
+        ':file_size' => $fileSize,
+        ':file_hash' => $fileHash,
+        ':package_data' => $fileContent
     ]);
+
+    $dbPackageId = $pdo->lastInsertId() ?: $db->fetchOne(
+        "SELECT id FROM section_packages WHERE package_id = ?", [$packageId]
+    )['id'];
 
     return [
         'id' => $dbPackageId,
