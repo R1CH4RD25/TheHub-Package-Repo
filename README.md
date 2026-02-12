@@ -42,12 +42,23 @@ Financial management, reimbursements, budgeting, and expense tracking.
 Student-facing tools and resources.
 - **[Bullying Report](packages/student/safety/)** `v1.0.0` - Anonymous bullying incident reporting (also in Reporting category)
 
+### 🏫 [District](packages/district/)
+District-wide administration, records management, and institutional data tools.
+- **[Student Directory](packages/district/student-directory/)** `v1.0.0` - Student records management with Google Workspace integration
+
 
 ## 📂 Repository Structure
 
 ```
 packages/
 ├── analytics/          # Data visualization & dashboards
+├── district/           # District administration & records
+│   └── student-directory/
+│       ├── student-directory_1.0.0.hubpkg
+│       ├── README.md
+│       ├── CHANGELOG.md
+│       ├── LICENSE
+│       └── screenshots/
 ├── forms/              # Form builders & surveys
 ├── integrations/       # Third-party connectors
 ├── operations/         # Fleet, facilities, operations management
