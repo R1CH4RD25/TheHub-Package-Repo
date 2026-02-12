@@ -362,82 +362,112 @@ class EnterpriseSidebar
 
     /**
      * Helper: Build nav items array for Admin Dashboard
+     * Google Admin-style: expandable groups with real route sub-pages (no tabs!)
      *
      * @param string $userRole User's role for permission checking
-     * @param string $activeTab Currently active tab
+     * @param string $currentPath Current URL path for active state detection
      * @return array Nav items
      */
-    public static function buildAdminNavItems($userRole, $activeTab = 'users')
+    public static function buildAdminNavItems($userRole, $currentPath = '/admin/')
     {
         $isSuperAdmin = ($userRole === 'super_admin');
         $isAdmin = in_array($userRole, ['super_admin', 'admin']);
+        $currentPath = strtok($currentPath, '?'); // strip query string
 
         $items = [];
 
-        // Management Console link
-        if ($isAdmin) {
-            $mgmtName = SiteSettings::get('mgmt_display_name', 'Management');
-            $mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
+        // Home
+        $items[] = [
+            'id' => 'home',
+            'type' => 'link',
+            'url' => '/admin/',
+            'icon' => 'fas fa-home',
+            'label' => 'Home',
+        ];
 
-            $items[] = [
-                'id' => 'management',
-                'type' => 'link',
-                'url' => '/management/',
-                'icon' => $mgmtIcon,
-                'label' => $mgmtName
+        // Users (expandable)
+        if ($isAdmin) {
+            $usersSubmenu = [
+                ['id' => 'users-active', 'label' => 'Active Users', 'url' => '/admin/users',
+                 'active' => ($currentPath === '/admin/users' || $currentPath === '/admin/users/')],
+                ['id' => 'users-pending', 'label' => 'Pending Approvals', 'url' => '/admin/users/pending',
+                 'active' => (strpos($currentPath, '/admin/users/pending') === 0)],
+                ['id' => 'users-invitations', 'label' => 'Invitations', 'url' => '/admin/users/invitations',
+                 'active' => (strpos($currentPath, '/admin/users/invitations') === 0)],
             ];
-        }
+            if ($isSuperAdmin) {
+                $usersSubmenu[] = ['id' => 'users-roles', 'label' => 'Organization Roles', 'url' => '/admin/roles',
+                                   'active' => (strpos($currentPath, '/admin/roles') === 0)];
+            }
 
-        // User Management
-        if ($isAdmin) {
             $items[] = [
                 'id' => 'users',
-                'type' => 'link',
-                'url' => '#',
+                'type' => 'expandable',
+                'url' => '/admin/users',
                 'icon' => 'fas fa-users',
-                'label' => 'User Management',
-                'data_tab' => 'users',
-                'active' => ($activeTab === 'users'),
-                'permission' => ['super_admin', 'admin']
+                'label' => 'Users',
+                'submenu' => $usersSubmenu,
+                'permission' => ['super_admin', 'admin'],
             ];
         }
 
-        // Package Management
+        // Package Management (expandable)
         if ($isAdmin) {
+            $packagesSubmenu = [
+                ['id' => 'packages-available', 'label' => 'Available', 'url' => '/admin/packages/available',
+                 'active' => (strpos($currentPath, '/admin/packages/available') === 0 || $currentPath === '/admin/packages' || $currentPath === '/admin/packages/')],
+                ['id' => 'packages-installed', 'label' => 'Installed', 'url' => '/admin/packages/installed',
+                 'active' => (strpos($currentPath, '/admin/packages/installed') === 0)],
+                ['id' => 'packages-updates', 'label' => 'Updates', 'url' => '/admin/packages/updates',
+                 'active' => (strpos($currentPath, '/admin/packages/updates') === 0)],
+                ['id' => 'packages-configure', 'label' => 'Configure', 'url' => '/admin/packages/configure',
+                 'active' => (strpos($currentPath, '/admin/packages/configure') === 0)],
+            ];
+
             $items[] = [
                 'id' => 'packages',
-                'type' => 'link',
-                'url' => '#',
+                'type' => 'expandable',
+                'url' => '/admin/packages',
                 'icon' => 'fas fa-box',
                 'label' => 'Package Management',
-                'data_tab' => 'packages',
-                'active' => ($activeTab === 'packages'),
-                'permission' => ['super_admin', 'admin']
+                'submenu' => $packagesSubmenu,
+                'permission' => ['super_admin', 'admin'],
             ];
         }
 
-        // Super Admin only items
+        // Settings (expandable, super admin only)
         if ($isSuperAdmin) {
             $items[] = [
-                'id' => 'site-settings',
-                'type' => 'link',
-                'url' => '#',
+                'id' => 'settings',
+                'type' => 'expandable',
+                'url' => '/admin/settings',
                 'icon' => 'fas fa-cog',
-                'label' => 'Site Settings',
-                'data_tab' => 'site-settings',
-                'active' => ($activeTab === 'site-settings'),
-                'permission' => ['super_admin']
+                'label' => 'Settings',
+                'submenu' => [
+                    ['id' => 'settings-general', 'label' => 'General', 'url' => '/admin/settings/general',
+                     'active' => (strpos($currentPath, '/admin/settings/general') === 0 || $currentPath === '/admin/settings' || $currentPath === '/admin/settings/')],
+                    ['id' => 'settings-auth', 'label' => 'Authentication', 'url' => '/admin/settings/auth',
+                     'active' => (strpos($currentPath, '/admin/settings/auth') === 0)],
+                    ['id' => 'settings-modules', 'label' => 'Modules', 'url' => '/admin/settings/modules',
+                     'active' => (strpos($currentPath, '/admin/settings/modules') === 0)],
+                    ['id' => 'settings-theme', 'label' => 'Theme', 'url' => '/admin/settings/theme',
+                     'active' => (strpos($currentPath, '/admin/settings/theme') === 0)],
+                    ['id' => 'settings-layout', 'label' => 'Layout', 'url' => '/admin/settings/layout',
+                     'active' => (strpos($currentPath, '/admin/settings/layout') === 0)],
+                ],
+                'permission' => ['super_admin'],
             ];
+        }
 
+        // Activity Logs (super admin only)
+        if ($isSuperAdmin) {
             $items[] = [
                 'id' => 'logs',
                 'type' => 'link',
-                'url' => '#',
-                'icon' => 'fas fa-chart-line',
+                'url' => '/admin/logs',
+                'icon' => 'fas fa-list-alt',
                 'label' => 'Activity Logs',
-                'data_tab' => 'logs',
-                'active' => ($activeTab === 'logs'),
-                'permission' => ['super_admin']
+                'permission' => ['super_admin'],
             ];
         }
 
@@ -446,12 +476,10 @@ class EnterpriseSidebar
             $items[] = [
                 'id' => 'export',
                 'type' => 'link',
-                'url' => '#',
+                'url' => '/admin/export',
                 'icon' => 'fas fa-download',
                 'label' => 'Export Data',
-                'data_tab' => 'export',
-                'active' => ($activeTab === 'export'),
-                'permission' => ['super_admin', 'admin']
+                'permission' => ['super_admin', 'admin'],
             ];
         }
 

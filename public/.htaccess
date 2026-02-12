@@ -11,17 +11,16 @@ RewriteRule ^$ hub.php [L]
 # Redirect index.php to root for clean URL
 RewriteRule ^index\.php$ / [R=301,L]
 
-# Laravel routes - Admin routes currently served by legacy PHP
-# TODO: Re-enable when Laravel blade admin views are complete
-# RewriteRule ^admin/?$ laravel.php [L,QSA]
-# RewriteRule ^admin/users(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/invitations(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/roles(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/permissions(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/packages(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/settings(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/logs(/.*)?$ laravel.php [L,QSA]
-# RewriteRule ^admin/export(/.*)?$ laravel.php [L,QSA]
+# Laravel routes - Google Admin-style navigation (re-enabled)
+RewriteRule ^admin/?$ laravel.php [L,QSA]
+RewriteRule ^admin/users(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/invitations(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/roles(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/permissions(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/packages(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/settings(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/logs(/.*)?$ laravel.php [L,QSA]
+RewriteRule ^admin/export(/.*)?$ laravel.php [L,QSA]
 
 # Laravel health check
 RewriteRule ^laravel/health$ laravel.php [L,QSA]
