@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /var/www/woodson/thehub/src/Package</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/nv.d3.min.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">/var/www/woodson/thehub/src</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Package</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="HandlerRegistry.php.html#18">Hub\Package\HandlerRegistry</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#16">Hub\Package\Handlers\UserDirectoryHandler</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#21">Hub\Package\MutationRouter</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#17">Hub\Package\PackageValidator</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#25">Hub\Package\PageRouter</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#16">Hub\Package\ProjectionEngine</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QueryRouter.php.html#22">Hub\Package\QueryRouter</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#15">Hub\Package\ScopeEngine</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#17">Hub\Package\StudentDirectory\ImportHandler</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageLoader.php.html#15">Hub\Package\PackageLoader</a></td><td class="text-right">37%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#22">Hub\Package\ExportHandler</a></td><td class="text-right">38%</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#15">Hub\Package\Renderers\TableRenderer</a></td><td class="text-right">53%</td></tr>
+       <tr><td><a href="ComponentRegistry.php.html#13">Hub\Package\ComponentRegistry</a></td><td class="text-right">59%</td></tr>
+       <tr><td><a href="Renderers/FilterRenderer.php.html#15">Hub\Package\Renderers\FilterRenderer</a></td><td class="text-right">61%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#26">Hub\Package\PolicyEngine</a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#15">Hub\Package\Renderers\DetailRenderer</a></td><td class="text-right">79%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#34">Hub\Package\SensitiveActionManager</a></td><td class="text-right">81%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDatabase.php.html#17">Hub\Package\StudentDirectory\StudentDatabase</a></td><td class="text-right">82%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDirectoryHandler.php.html#14">Hub\Package\StudentDirectory\StudentDirectoryHandler</a></td><td class="text-right">84%</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#29">Hub\Package\PackageAuditLogger</a></td><td class="text-right">89%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="PackageValidator.php.html#17">Hub\Package\PackageValidator</a></td><td class="text-right">5112</td></tr>
+       <tr><td><a href="PageRouter.php.html#25">Hub\Package\PageRouter</a></td><td class="text-right">4160</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#17">Hub\Package\StudentDirectory\ImportHandler</a></td><td class="text-right">2862</td></tr>
+       <tr><td><a href="MutationRouter.php.html#21">Hub\Package\MutationRouter</a></td><td class="text-right">1260</td></tr>
+       <tr><td><a href="ExportHandler.php.html#22">Hub\Package\ExportHandler</a></td><td class="text-right">917</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#18">Hub\Package\HandlerRegistry</a></td><td class="text-right">650</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#16">Hub\Package\ProjectionEngine</a></td><td class="text-right">600</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#15">Hub\Package\ScopeEngine</a></td><td class="text-right">506</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#15">Hub\Package\Renderers\TableRenderer</a></td><td class="text-right">469</td></tr>
+       <tr><td><a href="PackageLoader.php.html#15">Hub\Package\PackageLoader</a></td><td class="text-right">346</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#16">Hub\Package\Handlers\UserDirectoryHandler</a></td><td class="text-right">306</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#26">Hub\Package\PolicyEngine</a></td><td class="text-right">250</td></tr>
+       <tr><td><a href="QueryRouter.php.html#22">Hub\Package\QueryRouter</a></td><td class="text-right">182</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#15">Hub\Package\Renderers\DetailRenderer</a></td><td class="text-right">68</td></tr>
+       <tr><td><a href="Renderers/FilterRenderer.php.html#15">Hub\Package\Renderers\FilterRenderer</a></td><td class="text-right">52</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#34">Hub\Package\SensitiveActionManager</a></td><td class="text-right">46</td></tr>
+       <tr><td><a href="ComponentRegistry.php.html#13">Hub\Package\ComponentRegistry</a></td><td class="text-right">33</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#29">Hub\Package\PackageAuditLogger</a></td><td class="text-right">32</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDirectoryHandler.php.html#14">Hub\Package\StudentDirectory\StudentDirectoryHandler</a></td><td class="text-right">15</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDatabase.php.html#17">Hub\Package\StudentDirectory\StudentDatabase</a></td><td class="text-right">12</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="ComponentRegistry.php.html#66"><abbr title="Hub\Package\ComponentRegistry::registerFactory">registerFactory</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ComponentRegistry.php.html#121"><abbr title="Hub\Package\ComponentRegistry::getTypes">getTypes</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ComponentRegistry.php.html#132"><abbr title="Hub\Package\ComponentRegistry::reset">reset</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#33"><abbr title="Hub\Package\ExportHandler::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#57"><abbr title="Hub\Package\ExportHandler::export">export</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#149"><abbr title="Hub\Package\ExportHandler::stream">stream</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#215"><abbr title="Hub\Package\ExportHandler::generateXlsx">generateXlsx</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#402"><abbr title="Hub\Package\ExportHandler::executeQuery">executeQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#51"><abbr title="Hub\Package\HandlerRegistry::registerQuery">registerQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#75"><abbr title="Hub\Package\HandlerRegistry::registerMutation">registerMutation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#97"><abbr title="Hub\Package\HandlerRegistry::getQuery">getQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#111"><abbr title="Hub\Package\HandlerRegistry::getMutation">getMutation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#125"><abbr title="Hub\Package\HandlerRegistry::hasQuery">hasQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#139"><abbr title="Hub\Package\HandlerRegistry::hasMutation">hasMutation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#152"><abbr title="Hub\Package\HandlerRegistry::getPackageQueries">getPackageQueries</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#174"><abbr title="Hub\Package\HandlerRegistry::getPackageMutations">getPackageMutations</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#196"><abbr title="Hub\Package\HandlerRegistry::unregisterPackage">unregisterPackage</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#226"><abbr title="Hub\Package\HandlerRegistry::validateClass">validateClass</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#253"><abbr title="Hub\Package\HandlerRegistry::makeKey">makeKey</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#263"><abbr title="Hub\Package\HandlerRegistry::getStats">getStats</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#20"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#25"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::getPackageId">getPackageId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#30"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::getSupportedQueries">getSupportedQueries</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#35"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::canHandle">canHandle</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#43"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::execute">execute</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#56"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::listUsers">listUsers</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#128"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::getUser">getUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#148"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::getUserStats">getUserStats</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#27"><abbr title="Hub\Package\MutationRouter::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#63"><abbr title="Hub\Package\MutationRouter::execute">execute</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#230"><abbr title="Hub\Package\MutationRouter::validateCsrf">validateCsrf</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#253"><abbr title="Hub\Package\MutationRouter::sanitizeInput">sanitizeInput</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#274"><abbr title="Hub\Package\MutationRouter::captureBeforeState">captureBeforeState</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#286"><abbr title="Hub\Package\MutationRouter::invalidateCaches">invalidateCaches</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#302"><abbr title="Hub\Package\MutationRouter::queueBackgroundJobs">queueBackgroundJobs</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#323"><abbr title="Hub\Package\MutationRouter::logMutation">logMutation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#367"><abbr title="Hub\Package\MutationRouter::logMutationError">logMutationError</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#403"><abbr title="Hub\Package\MutationRouter::sanitizeForLogging">sanitizeForLogging</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MutationRouter.php.html#415"><abbr title="Hub\Package\MutationRouter::generateCorrelationId">generateCorrelationId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageLoader.php.html#93"><abbr title="Hub\Package\PackageLoader::loadFromFilesystem">loadFromFilesystem</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageLoader.php.html#182"><abbr title="Hub\Package\PackageLoader::findPage">findPage</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageLoader.php.html#218"><abbr title="Hub\Package\PackageLoader::resolveRouteParams">resolveRouteParams</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#31"><abbr title="Hub\Package\PackageValidator::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#48"><abbr title="Hub\Package\PackageValidator::validate">validate</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#97"><abbr title="Hub\Package\PackageValidator::validatePackageId">validatePackageId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#109"><abbr title="Hub\Package\PackageValidator::validateVersion">validateVersion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#121"><abbr title="Hub\Package\PackageValidator::isLayer3Package">isLayer3Package</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#140"><abbr title="Hub\Package\PackageValidator::extractHandlers">extractHandlers</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#177"><abbr title="Hub\Package\PackageValidator::extractDataClassifications">extractDataClassifications</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#213"><abbr title="Hub\Package\PackageValidator::getSchema">getSchema</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#240"><abbr title="Hub\Package\PackageValidator::performAdditionalValidation">performAdditionalValidation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageValidator.php.html#348"><abbr title="Hub\Package\PackageValidator::formatErrors">formatErrors</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#36"><abbr title="Hub\Package\PageRouter::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#56"><abbr title="Hub\Package\PageRouter::registerHandler">registerHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#70"><abbr title="Hub\Package\PageRouter::handle">handle</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#181"><abbr title="Hub\Package\PageRouter::handleQuery">handleQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#205"><abbr title="Hub\Package\PageRouter::handleMutation">handleMutation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#238"><abbr title="Hub\Package\PageRouter::executeQuery">executeQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#287"><abbr title="Hub\Package\PageRouter::fallbackQuery">fallbackQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#313"><abbr title="Hub\Package\PageRouter::findPageByRoute">findPageByRoute</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#371"><abbr title="Hub\Package\PageRouter::findPageForQuery">findPageForQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#389"><abbr title="Hub\Package\PageRouter::findPageForMutation">findPageForMutation</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#411"><abbr title="Hub\Package\PageRouter::extractDataClassifications">extractDataClassifications</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#435"><abbr title="Hub\Package\PageRouter::getPackageBaseUrl">getPackageBaseUrl</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PageRouter.php.html#454"><abbr title="Hub\Package\PageRouter::errorResponse">errorResponse</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#609"><abbr title="Hub\Package\PolicyEngine::userHasMfa">userHasMfa</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#728"><abbr title="Hub\Package\PolicyEngine::shouldBlockRequest">shouldBlockRequest</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#783"><abbr title="Hub\Package\PolicyEngine::resolveRuleValue">resolveRuleValue</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#33"><abbr title="Hub\Package\ProjectionEngine::maskFields">maskFields</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#58"><abbr title="Hub\Package\ProjectionEngine::maskRow">maskRow</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#84"><abbr title="Hub\Package\ProjectionEngine::getRedactionValue">getRedactionValue</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#101"><abbr title="Hub\Package\ProjectionEngine::isRow">isRow</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#122"><abbr title="Hub\Package\ProjectionEngine::removeFields">removeFields</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#148"><abbr title="Hub\Package\ProjectionEngine::getStats">getStats</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QueryRouter.php.html#29"><abbr title="Hub\Package\QueryRouter::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QueryRouter.php.html#65"><abbr title="Hub\Package\QueryRouter::execute">execute</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QueryRouter.php.html#186"><abbr title="Hub\Package\QueryRouter::logQuery">logQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QueryRouter.php.html#223"><abbr title="Hub\Package\QueryRouter::logQueryError">logQueryError</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QueryRouter.php.html#255"><abbr title="Hub\Package\QueryRouter::generateCorrelationId">generateCorrelationId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#22"><abbr title="Hub\Package\Renderers\DetailRenderer::getAssets">getAssets</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Renderers/FilterRenderer.php.html#22"><abbr title="Hub\Package\Renderers\FilterRenderer::getAssets">getAssets</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#252"><abbr title="Hub\Package\Renderers\TableRenderer::renderRowAction">renderRowAction</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#324"><abbr title="Hub\Package\Renderers\TableRenderer::renderPagination">renderPagination</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#31"><abbr title="Hub\Package\ScopeEngine::applyFilters">applyFilters</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#58"><abbr title="Hub\Package\ScopeEngine::toWhereClause">toWhereClause</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#96"><abbr title="Hub\Package\ScopeEngine::isValidFilter">isValidFilter</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#123"><abbr title="Hub\Package\ScopeEngine::getStats">getStats</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#48"><abbr title="Hub\Package\StudentDirectory\ImportHandler::parseForPreview">parseForPreview</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#116"><abbr title="Hub\Package\StudentDirectory\ImportHandler::processImport">processImport</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#243"><abbr title="Hub\Package\StudentDirectory\ImportHandler::mapRow">mapRow</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#261"><abbr title="Hub\Package\StudentDirectory\ImportHandler::insertFromImport">insertFromImport</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#325"><abbr title="Hub\Package\StudentDirectory\ImportHandler::updateFromImport">updateFromImport</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#396"><abbr title="Hub\Package\StudentDirectory\ImportHandler::logImport">logImport</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#421"><abbr title="Hub\Package\StudentDirectory\ImportHandler::suggestFieldMapping">suggestFieldMapping</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDatabase.php.html#90"><abbr title="Hub\Package\StudentDirectory\StudentDatabase::insert">insert</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDatabase.php.html#100"><abbr title="Hub\Package\StudentDirectory\StudentDatabase::beginTransaction">beginTransaction</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDatabase.php.html#108"><abbr title="Hub\Package\StudentDirectory\StudentDatabase::commit">commit</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDatabase.php.html#116"><abbr title="Hub\Package\StudentDirectory\StudentDatabase::rollBack">rollBack</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#384"><abbr title="Hub\Package\PackageAuditLogger::inferSeverity">inferSeverity</abbr></a></td><td class="text-right">40%</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#193"><abbr title="Hub\Package\Renderers\TableRenderer::renderCell">renderCell</abbr></a></td><td class="text-right">45%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#653"><abbr title="Hub\Package\PolicyEngine::checkAlertRules">checkAlertRules</abbr></a></td><td class="text-right">47%</td></tr>
+       <tr><td><a href="ComponentRegistry.php.html#78"><abbr title="Hub\Package\ComponentRegistry::create">create</abbr></a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="Renderers/DashboardRenderer.php.html#317"><abbr title="Hub\Package\Renderers\DashboardRenderer::compactNumber">compactNumber</abbr></a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="Renderers/FilterRenderer.php.html#62"><abbr title="Hub\Package\Renderers\FilterRenderer::renderFilterField">renderFilterField</abbr></a></td><td class="text-right">54%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#433"><abbr title="Hub\Package\SensitiveActionManager::getStats">getStats</abbr></a></td><td class="text-right">57%</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#204"><abbr title="Hub\Package\Renderers\DetailRenderer::renderAction">renderAction</abbr></a></td><td class="text-right">59%</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#163"><abbr title="Hub\Package\Renderers\TableRenderer::renderRow">renderRow</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#387"><abbr title="Hub\Package\SensitiveActionManager::revokeOutstandingTokens">revokeOutstandingTokens</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#411"><abbr title="Hub\Package\SensitiveActionManager::cleanup">cleanup</abbr></a></td><td class="text-right">62%</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#357"><abbr title="Hub\Package\PackageAuditLogger::getUnresolvedAlerts">getUnresolvedAlerts</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#421"><abbr title="Hub\Package\PolicyEngine::isRateLimited">isRateLimited</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDirectoryHandler.php.html#136"><abbr title="Hub\Package\StudentDirectory\StudentDirectoryHandler::executeMutation">executeMutation</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#68"><abbr title="Hub\Package\PolicyEngine::canAccessPage">canAccessPage</abbr></a></td><td class="text-right">69%</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#106"><abbr title="Hub\Package\Renderers\DetailRenderer::renderField">renderField</abbr></a></td><td class="text-right">71%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#494"><abbr title="Hub\Package\PolicyEngine::getRateLimitStatus">getRateLimitStatus</abbr></a></td><td class="text-right">72%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#266"><abbr title="Hub\Package\PolicyEngine::getScopeFilters">getScopeFilters</abbr></a></td><td class="text-right">73%</td></tr>
+       <tr><td><a href="PackageLoader.php.html#31"><abbr title="Hub\Package\PackageLoader::load">load</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#141"><abbr title="Hub\Package\Renderers\TableRenderer::renderColumnHeader">renderColumnHeader</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#253"><abbr title="Hub\Package\PackageAuditLogger::getRecentEvents">getRecentEvents</abbr></a></td><td class="text-right">78%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#174"><abbr title="Hub\Package\PolicyEngine::getVisibleFields">getVisibleFields</abbr></a></td><td class="text-right">81%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#173"><abbr title="Hub\Package\SensitiveActionManager::consumeToken">consumeToken</abbr></a></td><td class="text-right">81%</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#290"><abbr title="Hub\Package\PackageAuditLogger::getEventCounts">getEventCounts</abbr></a></td><td class="text-right">81%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#298"><abbr title="Hub\Package\SensitiveActionManager::validateToken">validateToken</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="StudentDirectory/ExportHandler.php.html#188"><abbr title="Hub\Package\StudentDirectory\ExportHandler::getFilteredStudents">getFilteredStudents</abbr></a></td><td class="text-right">84%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentMutationHandler.php.html#305"><abbr title="Hub\Package\StudentDirectory\StudentMutationHandler::printCards">printCards</abbr></a></td><td class="text-right">84%</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#324"><abbr title="Hub\Package\PackageAuditLogger::getUserActivity">getUserActivity</abbr></a></td><td class="text-right">85%</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#343"><abbr title="Hub\Package\SensitiveActionManager::revokeToken">revokeToken</abbr></a></td><td class="text-right">85%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDirectoryHandler.php.html#59"><abbr title="Hub\Package\StudentDirectory\StudentDirectoryHandler::executeQuery">executeQuery</abbr></a></td><td class="text-right">86%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#449"><abbr title="Hub\Package\PolicyEngine::recordRateHit">recordRateHit</abbr></a></td><td class="text-right">86%</td></tr>
+       <tr><td><a href="StudentDirectory/StudentQueryHandler.php.html#257"><abbr title="Hub\Package\StudentDirectory\StudentQueryHandler::buildSortClause">buildSortClause</abbr></a></td><td class="text-right">86%</td></tr>
+       <tr><td><a href="Renderers/FormRenderer.php.html#190"><abbr title="Hub\Package\Renderers\FormRenderer::renderInput">renderInput</abbr></a></td><td class="text-right">86%</td></tr>
+       <tr><td><a href="PackageLoader.php.html#55"><abbr title="Hub\Package\PackageLoader::loadFromDatabase">loadFromDatabase</abbr></a></td><td class="text-right">87%</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#114"><abbr title="Hub\Package\PolicyEngine::check">check</abbr></a></td><td class="text-right">87%</td></tr>
+       <tr><td><a href="ExportHandler.php.html#330"><abbr title="Hub\Package\ExportHandler::formatValueForExport">formatValueForExport</abbr></a></td><td class="text-right">88%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="PackageValidator.php.html#240"><abbr title="Hub\Package\PackageValidator::performAdditionalValidation">performAdditionalValidation</abbr></a></td><td class="text-right">992</td></tr>
+       <tr><td><a href="MutationRouter.php.html#63"><abbr title="Hub\Package\MutationRouter::execute">execute</abbr></a></td><td class="text-right">380</td></tr>
+       <tr><td><a href="PageRouter.php.html#313"><abbr title="Hub\Package\PageRouter::findPageByRoute">findPageByRoute</abbr></a></td><td class="text-right">240</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#116"><abbr title="Hub\Package\StudentDirectory\ImportHandler::processImport">processImport</abbr></a></td><td class="text-right">210</td></tr>
+       <tr><td><a href="PackageValidator.php.html#177"><abbr title="Hub\Package\PackageValidator::extractDataClassifications">extractDataClassifications</abbr></a></td><td class="text-right">156</td></tr>
+       <tr><td><a href="PageRouter.php.html#70"><abbr title="Hub\Package\PageRouter::handle">handle</abbr></a></td><td class="text-right">156</td></tr>
+       <tr><td><a href="PackageLoader.php.html#93"><abbr title="Hub\Package\PackageLoader::loadFromFilesystem">loadFromFilesystem</abbr></a></td><td class="text-right">132</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#324"><abbr title="Hub\Package\Renderers\TableRenderer::renderPagination">renderPagination</abbr></a></td><td class="text-right">132</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#325"><abbr title="Hub\Package\StudentDirectory\ImportHandler::updateFromImport">updateFromImport</abbr></a></td><td class="text-right">132</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#252"><abbr title="Hub\Package\Renderers\TableRenderer::renderRowAction">renderRowAction</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="PackageValidator.php.html#140"><abbr title="Hub\Package\PackageValidator::extractHandlers">extractHandlers</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="QueryRouter.php.html#65"><abbr title="Hub\Package\QueryRouter::execute">execute</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#48"><abbr title="Hub\Package\StudentDirectory\ImportHandler::parseForPreview">parseForPreview</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="ExportHandler.php.html#57"><abbr title="Hub\Package\ExportHandler::export">export</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="ExportHandler.php.html#215"><abbr title="Hub\Package\ExportHandler::generateXlsx">generateXlsx</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#56"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::listUsers">listUsers</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="PackageLoader.php.html#182"><abbr title="Hub\Package\PackageLoader::findPage">findPage</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="PageRouter.php.html#389"><abbr title="Hub\Package\PageRouter::findPageForMutation">findPageForMutation</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#58"><abbr title="Hub\Package\ScopeEngine::toWhereClause">toWhereClause</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#193"><abbr title="Hub\Package\Renderers\TableRenderer::renderCell">renderCell</abbr></a></td><td class="text-right">52</td></tr>
+       <tr><td><a href="Renderers/FilterRenderer.php.html#62"><abbr title="Hub\Package\Renderers\FilterRenderer::renderFilterField">renderFilterField</abbr></a></td><td class="text-right">47</td></tr>
+       <tr><td><a href="PageRouter.php.html#411"><abbr title="Hub\Package\PageRouter::extractDataClassifications">extractDataClassifications</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#122"><abbr title="Hub\Package\ProjectionEngine::removeFields">removeFields</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#96"><abbr title="Hub\Package\ScopeEngine::isValidFilter">isValidFilter</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#243"><abbr title="Hub\Package\StudentDirectory\ImportHandler::mapRow">mapRow</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#261"><abbr title="Hub\Package\StudentDirectory\ImportHandler::insertFromImport">insertFromImport</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#106"><abbr title="Hub\Package\Renderers\DetailRenderer::renderField">renderField</abbr></a></td><td class="text-right">36</td></tr>
+       <tr><td><a href="Renderers/FormRenderer.php.html#190"><abbr title="Hub\Package\Renderers\FormRenderer::renderInput">renderInput</abbr></a></td><td class="text-right">33</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#196"><abbr title="Hub\Package\HandlerRegistry::unregisterPackage">unregisterPackage</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="PackageLoader.php.html#218"><abbr title="Hub\Package\PackageLoader::resolveRouteParams">resolveRouteParams</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="PackageValidator.php.html#348"><abbr title="Hub\Package\PackageValidator::formatErrors">formatErrors</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="PageRouter.php.html#238"><abbr title="Hub\Package\PageRouter::executeQuery">executeQuery</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="PageRouter.php.html#371"><abbr title="Hub\Package\PageRouter::findPageForQuery">findPageForQuery</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#58"><abbr title="Hub\Package\ProjectionEngine::maskRow">maskRow</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#148"><abbr title="Hub\Package\ProjectionEngine::getStats">getStats</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#31"><abbr title="Hub\Package\ScopeEngine::applyFilters">applyFilters</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#421"><abbr title="Hub\Package\StudentDirectory\ImportHandler::suggestFieldMapping">suggestFieldMapping</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#266"><abbr title="Hub\Package\PolicyEngine::getScopeFilters">getScopeFilters</abbr></a></td><td class="text-right">29</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#226"><abbr title="Hub\Package\HandlerRegistry::validateClass">validateClass</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="PackageValidator.php.html#48"><abbr title="Hub\Package\PackageValidator::validate">validate</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="PackageValidator.php.html#213"><abbr title="Hub\Package\PackageValidator::getSchema">getSchema</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="PageRouter.php.html#205"><abbr title="Hub\Package\PageRouter::handleMutation">handleMutation</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#33"><abbr title="Hub\Package\ProjectionEngine::maskFields">maskFields</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ScopeEngine.php.html#123"><abbr title="Hub\Package\ScopeEngine::getStats">getStats</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ExportHandler.php.html#330"><abbr title="Hub\Package\ExportHandler::formatValueForExport">formatValueForExport</abbr></a></td><td class="text-right">19</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#653"><abbr title="Hub\Package\PolicyEngine::checkAlertRules">checkAlertRules</abbr></a></td><td class="text-right">17</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#173"><abbr title="Hub\Package\SensitiveActionManager::consumeToken">consumeToken</abbr></a></td><td class="text-right">16</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#68"><abbr title="Hub\Package\PolicyEngine::canAccessPage">canAccessPage</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#152"><abbr title="Hub\Package\HandlerRegistry::getPackageQueries">getPackageQueries</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#174"><abbr title="Hub\Package\HandlerRegistry::getPackageMutations">getPackageMutations</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="MutationRouter.php.html#230"><abbr title="Hub\Package\MutationRouter::validateCsrf">validateCsrf</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="PackageValidator.php.html#121"><abbr title="Hub\Package\PackageValidator::isLayer3Package">isLayer3Package</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="PageRouter.php.html#435"><abbr title="Hub\Package\PageRouter::getPackageBaseUrl">getPackageBaseUrl</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#728"><abbr title="Hub\Package\PolicyEngine::shouldBlockRequest">shouldBlockRequest</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#783"><abbr title="Hub\Package\PolicyEngine::resolveRuleValue">resolveRuleValue</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ProjectionEngine.php.html#101"><abbr title="Hub\Package\ProjectionEngine::isRow">isRow</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ComponentRegistry.php.html#78"><abbr title="Hub\Package\ComponentRegistry::create">create</abbr></a></td><td class="text-right">10</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDirectoryHandler.php.html#59"><abbr title="Hub\Package\StudentDirectory\StudentDirectoryHandler::executeQuery">executeQuery</abbr></a></td><td class="text-right">9</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#174"><abbr title="Hub\Package\PolicyEngine::getVisibleFields">getVisibleFields</abbr></a></td><td class="text-right">8</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#298"><abbr title="Hub\Package\SensitiveActionManager::validateToken">validateToken</abbr></a></td><td class="text-right">7</td></tr>
+       <tr><td><a href="Renderers/DetailRenderer.php.html#204"><abbr title="Hub\Package\Renderers\DetailRenderer::renderAction">renderAction</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#163"><abbr title="Hub\Package\Renderers\TableRenderer::renderRow">renderRow</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ExportHandler.php.html#149"><abbr title="Hub\Package\ExportHandler::stream">stream</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ExportHandler.php.html#402"><abbr title="Hub\Package\ExportHandler::executeQuery">executeQuery</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#51"><abbr title="Hub\Package\HandlerRegistry::registerQuery">registerQuery</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="HandlerRegistry.php.html#75"><abbr title="Hub\Package\HandlerRegistry::registerMutation">registerMutation</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#128"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::getUser">getUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Handlers/UserDirectoryHandler.php.html#148"><abbr title="Hub\Package\Handlers\UserDirectoryHandler::getUserStats">getUserStats</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="MutationRouter.php.html#253"><abbr title="Hub\Package\MutationRouter::sanitizeInput">sanitizeInput</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="MutationRouter.php.html#286"><abbr title="Hub\Package\MutationRouter::invalidateCaches">invalidateCaches</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="MutationRouter.php.html#302"><abbr title="Hub\Package\MutationRouter::queueBackgroundJobs">queueBackgroundJobs</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="MutationRouter.php.html#323"><abbr title="Hub\Package\MutationRouter::logMutation">logMutation</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="PageRouter.php.html#181"><abbr title="Hub\Package\PageRouter::handleQuery">handleQuery</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="PageRouter.php.html#287"><abbr title="Hub\Package\PageRouter::fallbackQuery">fallbackQuery</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#609"><abbr title="Hub\Package\PolicyEngine::userHasMfa">userHasMfa</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="StudentDirectory/ImportHandler.php.html#396"><abbr title="Hub\Package\StudentDirectory\ImportHandler::logImport">logImport</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="StudentDirectory/StudentMutationHandler.php.html#305"><abbr title="Hub\Package\StudentDirectory\StudentMutationHandler::printCards">printCards</abbr></a></td><td class="text-right">5</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#343"><abbr title="Hub\Package\SensitiveActionManager::revokeToken">revokeToken</abbr></a></td><td class="text-right">5</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#384"><abbr title="Hub\Package\PackageAuditLogger::inferSeverity">inferSeverity</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="PackageLoader.php.html#31"><abbr title="Hub\Package\PackageLoader::load">load</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="Renderers/TableRenderer.php.html#141"><abbr title="Hub\Package\Renderers\TableRenderer::renderColumnHeader">renderColumnHeader</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="Renderers/DashboardRenderer.php.html#317"><abbr title="Hub\Package\Renderers\DashboardRenderer::compactNumber">compactNumber</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="StudentDirectory/ExportHandler.php.html#188"><abbr title="Hub\Package\StudentDirectory\ExportHandler::getFilteredStudents">getFilteredStudents</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="PackageLoader.php.html#55"><abbr title="Hub\Package\PackageLoader::loadFromDatabase">loadFromDatabase</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#114"><abbr title="Hub\Package\PolicyEngine::check">check</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#433"><abbr title="Hub\Package\SensitiveActionManager::getStats">getStats</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#421"><abbr title="Hub\Package\PolicyEngine::isRateLimited">isRateLimited</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="StudentDirectory/StudentDirectoryHandler.php.html#136"><abbr title="Hub\Package\StudentDirectory\StudentDirectoryHandler::executeMutation">executeMutation</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#494"><abbr title="Hub\Package\PolicyEngine::getRateLimitStatus">getRateLimitStatus</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#253"><abbr title="Hub\Package\PackageAuditLogger::getRecentEvents">getRecentEvents</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#290"><abbr title="Hub\Package\PackageAuditLogger::getEventCounts">getEventCounts</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#324"><abbr title="Hub\Package\PackageAuditLogger::getUserActivity">getUserActivity</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="PolicyEngine.php.html#449"><abbr title="Hub\Package\PolicyEngine::recordRateHit">recordRateHit</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="StudentDirectory/StudentQueryHandler.php.html#257"><abbr title="Hub\Package\StudentDirectory\StudentQueryHandler::buildSortClause">buildSortClause</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#387"><abbr title="Hub\Package\SensitiveActionManager::revokeOutstandingTokens">revokeOutstandingTokens</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="SensitiveActionManager.php.html#411"><abbr title="Hub\Package\SensitiveActionManager::cleanup">cleanup</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="PackageAuditLogger.php.html#357"><abbr title="Hub\Package\PackageAuditLogger::getUnresolvedAlerts">getUnresolvedAlerts</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 10.1.16</a> using <a href="https://www.php.net/" target="_top">PHP 8.3.6</a> and <a href="https://phpunit.de/">PHPUnit 10.5.58</a> at Thu Feb 12 11:10:20 CST 2026.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/jquery.min.js?v=10.1.16" type="text/javascript"></script>
+  <script src="../_js/d3.min.js?v=10.1.16" type="text/javascript"></script>
+  <script src="../_js/nv.d3.min.js?v=10.1.16" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([9,0,0,0,2,0,2,1,2,4,6,0], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([98,0,0,0,0,3,5,7,6,15,15,80], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[59.375,16,"<a href=\"ComponentRegistry.php.html#13\">Hub\\Package\\ComponentRegistry<\/a>"],[38.02083333333333,60,"<a href=\"ExportHandler.php.html#22\">Hub\\Package\\ExportHandler<\/a>"],[0,25,"<a href=\"HandlerRegistry.php.html#18\">Hub\\Package\\HandlerRegistry<\/a>"],[0,17,"<a href=\"Handlers\/UserDirectoryHandler.php.html#16\">Hub\\Package\\Handlers\\UserDirectoryHandler<\/a>"],[0,35,"<a href=\"MutationRouter.php.html#21\">Hub\\Package\\MutationRouter<\/a>"],[89.13043478260869,31,"<a href=\"PackageAuditLogger.php.html#29\">Hub\\Package\\PackageAuditLogger<\/a>"],[37.89473684210527,36,"<a href=\"PackageLoader.php.html#15\">Hub\\Package\\PackageLoader<\/a>"],[0,71,"<a href=\"PackageValidator.php.html#17\">Hub\\Package\\PackageValidator<\/a>"],[0,64,"<a href=\"PageRouter.php.html#25\">Hub\\Package\\PageRouter<\/a>"],[75.97173144876325,103,"<a href=\"PolicyEngine.php.html#26\">Hub\\Package\\PolicyEngine<\/a>"],[0,24,"<a href=\"ProjectionEngine.php.html#16\">Hub\\Package\\ProjectionEngine<\/a>"],[0,13,"<a href=\"QueryRouter.php.html#22\">Hub\\Package\\QueryRouter<\/a>"],[97.0414201183432,46,"<a href=\"Renderers\/DashboardRenderer.php.html#26\">Hub\\Package\\Renderers\\DashboardRenderer<\/a>"],[79.28571428571428,48,"<a href=\"Renderers\/DetailRenderer.php.html#15\">Hub\\Package\\Renderers\\DetailRenderer<\/a>"],[61.702127659574465,23,"<a href=\"Renderers\/FilterRenderer.php.html#15\">Hub\\Package\\Renderers\\FilterRenderer<\/a>"],[92.81437125748504,55,"<a href=\"Renderers\/FormRenderer.php.html#15\">Hub\\Package\\Renderers\\FormRenderer<\/a>"],[53.21100917431193,63,"<a href=\"Renderers\/TableRenderer.php.html#15\">Hub\\Package\\Renderers\\TableRenderer<\/a>"],[0,22,"<a href=\"ScopeEngine.php.html#15\">Hub\\Package\\ScopeEngine<\/a>"],[81.81818181818183,38,"<a href=\"SensitiveActionManager.php.html#34\">Hub\\Package\\SensitiveActionManager<\/a>"],[97.85714285714285,10,"<a href=\"StudentDirectory\/ExportHandler.php.html#14\">Hub\\Package\\StudentDirectory\\ExportHandler<\/a>"],[0,53,"<a href=\"StudentDirectory\/ImportHandler.php.html#17\">Hub\\Package\\StudentDirectory\\ImportHandler<\/a>"],[98.27586206896551,30,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#17\">Hub\\Package\\StudentDirectory\\PasswordGenerator<\/a>"],[82.35294117647058,12,"<a href=\"StudentDirectory\/StudentDatabase.php.html#17\">Hub\\Package\\StudentDirectory\\StudentDatabase<\/a>"],[84.78260869565217,15,"<a href=\"StudentDirectory\/StudentDirectoryHandler.php.html#14\">Hub\\Package\\StudentDirectory\\StudentDirectoryHandler<\/a>"],[95.13274336283186,35,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#15\">Hub\\Package\\StudentDirectory\\StudentMutationHandler<\/a>"],[96.72131147540983,23,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#14\">Hub\\Package\\StudentDirectory\\StudentQueryHandler<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"ComponentRegistry.php.html#23\">Hub\\Package\\ComponentRegistry::__construct<\/a>"],[100,2,"<a href=\"ComponentRegistry.php.html#28\">Hub\\Package\\ComponentRegistry::getInstance<\/a>"],[100,1,"<a href=\"ComponentRegistry.php.html#39\">Hub\\Package\\ComponentRegistry::registerDefaults<\/a>"],[100,1,"<a href=\"ComponentRegistry.php.html#55\">Hub\\Package\\ComponentRegistry::register<\/a>"],[0,1,"<a href=\"ComponentRegistry.php.html#66\">Hub\\Package\\ComponentRegistry::registerFactory<\/a>"],[50,6,"<a href=\"ComponentRegistry.php.html#78\">Hub\\Package\\ComponentRegistry::create<\/a>"],[100,2,"<a href=\"ComponentRegistry.php.html#111\">Hub\\Package\\ComponentRegistry::has<\/a>"],[0,1,"<a href=\"ComponentRegistry.php.html#121\">Hub\\Package\\ComponentRegistry::getTypes<\/a>"],[0,1,"<a href=\"ComponentRegistry.php.html#132\">Hub\\Package\\ComponentRegistry::reset<\/a>"],[0,1,"<a href=\"ExportHandler.php.html#33\">Hub\\Package\\ExportHandler::__construct<\/a>"],[0,8,"<a href=\"ExportHandler.php.html#57\">Hub\\Package\\ExportHandler::export<\/a>"],[0,2,"<a href=\"ExportHandler.php.html#149\">Hub\\Package\\ExportHandler::stream<\/a>"],[100,3,"<a href=\"ExportHandler.php.html#174\">Hub\\Package\\ExportHandler::generateCsv<\/a>"],[0,8,"<a href=\"ExportHandler.php.html#215\">Hub\\Package\\ExportHandler::generateXlsx<\/a>"],[100,5,"<a href=\"ExportHandler.php.html#298\">Hub\\Package\\ExportHandler::generateJson<\/a>"],[88.88888888888889,19,"<a href=\"ExportHandler.php.html#330\">Hub\\Package\\ExportHandler::formatValueForExport<\/a>"],[100,3,"<a href=\"ExportHandler.php.html#368\">Hub\\Package\\ExportHandler::inferColumnsFromData<\/a>"],[100,9,"<a href=\"ExportHandler.php.html#385\">Hub\\Package\\ExportHandler::inferColumnType<\/a>"],[0,2,"<a href=\"ExportHandler.php.html#402\">Hub\\Package\\ExportHandler::executeQuery<\/a>"],[0,2,"<a href=\"HandlerRegistry.php.html#51\">Hub\\Package\\HandlerRegistry::registerQuery<\/a>"],[0,2,"<a href=\"HandlerRegistry.php.html#75\">Hub\\Package\\HandlerRegistry::registerMutation<\/a>"],[0,1,"<a href=\"HandlerRegistry.php.html#97\">Hub\\Package\\HandlerRegistry::getQuery<\/a>"],[0,1,"<a href=\"HandlerRegistry.php.html#111\">Hub\\Package\\HandlerRegistry::getMutation<\/a>"],[0,1,"<a href=\"HandlerRegistry.php.html#125\">Hub\\Package\\HandlerRegistry::hasQuery<\/a>"],[0,1,"<a href=\"HandlerRegistry.php.html#139\">Hub\\Package\\HandlerRegistry::hasMutation<\/a>"],[0,3,"<a href=\"HandlerRegistry.php.html#152\">Hub\\Package\\HandlerRegistry::getPackageQueries<\/a>"],[0,3,"<a href=\"HandlerRegistry.php.html#174\">Hub\\Package\\HandlerRegistry::getPackageMutations<\/a>"],[0,5,"<a href=\"HandlerRegistry.php.html#196\">Hub\\Package\\HandlerRegistry::unregisterPackage<\/a>"],[0,4,"<a href=\"HandlerRegistry.php.html#226\">Hub\\Package\\HandlerRegistry::validateClass<\/a>"],[0,1,"<a href=\"HandlerRegistry.php.html#253\">Hub\\Package\\HandlerRegistry::makeKey<\/a>"],[0,1,"<a href=\"HandlerRegistry.php.html#263\">Hub\\Package\\HandlerRegistry::getStats<\/a>"],[0,1,"<a href=\"Handlers\/UserDirectoryHandler.php.html#20\">Hub\\Package\\Handlers\\UserDirectoryHandler::__construct<\/a>"],[0,1,"<a href=\"Handlers\/UserDirectoryHandler.php.html#25\">Hub\\Package\\Handlers\\UserDirectoryHandler::getPackageId<\/a>"],[0,1,"<a href=\"Handlers\/UserDirectoryHandler.php.html#30\">Hub\\Package\\Handlers\\UserDirectoryHandler::getSupportedQueries<\/a>"],[0,1,"<a href=\"Handlers\/UserDirectoryHandler.php.html#35\">Hub\\Package\\Handlers\\UserDirectoryHandler::canHandle<\/a>"],[0,1,"<a href=\"Handlers\/UserDirectoryHandler.php.html#43\">Hub\\Package\\Handlers\\UserDirectoryHandler::execute<\/a>"],[0,8,"<a href=\"Handlers\/UserDirectoryHandler.php.html#56\">Hub\\Package\\Handlers\\UserDirectoryHandler::listUsers<\/a>"],[0,2,"<a href=\"Handlers\/UserDirectoryHandler.php.html#128\">Hub\\Package\\Handlers\\UserDirectoryHandler::getUser<\/a>"],[0,2,"<a href=\"Handlers\/UserDirectoryHandler.php.html#148\">Hub\\Package\\Handlers\\UserDirectoryHandler::getUserStats<\/a>"],[0,1,"<a href=\"MutationRouter.php.html#27\">Hub\\Package\\MutationRouter::__construct<\/a>"],[0,19,"<a href=\"MutationRouter.php.html#63\">Hub\\Package\\MutationRouter::execute<\/a>"],[0,3,"<a href=\"MutationRouter.php.html#230\">Hub\\Package\\MutationRouter::validateCsrf<\/a>"],[0,2,"<a href=\"MutationRouter.php.html#253\">Hub\\Package\\MutationRouter::sanitizeInput<\/a>"],[0,1,"<a href=\"MutationRouter.php.html#274\">Hub\\Package\\MutationRouter::captureBeforeState<\/a>"],[0,2,"<a href=\"MutationRouter.php.html#286\">Hub\\Package\\MutationRouter::invalidateCaches<\/a>"],[0,2,"<a href=\"MutationRouter.php.html#302\">Hub\\Package\\MutationRouter::queueBackgroundJobs<\/a>"],[0,2,"<a href=\"MutationRouter.php.html#323\">Hub\\Package\\MutationRouter::logMutation<\/a>"],[0,1,"<a href=\"MutationRouter.php.html#367\">Hub\\Package\\MutationRouter::logMutationError<\/a>"],[0,1,"<a href=\"MutationRouter.php.html#403\">Hub\\Package\\MutationRouter::sanitizeForLogging<\/a>"],[0,1,"<a href=\"MutationRouter.php.html#415\">Hub\\Package\\MutationRouter::generateCorrelationId<\/a>"],[100,5,"<a href=\"PackageAuditLogger.php.html#49\">Hub\\Package\\PackageAuditLogger::log<\/a>"],[100,1,"<a href=\"PackageAuditLogger.php.html#108\">Hub\\Package\\PackageAuditLogger::logQuery<\/a>"],[100,3,"<a href=\"PackageAuditLogger.php.html#128\">Hub\\Package\\PackageAuditLogger::logMutation<\/a>"],[100,1,"<a href=\"PackageAuditLogger.php.html#152\">Hub\\Package\\PackageAuditLogger::logAccessDenied<\/a>"],[100,1,"<a href=\"PackageAuditLogger.php.html#169\">Hub\\Package\\PackageAuditLogger::logRateLimited<\/a>"],[100,1,"<a href=\"PackageAuditLogger.php.html#187\">Hub\\Package\\PackageAuditLogger::logReveal<\/a>"],[100,1,"<a href=\"PackageAuditLogger.php.html#206\">Hub\\Package\\PackageAuditLogger::logPolicyViolation<\/a>"],[100,2,"<a href=\"PackageAuditLogger.php.html#223\">Hub\\Package\\PackageAuditLogger::logTokenEvent<\/a>"],[78.57142857142857,3,"<a href=\"PackageAuditLogger.php.html#253\">Hub\\Package\\PackageAuditLogger::getRecentEvents<\/a>"],[81.81818181818183,3,"<a href=\"PackageAuditLogger.php.html#290\">Hub\\Package\\PackageAuditLogger::getEventCounts<\/a>"],[85.71428571428571,3,"<a href=\"PackageAuditLogger.php.html#324\">Hub\\Package\\PackageAuditLogger::getUserActivity<\/a>"],[66.66666666666666,2,"<a href=\"PackageAuditLogger.php.html#357\">Hub\\Package\\PackageAuditLogger::getUnresolvedAlerts<\/a>"],[40,3,"<a href=\"PackageAuditLogger.php.html#384\">Hub\\Package\\PackageAuditLogger::inferSeverity<\/a>"],[100,2,"<a href=\"PackageAuditLogger.php.html#403\">Hub\\Package\\PackageAuditLogger::getDb<\/a>"],[100,1,"<a href=\"PackageLoader.php.html#20\">Hub\\Package\\PackageLoader::__construct<\/a>"],[75,4,"<a href=\"PackageLoader.php.html#31\">Hub\\Package\\PackageLoader::load<\/a>"],[87.5,4,"<a href=\"PackageLoader.php.html#55\">Hub\\Package\\PackageLoader::loadFromDatabase<\/a>"],[0,11,"<a href=\"PackageLoader.php.html#93\">Hub\\Package\\PackageLoader::loadFromFilesystem<\/a>"],[100,3,"<a href=\"PackageLoader.php.html#149\">Hub\\Package\\PackageLoader::getInstalled<\/a>"],[0,7,"<a href=\"PackageLoader.php.html#182\">Hub\\Package\\PackageLoader::findPage<\/a>"],[0,5,"<a href=\"PackageLoader.php.html#218\">Hub\\Package\\PackageLoader::resolveRouteParams<\/a>"],[100,1,"<a href=\"PackageLoader.php.html#242\">Hub\\Package\\PackageLoader::clearCache<\/a>"],[0,1,"<a href=\"PackageValidator.php.html#31\">Hub\\Package\\PackageValidator::__construct<\/a>"],[0,4,"<a href=\"PackageValidator.php.html#48\">Hub\\Package\\PackageValidator::validate<\/a>"],[0,1,"<a href=\"PackageValidator.php.html#97\">Hub\\Package\\PackageValidator::validatePackageId<\/a>"],[0,1,"<a href=\"PackageValidator.php.html#109\">Hub\\Package\\PackageValidator::validateVersion<\/a>"],[0,3,"<a href=\"PackageValidator.php.html#121\">Hub\\Package\\PackageValidator::isLayer3Package<\/a>"],[0,9,"<a href=\"PackageValidator.php.html#140\">Hub\\Package\\PackageValidator::extractHandlers<\/a>"],[0,12,"<a href=\"PackageValidator.php.html#177\">Hub\\Package\\PackageValidator::extractDataClassifications<\/a>"],[0,4,"<a href=\"PackageValidator.php.html#213\">Hub\\Package\\PackageValidator::getSchema<\/a>"],[0,31,"<a href=\"PackageValidator.php.html#240\">Hub\\Package\\PackageValidator::performAdditionalValidation<\/a>"],[0,5,"<a href=\"PackageValidator.php.html#348\">Hub\\Package\\PackageValidator::formatErrors<\/a>"],[0,1,"<a href=\"PageRouter.php.html#36\">Hub\\Package\\PageRouter::__construct<\/a>"],[0,1,"<a href=\"PageRouter.php.html#56\">Hub\\Package\\PageRouter::registerHandler<\/a>"],[0,12,"<a href=\"PageRouter.php.html#70\">Hub\\Package\\PageRouter::handle<\/a>"],[0,2,"<a href=\"PageRouter.php.html#181\">Hub\\Package\\PageRouter::handleQuery<\/a>"],[0,4,"<a href=\"PageRouter.php.html#205\">Hub\\Package\\PageRouter::handleMutation<\/a>"],[0,5,"<a href=\"PageRouter.php.html#238\">Hub\\Package\\PageRouter::executeQuery<\/a>"],[0,2,"<a href=\"PageRouter.php.html#287\">Hub\\Package\\PageRouter::fallbackQuery<\/a>"],[0,15,"<a href=\"PageRouter.php.html#313\">Hub\\Package\\PageRouter::findPageByRoute<\/a>"],[0,5,"<a href=\"PageRouter.php.html#371\">Hub\\Package\\PageRouter::findPageForQuery<\/a>"],[0,7,"<a href=\"PageRouter.php.html#389\">Hub\\Package\\PageRouter::findPageForMutation<\/a>"],[0,6,"<a href=\"PageRouter.php.html#411\">Hub\\Package\\PageRouter::extractDataClassifications<\/a>"],[0,3,"<a href=\"PageRouter.php.html#435\">Hub\\Package\\PageRouter::getPackageBaseUrl<\/a>"],[0,1,"<a href=\"PageRouter.php.html#454\">Hub\\Package\\PageRouter::errorResponse<\/a>"],[69.23076923076923,10,"<a href=\"PolicyEngine.php.html#68\">Hub\\Package\\PolicyEngine::canAccessPage<\/a>"],[87.5,4,"<a href=\"PolicyEngine.php.html#114\">Hub\\Package\\PolicyEngine::check<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#142\">Hub\\Package\\PolicyEngine::hasRole<\/a>"],[81.25,8,"<a href=\"PolicyEngine.php.html#174\">Hub\\Package\\PolicyEngine::getVisibleFields<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#217\">Hub\\Package\\PolicyEngine::getVisibleFieldKeys<\/a>"],[100,3,"<a href=\"PolicyEngine.php.html#232\">Hub\\Package\\PolicyEngine::getDataClassifications<\/a>"],[73.68421052631578,21,"<a href=\"PolicyEngine.php.html#266\">Hub\\Package\\PolicyEngine::getScopeFilters<\/a>"],[100,4,"<a href=\"PolicyEngine.php.html#377\">Hub\\Package\\PolicyEngine::getFieldMasks<\/a>"],[66.66666666666666,3,"<a href=\"PolicyEngine.php.html#421\">Hub\\Package\\PolicyEngine::isRateLimited<\/a>"],[86.66666666666667,3,"<a href=\"PolicyEngine.php.html#449\">Hub\\Package\\PolicyEngine::recordRateHit<\/a>"],[72.41379310344827,3,"<a href=\"PolicyEngine.php.html#494\">Hub\\Package\\PolicyEngine::getRateLimitStatus<\/a>"],[95.23809523809523,8,"<a href=\"PolicyEngine.php.html#556\">Hub\\Package\\PolicyEngine::isWithinAllowedTime<\/a>"],[0,2,"<a href=\"PolicyEngine.php.html#609\">Hub\\Package\\PolicyEngine::userHasMfa<\/a>"],[100,2,"<a href=\"PolicyEngine.php.html#625\">Hub\\Package\\PolicyEngine::requiresMfaReVerification<\/a>"],[47.5,8,"<a href=\"PolicyEngine.php.html#653\">Hub\\Package\\PolicyEngine::checkAlertRules<\/a>"],[0,3,"<a href=\"PolicyEngine.php.html#728\">Hub\\Package\\PolicyEngine::shouldBlockRequest<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#745\">Hub\\Package\\PolicyEngine::getUserRole<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#761\">Hub\\Package\\PolicyEngine::getUserPermissions<\/a>"],[100,2,"<a href=\"PolicyEngine.php.html#769\">Hub\\Package\\PolicyEngine::matchesWildcard<\/a>"],[0,3,"<a href=\"PolicyEngine.php.html#783\">Hub\\Package\\PolicyEngine::resolveRuleValue<\/a>"],[100,5,"<a href=\"PolicyEngine.php.html#799\">Hub\\Package\\PolicyEngine::extractActionType<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#811\">Hub\\Package\\PolicyEngine::checkRateLimitDb<\/a>"],[100,2,"<a href=\"PolicyEngine.php.html#829\">Hub\\Package\\PolicyEngine::getDb<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#844\">Hub\\Package\\PolicyEngine::getRoleLevel<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#852\">Hub\\Package\\PolicyEngine::getAvailableRoles<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#860\">Hub\\Package\\PolicyEngine::getDefaultPermissionsForRole<\/a>"],[100,1,"<a href=\"PolicyEngine.php.html#868\">Hub\\Package\\PolicyEngine::getDefaultRateLimits<\/a>"],[0,4,"<a href=\"ProjectionEngine.php.html#33\">Hub\\Package\\ProjectionEngine::maskFields<\/a>"],[0,5,"<a href=\"ProjectionEngine.php.html#58\">Hub\\Package\\ProjectionEngine::maskRow<\/a>"],[0,1,"<a href=\"ProjectionEngine.php.html#84\">Hub\\Package\\ProjectionEngine::getRedactionValue<\/a>"],[0,3,"<a href=\"ProjectionEngine.php.html#101\">Hub\\Package\\ProjectionEngine::isRow<\/a>"],[0,6,"<a href=\"ProjectionEngine.php.html#122\">Hub\\Package\\ProjectionEngine::removeFields<\/a>"],[0,5,"<a href=\"ProjectionEngine.php.html#148\">Hub\\Package\\ProjectionEngine::getStats<\/a>"],[0,1,"<a href=\"QueryRouter.php.html#29\">Hub\\Package\\QueryRouter::__construct<\/a>"],[0,9,"<a href=\"QueryRouter.php.html#65\">Hub\\Package\\QueryRouter::execute<\/a>"],[0,1,"<a href=\"QueryRouter.php.html#186\">Hub\\Package\\QueryRouter::logQuery<\/a>"],[0,1,"<a href=\"QueryRouter.php.html#223\">Hub\\Package\\QueryRouter::logQueryError<\/a>"],[0,1,"<a href=\"QueryRouter.php.html#255\">Hub\\Package\\QueryRouter::generateCorrelationId<\/a>"],[100,1,"<a href=\"Renderers\/DashboardRenderer.php.html#28\">Hub\\Package\\Renderers\\DashboardRenderer::getType<\/a>"],[100,1,"<a href=\"Renderers\/DashboardRenderer.php.html#33\">Hub\\Package\\Renderers\\DashboardRenderer::getAssets<\/a>"],[100,8,"<a href=\"Renderers\/DashboardRenderer.php.html#41\">Hub\\Package\\Renderers\\DashboardRenderer::render<\/a>"],[97.22222222222221,13,"<a href=\"Renderers\/DashboardRenderer.php.html#98\">Hub\\Package\\Renderers\\DashboardRenderer::renderCard<\/a>"],[96.96969696969697,4,"<a href=\"Renderers\/DashboardRenderer.php.html#163\">Hub\\Package\\Renderers\\DashboardRenderer::renderChart<\/a>"],[96.96969696969697,8,"<a href=\"Renderers\/DashboardRenderer.php.html#215\">Hub\\Package\\Renderers\\DashboardRenderer::renderActionQueue<\/a>"],[100,4,"<a href=\"Renderers\/DashboardRenderer.php.html#268\">Hub\\Package\\Renderers\\DashboardRenderer::renderQuickLinks<\/a>"],[100,4,"<a href=\"Renderers\/DashboardRenderer.php.html#301\">Hub\\Package\\Renderers\\DashboardRenderer::formatCardValue<\/a>"],[50,3,"<a href=\"Renderers\/DashboardRenderer.php.html#317\">Hub\\Package\\Renderers\\DashboardRenderer::compactNumber<\/a>"],[100,1,"<a href=\"Renderers\/DetailRenderer.php.html#17\">Hub\\Package\\Renderers\\DetailRenderer::getType<\/a>"],[0,1,"<a href=\"Renderers\/DetailRenderer.php.html#22\">Hub\\Package\\Renderers\\DetailRenderer::getAssets<\/a>"],[100,9,"<a href=\"Renderers\/DetailRenderer.php.html#30\">Hub\\Package\\Renderers\\DetailRenderer::render<\/a>"],[100,3,"<a href=\"Renderers\/DetailRenderer.php.html#82\">Hub\\Package\\Renderers\\DetailRenderer::renderSection<\/a>"],[71.9298245614035,24,"<a href=\"Renderers\/DetailRenderer.php.html#106\">Hub\\Package\\Renderers\\DetailRenderer::renderField<\/a>"],[100,3,"<a href=\"Renderers\/DetailRenderer.php.html#190\">Hub\\Package\\Renderers\\DetailRenderer::renderFlatFields<\/a>"],[59.09090909090909,5,"<a href=\"Renderers\/DetailRenderer.php.html#204\">Hub\\Package\\Renderers\\DetailRenderer::renderAction<\/a>"],[100,2,"<a href=\"Renderers\/DetailRenderer.php.html#236\">Hub\\Package\\Renderers\\DetailRenderer::renderNotFound<\/a>"],[100,1,"<a href=\"Renderers\/FilterRenderer.php.html#17\">Hub\\Package\\Renderers\\FilterRenderer::getType<\/a>"],[0,1,"<a href=\"Renderers\/FilterRenderer.php.html#22\">Hub\\Package\\Renderers\\FilterRenderer::getAssets<\/a>"],[100,3,"<a href=\"Renderers\/FilterRenderer.php.html#30\">Hub\\Package\\Renderers\\FilterRenderer::render<\/a>"],[54.929577464788736,18,"<a href=\"Renderers\/FilterRenderer.php.html#62\">Hub\\Package\\Renderers\\FilterRenderer::renderFilterField<\/a>"],[100,1,"<a href=\"Renderers\/FormRenderer.php.html#17\">Hub\\Package\\Renderers\\FormRenderer::getType<\/a>"],[100,1,"<a href=\"Renderers\/FormRenderer.php.html#22\">Hub\\Package\\Renderers\\FormRenderer::getAssets<\/a>"],[97.67441860465115,7,"<a href=\"Renderers\/FormRenderer.php.html#30\">Hub\\Package\\Renderers\\FormRenderer::render<\/a>"],[96,9,"<a href=\"Renderers\/FormRenderer.php.html#102\">Hub\\Package\\Renderers\\FormRenderer::renderSection<\/a>"],[96.15384615384616,6,"<a href=\"Renderers\/FormRenderer.php.html#144\">Hub\\Package\\Renderers\\FormRenderer::renderField<\/a>"],[86.76470588235294,31,"<a href=\"Renderers\/FormRenderer.php.html#190\">Hub\\Package\\Renderers\\FormRenderer::renderInput<\/a>"],[100,1,"<a href=\"Renderers\/TableRenderer.php.html#17\">Hub\\Package\\Renderers\\TableRenderer::getType<\/a>"],[100,1,"<a href=\"Renderers\/TableRenderer.php.html#22\">Hub\\Package\\Renderers\\TableRenderer::getAssets<\/a>"],[95.71428571428572,14,"<a href=\"Renderers\/TableRenderer.php.html#30\">Hub\\Package\\Renderers\\TableRenderer::render<\/a>"],[75,4,"<a href=\"Renderers\/TableRenderer.php.html#141\">Hub\\Package\\Renderers\\TableRenderer::renderColumnHeader<\/a>"],[60,5,"<a href=\"Renderers\/TableRenderer.php.html#163\">Hub\\Package\\Renderers\\TableRenderer::renderRow<\/a>"],[45,15,"<a href=\"Renderers\/TableRenderer.php.html#193\">Hub\\Package\\Renderers\\TableRenderer::renderCell<\/a>"],[0,10,"<a href=\"Renderers\/TableRenderer.php.html#252\">Hub\\Package\\Renderers\\TableRenderer::renderRowAction<\/a>"],[100,2,"<a href=\"Renderers\/TableRenderer.php.html#311\">Hub\\Package\\Renderers\\TableRenderer::renderBulkAction<\/a>"],[0,11,"<a href=\"Renderers\/TableRenderer.php.html#324\">Hub\\Package\\Renderers\\TableRenderer::renderPagination<\/a>"],[0,5,"<a href=\"ScopeEngine.php.html#31\">Hub\\Package\\ScopeEngine::applyFilters<\/a>"],[0,7,"<a href=\"ScopeEngine.php.html#58\">Hub\\Package\\ScopeEngine::toWhereClause<\/a>"],[0,6,"<a href=\"ScopeEngine.php.html#96\">Hub\\Package\\ScopeEngine::isValidFilter<\/a>"],[0,4,"<a href=\"ScopeEngine.php.html#123\">Hub\\Package\\ScopeEngine::getStats<\/a>"],[100,1,"<a href=\"SensitiveActionManager.php.html#48\">Hub\\Package\\SensitiveActionManager::__construct<\/a>"],[95.34883720930233,3,"<a href=\"SensitiveActionManager.php.html#72\">Hub\\Package\\SensitiveActionManager::issueToken<\/a>"],[81.69014084507043,15,"<a href=\"SensitiveActionManager.php.html#173\">Hub\\Package\\SensitiveActionManager::consumeToken<\/a>"],[83.33333333333334,7,"<a href=\"SensitiveActionManager.php.html#298\">Hub\\Package\\SensitiveActionManager::validateToken<\/a>"],[85.71428571428571,5,"<a href=\"SensitiveActionManager.php.html#343\">Hub\\Package\\SensitiveActionManager::revokeToken<\/a>"],[60,2,"<a href=\"SensitiveActionManager.php.html#387\">Hub\\Package\\SensitiveActionManager::revokeOutstandingTokens<\/a>"],[62.5,2,"<a href=\"SensitiveActionManager.php.html#411\">Hub\\Package\\SensitiveActionManager::cleanup<\/a>"],[57.89473684210527,3,"<a href=\"SensitiveActionManager.php.html#433\">Hub\\Package\\SensitiveActionManager::getStats<\/a>"],[100,3,"<a href=\"StudentDirectory\/ExportHandler.php.html#22\">Hub\\Package\\StudentDirectory\\ExportHandler::exportStandardCsv<\/a>"],[98.71794871794873,3,"<a href=\"StudentDirectory\/ExportHandler.php.html#93\">Hub\\Package\\StudentDirectory\\ExportHandler::exportGoogleCsv<\/a>"],[84.61538461538461,4,"<a href=\"StudentDirectory\/ExportHandler.php.html#188\">Hub\\Package\\StudentDirectory\\ExportHandler::getFilteredStudents<\/a>"],[0,9,"<a href=\"StudentDirectory\/ImportHandler.php.html#48\">Hub\\Package\\StudentDirectory\\ImportHandler::parseForPreview<\/a>"],[0,14,"<a href=\"StudentDirectory\/ImportHandler.php.html#116\">Hub\\Package\\StudentDirectory\\ImportHandler::processImport<\/a>"],[0,6,"<a href=\"StudentDirectory\/ImportHandler.php.html#243\">Hub\\Package\\StudentDirectory\\ImportHandler::mapRow<\/a>"],[0,6,"<a href=\"StudentDirectory\/ImportHandler.php.html#261\">Hub\\Package\\StudentDirectory\\ImportHandler::insertFromImport<\/a>"],[0,11,"<a href=\"StudentDirectory\/ImportHandler.php.html#325\">Hub\\Package\\StudentDirectory\\ImportHandler::updateFromImport<\/a>"],[0,2,"<a href=\"StudentDirectory\/ImportHandler.php.html#396\">Hub\\Package\\StudentDirectory\\ImportHandler::logImport<\/a>"],[0,5,"<a href=\"StudentDirectory\/ImportHandler.php.html#421\">Hub\\Package\\StudentDirectory\\ImportHandler::suggestFieldMapping<\/a>"],[100,9,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#24\">Hub\\Package\\StudentDirectory\\PasswordGenerator::generateByGrade<\/a>"],[100,3,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#77\">Hub\\Package\\StudentDirectory\\PasswordGenerator::extractMMYYfromDOB<\/a>"],[100,5,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#97\">Hub\\Package\\StudentDirectory\\PasswordGenerator::generateChromebookLogin<\/a>"],[100,1,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#117\">Hub\\Package\\StudentDirectory\\PasswordGenerator::generateGroupEmail<\/a>"],[100,3,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#125\">Hub\\Package\\StudentDirectory\\PasswordGenerator::determineOU<\/a>"],[91.66666666666666,7,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#143\">Hub\\Package\\StudentDirectory\\PasswordGenerator::calculateGraduationYear<\/a>"],[100,2,"<a href=\"StudentDirectory\/PasswordGenerator.php.html#170\">Hub\\Package\\StudentDirectory\\PasswordGenerator::getRandomSpecialChars<\/a>"],[100,2,"<a href=\"StudentDirectory\/StudentDatabase.php.html#24\">Hub\\Package\\StudentDirectory\\StudentDatabase::getConnection<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#49\">Hub\\Package\\StudentDirectory\\StudentDatabase::fetchAll<\/a>"],[100,2,"<a href=\"StudentDirectory\/StudentDatabase.php.html#59\">Hub\\Package\\StudentDirectory\\StudentDatabase::fetchOne<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#70\">Hub\\Package\\StudentDirectory\\StudentDatabase::fetchColumn<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#80\">Hub\\Package\\StudentDirectory\\StudentDatabase::execute<\/a>"],[0,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#90\">Hub\\Package\\StudentDirectory\\StudentDatabase::insert<\/a>"],[0,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#100\">Hub\\Package\\StudentDirectory\\StudentDatabase::beginTransaction<\/a>"],[0,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#108\">Hub\\Package\\StudentDirectory\\StudentDatabase::commit<\/a>"],[0,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#116\">Hub\\Package\\StudentDirectory\\StudentDatabase::rollBack<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDatabase.php.html#124\">Hub\\Package\\StudentDirectory\\StudentDatabase::reset<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDirectoryHandler.php.html#36\">Hub\\Package\\StudentDirectory\\StudentDirectoryHandler::getPackageId<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDirectoryHandler.php.html#41\">Hub\\Package\\StudentDirectory\\StudentDirectoryHandler::getSupportedQueries<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentDirectoryHandler.php.html#46\">Hub\\Package\\StudentDirectory\\StudentDirectoryHandler::getSupportedMutations<\/a>"],[86.48648648648648,9,"<a href=\"StudentDirectory\/StudentDirectoryHandler.php.html#59\">Hub\\Package\\StudentDirectory\\StudentDirectoryHandler::executeQuery<\/a>"],[66.66666666666666,3,"<a href=\"StudentDirectory\/StudentDirectoryHandler.php.html#136\">Hub\\Package\\StudentDirectory\\StudentDirectoryHandler::executeMutation<\/a>"],[97.10144927536231,10,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#25\">Hub\\Package\\StudentDirectory\\StudentMutationHandler::createStudent<\/a>"],[94.20289855072464,11,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#126\">Hub\\Package\\StudentDirectory\\StudentMutationHandler::updateStudent<\/a>"],[100,2,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#230\">Hub\\Package\\StudentDirectory\\StudentMutationHandler::resetPassword<\/a>"],[95,4,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#264\">Hub\\Package\\StudentDirectory\\StudentMutationHandler::bulkDelete<\/a>"],[84.61538461538461,5,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#305\">Hub\\Package\\StudentDirectory\\StudentMutationHandler::printCards<\/a>"],[100,3,"<a href=\"StudentDirectory\/StudentMutationHandler.php.html#350\">Hub\\Package\\StudentDirectory\\StudentMutationHandler::renderCards<\/a>"],[95.55555555555556,6,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#29\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::listStudents<\/a>"],[100,3,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#111\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::getStudent<\/a>"],[100,5,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#133\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::getStats<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#178\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::getGrades<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#193\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::getGraduationYears<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#209\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::getImportHistory<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#222\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::studentExists<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#234\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::searchStudents<\/a>"],[86.66666666666667,3,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#257\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::buildSortClause<\/a>"],[100,1,"<a href=\"StudentDirectory\/StudentQueryHandler.php.html#285\">Hub\\Package\\StudentDirectory\\StudentQueryHandler::gradeOrderExpression<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>
