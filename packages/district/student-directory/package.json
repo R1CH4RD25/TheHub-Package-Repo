@@ -1,0 +1,410 @@
+{
+  "id": "district.student-directory",
+  "name": "Student Directory",
+  "version": "1.0.0",
+  "description": "Student records management — search, view, edit, import/export with Google Workspace integration",
+  "icon": "bi-people-fill",
+  "author": "Woodson ISD Technology",
+  "category": "district",
+
+  "database": {
+    "connection": "woodson_students",
+    "primaryTable": "students",
+    "auditTable": "audit_log"
+  },
+
+  "access": {
+    "roles": {
+      "viewer": {
+        "description": "View student records (teachers, office staff)",
+        "hubRoles": ["staff", "counselor", "principal", "admin", "super_admin"],
+        "googleGroups": ["teachers@woodsonisd.net", "office@woodsonisd.net"]
+      },
+      "editor": {
+        "description": "Edit/add/delete students, reset passwords",
+        "hubRoles": ["admin", "super_admin"],
+        "googleGroups": ["technology@woodsonisd.net", "admin@woodsonisd.net"]
+      },
+      "importer": {
+        "description": "CSV import/export, bulk operations",
+        "hubRoles": ["admin", "super_admin"],
+        "googleGroups": ["technology@woodsonisd.net"]
+      }
+    }
+  },
+
+  "pages": {
+    "index": {
+      "title": "Student Directory",
+      "icon": "bi-people",
+      "layout": "full",
+      "components": [
+        {
+          "type": "dashboard",
+          "id": "student-stats",
+          "query": "getStats",
+          "cards": [
+            { "title": "Total Students", "dataKey": "total", "icon": "bi-people-fill", "color": "primary" },
+            { "title": "Elementary", "dataKey": "elementary", "icon": "bi-backpack", "color": "success", "link": "/?grade_group=elementary" },
+            { "title": "Junior High", "dataKey": "junior_high", "icon": "bi-book", "color": "info", "link": "/?grade_group=junior_high" },
+            { "title": "High School", "dataKey": "high_school", "icon": "bi-mortarboard", "color": "warning", "link": "/?grade_group=high_school" }
+          ],
+          "access": { "minRole": "viewer" }
+        },
+        {
+          "type": "filters",
+          "id": "student-filters",
+          "target": "student-table",
+          "fields": [
+            { "key": "search", "type": "search", "label": "Search", "placeholder": "Name, ID, or email..." },
+            { "key": "grade", "type": "select", "label": "Grade", "optionsQuery": "getGrades" },
+            { "key": "graduation_year", "type": "select", "label": "Graduation Year", "optionsQuery": "getGraduationYears" }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "student-table",
+          "query": "listStudents",
+          "columns": [
+            { "key": "student_id", "label": "Student ID", "sortable": true, "type": "text" },
+            { "key": "full_name", "label": "Name", "sortable": true, "type": "text" },
+            { "key": "grade", "label": "Grade", "sortable": true, "type": "badge" },
+            { "key": "chromebook_login", "label": "Chromebook Login", "type": "text" },
+            { "key": "password", "label": "Password", "type": "masked" },
+            { "key": "ou_for_google", "label": "School", "type": "badge" }
+          ],
+          "rowActions": [
+            { "label": "View", "type": "route", "to": "/view/{id}", "icon": "bi-eye", "variant": "primary" }
+          ],
+          "bulkActions": [
+            { "label": "Print Cards", "mutation": "printCards", "icon": "bi-printer", "variant": "info", "access": { "minRole": "viewer" } },
+            { "label": "Delete Selected", "mutation": "bulkDelete", "icon": "bi-trash", "variant": "danger", "confirm": "Are you sure you want to delete the selected students?", "access": { "minRole": "editor" } }
+          ],
+          "pageSize": 50,
+          "searchPageSize": 1000
+        }
+      ]
+    },
+
+    "view": {
+      "title": "Student Details",
+      "icon": "bi-person-badge",
+      "route": "/view/:id",
+      "components": [
+        {
+          "type": "detail",
+          "id": "student-detail",
+          "query": "getStudent",
+          "backUrl": "/",
+          "sections": [
+            {
+              "title": "Personal Information",
+              "icon": "bi-person",
+              "columns": 2,
+              "fields": [
+                { "key": "student_id", "label": "Student ID", "type": "text", "copyable": true },
+                { "key": "first_name", "label": "First Name", "type": "text" },
+                { "key": "middle_name", "label": "Middle Name", "type": "text" },
+                { "key": "last_name", "label": "Last Name", "type": "text" },
+                { "key": "nickname", "label": "Nickname", "type": "text" },
+                { "key": "sex", "label": "Sex", "type": "badge" },
+                { "key": "dob", "label": "Date of Birth", "type": "date" },
+                { "key": "grade", "label": "Grade", "type": "badge", "badgeColor": "primary" },
+                { "key": "graduation_year", "label": "Graduation Year", "type": "text" }
+              ]
+            },
+            {
+              "title": "Account Information",
+              "icon": "bi-laptop",
+              "columns": 2,
+              "fields": [
+                { "key": "chromebook_login", "label": "Chromebook Login", "type": "email", "copyable": true },
+                { "key": "password", "label": "Password", "type": "masked", "copyable": true },
+                { "key": "group_email", "label": "Group Email", "type": "email" },
+                { "key": "ou_for_google", "label": "Google OU", "type": "badge", "badgeColor": "info" }
+              ]
+            },
+            {
+              "title": "Demographics",
+              "icon": "bi-globe",
+              "columns": 3,
+              "collapsible": true,
+              "fields": [
+                { "key": "hispanic_latino", "label": "Hispanic/Latino", "type": "boolean" },
+                { "key": "white", "label": "White", "type": "boolean" },
+                { "key": "black_african_american", "label": "Black/African American", "type": "boolean" },
+                { "key": "asian", "label": "Asian", "type": "boolean" },
+                { "key": "american_indian_alaskan_native", "label": "American Indian/Alaskan Native", "type": "boolean" },
+                { "key": "hawaiian_pacific_isl", "label": "Hawaiian/Pacific Islander", "type": "boolean" }
+              ]
+            }
+          ],
+          "actions": [
+            { "label": "Edit", "type": "route", "to": "/edit/{id}", "icon": "bi-pencil", "variant": "primary", "access": { "minRole": "editor" } },
+            { "label": "Reset Password", "type": "mutation", "mutation": "resetPassword", "icon": "bi-key", "variant": "warning", "confirm": "Reset this student's password to default?", "access": { "minRole": "editor" } },
+            { "label": "Print Card", "type": "mutation", "mutation": "printCards", "icon": "bi-printer", "variant": "info" }
+          ]
+        }
+      ]
+    },
+
+    "add": {
+      "title": "Add Student",
+      "icon": "bi-person-plus",
+      "route": "/add",
+      "access": { "minRole": "editor" },
+      "components": [
+        {
+          "type": "form",
+          "id": "student-add-form",
+          "mutation": "createStudent",
+          "submitLabel": "Add Student",
+          "cancelUrl": "/",
+          "sections": [
+            {
+              "title": "Required Information",
+              "fields": [
+                { "key": "student_id", "type": "text", "label": "Student ID", "required": true, "helpText": "Unique student identifier from SIS" },
+                { "key": "first_name", "type": "text", "label": "First Name", "required": true },
+                { "key": "last_name", "type": "text", "label": "Last Name", "required": true },
+                { "key": "grade", "type": "select", "label": "Grade", "required": true, "options": [
+                  {"value": "PK", "label": "PK"}, {"value": "KG", "label": "KG"},
+                  {"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"},
+                  {"value": "4", "label": "4"}, {"value": "5", "label": "5"}, {"value": "6", "label": "6"},
+                  {"value": "7", "label": "7"}, {"value": "8", "label": "8"}, {"value": "9", "label": "9"},
+                  {"value": "10", "label": "10"}, {"value": "11", "label": "11"}, {"value": "12", "label": "12"}
+                ]}
+              ]
+            },
+            {
+              "title": "Optional Information",
+              "collapsible": false,
+              "fields": [
+                { "key": "middle_name", "type": "text", "label": "Middle Name" },
+                { "key": "nickname", "type": "text", "label": "Nickname", "helpText": "Used for email if provided" },
+                { "key": "sex", "type": "select", "label": "Sex", "options": [{"value":"M","label":"Male"},{"value":"F","label":"Female"}] },
+                { "key": "dob", "type": "date", "label": "Date of Birth" }
+              ]
+            },
+            {
+              "title": "Demographics",
+              "collapsible": true,
+              "collapsed": true,
+              "fields": [
+                { "key": "hispanic_latino", "type": "checkbox", "label": "Hispanic/Latino" },
+                { "key": "white", "type": "checkbox", "label": "White" },
+                { "key": "black_african_american", "type": "checkbox", "label": "Black/African American" },
+                { "key": "asian", "type": "checkbox", "label": "Asian" },
+                { "key": "american_indian_alaskan_native", "type": "checkbox", "label": "American Indian/Alaskan Native" },
+                { "key": "hawaiian_pacific_isl", "type": "checkbox", "label": "Hawaiian/Pacific Islander" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "edit": {
+      "title": "Edit Student",
+      "icon": "bi-pencil",
+      "route": "/edit/:id",
+      "access": { "minRole": "editor" },
+      "components": [
+        {
+          "type": "form",
+          "id": "student-edit-form",
+          "mutation": "updateStudent",
+          "query": "getStudent",
+          "submitLabel": "Save Changes",
+          "cancelUrl": "/view/{id}",
+          "sections": [
+            {
+              "title": "Personal Information",
+              "fields": [
+                { "key": "student_id", "type": "text", "label": "Student ID", "required": true },
+                { "key": "first_name", "type": "text", "label": "First Name", "required": true },
+                { "key": "middle_name", "type": "text", "label": "Middle Name" },
+                { "key": "last_name", "type": "text", "label": "Last Name", "required": true },
+                { "key": "nickname", "type": "text", "label": "Nickname" },
+                { "key": "sex", "type": "select", "label": "Sex", "options": [{"value":"M","label":"Male"},{"value":"F","label":"Female"}] },
+                { "key": "dob", "type": "date", "label": "Date of Birth" },
+                { "key": "grade", "type": "select", "label": "Grade", "required": true, "options": [
+                  {"value": "PK", "label": "PK"}, {"value": "KG", "label": "KG"},
+                  {"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"},
+                  {"value": "4", "label": "4"}, {"value": "5", "label": "5"}, {"value": "6", "label": "6"},
+                  {"value": "7", "label": "7"}, {"value": "8", "label": "8"}, {"value": "9", "label": "9"},
+                  {"value": "10", "label": "10"}, {"value": "11", "label": "11"}, {"value": "12", "label": "12"}
+                ]}
+              ]
+            },
+            {
+              "title": "Demographics",
+              "collapsible": true,
+              "fields": [
+                { "key": "hispanic_latino", "type": "checkbox", "label": "Hispanic/Latino" },
+                { "key": "white", "type": "checkbox", "label": "White" },
+                { "key": "black_african_american", "type": "checkbox", "label": "Black/African American" },
+                { "key": "asian", "type": "checkbox", "label": "Asian" },
+                { "key": "american_indian_alaskan_native", "type": "checkbox", "label": "American Indian/Alaskan Native" },
+                { "key": "hawaiian_pacific_isl", "type": "checkbox", "label": "Hawaiian/Pacific Islander" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "import": {
+      "title": "Import Students",
+      "icon": "bi-upload",
+      "route": "/import",
+      "access": { "minRole": "importer" },
+      "components": [
+        {
+          "type": "form",
+          "id": "import-form",
+          "mutation": "importCsv",
+          "submitLabel": "Upload & Preview",
+          "sections": [
+            {
+              "title": "CSV Import",
+              "description": "Upload a CSV file with student data. Required columns: Student ID, Grade, Last Name, First Name",
+              "fields": [
+                { "key": "csvfile", "type": "file", "label": "CSV File", "required": true, "accept": ".csv" },
+                { "key": "import_mode", "type": "select", "label": "Import Mode", "required": true, "options": [
+                  { "value": "append", "label": "Append — Add new students only" },
+                  { "value": "rewrite", "label": "Rewrite — Update existing, add new" },
+                  { "value": "ignore", "label": "Ignore — Skip existing students" }
+                ]}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "import-history",
+          "query": "getImportHistory",
+          "columns": [
+            { "key": "filename", "label": "File", "type": "text" },
+            { "key": "import_mode", "label": "Mode", "type": "badge" },
+            { "key": "total_records", "label": "Total", "type": "number" },
+            { "key": "new_records", "label": "New", "type": "number" },
+            { "key": "updated_records", "label": "Updated", "type": "number" },
+            { "key": "status", "label": "Status", "type": "badge", "badgeColor": "success" },
+            { "key": "created_at", "label": "Date", "type": "datetime" }
+          ],
+          "pageSize": 10
+        }
+      ]
+    },
+
+    "export": {
+      "title": "Export Students",
+      "icon": "bi-download",
+      "route": "/export",
+      "access": { "minRole": "importer" },
+      "components": [
+        {
+          "type": "dashboard",
+          "id": "export-options",
+          "quickLinks": [
+            { "label": "Standard CSV", "url": "/api/export/standard", "icon": "bi-filetype-csv", "variant": "primary", "description": "All student fields" },
+            { "label": "Google Workspace CSV", "url": "/api/export/google", "icon": "bi-google", "variant": "success", "description": "Google Admin console format" },
+            { "label": "Print All Cards", "url": "/print-cards", "icon": "bi-printer", "variant": "info", "description": "Printable login cards" }
+          ]
+        }
+      ]
+    }
+  },
+
+  "queries": {
+    "listStudents": {
+      "description": "Search and list students with filtering and pagination",
+      "handler": "StudentQueryHandler::listStudents",
+      "params": ["search", "grade", "graduation_year", "page", "pageSize", "sort", "sortDir"],
+      "cache": false
+    },
+    "getStudent": {
+      "description": "Get a single student by ID",
+      "handler": "StudentQueryHandler::getStudent",
+      "params": ["id"]
+    },
+    "getStats": {
+      "description": "Dashboard statistics",
+      "handler": "StudentQueryHandler::getStats",
+      "cache": 300
+    },
+    "getGrades": {
+      "description": "Get distinct grade options",
+      "handler": "StudentQueryHandler::getGrades",
+      "cache": 3600
+    },
+    "getGraduationYears": {
+      "description": "Get distinct graduation year options",
+      "handler": "StudentQueryHandler::getGraduationYears",
+      "cache": 3600
+    },
+    "getImportHistory": {
+      "description": "Recent import history",
+      "handler": "StudentQueryHandler::getImportHistory",
+      "access": { "minRole": "importer" }
+    }
+  },
+
+  "mutations": {
+    "createStudent": {
+      "description": "Add a new student with auto-generated credentials",
+      "handler": "StudentMutationHandler::createStudent",
+      "access": { "minRole": "editor" },
+      "audit": true
+    },
+    "updateStudent": {
+      "description": "Update student record",
+      "handler": "StudentMutationHandler::updateStudent",
+      "access": { "minRole": "editor" },
+      "audit": true
+    },
+    "resetPassword": {
+      "description": "Reset student password to generated default",
+      "handler": "StudentMutationHandler::resetPassword",
+      "access": { "minRole": "editor" },
+      "audit": true
+    },
+    "bulkDelete": {
+      "description": "Delete selected students",
+      "handler": "StudentMutationHandler::bulkDelete",
+      "access": { "minRole": "editor" },
+      "audit": true,
+      "confirm": true
+    },
+    "importCsv": {
+      "description": "Import students from CSV file",
+      "handler": "StudentMutationHandler::importCsv",
+      "access": { "minRole": "importer" },
+      "audit": true
+    },
+    "printCards": {
+      "description": "Generate printable login cards",
+      "handler": "StudentMutationHandler::printCards"
+    }
+  },
+
+  "policies": {
+    "fieldVisibility": {
+      "password": {
+        "default": "masked",
+        "reveal": {
+          "minRole": "viewer",
+          "audit": true,
+          "rateLimit": "20/hour"
+        }
+      }
+    },
+    "rateLimits": {
+      "query": "60/minute",
+      "mutation": "30/minute",
+      "export": "5/hour",
+      "import": "3/hour"
+    }
+  }
+}
