@@ -27,6 +27,46 @@ class SettingsController extends Controller
     }
 
     /**
+     * Display general settings tab.
+     */
+    public function general(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'general');
+    }
+
+    /**
+     * Display authentication settings tab.
+     */
+    public function auth(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'auth');
+    }
+
+    /**
+     * Display modules settings tab.
+     */
+    public function modules(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'modules');
+    }
+
+    /**
+     * Display theme settings tab.
+     */
+    public function theme(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'theme');
+    }
+
+    /**
+     * Display layout settings tab.
+     */
+    public function layout(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'layout');
+    }
+
+    /**
      * Get all site settings.
      */
     public function get(Request $request): JsonResponse

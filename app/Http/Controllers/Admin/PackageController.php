@@ -25,6 +25,44 @@ class PackageController extends Controller
     }
 
     /**
+     * Display available packages.
+     */
+    public function available(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'available');
+    }
+
+    /**
+     * Display installed packages.
+     */
+    public function installed(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'installed');
+    }
+
+    /**
+     * Display package updates.
+     */
+    public function updates(Request $request)
+    {
+        return $this->index($request)->with('activeTab', 'updates');
+    }
+
+    /**
+     * Display configuration for a specific package.
+     */
+    public function configurePackage(Request $request, string $packageId)
+    {
+        $currentUser = $request->attributes->get('user');
+        $isSuperAdmin = ($currentUser['role'] === 'super_admin');
+
+        return view('admin.packages-configure', [
+            'isSuperAdmin' => $isSuperAdmin,
+            'packageId' => $packageId
+        ]);
+    }
+
+    /**
      * Display package configuration interface.
      */
     public function configure(Request $request)
