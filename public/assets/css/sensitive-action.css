@@ -1,0 +1,262 @@
+/**
+ * Sensitive Action Modal Styles
+ *
+ * Styles for the reason-modal and countdown-timer UI components
+ * used by the sensitive action (reveal) pattern.
+ */
+
+/* Modal overlay */
+.sa-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: sa-fadeIn 0.15s ease-out;
+}
+
+@keyframes sa-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Modal container */
+.sa-modal {
+    background: var(--hub-surface, #fff);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 420px;
+    max-width: 90vw;
+    overflow: hidden;
+    animation: sa-slideUp 0.2s ease-out;
+}
+
+@keyframes sa-slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Modal header */
+.sa-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--hub-border, #e0e0e0);
+}
+
+.sa-modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--hub-text, #1a1a1a);
+}
+
+.sa-header-active {
+    background: linear-gradient(135deg, #e8f0fe, #fff);
+}
+
+.sa-icon-shield, .sa-icon-timer {
+    color: var(--hub-primary, #1a73e8);
+    flex-shrink: 0;
+}
+
+/* Modal body */
+.sa-modal-body {
+    padding: 20px 24px;
+}
+
+.sa-modal-body p {
+    margin: 0 0 16px;
+    color: var(--hub-text-secondary, #555);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.sa-modal-body label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: var(--hub-text, #1a1a1a);
+}
+
+.sa-required {
+    color: #d32f2f;
+}
+
+.sa-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--hub-border, #dadce0);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+    min-height: 70px;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+    background: var(--hub-surface, #fff);
+    color: var(--hub-text, #1a1a1a);
+}
+
+.sa-textarea:focus {
+    outline: none;
+    border-color: var(--hub-primary, #1a73e8);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
+}
+
+.sa-hint {
+    font-size: 0.8rem !important;
+    color: var(--hub-text-muted, #888) !important;
+    margin-top: 8px !important;
+}
+
+/* Modal footer */
+.sa-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--hub-border, #e0e0e0);
+    background: var(--hub-surface-alt, #f8f9fa);
+}
+
+/* Buttons */
+.sa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.sa-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sa-btn-cancel {
+    background: transparent;
+    color: var(--hub-text-secondary, #555);
+    border: 1px solid var(--hub-border, #dadce0);
+}
+
+.sa-btn-cancel:hover {
+    background: var(--hub-surface-hover, #f0f0f0);
+}
+
+.sa-btn-confirm {
+    background: var(--hub-primary, #1a73e8);
+    color: #fff;
+}
+
+.sa-btn-confirm:hover:not(:disabled) {
+    background: var(--hub-primary-dark, #1557b0);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.sa-btn-reveal {
+    background: #2e7d32;
+    color: #fff;
+}
+
+.sa-btn-reveal:hover {
+    background: #1b5e20;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+/* Countdown specific */
+.sa-countdown-body {
+    text-align: center;
+    padding: 24px;
+}
+
+.sa-countdown-ring {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.sa-countdown-number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--hub-primary, #1a73e8);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s;
+}
+
+.sa-ring-progress {
+    transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+}
+
+.sa-countdown-label {
+    font-size: 0.95rem !important;
+    color: var(--hub-text, #1a1a1a) !important;
+}
+
+.sa-countdown-hint {
+    font-size: 0.8rem !important;
+    color: var(--hub-text-muted, #888) !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .sa-modal {
+        background: #1e1e1e;
+    }
+
+    .sa-modal-header {
+        border-color: #333;
+    }
+
+    .sa-modal-header h3 {
+        color: #e0e0e0;
+    }
+
+    .sa-header-active {
+        background: linear-gradient(135deg, #1a2a3a, #1e1e1e);
+    }
+
+    .sa-modal-body label {
+        color: #e0e0e0;
+    }
+
+    .sa-textarea {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    .sa-modal-footer {
+        border-color: #333;
+        background: #252525;
+    }
+
+    .sa-btn-cancel {
+        color: #aaa;
+        border-color: #444;
+    }
+
+    .sa-btn-cancel:hover {
+        background: #333;
+    }
+
+    .sa-ring-bg {
+        stroke: #333 !important;
+    }
+}
