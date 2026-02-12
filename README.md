@@ -46,12 +46,16 @@ A modular, secure web application platform for managing school district operatio
   - Module-level permissions
   - Role cascading and dependencies
 
-- **📦 Modular Architecture**
-  - Vehicle Maintenance & Fuel Travel
-  - Bullying Report System
-  - Substitute Request Management
-  - Travel Reimbursement
-  - Easy to add new modules
+- **📦 Package System (Layer 3)**
+  - JSON-driven `.hubpkg` packages — no custom templates needed
+  - Component renderers: Dashboard, Table, Filters, Detail, Form
+  - Responsive column visibility (`hide-mobile`, `hide-tablet`) per package
+  - Icon mapping (Lucide → FontAwesome) with 80+ built-in mappings
+  - Masked fields (passwords/SSNs) with show/hide toggle
+  - Grade-aware badge coloring, sortable columns, pagination
+  - Bulk actions, row actions, mutation confirmation modals
+  - RBAC policy engine with role hierarchy enforcement
+  - See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full schema reference
 
 - **🎨 Complete Theme System**
   - 45+ customizable color settings
@@ -169,10 +173,16 @@ sudo certbot --apache -d hub.example.com
 - **[docs/ADVANCED_USER_FILTERING.md](docs/ADVANCED_USER_FILTERING.md)** - User management filters
 
 ### Developer Resources
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Package JSON schema, icons, responsive rules, component reference
 - **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - AI development guidelines
 - **[database/schema.sql](database/schema.sql)** - Core database schema
 - **[database/modules-schema.sql](database/modules-schema.sql)** - Module schema
 - **[database/sections-schema.sql](database/sections-schema.sql)** - Sections schema
+
+### Package System
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Complete guide to building `.hubpkg` packages
+- **[PACKAGE_ARCHITECTURE_SPEC.md](PACKAGE_ARCHITECTURE_SPEC.md)** - Deep architecture spec
+- **[src/Package/IconMapper.php](src/Package/IconMapper.php)** - Lucide → FontAwesome icon mapping reference
 
 ## 🎯 Usage
 
@@ -233,22 +243,51 @@ thehub/
 │   └── migrations/       # Database migrations
 ├── docs/                 # Documentation
 ├── logs/                 # Application logs
+├── packages/             # .hubpkg package sources
+│   └── [category]/
+│       └── [package-id]/
+│           ├── package.json          # Package manifest (schema, pages, components)
+│           ├── *Handler.php          # Data query/mutation handlers
+│           └── README.md
 ├── public/               # Web root
 │   ├── index.php
 │   ├── login.php
+│   ├── hub.php           # Hub landing (section cards)
+│   ├── p/index.php       # Package page renderer (routes /p/*)
 │   ├── admin/
 │   ├── api/
 │   ├── assets/
+│   │   ├── css/
+│   │   │   ├── package-components.css  # Table, form, filter, dashboard styles
+│   │   │   └── hub/                    # Hub landing page styles
+│   │   └── js/
+│   │       ├── package-table.js        # Table sort, filter, pagination, masked toggle
+│   │       └── package-dashboard.js    # Dashboard chart rendering
 │   ├── modules/
 │   └── ...
 ├── sessions/             # PHP sessions
 ├── src/                  # PHP classes (PSR-4: Hub\*)
 │   ├── Auth.php
 │   ├── Database.php
+│   ├── Helpers.php
 │   ├── User.php
 │   ├── Module.php
 │   ├── Theme.php
-│   └── ...
+│   └── Package/          # Package rendering engine
+│       ├── PageRouter.php            # Routes /p/* requests to components
+│       ├── ComponentRegistry.php     # Maps component types to renderers
+│       ├── IconMapper.php            # Lucide → FontAwesome mapping (80+ icons)
+│       ├── PolicyEngine.php          # RBAC enforcement
+│       ├── Contracts/
+│       │   └── ComponentRendererInterface.php
+│       ├── Renderers/
+│       │   ├── DashboardRenderer.php # KPI cards grid
+│       │   ├── TableRenderer.php     # Data tables with responsive columns
+│       │   ├── FilterRenderer.php    # Search & filter bars
+│       │   ├── DetailRenderer.php    # Record detail views
+│       │   └── FormRenderer.php      # Create/edit forms
+│       └── [PackageName]/
+│           └── *Handler.php          # Per-package data handlers
 ├── temp/                 # Temporary files
 └── uploads/              # User uploads
 ```
@@ -359,4 +398,4 @@ Developed for educational institutions to streamline operations and improve effi
 ---
 
 **Version**: 2.0
-**Last Updated**: October 2025
+**Last Updated**: February 2026
