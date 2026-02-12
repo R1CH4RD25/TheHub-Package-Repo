@@ -166,6 +166,10 @@
                                     "confirm": "Are you sure you want to delete the selected students?"
                                 }
                             ],
+                            "defaultSort": {
+                                "column": "grade",
+                                "direction": "asc"
+                            },
                             "pagination": {
                                 "perPage": 50,
                                 "pageSizes": [
