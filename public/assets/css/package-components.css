@@ -621,6 +621,305 @@ a.pkg-dashboard-card:hover {
 }
 
 /* ========================================
+   DASHBOARD: TREND INDICATORS
+   ======================================== */
+.pkg-card-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+}
+
+.pkg-trend-positive {
+    color: #059669;
+    background: #ecfdf5;
+}
+
+.pkg-trend-negative {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+/* ========================================
+   DASHBOARD: CHARTS (Chart.js)
+   ======================================== */
+.pkg-dashboard-charts {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.pkg-chart-container {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.pkg-chart-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem;
+}
+
+.pkg-chart-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.pkg-chart-wrapper canvas {
+    width: 100% !important;
+}
+
+/* ========================================
+   DASHBOARD: ACTION QUEUES
+   ======================================== */
+.pkg-dashboard-queues {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.pkg-action-queue {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.pkg-queue-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.pkg-queue-empty {
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.pkg-queue-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pkg-queue-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid #f9fafb;
+}
+
+.pkg-queue-item:last-child {
+    border-bottom: none;
+}
+
+.pkg-queue-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.pkg-queue-item-left i {
+    color: #6b7280;
+}
+
+.pkg-queue-item-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pkg-queue-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 12px;
+}
+
+/* ========================================
+   DASHBOARD: QUICK LINKS
+   ======================================== */
+.pkg-quick-links {
+    margin-top: 1.5rem;
+}
+
+.pkg-quick-links-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem;
+}
+
+.pkg-quick-links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pkg-quick-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    font-size: 0.85rem;
+    min-width: 100px;
+}
+
+.pkg-quick-link i {
+    font-size: 1.25rem;
+}
+
+.pkg-quick-link-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    font-weight: 400;
+    margin-top: 0.125rem;
+}
+
+/* ========================================
+   TOAST CONTAINER
+   ======================================== */
+.pkg-toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 400px;
+}
+
+.pkg-toast-container .pkg-toast {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pkg-toast-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 0 0 0.5rem;
+    line-height: 1;
+}
+
+.pkg-toast-close:hover {
+    color: #fff;
+}
+
+.pkg-toast-fade {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.pkg-toast-warning {
+    background: #d97706;
+}
+
+/* ========================================
+   EXPORT BUTTON STYLES
+   ======================================== */
+.pkg-export-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.pkg-export-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+    z-index: 100;
+    padding: 0.25rem 0;
+    display: none;
+}
+
+.pkg-export-dropdown.open .pkg-export-menu {
+    display: block;
+}
+
+.pkg-export-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.pkg-export-option:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.pkg-export-option i {
+    color: #6b7280;
+    width: 18px;
+    text-align: center;
+}
+
+/* ========================================
+   FORM LOADING OVERLAY
+   ======================================== */
+.pkg-form-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.pkg-form-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.4);
+    z-index: 10;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+/* ========================================
    MUTATION/ACTION MODAL
    ======================================== */
 .pkg-mutation-modal {

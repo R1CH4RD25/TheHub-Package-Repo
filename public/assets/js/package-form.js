@@ -124,16 +124,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('mutation', config.mutation);
                 body = formData;
             } else {
-                body = JSON.stringify(Object.assign({}, input, {
-                    package: config.packageId,
-                    mutation: config.mutation,
-                    csrf_token: config.csrf,
-                }));
+                body = JSON.stringify({
+                    packageId: config.packageId,
+                    mutationName: config.mutation,
+                    input: input,
+                    csrfToken: config.csrfToken || config.csrf,
+                });
                 headers['Content-Type'] = 'application/json';
-                headers['X-CSRF-TOKEN'] = config.csrf;
+                headers['X-Requested-With'] = 'XMLHttpRequest';
             }
 
-            fetch('/api/package.php?action=mutation', {
+            // Use new Sprint 3 mutation endpoint with fallback
+            var mutationUrl = hasFiles
+                ? '/api/package.php?action=mutation'
+                : '/api/package-mutation.php';
+
+            fetch(mutationUrl, {
                 method: 'POST',
                 headers: headers,
                 body: body,
