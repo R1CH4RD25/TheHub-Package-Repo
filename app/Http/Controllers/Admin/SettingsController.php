@@ -12,7 +12,7 @@ class SettingsController extends Controller
     /**
      * Display site settings interface.
      */
-    public function index(Request $request)
+    public function index(Request $request, string $activeTab = 'general')
     {
         $currentUser = $request->attributes->get('user');
         $isSuperAdmin = ($currentUser['role'] === 'super_admin');
@@ -22,7 +22,8 @@ class SettingsController extends Controller
         }
 
         return view('admin.settings', [
-            'isSuperAdmin' => $isSuperAdmin
+            'isSuperAdmin' => $isSuperAdmin,
+            'activeTab' => $activeTab,
         ]);
     }
 
@@ -31,7 +32,7 @@ class SettingsController extends Controller
      */
     public function general(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'general');
+        return $this->index($request, 'general');
     }
 
     /**
@@ -39,7 +40,7 @@ class SettingsController extends Controller
      */
     public function auth(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'auth');
+        return $this->index($request, 'auth');
     }
 
     /**
@@ -47,7 +48,7 @@ class SettingsController extends Controller
      */
     public function modules(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'modules');
+        return $this->index($request, 'modules');
     }
 
     /**
@@ -55,7 +56,7 @@ class SettingsController extends Controller
      */
     public function theme(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'theme');
+        return $this->index($request, 'theme');
     }
 
     /**
@@ -63,7 +64,7 @@ class SettingsController extends Controller
      */
     public function layout(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'layout');
+        return $this->index($request, 'layout');
     }
 
     /**

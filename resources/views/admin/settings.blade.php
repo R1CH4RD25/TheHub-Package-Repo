@@ -3,8 +3,22 @@
 @section('title', 'Site Settings')
 
 @section('content')
-<div class="admin-tab active">
-    <div class="tab-header">
+@php
+    $activeTab = $activeTab ?? 'general';
+    // Map sidebar routes to existing subtab IDs
+    // general, theme, layout → appearance subtab
+    // auth, modules → behavior subtab
+    $subtabMap = [
+        'general' => 'appearance',
+        'auth' => 'behavior',
+        'modules' => 'behavior',
+        'theme' => 'appearance',
+        'layout' => 'appearance',
+    ];
+    $activeSubtab = $subtabMap[$activeTab] ?? 'appearance';
+@endphp
+<div class="admin-main-content">
+    <div class="content-header">
         <div>
             <h1><i class="fas fa-cog"></i> Site Settings</h1>
             <p class="text-muted">Configure branding, colors, and site-wide preferences</p>
@@ -17,17 +31,12 @@
         </div>
     </div>
 
-    <div class="tab-content-scroll">
-        <!-- Settings Sub-tabs - CONDENSED TO 3 -->
-        <div class="user-subtabs">
-            <button class="subtab-btn active" data-subtab="appearance">Appearance</button>
-            <button class="subtab-btn" data-subtab="behavior">Behavior & Access</button>
-            <button class="subtab-btn" data-subtab="system">System</button>
-        </div>
+    <div class="content-body">
+        <!-- Navigation now in sidebar - tabs removed per Google Admin refactor -->
 
         <div class="site-settings-container">
             <!-- APPEARANCE TAB -->
-            <div id="subtab-appearance" class="user-subtab active">
+            <div id="subtab-appearance" class="user-subtab {{ $activeSubtab === 'appearance' ? 'active' : '' }}" style="{{ $activeSubtab === 'appearance' ? '' : 'display:none;' }}">
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
                     Customize the look and feel of your application. Click sections to expand.
                 </p>
@@ -566,7 +575,7 @@
             </div> <!-- Close #subtab-appearance -->
 
             <!-- BEHAVIOR & ACCESS TAB -->
-            <div id="subtab-behavior" class="user-subtab">
+            <div id="subtab-behavior" class="user-subtab {{ $activeSubtab === 'behavior' ? 'active' : '' }}" style="{{ $activeSubtab === 'behavior' ? '' : 'display:none;' }}">
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
                     Configure navigation behavior and access controls.
                 </p>
@@ -780,7 +789,7 @@
             </div>
 
             <!-- SYSTEM TAB -->
-            <div id="subtab-system" class="user-subtab">
+            <div id="subtab-system" class="user-subtab {{ $activeSubtab === 'system' ? 'active' : '' }}" style="{{ $activeSubtab === 'system' ? '' : 'display:none;' }}">
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
                     Configure system-level settings and security options.
                 </p>
@@ -872,8 +881,8 @@
                 </div>
             </div> <!-- Close #subtab-system -->
         </div> <!-- Close .site-settings-container -->
-    </div> <!-- Close .tab-content-scroll -->
-</div> <!-- Close .admin-tab -->
+    </div> <!-- Close .content-body -->
+</div> <!-- Close .admin-main-content -->
 
 @push('styles')
 <style nonce="<?php echo CSP_NONCE; ?>">
@@ -1204,84 +1213,13 @@ function updateManagementIconPreview(iconClass) {
 
 // Section toggle - bind event listeners instead of inline onclick
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('═══════════════════════════════════════════════════');
-    console.log('🚀 SETTINGS PAGE DEBUG - DOM STRUCTURE CHECK');
-    console.log('═══════════════════════════════════════════════════');
-    
-    // Check container structure
-    const container = document.querySelector('.site-settings-container');
-    console.log('📦 .site-settings-container found:', !!container);
-    if (container) {
-        console.log('   Children:', container.children.length);
-        Array.from(container.children).forEach((child, i) => {
-            console.log(`   Child ${i}:`, child.tagName, child.id, child.className);
-        });
-    }
-    
-    // Check all user-subtab elements
-    const allSubtabs = document.querySelectorAll('.user-subtab');
-    console.log('\n🔍 Found .user-subtab elements:', allSubtabs.length);
-    allSubtabs.forEach((tab, i) => {
-        const sectionsInside = tab.querySelectorAll('.settings-section');
-        console.log(`   Tab ${i}: #${tab.id}`, {
-            classes: tab.className,
-            hasActive: tab.classList.contains('active'),
-            sectionsInside: sectionsInside.length,
-            parent: tab.parentElement?.className
-        });
-    });
-    
-    // Check subtab buttons
-    const buttons = document.querySelectorAll('.subtab-btn');
-    console.log('\n🔘 Found .subtab-btn elements:', buttons.length);
-    buttons.forEach((btn, i) => {
-        console.log(`   Button ${i}:`, btn.getAttribute('data-subtab'), {
-            hasActive: btn.classList.contains('active'),
-            text: btn.textContent.trim()
-        });
-    });
-    
-    console.log('═══════════════════════════════════════════════════\n');
-    
-    // CSS Version Debug
-    const links = document.querySelectorAll('link[rel="stylesheet"]');
-    console.log('🎨 DEBUG: CSS files loaded:');
-    links.forEach(link => {
-        const url = new URL(link.href);
-        console.log(`  ${url.pathname}${url.search}`);
-    });
 
-    // Accordion toggles
-    const allSectionHeaders = document.querySelectorAll('.settings-section-header');
-    console.log('🔧 Setting up accordion toggles for', allSectionHeaders.length, 'headers');
-    
-    document.querySelectorAll('.settings-section-header').forEach((header, index) => {
+    // Accordion toggles for settings sections
+    document.querySelectorAll('.settings-section-header').forEach((header) => {
         header.addEventListener('click', () => {
-            const wasActive = header.classList.contains('active');
             const body = header.nextElementSibling;
-            const wasCollapsed = body?.classList.contains('collapsed');
-            const headerText = header.textContent.trim().replace(/\s+/g, ' ').substring(0, 30);
-            
-            console.log(`🔧 ACCORDION CLICK ${index}: "${headerText}"`);
-            console.log(`   Before: header.active=${wasActive}, body.collapsed=${wasCollapsed}`);
-            
             header.classList.toggle('active');
             body?.classList.toggle('collapsed');
-            
-            const nowActive = header.classList.contains('active');
-            const nowCollapsed = body?.classList.contains('collapsed');
-            console.log(`   After: header.active=${nowActive}, body.collapsed=${nowCollapsed}`);
-            
-            if (body) {
-                const bodyStyleImmediate = window.getComputedStyle(body);
-                console.log(`   Body IMMEDIATE: maxHeight=${bodyStyleImmediate.maxHeight}, height=${bodyStyleImmediate.height}`);
-                
-                // Check again after transition completes (350ms)
-                setTimeout(() => {
-                    const bodyStyleFinal = window.getComputedStyle(body);
-                    console.log(`   Body AFTER TRANSITION: maxHeight=${bodyStyleFinal.maxHeight}, height=${bodyStyleFinal.height}`);
-                }, 350);
-            }
         });
     });
 
@@ -1290,154 +1228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoInput = document.getElementById('logoUpload');
     if (logoBtn && logoInput) {
         logoBtn.addEventListener('click', () => logoInput.click());
-    }
-
-    // Subtab switching with DEBUG
-    const subtabButtons = document.querySelectorAll('.subtab-btn');
-    console.log('🔍 DEBUG: Found subtab buttons:', subtabButtons.length);
-
-    subtabButtons.forEach((btn, index) => {
-        console.log(`🔍 DEBUG: Button ${index}:`, btn.getAttribute('data-subtab'), btn.classList.contains('active'));
-
-        btn.addEventListener('click', function() {
-            const subtab = this.getAttribute('data-subtab');
-            console.log('🔵 DEBUG: Clicked tab:', subtab);
-
-            // Remove active from all buttons
-            subtabButtons.forEach(b => {
-                b.classList.remove('active');
-                console.log(`  ❌ Removed active from button:`, b.getAttribute('data-subtab'));
-            });
-
-            // Add active to clicked button
-            this.classList.add('active');
-            console.log(`  ✅ Added active to button:`, subtab);
-
-            // Remove active from all tab content
-            const allTabs = document.querySelectorAll('.user-subtab');
-            console.log('🔍 DEBUG: Found tab contents:', allTabs.length);
-            allTabs.forEach(s => {
-                s.classList.remove('active');
-                console.log(`  ❌ Removed active from content:`, s.id);
-            });
-
-            // Add active to target tab content
-            const targetTab = document.getElementById(`subtab-${subtab}`);
-            console.log('🔍 DEBUG: Target tab element:', targetTab);
-            if (targetTab) {
-                targetTab.classList.add('active');
-                console.log(`  ✅ Added active to content:`, targetTab.id);
-
-                // Check computed styles
-                const computedStyle = window.getComputedStyle(targetTab);
-                console.log('📊 DEBUG: Computed display:', computedStyle.display);
-                console.log('📊 DEBUG: Computed visibility:', computedStyle.visibility);
-                console.log('📊 DEBUG: Computed opacity:', computedStyle.opacity);
-                console.log('📊 DEBUG: Computed height:', computedStyle.height);
-
-                // Check if content actually exists inside
-                const contentSections = targetTab.querySelectorAll('.settings-section');
-                console.log('📦 DEBUG: Sections inside tab:', contentSections.length);
-                contentSections.forEach((section, i) => {
-                    const header = section.querySelector('.settings-section-header');
-                    const body = section.querySelector('.settings-section-body');
-                    const headerText = header ? header.textContent.trim().replace(/\s+/g, ' ').substring(0, 40) : 'none';
-                    console.log(`  📦 Section ${i}: ${headerText}`, {
-                        bodyExists: !!body,
-                        bodyCollapsed: body?.classList.contains('collapsed'),
-                        bodyDisplay: body ? window.getComputedStyle(body).display : 'none',
-                        bodyHeight: body ? window.getComputedStyle(body).height : 'none',
-                        bodyMaxHeight: body ? window.getComputedStyle(body).maxHeight : 'none'
-                    });
-                });
-
-                // Check tab position and visibility
-                const rect = targetTab.getBoundingClientRect();
-                console.log('📐 DEBUG: Tab position:', {
-                    top: rect.top,
-                    left: rect.left,
-                    width: rect.width,
-                    height: rect.height,
-                    bottom: rect.bottom,
-                    isInViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth
-                });
-
-                // Check ALL computed styles on tab
-                const tabStyle = window.getComputedStyle(targetTab);
-                console.log('🎨 DEBUG: Tab computed styles:', {
-                    display: tabStyle.display,
-                    position: tabStyle.position,
-                    width: tabStyle.width,
-                    height: tabStyle.height,
-                    minHeight: tabStyle.minHeight,
-                    maxHeight: tabStyle.maxHeight,
-                    flex: tabStyle.flex,
-                    flexBasis: tabStyle.flexBasis,
-                    flexGrow: tabStyle.flexGrow,
-                    flexShrink: tabStyle.flexShrink
-                });
-
-                // Check first child (p tag) dimensions
-                const firstChild = targetTab.firstElementChild;
-                if (firstChild) {
-                    const childRect = firstChild.getBoundingClientRect();
-                    const childStyle = window.getComputedStyle(firstChild);
-                    console.log('📏 DEBUG: First child element:', {
-                        tagName: firstChild.tagName,
-                        rect: { width: childRect.width, height: childRect.height },
-                        display: childStyle.display,
-                        width: childStyle.width,
-                        height: childStyle.height
-                    });
-                }
-
-                // Check first .settings-section
-                const firstSection = targetTab.querySelector('.settings-section');
-                if (firstSection) {
-                    const sectionRect = firstSection.getBoundingClientRect();
-                    const sectionStyle = window.getComputedStyle(firstSection);
-                    console.log('📦 DEBUG: First .settings-section:', {
-                        rect: { width: sectionRect.width, height: sectionRect.height },
-                        display: sectionStyle.display,
-                        width: sectionStyle.width,
-                        height: sectionStyle.height,
-                        overflow: sectionStyle.overflow
-                    });
-                }
-
-                // Check parent container
-                const container = targetTab.closest('.site-settings-container');
-                if (container) {
-                    const containerStyle = window.getComputedStyle(container);
-                    const containerRect = container.getBoundingClientRect();
-                    console.log('📦 DEBUG: Container .site-settings-container:', {
-                        display: containerStyle.display,
-                        height: containerStyle.height,
-                        maxHeight: containerStyle.maxHeight,
-                        overflow: containerStyle.overflow,
-                        position: containerStyle.position,
-                        rect: { width: containerRect.width, height: containerRect.height }
-                    });
-                }
-            } else {
-                console.error('❌ ERROR: Target tab not found:', `subtab-${subtab}`);
-            }
-        });
-    });
-
-    // Ensure default active subtab content is visible
-    const initialActiveBtn = document.querySelector('.subtab-btn.active') || subtabButtons[0];
-    console.log('🔍 DEBUG: Initial active button:', initialActiveBtn?.getAttribute('data-subtab'));
-    if (initialActiveBtn) {
-        const subtab = initialActiveBtn.getAttribute('data-subtab');
-        const initialTab = document.getElementById(`subtab-${subtab}`);
-        console.log('🔍 DEBUG: Initial tab element:', initialTab);
-        if (initialTab) {
-            initialTab.classList.add('active');
-            console.log('✅ DEBUG: Set initial tab active:', subtab);
-            const computedStyle = window.getComputedStyle(initialTab);
-            console.log('📊 DEBUG: Initial display:', computedStyle.display);
-        }
     }
 });
 

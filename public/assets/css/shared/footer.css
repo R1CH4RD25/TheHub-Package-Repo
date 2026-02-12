@@ -74,14 +74,14 @@ footer.footer,
         min-height: auto;
         height: auto;
     }
-    
+
     .footer-content {
         flex-direction: column;
         gap: 0.25rem;
         text-align: center;
         padding: 0.5rem 0;
     }
-    
+
     .footer-left,
     .footer-right {
         gap: 0.5rem;
@@ -94,11 +94,11 @@ footer.footer,
     .admin-footer {
         font-size: 0.7rem;
     }
-    
+
     .footer-separator {
         display: none;
     }
-    
+
     .footer-left,
     .footer-right {
         flex-direction: column;

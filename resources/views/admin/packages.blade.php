@@ -3,8 +3,18 @@
 @section('title', 'Package Management')
 
 @section('content')
-<div class="admin-tab active">
-    <div class="tab-header">
+@php
+    $activeTab = $activeTab ?? 'available';
+    // Map route activeTab to subtab IDs
+    $subtabMap = [
+        'available' => 'available-packages',
+        'installed' => 'installed-packages',
+        'updates' => 'package-updates',
+    ];
+    $activeSubtab = $subtabMap[$activeTab] ?? 'available-packages';
+@endphp
+<div class="admin-main-content">
+    <div class="content-header">
         <div>
             <h1><i class="fas fa-box"></i> Package Management</h1>
             <p class="text-muted">Install and manage section packages</p>
@@ -16,24 +26,11 @@
         @endif
     </div>
 
-    <div class="tab-content-scroll">
-        <!-- Package Sub-tabs -->
-        <div class="user-subtabs">
-            <button class="subtab-btn active" data-subtab="installed-packages">
-                <i class="fas fa-check-circle"></i> Installed Packages
-            </button>
-            @if($isSuperAdmin)
-                <button class="subtab-btn" data-subtab="available-packages">
-                    <i class="fas fa-cloud-download-alt"></i> Available Packages
-                </button>
-                <button class="subtab-btn" data-subtab="package-updates">
-                    <i class="fas fa-arrow-circle-up"></i> Updates
-                </button>
-            @endif
-        </div>
+    <div class="content-body">
+        <!-- Navigation now in sidebar - tabs removed per Google Admin refactor -->
 
         <!-- Installed Packages Subtab -->
-        <div id="subtab-installed-packages" class="user-subtab active">
+        <div id="subtab-installed-packages" class="user-subtab {{ $activeSubtab === 'installed-packages' ? 'active' : '' }}" style="{{ $activeSubtab === 'installed-packages' ? '' : 'display:none;' }}">
             <p class="info-text">
                 <strong>📦 Installed Packages:</strong> Manage your installed section packages.
                 You can upgrade, downgrade, or uninstall packages from here.
@@ -45,7 +42,7 @@
 
         <!-- Available Packages Subtab (Super Admin Only) -->
         @if($isSuperAdmin)
-            <div id="subtab-available-packages" class="user-subtab">
+            <div id="subtab-available-packages" class="user-subtab {{ $activeSubtab === 'available-packages' ? 'active' : '' }}" style="{{ $activeSubtab === 'available-packages' ? '' : 'display:none;' }}">
                 <p class="info-text">
                     <strong>🆕 Available Packages:</strong> Upload and review new packages before installation.
                     All packages are validated for compatibility before they can be installed.
@@ -90,7 +87,7 @@
             </div>
 
             <!-- Package Updates Subtab -->
-            <div id="subtab-package-updates" class="user-subtab">
+            <div id="subtab-package-updates" class="user-subtab {{ $activeSubtab === 'package-updates' ? 'active' : '' }}" style="{{ $activeSubtab === 'package-updates' ? '' : 'display:none;' }}">
                 <p class="info-text">
                     <strong>🔄 Available Updates:</strong> Keep your packages up-to-date with the latest features and security fixes.
                 </p>
@@ -99,8 +96,8 @@
                 </div>
             </div>
         @endif
-    </div>
-</div>
+    </div> <!-- Close .content-body -->
+</div> <!-- Close .admin-main-content -->
 
 @push('scripts')
 <script src="{{ asset('assets/js/debug-helper.js') }}"></script>
@@ -108,20 +105,11 @@
 <script>
 const csrfToken = '{{ csrf_token() }}';
 const isSuperAdmin = {{ $isSuperAdmin ? 'true' : 'false' }};
+const activeSubtab = '{{ $activeSubtab }}';
 
-// Subtab switching
-document.querySelectorAll('.subtab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const subtab = this.getAttribute('data-subtab');
-
-        document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-
-        document.querySelectorAll('.user-subtab').forEach(s => s.classList.remove('active'));
-        document.getElementById(`subtab-${subtab}`).classList.add('active');
-
-        loadSubtabData(subtab);
-    });
+// Load data for the active subtab on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadSubtabData(activeSubtab);
 });
 
 function loadSubtabData(subtab) {
@@ -1121,13 +1109,9 @@ async function downloadQueuedPackages() {
         await loadAvailablePackages();
         debugLog('SUCCESS', '✅ Available packages refreshed');
 
-        // Switch to Available Packages tab (this will close repository if open)
-        debugLog('UI', '📑 Switching to Available Packages tab');
-        const availablePackagesBtn = document.querySelector('.subtab-btn[data-subtab="available-packages"]');
-        if (availablePackagesBtn) {
-            availablePackagesBtn.click();
-            debugLog('UI', '✅ Tab switch triggered - repository panel closed');
-        }
+        // Switch to Available Packages page
+        debugLog('UI', '📑 Redirecting to Available Packages');
+        window.location.href = '/admin/packages/available';
 
         // Close verification modal
         updateVerificationStatus(verifyModal, 'Complete!', true);

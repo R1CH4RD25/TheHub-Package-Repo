@@ -14,13 +14,14 @@ class PackageController extends Controller
     /**
      * Display package management interface.
      */
-    public function index(Request $request)
+    public function index(Request $request, string $activeTab = 'available')
     {
         $currentUser = $request->attributes->get('user');
         $isSuperAdmin = ($currentUser['role'] === 'super_admin');
 
         return view('admin.packages', [
-            'isSuperAdmin' => $isSuperAdmin
+            'isSuperAdmin' => $isSuperAdmin,
+            'activeTab' => $activeTab,
         ]);
     }
 
@@ -29,7 +30,7 @@ class PackageController extends Controller
      */
     public function available(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'available');
+        return $this->index($request, 'available');
     }
 
     /**
@@ -37,7 +38,7 @@ class PackageController extends Controller
      */
     public function installed(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'installed');
+        return $this->index($request, 'installed');
     }
 
     /**
@@ -45,7 +46,7 @@ class PackageController extends Controller
      */
     public function updates(Request $request)
     {
-        return $this->index($request)->with('activeTab', 'updates');
+        return $this->index($request, 'updates');
     }
 
     /**

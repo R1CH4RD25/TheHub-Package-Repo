@@ -1178,6 +1178,89 @@ html {
     z-index: 1;
 }
 
+/* Main content wrapper (replaces old tab system with sidebar navigation) */
+.admin-main-content {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    padding: var(--space-4);
+    padding-right: var(--space-6, 2rem);
+    height: 100%;
+}
+
+/* Fixed content header - stays at top */
+.admin-main-content .content-header,
+.admin-tab .tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem var(--space-4);
+    margin: calc(var(--space-4) * -1) calc(var(--space-6, 2rem) * -1) 0 calc(var(--space-4) * -1);
+    background: white;
+    border-bottom: 2px solid var(--border-primary, var(--gray-300));
+    flex-shrink: 0;
+    min-height: 60px;
+}
+
+.admin-main-content .content-header h1,
+.admin-tab .tab-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.admin-main-content .content-header h1 i,
+.admin-tab .tab-header h1 i {
+    margin-right: 0.5rem;
+    opacity: 0.7;
+}
+
+.admin-main-content .content-header .text-muted,
+.admin-tab .tab-header .text-muted {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+}
+
+/* Scrollable content body */
+.content-body,
+.tab-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--space-4) 0;
+    background: white;
+    min-width: 0;
+}
+
+/* Legacy tab wrapper - backwards compatibility */
+.admin-tab.active {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    padding: var(--space-4);
+    padding-right: var(--space-6, 2rem);
+    height: 100%;
+}
+
+/* Wider padding on large screens */
+@media (min-width: 1600px) {
+    .content-body,
+    .tab-content-scroll {
+        padding: 2rem 1rem;
+    }
+    .admin-main-content,
+    .admin-tab.active {
+        padding-right: 3rem;
+    }
+}
+
+/* Ensure all direct children respect container width */
+.content-body > *,
+.tab-content-scroll > * {
+    max-width: 100%;
+}
+
 .admin-footer {
     grid-column: 2;
     grid-row: 3;
@@ -2494,14 +2577,14 @@ footer.footer,
         min-height: auto;
         height: auto;
     }
-    
+
     .footer-content {
         flex-direction: column;
         gap: 0.25rem;
         text-align: center;
         padding: 0.5rem 0;
     }
-    
+
     .footer-left,
     .footer-right {
         gap: 0.5rem;
@@ -2514,11 +2597,11 @@ footer.footer,
     .admin-footer {
         font-size: 0.7rem;
     }
-    
+
     .footer-separator {
         display: none;
     }
-    
+
     .footer-left,
     .footer-right {
         flex-direction: column;
