@@ -99,13 +99,35 @@ Each package is self-contained with:
 
 ### Package Format
 
-The Hub packages use the `.hubpkg` format - a JSON-based package format containing:
+The Hub packages use the `.hubpkg` format — a JSON-based manifest (**Schema v3.0.0**) that declaratively defines the entire package UI:
 
-- **Metadata**: Package ID, version, author, dependencies
-- **Field Definitions**: Custom form fields with types and validation rules
-- **Permissions**: Required user roles and capabilities
-- **Menu Items**: Navigation configuration
-- **Compatibility Checks**: System requirements and version constraints
+- **Metadata** (`package`): ID, version, author, icon, category, base URL
+- **Database** (`database`): Connection name, primary table, audit table
+- **Presentation** (`presentation.pages`): Page definitions with route, layout, and component arrays
+- **Components**: Dashboard (KPI cards), Table (data grids), Filters (search bars), Detail (record view), Form (create/edit)
+- **Data** (`data`): Query and mutation handler mappings
+- **Policy** (`policy`): RBAC rules, role hierarchy, permissions
+- **Access** (`access`): Role requirements per page/action
+
+> No custom HTML templates are needed — the rendering engine reads the JSON and builds the UI.
+
+### Icons
+
+Use **Lucide** naming (`lucide-*`) in your JSON for readability. The Hub's `IconMapper` automatically converts them to **FontAwesome 6.5** equivalents at render time (80+ mappings). You can also use `fas fa-*`, `far fa-*`, `fab fa-*`, or `bi bi-*` directly.
+
+Common mappings: `lucide-users` → `fas fa-users`, `lucide-eye` → `fas fa-eye`, `lucide-graduation-cap` → `fas fa-graduation-cap`, `lucide-trash-2` → `fas fa-trash`.
+
+### Responsive Design
+
+Each package controls its own mobile behavior via column-level `responsive` properties:
+
+| Value | Behavior |
+|---|---|
+| *(omitted)* | Always visible |
+| `"hide-mobile"` | Hidden at ≤ 768px |
+| `"hide-tablet"` | Hidden at ≤ 1024px |
+
+Set `"layout": "full"` on a page to use a wide container (1600px) for data-heavy views, or `"standard"` (default, ~1140px) for forms.
 
 ## 📋 Package Specification
 
@@ -117,23 +139,102 @@ All packages follow [Semantic Versioning 2.0.0](https://semver.org/):
 - **MINOR** version: New functionality (backwards-compatible)
 - **PATCH** version: Bug fixes (backwards-compatible)
 
-### Required Fields
+### Schema v3.0.0 Structure
 
 ```json
 {
-  "package_id": "unique-package-id",
-  "display_name": "Human Readable Name",
-  "version": "1.0.0",
-  "author": "Author Name",
-  "description": "Package description",
-  "hub_version_min": "1.0.0",
-  "dependencies": [],
-  "conflicts": [],
-  "fields": [...],
-  "permissions": {...},
-  "menu_items": [...]
+  "schemaVersion": "3.0.0",
+  "package": {
+    "id": "category.package-name",
+    "display_name": "Human Readable Name",
+    "description": "What the package does",
+    "version": "1.0.0",
+    "author": "Author Name",
+    "icon": "lucide-icon-name",
+    "category": "district",
+    "base_url": "/p/category.package-name"
+  },
+  "database": {
+    "connection": "database_name",
+    "primaryTable": "main_table",
+    "auditTable": "audit_log"
+  },
+  "presentation": {
+    "pages": {
+      "index": {
+        "title": "Page Title",
+        "route": "/",
+        "layout": "full",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                { "title": "Total", "dataKey": "total", "icon": "lucide-users", "color": "primary" }
+              ]
+            },
+            "dataQuery": "getStats"
+          },
+          {
+            "type": "filters",
+            "config": {
+              "targetTable": "pkg-table-main",
+              "filters": [
+                { "name": "search", "type": "search", "placeholder": "Search..." },
+                { "name": "status", "type": "select", "label": "Status", "options": [...] }
+              ]
+            }
+          },
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-main",
+              "columns": [
+                { "key": "name",  "label": "Name",  "sortable": true, "width": "25%" },
+                { "key": "grade", "label": "Grade", "style": "badge", "width": "8%" },
+                { "key": "pass",  "label": "Password", "style": "masked", "responsive": "hide-mobile" }
+              ],
+              "actions": [
+                { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/view/{id}", "variant": "warning" }
+              ],
+              "bulkActions": [
+                { "label": "Delete", "mutation": "bulkDelete", "icon": "lucide-trash-2", "variant": "danger", "confirm": "Are you sure?" }
+              ],
+              "pagination": { "perPage": 50 }
+            },
+            "dataQuery": "listRecords"
+          }
+        ]
+      }
+    }
+  },
+  "data": { ... },
+  "policy": { ... },
+  "access": { ... }
 }
 ```
+
+### Column Styles
+
+| Style | Renders As |
+|---|---|
+| `text` | Plain text (default) |
+| `badge` | Colored badge (auto-colors for grade, school, status) |
+| `masked` | Bullet dots with Show/Hide toggle (passwords, SSNs) |
+| `link` | Clickable hyperlink |
+| `date` | Formatted as `Mar 5, 2026` |
+| `datetime` | `Mar 5, 2026 2:30pm` |
+| `currency` | `$1,234.56` |
+| `boolean` | Green check / red X icon |
+
+### Dashboard Card Colors
+
+`primary` (blue), `success` (green), `warning` (amber), `danger` (red), `info` (sky blue)
+
+### Row Action Variants
+
+`primary`, `warning`, `danger`, `info`, `success` — maps to Bootstrap button colors.
 
 ## 🔒 Security & Validation
 
@@ -152,94 +253,120 @@ All packages in this repository have passed The Hub's comprehensive validation s
 
 ## 🛠️ Creating Your Own Package
 
-### Package Structure Template
+### Package Directory Structure
+
+```
+packages/[category]/[package-id]/
+├── package.json                       # Source manifest (schema v3.0.0)
+├── [package-id]_[version].hubpkg      # Distributable copy of package.json
+├── [PackageName]Handler.php           # Data query/mutation handler (optional)
+├── README.md                          # Package documentation
+├── CHANGELOG.md                       # Version history
+├── LICENSE                            # License file
+└── screenshots/                       # At least 2 screenshots
+    ├── main-view.png
+    └── detail-view.png
+```
+
+### Quick Example
+
+Here's a minimal package with a dashboard + table:
 
 ```json
 {
-  "package_id": "your-package-id",
-  "display_name": "Your Package Name",
-  "version": "1.0.0",
-  "author": "Your Name",
-  "description": "What your package does",
-  "hub_version_min": "1.0.0",
-  "hub_version_max": null,
-  "dependencies": [],
-  "conflicts": [],
-  "fields": [
-    {
-      "field_name": "example_field",
-      "label": "Example Field",
-      "type": "text",
-      "required": true,
-      "validation_rules": {
-        "max_length": 255
-      },
-      "help_text": "Helper text for users"
-    }
-  ],
-  "permissions": {
-    "view": ["user", "admin"],
-    "create": ["admin"],
-    "edit": ["admin"],
-    "delete": ["admin"]
+  "schemaVersion": "3.0.0",
+  "package": {
+    "id": "district.staff-directory",
+    "display_name": "Staff Directory",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "icon": "lucide-users",
+    "category": "district",
+    "base_url": "/p/district.staff-directory"
   },
-  "menu_items": [
-    {
-      "label": "Your Section",
-      "icon": "bi-icon-name",
-      "order": 10
+  "database": {
+    "connection": "your_database",
+    "primaryTable": "staff"
+  },
+  "presentation": {
+    "pages": {
+      "index": {
+        "title": "Staff Directory",
+        "route": "/",
+        "layout": "full",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 3,
+              "cards": [
+                { "title": "Total Staff", "dataKey": "total", "icon": "lucide-users", "color": "primary" },
+                { "title": "Teachers", "dataKey": "teachers", "icon": "lucide-book-open", "color": "success" },
+                { "title": "Support", "dataKey": "support", "icon": "lucide-briefcase", "color": "info" }
+              ]
+            },
+            "dataQuery": "getStats"
+          },
+          {
+            "type": "filters",
+            "config": {
+              "targetTable": "pkg-table-staff",
+              "filters": [
+                { "name": "search", "type": "search", "placeholder": "Search by name or email..." },
+                { "name": "department", "type": "select", "label": "Department", "optionsQuery": "getDepartments" }
+              ]
+            }
+          },
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-staff",
+              "columns": [
+                { "key": "name", "label": "Name", "sortable": true, "width": "30%" },
+                { "key": "email", "label": "Email", "width": "25%", "responsive": "hide-mobile" },
+                { "key": "department", "label": "Department", "style": "badge", "width": "20%" },
+                { "key": "phone", "label": "Phone", "width": "15%", "responsive": "hide-mobile" }
+              ],
+              "actions": [
+                { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/view/{id}", "variant": "warning" }
+              ],
+              "pagination": { "perPage": 50 }
+            },
+            "dataQuery": "listStaff"
+          }
+        ]
+      }
     }
-  ]
+  }
 }
 ```
 
-### Field Types
+### Design Guidelines
 
-Supported field types:
-- `text` - Single-line text input
-- `textarea` - Multi-line text input
-- `number` - Numeric input
-- `email` - Email address with validation
-- `date` - Date picker
-- `datetime` - Date and time picker
-- `select` - Dropdown selection
-- `multiselect` - Multiple selection
-- `checkbox` - Boolean checkbox
-- `radio` - Radio button group
-- `file` - File upload
-
-### Validation Rules
-
-Available validation rules:
-- `required`: Boolean - Field must have a value
-- `min_length`: Integer - Minimum string length
-- `max_length`: Integer - Maximum string length
-- `min_value`: Number - Minimum numeric value
-- `max_value`: Number - Maximum numeric value
-- `pattern`: Regex - Custom validation pattern
-- `allowed_extensions`: Array - File type restrictions
-- `max_file_size`: Integer - File size limit in bytes
+- **Dashboard**: Use `"columns": 4` for 4 KPI cards, `3` for 3, etc. Cards auto-stack to 2-col on tablet, 1-col on phone.
+- **Tables**: Set `width` as percentages (~95% total). Mark non-essential columns `"responsive": "hide-mobile"`. Show only 3-4 columns + action on mobile.
+- **Masked fields**: Use `"style": "masked"` for passwords/SSNs. Users click Show/Hide — works on desktop and mobile.
+- **Icons**: Use `lucide-*` for readability (auto-mapped to FontAwesome). See `IconMapper.php` for the full 80+ mapping list.
+- **Layout**: Use `"layout": "full"` for data-heavy index pages. Use `"standard"` for forms and detail views.
 
 ### Submit Your Package
 
-To submit a package to this repository:
-
-1. Create your `.hubpkg` file following the specification above
-2. Test thoroughly in your Hub instance
-3. Fork this repository
-4. Add your package to the appropriate category folder
-5. Update the "Available Packages" table in this README
-6. Submit a pull request with:
-   - Package file
-   - Screenshot(s) of the section in action
+1. Create your `package.json` following the schema above
+2. Copy it to `[package-id]_[version].hubpkg`
+3. Test thoroughly in your Hub instance
+4. Fork this repository
+5. Add your package to the appropriate category folder
+6. Update the categories list in this README
+7. Submit a pull request with:
+   - Package file + README + CHANGELOG + screenshots
    - Installation/configuration notes
-   - Any special requirements
+   - Any special database requirements
 
 ## 📖 Documentation
 
-- [Package System Build Documentation](https://github.com/yourusername/thehub/blob/main/docs/PACKAGE_SYSTEM_BUILD_COMPLETE.md)
-- [Dynamic Sections Roadmap](https://github.com/yourusername/thehub/blob/main/docs/DYNAMIC_SECTIONS_ROADMAP.md)
-- [Modular Architecture](https://github.com/yourusername/thehub/blob/main/docs/MODULAR_ARCHITECTURE.md)
+- [Package JSON Schema Reference (CONTRIBUTING.md)](https://github.com/R1CH4RD25/TheHub/blob/laravel-migration/CONTRIBUTING.md) - Complete schema v3.0.0 docs
+- [Package Architecture Spec](https://github.com/R1CH4RD25/TheHub/blob/laravel-migration/PACKAGE_ARCHITECTURE_SPEC.md) - Deep architecture details
+- [Icon Mapper Source](https://github.com/R1CH4RD25/TheHub/blob/laravel-migration/src/Package/IconMapper.php) - Full Lucide → FontAwesome mapping
 
 ## 🤝 Contributing
 
@@ -276,6 +403,12 @@ For issues, questions, or feature requests:
 - Contact The Hub administrators at your institution
 
 ## 🔄 Version History
+
+### Repository v1.1.0 (February 2026)
+- Updated to Schema v3.0.0 (presentation pages, components, responsive columns)
+- Student Directory v1.0.0 updated with responsive mobile config, column widths
+- README & CONTRIBUTING updated with full schema reference
+- Icon system: Lucide → FontAwesome automatic mapping
 
 ### Repository v1.0.0 (October 2025)
 - Initial repository setup
