@@ -1,273 +1,178 @@
-# AI Session Context - Admin Users Google Redesign
+# AI Session Context — Management Console Redesign
 
-**Last Updated:** December 2, 2025  
-**Current Branch:** laravel-migration  
-**Session Status:** ✅ Phase 1 Complete
-
----
-
-## 🎯 What We Just Accomplished
-
-Completed full Google Admin Console-style redesign of the Admin Users interface with 71 commits. The interface now features:
-
-- **Role filter panel** with "Filter by Role" heading
-- **Interactive muted states** (50% opacity → 100% on hover)
-- **Selection memory** (remembers role when switching modes)
-- **Radio buttons** always visible: "Users from all roles" / "Users from selected roles"
-- **Search and role tree** dim when "all roles" selected, brighten on hover
-- **MANAGE ROLE HIERARCHY** link at bottom of panel
-- **Checkbox selection** with sliding action panel
-- **Dynamic action buttons** based on selection state
-- **Working bulk operations** (suspend/activate)
+**Last Updated:** February 12, 2026
+**Current Branch:** laravel-migration
+**Previous Session:** ✅ Package Rendering Engine + Mobile UX
+**Next Session:** Management Console Redesign
 
 ---
 
-## 📁 Key Files to Know
+## 🎯 What Was Accomplished (Feb 12, 2026)
 
-### Templates
-- `resources/views/admin/users.blade.php` - Main user management interface (1052 lines)
+### Package Rendering Engine — End-to-End Working
+- Created `src/Package/IconMapper.php` (80+ Lucide → FontAwesome mappings)
+- Fixed 12+ bugs across TableRenderer, FilterRenderer, DashboardRenderer, DetailRenderer, FormRenderer, PageRouter, StudentQueryHandler
+- Student Directory loads at `/p/district.student-directory` with dashboard cards, filters, sortable table, masked passwords, view actions
+- Default sort: grade (PK, KG, 1, 2, 3...) then last_name via SQL CASE expression
 
-### Styles
-- `public/assets/css/admin/admin-dashboard.css` - Source styles (2912 lines)
-- `public/assets/css/admin-bundle.css` - Compiled bundle (164K)
-- `public/assets/css/mgmt-bundle.css` - Management bundle (164K)
-- Build script: `bash build-css.sh` (always run after CSS changes)
+### Mobile Responsiveness — Platform-Wide
+- Header nav links collapse into hamburger menu on mobile (≤768px)
+- Dashboard cards: full-width, compact padding
+- Filters: eliminated dead space, compact stacking, side-by-side buttons
+- Tables: `hide-mobile`/`hide-tablet` per column, 44px touch targets
+- Password toggle: `touchend` event for mobile touch support
 
-### Backend
-- `app/Http/Controllers/Admin/UserController.php` - API endpoints (list, deactivate, reactivate)
-- Returns ALL users (both active and suspended) - filtering happens client-side
-
-### Layout
-- `resources/views/layouts/enterprise.blade.php` - Unified admin/management layout
+### Distributable Package
+- `.hubpkg` stripped of `@woodsonisd.net` Google Group mappings
+- Contains zero student data — only schema/rendering definitions
+- Synced to both TheHub and TheHub-Package-Repo on GitHub
 
 ---
 
-## 🎨 Current Design System
+## 📁 Key Files for Next Session
 
-### Colors
-```css
---primary-color: #C99700 (ND Gold)
---nd-gold: #C99700
-Active badge: #10B981 (green)
-Suspended badge: #EF4444 (red)
+### Management System (TARGET)
+| File | Purpose |
+|------|---------|
+| `public/management/index.php` | Landing page — module card grid with submission stats |
+| `public/management/section.php` | Section drill-down — jQuery DataTables submissions list |
+| `public/management/submission.php` | Single submission detail view |
+| `public/management/api/submissions.php` | DataTables server-side API |
+| `public/management/api/comments.php` | Comment system API |
+| `src/ManagementCenter.php` | Business logic (435 lines): stats, sections, bulk actions |
+| `src/Components/EnterpriseSidebar.php` | Sidebar component (551 lines): builds admin + mgmt nav |
+| `src/Components/EnterpriseHeader.php` | Breadcrumbs + cross-nav links (133 lines) |
+| `src/Components/EnterpriseFooter.php` | Footer with context label |
+| `public/assets/css/mgmt-bundle.css` | CSS bundle (8,165 lines — same structure as admin-bundle) |
+| `public/assets/css/management.css` | Old management styles (407 lines — NOT in bundle) |
+| `public/assets/js/management.js` | Comment system, bulk actions (338 lines) |
+
+### Package Rendering Engine (REUSE)
+| File | Purpose |
+|------|---------|
+| `src/Package/PageRouter.php` | Routes `/p/*`, executes queries, renders components |
+| `src/Package/ComponentRegistry.php` | Maps types → renderer classes |
+| `src/Package/IconMapper.php` | Lucide → FontAwesome mapping |
+| `src/Package/Renderers/*.php` | Dashboard, Table, Filter, Detail, Form renderers |
+| `public/p/index.php` | Package page front controller |
+| `public/assets/css/package-components.css` | Component styles (1,230 lines) |
+| `public/assets/js/package-table.js` | Table sort, filter, pagination, masked toggle |
+
+### Planning Docs
+| File | Purpose |
+|------|---------|
+| `MANAGEMENT_CONSOLE_IMPLEMENTATION_ANALYSIS.md` | Full analysis of proposed `manifest.json` `manager` property |
+| `ADMIN_VS_MANAGEMENT_SEPARATION.md` | Strategy for separating admin vs management concerns |
+| `COMMAND_TO_MANAGEMENT_MIGRATION.md` | Migration from old "Command Center" naming |
+| `HANDOFF_2026-02-12_PACKAGE_MOBILE.md` | This session's detailed handoff |
+
+---
+
+## 🔜 Management Console Redesign — The Problem
+
+### Current State
+Management at `/management/` shows a **generic submission workflow UI**:
+- Landing page: 4 metric cards (Active Modules, Total Submissions, Pending, Urgent) + module card grid
+- Section drill-down: jQuery DataTables list of submissions with filters (status, priority, date)
+- Submission detail: Full view with comments, attachments, history timeline
+
+**It looks and behaves like an admin panel**, not a user-facing package experience. Packages are NOT rendered through the component renderers — Management doesn't know about packages at all.
+
+### Current Architecture
+```
+/management/
+├── index.php         ← Module card grid with submission stats (ManagementCenter queries)
+├── section.php       ← DataTables submissions list (jQuery + server-side API)
+├── submission.php    ← Single submission detail view
+└── api/
+    ├── submissions.php ← DataTables server-side endpoint
+    └── comments.php    ← Comment system endpoint
 ```
 
-### Key Measurements
-- **Role panel width:** 280px (collapsed: 0)
-- **Action panel width:** 320px (slides from right)
-- **Panel header height:** 65px (matches content header)
-- **Expand button:** 28px × 56px, positioned at top: 10px
-- **Muted opacity:** 50% → 100% on hover
-- **Transitions:** 0.3s ease for opacity, grid columns
+### What's Wrong
+1. **No package awareness** — `ManagementCenter` queries `sections` table only, no `PackageManager` integration
+2. **Generic UI** — Every section shows the same DataTables submissions view, regardless of what the package defines
+3. **Admin-style layout** — Uses `admin-root`, `admin-shell`, `admin-main` CSS classes (same as Admin Dashboard)
+4. **Role gating too tight** — `requireRole(['admin', 'super_admin'])` excludes the `manager` role
+5. **Broken HTML** in `index.php` ~line 128 (malformed `<main>` tag)
+6. **Garbled JS** in `section.php` ~line 340 (truncated DataTables code)
+7. **`management.css` not bundled** — Old styles exist in source file but NOT in `mgmt-bundle.css`
+8. **Empty responsive CSS** — `mgmt/mgmt-media.css` has zero rules
+9. **`Layout.php` stale ref** — Reads `cc_display_name` instead of `mgmt_display_name`
 
-### Important CSS Classes
-```css
-.role-filter-panel          // Left sidebar
-.panel-content              // Scrollable panel content
-.role-search.muted          // Dimmed search (50% opacity)
-.role-tree.muted            // Dimmed role tree (50% opacity)
-.role-item.active           // Selected role (primary bg + white text)
-.action-panel               // Sliding panel from right
-.user-avatar.suspended      // Avatar with diagonal strikethrough
-.manage-roles-link          // Bottom link with border-top
+### Target Architecture
 ```
+/management/
+├── index → Package card grid (each installed package = card with live stats)
+├── {package-id}/ → Package rendered via PageRouter within Management shell
+│   ├── Sidebar shows package pages as nav items
+│   ├── Breadcrumbs: Management > Student Directory > Students
+│   └── Content: Same component renderers (dashboard, table, filters, etc.)
+└── legacy/{section-slug} → DataTables submission view (non-package sections only)
+```
+
+### Implementation Strategy
+1. **Package-driven sidebar** — Replace flat section links with grouped package navigation. Each package's pages become sidebar sub-items.
+2. **Embed PageRouter output** — When user clicks a package, route to PageRouter (same engine as `/p/*`) but render within the Management shell (sidebar + header + breadcrumbs).
+3. **Package landing cards** — Index page shows installed packages as visual cards pulling live stats from each package's `getStats` query handler.
+4. **CSS namespace** — Replace `admin-*` with `mgmt-*` classes in management context.
+5. **Role access** — Allow `manager` role, not just `admin`/`super_admin`.
+6. **Legacy fallback** — Sections without packages keep the existing DataTables submissions view.
 
 ---
 
-## 🔧 JavaScript State Management
+## 🔧 Database Quick Reference
 
-### Key Variables
-```javascript
-let lastSelectedRole = null;  // Remembers selection when switching modes
-```
+| Table | DB | Purpose |
+|-------|-----|---------|
+| `section_packages` (id=120) | `woodson_hub` | Student Directory package JSON |
+| `students` (173 rows) | `woodson_students` | Student records |
+| `sections` | `woodson_hub` | Section definitions |
+| `section_role_access` | `woodson_hub` | Role-based section visibility |
 
-### Event Handlers
-1. **Radio button change** - Toggles muted state, shows/hides active role
-2. **Search input focus** - Auto-switches to "selected roles" mode
-3. **Role item click** - Auto-switches to "selected roles" mode and applies filter
-4. **Collapse/expand** - Animates panel width with grid transitions
-
----
-
-## 🐛 Known Issues & Quick Fixes
-
-### Current Issues
-1. **Role search doesn't filter** - Input exists but no filtering logic yet
-2. **Multi-select toggle** - Button present but not functional
-3. **Custom scrollbars** - Not styled (Google uses thin custom scrollbars)
-4. **Expand button positioning** - May need adjustment on smaller screens
-
-### Quick Reference Commands
+### Sync Package Data (file → DB)
 ```bash
-# Build CSS after changes
-bash build-css.sh
-
-# Stage and commit
-git add resources/views/admin/users.blade.php public/assets/css/
-git commit -m "✨ Your message here"
-git push
-
-# View recent commits
-git log --oneline -10
+php -r "require 'src/bootstrap.php'; \$db = Hub\Database::getInstance(); \$stmt = \$db->prepare('UPDATE section_packages SET package_data = ? WHERE id = 120'); \$stmt->execute([file_get_contents('packages/district/student-directory/package.json')]);"
 ```
 
 ---
 
-## 🚀 Next Session Priorities (Phase 2)
+## 🛠️ Build Commands
 
-### High Priority
-1. **Implement role search filtering**
-   - Filter role tree based on search input
-   - Show/hide role items dynamically
-   - Highlight matching text
+```bash
+# Rebuild CSS bundles (header, hub, admin, mgmt)
+cd public/assets/css && bash ../../../build-css-bundles.sh
 
-2. **Add keyboard navigation**
-   - Arrow keys to navigate role tree
-   - Enter to select role
-   - Escape to deselect/close panels
-   - Tab order for accessibility
+# Rebuild hubpkg from package.json
+cp packages/district/student-directory/package.json packages/district/student-directory/student-directory_1.0.0.hubpkg
 
-3. **Multi-select toggle functionality**
-   - Allow selecting multiple roles
-   - Update user list to show union of selected roles
-   - Visual indicator for multi-selected roles
+# CSS brace balance check
+python3 -c "css=open('public/assets/css/header.css').read(); print('header.css balanced:', css.count('{')==css.count('}'))"
 
-### Medium Priority
-4. **Role hierarchy management modal**
-   - Click "MANAGE ROLE HIERARCHY" → open modal
-   - Drag-and-drop to reorganize roles
-   - Add/edit/delete roles
-   - Save changes to database
+# Local dev server
+cd public && php -S localhost:8000
 
-5. **Enhanced bulk actions**
-   - Add "Change Role" bulk action
-   - Add "Send Email" bulk action
-   - Progress indicators for bulk operations
-   - Better error handling with retry logic
-
-6. **Custom scrollbar styling**
-   - Match Google's thin scrollbar design
-   - Hide scrollbar when not hovering (webkit)
-   - Smooth scrollbar appearance
-
-### Low Priority (Polish)
-7. **Loading states**
-   - Skeleton loaders during initial load
-   - Spinner for bulk operations
-   - Disabled state for action buttons during processing
-
-8. **Mobile responsiveness**
-   - Collapse panel by default on mobile
-   - Stack action buttons vertically
-   - Touch-friendly hit areas
-
-9. **Accessibility improvements**
-   - ARIA labels for all interactive elements
-   - Screen reader announcements for state changes
-   - Focus management (trap focus in panels)
-   - Keyboard shortcuts documentation
-
----
-
-## 💡 Implementation Tips
-
-### When Adding New Features
-1. **Always update both source and bundles** - Edit `admin-dashboard.css`, then run `build-css.sh`
-2. **Test muted state interactions** - Ensure new elements respect the muted state system
-3. **Maintain selection memory** - New filters should integrate with `lastSelectedRole` pattern
-4. **Keep radio buttons visible** - Never dim the role selection mode radio buttons
-5. **Match Google's patterns** - Reference Google Admin Console for interaction details
-
-### CSS Patterns to Follow
-```css
-/* Muted state pattern */
-.element.muted {
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-}
-.element.muted:hover {
-    opacity: 1;
-}
-
-/* Active selection pattern */
-.element.active {
-    background: var(--primary-color);
-    color: white;
-}
-```
-
-### JavaScript Patterns to Follow
-```javascript
-// Auto-switch to selected mode pattern
-if (element.classList.contains('muted')) {
-    const selectedRadio = document.querySelector('input[name="roleMode"][value="selected"]');
-    if (selectedRadio) {
-        selectedRadio.checked = true;
-        selectedRadio.dispatchEvent(new Event('change'));
-    }
-}
+# Commit convention
+git commit -m "✨ Feature description"   # new feature
+git commit -m "🐛 Fix description"       # bug fix
+git commit -m "📱 Mobile fix"            # responsive
+git commit -m "📚 Update docs"           # documentation
+git commit -m "🔒 Security fix"          # security
+git commit -m "📦 Rebuild hubpkg"        # package rebuild
 ```
 
 ---
 
-## 📊 Current Statistics
-
-- **Total commits:** 72 (including documentation)
-- **Files modified:** 5 main files
-- **Lines of code:** ~4,000+ across all files
-- **CSS bundle size:** 164K (optimized)
-- **Features completed:** 10 major features
-- **Outstanding items:** ~15 Phase 2+ features
+## 📊 Session Commits (Feb 12)
+```
+7551fda 🔒 Strip site-specific Google Group mappings from distributable hubpkg
+2a4551a 📱 Fix mobile: collapsible nav menu, tighter dashboard cards, compact filters
+b7e1a82 ✨ Default sort: grade (PK,KG,1,2,3...) then name
+```
 
 ---
 
-## 🎓 Important Context for Next AI
-
-### Design Philosophy
-- **Google-first approach** - When in doubt, match Google Admin Console exactly
-- **Smooth transitions** - 0.3s is the sweet spot for professional feel
-- **Interactive muted states** - Never fully disable, just dim and activate on hover
-- **Selection memory** - Always remember user choices when switching modes
-- **Progressive enhancement** - Start with basic functionality, add polish incrementally
-
-### Things That Should NOT Change
-- ✅ Radio buttons always visible (never muted)
-- ✅ Muted opacity levels (50% → 100%)
-- ✅ Transition timings (0.3s ease)
-- ✅ Primary color (#C99700 ND Gold)
-- ✅ Panel widths (280px, 320px)
-- ✅ Selection memory pattern with `lastSelectedRole`
-
-### Things That CAN Be Improved
-- 🔄 Role search filtering logic (needs implementation)
-- 🔄 Multi-select functionality (placeholder exists)
-- 🔄 Scrollbar styling (not yet Google-style)
-- 🔄 Loading states (no skeletons yet)
-- 🔄 Keyboard navigation (basic accessibility)
-- 🔄 Mobile responsiveness (desktop-first currently)
-
----
-
-## 🔗 Useful References
-
-- **Full documentation:** `ADMIN_USERS_GOOGLE_REDESIGN.md`
-- **GitHub repo:** https://github.com/R1CH4RD25/TheHub
-- **Branch:** laravel-migration (72 commits ahead of v1.1)
-- **Google Admin Console:** https://admin.google.com (for reference)
-- **Design system:** `public/assets/css/shared/enterprise-design-system.css`
-
----
-
-## ⚡ Quick Start for Next Session
-
-1. Pull latest changes: `git pull origin laravel-migration`
-2. Review this document and `ADMIN_USERS_GOOGLE_REDESIGN.md`
-3. Choose a Phase 2 priority item from above
-4. Make changes, run `build-css.sh` if CSS modified
-5. Test in browser (focus on muted state interactions)
-6. Commit with emoji prefix (✨ feature, 🐛 fix, 📚 docs, 🎨 style)
-7. Update this document if major patterns change
-
----
-
-**Ready to continue Phase 2!** 🚀
+## 🔗 Related Handoffs
+- [HANDOFF_2026-02-12_PACKAGE_MOBILE.md](HANDOFF_2026-02-12_PACKAGE_MOBILE.md) — This session
+- [HANDOFF_2026-02-11_SPRINT0_SECURITY.md](HANDOFF_2026-02-11_SPRINT0_SECURITY.md) — Sprint 0 enforcement pipelines
+- [HANDOFF_2026-02-10_NAVIGATION_ICONS.md](HANDOFF_2026-02-10_NAVIGATION_ICONS.md) — Navigation icons
