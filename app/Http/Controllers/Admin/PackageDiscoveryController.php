@@ -161,12 +161,81 @@ class PackageDiscoveryController extends Controller
             }
         }
 
-        $packages = $this->searchGitHubDirectory($owner, $repo, 'packages');
+        $rawPackages = $this->searchGitHubDirectory($owner, $repo, 'packages');
+
+        // Deduplicate by package ID, keeping only the LATEST version.
+        // When a new version is published, older .hubpkg files should be moved
+        // to packages/archive/ in the GitHub repo. This dedup catches any that weren't.
+        $packages = $this->deduplicatePackages($rawPackages);
+
+        error_log("Package discovery: {$owner}/{$repo} — " . count($rawPackages) . " raw → " . count($packages) . " after dedup");
 
         // Cache for 1 hour
         Cache::set($cacheKey, $packages, self::CACHE_TTL);
 
         return $packages;
+    }
+
+    /**
+     * Deduplicate packages by ID, keeping only the latest version.
+     * Normalizes IDs to handle cases where metadata fetch fails
+     * (e.g., 'district.student-directory' vs 'student-directory').
+     */
+    private function deduplicatePackages(array $packages): array
+    {
+        $latestByPackageId = [];
+        $nameToCanonicalId = []; // maps normalized names → canonical package_id
+
+        foreach ($packages as $package) {
+            $pkgId = $package['id'] ?? '';
+            if (empty($pkgId)) {
+                continue;
+            }
+
+            // Strip category prefix for matching (e.g., 'district.student-directory' → 'student-directory')
+            $normalizedName = preg_replace('/^[^.]+\./', '', $pkgId);
+
+            // Also get filename-based name (strip version suffix)
+            $fileBaseName = $pkgId;
+            if (preg_match('/(.+?)[-_]v?\d+\.\d+/', $pkgId, $m)) {
+                $fileBaseName = $m[1];
+            }
+
+            // Find canonical ID — check if we've seen this package under a different ID
+            $canonicalId = $pkgId;
+            if (isset($nameToCanonicalId[$normalizedName])) {
+                $canonicalId = $nameToCanonicalId[$normalizedName];
+            } elseif (isset($nameToCanonicalId[$fileBaseName])) {
+                $canonicalId = $nameToCanonicalId[$fileBaseName];
+            } else {
+                $nameToCanonicalId[$normalizedName] = $pkgId;
+                $nameToCanonicalId[$fileBaseName] = $pkgId;
+            }
+
+            if (!isset($latestByPackageId[$canonicalId])) {
+                $latestByPackageId[$canonicalId] = $package;
+            } else {
+                $existingVersion = $latestByPackageId[$canonicalId]['version'] ?? '0.0.0';
+                $newVersion = $package['version'] ?? '0.0.0';
+
+                if (version_compare($newVersion, $existingVersion, '>')) {
+                    // Newer version — replace
+                    error_log("Package dedup '{$canonicalId}': v{$newVersion} replaces v{$existingVersion}");
+                    $latestByPackageId[$canonicalId] = $package;
+                } elseif ($newVersion === $existingVersion) {
+                    // Same version — keep larger file (more complete package)
+                    $existingSize = $latestByPackageId[$canonicalId]['size'] ?? 0;
+                    $newSize = $package['size'] ?? 0;
+                    if ($newSize > $existingSize) {
+                        error_log("Package dedup '{$canonicalId}': same v{$newVersion}, keeping larger ({$newSize} > {$existingSize})");
+                        $latestByPackageId[$canonicalId] = $package;
+                    }
+                }
+                // else: older version, skip
+            }
+        }
+
+        return array_values($latestByPackageId);
     }
 
     /**
@@ -395,25 +464,39 @@ class PackageDiscoveryController extends Controller
         $validationStatus = $validation['overall_status'] ?? 'fail';
         $canInstall = $validation['can_install'] ? 1 : 0;
 
-        $db->execute(
+        // Upsert: if package already exists with this ID, update it (newer version replaces old)
+        $pdo = $db->getConnection();
+        $stmt = $pdo->prepare(
             "INSERT INTO section_packages (package_id, name, version, display_name, description, author, file_path, uploaded_by, uploaded_at, validation_status, can_install, package_data)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)",
-            [
-                $packageId,
-                $pkg['name'] ?? $packageId, // Use package name or fall back to ID
-                $version,
-                $displayName,
-                $pkg['description'] ?? '',
-                $pkg['author'] ?? 'Unknown',
-                $uploadPath,
-                $userId,
-                $validationStatus,
-                $canInstall,
-                json_encode($packageData) // Add the full package data as JSON
-            ]
+             VALUES (:pid, :name, :ver, :dname, :desc, :author, :fpath, :uid, NOW(), :vstatus, :cinst, :pdata)
+             ON DUPLICATE KEY UPDATE
+                name = VALUES(name),
+                version = VALUES(version),
+                display_name = VALUES(display_name),
+                description = VALUES(description),
+                author = VALUES(author),
+                file_path = VALUES(file_path),
+                uploaded_by = VALUES(uploaded_by),
+                uploaded_at = NOW(),
+                validation_status = VALUES(validation_status),
+                can_install = VALUES(can_install),
+                package_data = VALUES(package_data)"
         );
+        $stmt->execute([
+            ':pid' => $packageId,
+            ':name' => $pkg['name'] ?? $packageId,
+            ':ver' => $version,
+            ':dname' => $displayName,
+            ':desc' => $pkg['description'] ?? '',
+            ':author' => $pkg['author'] ?? 'Unknown',
+            ':fpath' => $uploadPath,
+            ':uid' => $userId,
+            ':vstatus' => $validationStatus,
+            ':cinst' => $canInstall,
+            ':pdata' => json_encode($packageData),
+        ]);
 
-        $newPackageRecordId = $db->lastInsertId();
+        $newPackageRecordId = $pdo->lastInsertId() ?: ($existing['id'] ?? 0);
 
         // Clear cache
         Cache::delete('packages:installed');
