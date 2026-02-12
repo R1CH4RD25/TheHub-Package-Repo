@@ -1,0 +1,214 @@
+{
+    "schemaVersion": "3.0.0",
+    "package": {
+        "id": "com.woodson.user-directory",
+        "display_name": "User Directory",
+        "description": "Browse and manage hub users — demonstrates Layer 3 package rendering",
+        "version": "1.0.0",
+        "author": "Woodson ISD",
+        "icon": "bi-people"
+    },
+    "presentation": {
+        "pages": {
+            "list": {
+                "title": "User Directory",
+                "route": "/",
+                "layout": "standard",
+                "components": [
+                    {
+                        "type": "dashboard",
+                        "config": {
+                            "columns": 4,
+                            "cards": [
+                                {
+                                    "title": "Total Users",
+                                    "icon": "bi-people-fill",
+                                    "dataKey": "total_users",
+                                    "color": "primary"
+                                },
+                                {
+                                    "title": "Admins",
+                                    "icon": "bi-shield-lock",
+                                    "dataKey": "admin_count",
+                                    "color": "danger"
+                                },
+                                {
+                                    "title": "Staff",
+                                    "icon": "bi-person-badge",
+                                    "dataKey": "staff_count",
+                                    "color": "success"
+                                },
+                                {
+                                    "title": "Pending",
+                                    "icon": "bi-hourglass-split",
+                                    "dataKey": "pending_count",
+                                    "color": "warning"
+                                }
+                            ]
+                        },
+                        "dataQuery": "user_stats"
+                    },
+                    {
+                        "type": "filters",
+                        "config": {
+                            "targetTable": "pkg-table-users",
+                            "filters": [
+                                {
+                                    "name": "search",
+                                    "type": "search",
+                                    "placeholder": "Search by name or email...",
+                                    "debounce": 300
+                                },
+                                {
+                                    "name": "role",
+                                    "type": "select",
+                                    "label": "Role",
+                                    "options": [
+                                        { "value": "", "label": "All Roles" },
+                                        { "value": "super_admin", "label": "Super Admin" },
+                                        { "value": "admin", "label": "Admin" },
+                                        { "value": "business_manager", "label": "Business Manager" },
+                                        { "value": "staff", "label": "Staff" }
+                                    ]
+                                },
+                                {
+                                    "name": "status",
+                                    "type": "select",
+                                    "label": "Status",
+                                    "options": [
+                                        { "value": "", "label": "All" },
+                                        { "value": "approved", "label": "Approved" },
+                                        { "value": "pending", "label": "Pending" }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "table",
+                        "config": {
+                            "id": "pkg-table-users",
+                            "columns": [
+                                { "key": "name", "label": "Name", "sortable": true },
+                                { "key": "email", "label": "Email", "sortable": true, "style": "link" },
+                                { "key": "role", "label": "Role", "sortable": true, "style": "badge" },
+                                { "key": "status", "label": "Status", "style": "badge" },
+                                { "key": "created_at", "label": "Joined", "sortable": true, "style": "date" }
+                            ],
+                            "actions": [
+                                {
+                                    "label": "View",
+                                    "icon": "bi-eye",
+                                    "type": "route",
+                                    "route": "/detail/{id}"
+                                }
+                            ],
+                            "pagination": {
+                                "perPage": 10,
+                                "pageSizes": [10, 25, 50]
+                            },
+                            "emptyState": {
+                                "icon": "bi-people",
+                                "title": "No Users Found",
+                                "description": "No users match your search criteria."
+                            }
+                        },
+                        "dataQuery": "list_users"
+                    }
+                ]
+            },
+            "detail": {
+                "title": "User Details",
+                "route": "/detail/{user_id}",
+                "layout": "standard",
+                "components": [
+                    {
+                        "type": "detail",
+                        "config": {
+                            "backRoute": "/",
+                            "actions": [
+                                {
+                                    "label": "Edit",
+                                    "icon": "bi-pencil",
+                                    "type": "route",
+                                    "route": "/edit/{user_id}",
+                                    "style": "primary"
+                                }
+                            ],
+                            "sections": [
+                                {
+                                    "title": "Basic Information",
+                                    "columns": 2,
+                                    "fields": [
+                                        { "key": "name", "label": "Full Name" },
+                                        { "key": "email", "label": "Email", "type": "email" },
+                                        { "key": "role", "label": "Role", "type": "badge" },
+                                        { "key": "status", "label": "Status", "type": "badge" }
+                                    ]
+                                },
+                                {
+                                    "title": "Account Details",
+                                    "columns": 2,
+                                    "fields": [
+                                        { "key": "created_at", "label": "Account Created", "type": "datetime" },
+                                        { "key": "last_login", "label": "Last Login", "type": "datetime" },
+                                        { "key": "google_id", "label": "Google ID", "type": "masked" },
+                                        { "key": "is_active", "label": "Active", "type": "boolean" }
+                                    ]
+                                }
+                            ]
+                        },
+                        "dataQuery": "get_user"
+                    }
+                ]
+            }
+        }
+    },
+    "data": {
+        "queries": {
+            "list_users": {
+                "description": "List all hub users with filters",
+                "table": "users",
+                "defaultSort": "name",
+                "defaultSortDir": "asc",
+                "parameters": {
+                    "search": { "type": "string", "optional": true },
+                    "role": { "type": "string", "optional": true },
+                    "status": { "type": "string", "optional": true }
+                }
+            },
+            "get_user": {
+                "description": "Get a single user by ID",
+                "table": "users",
+                "parameters": {
+                    "user_id": { "type": "integer", "required": true }
+                }
+            },
+            "user_stats": {
+                "description": "Get user count statistics",
+                "type": "aggregate"
+            }
+        },
+        "mutations": {}
+    },
+    "policy": {
+        "roles": {
+            "viewer": {
+                "label": "Viewer",
+                "queries": ["list_users", "get_user", "user_stats"]
+            },
+            "admin": {
+                "label": "Admin",
+                "inherits": "viewer",
+                "mutations": []
+            }
+        },
+        "defaultRole": "viewer",
+        "globalRoleMapping": {
+            "super_admin": "admin",
+            "admin": "admin",
+            "business_manager": "viewer",
+            "staff": "viewer"
+        }
+    }
+}

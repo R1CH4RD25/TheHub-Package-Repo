@@ -1,0 +1,751 @@
+/**
+ * Package Component Styles (Layer 3)
+ *
+ * Shared styles for all JSON-driven package components:
+ * Tables, Forms, Detail views, Filters, Dashboards.
+ *
+ * Follows existing Hub design patterns (enterprise, Bootstrap-based).
+ */
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+.pkg-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem 0 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.pkg-page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pkg-page-icon {
+    font-size: 1.75rem;
+    color: var(--hub-primary, #2563eb);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hub-primary-light, #eff6ff);
+    border-radius: 10px;
+}
+
+.pkg-page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937;
+}
+
+.pkg-page-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.125rem 0 0;
+}
+
+.pkg-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* ========================================
+   TABLE COMPONENT
+   ======================================== */
+.pkg-table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+}
+
+.pkg-table-count .count-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.pkg-table-count strong {
+    color: #1f2937;
+}
+
+.pkg-bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pkg-bulk-actions .bulk-count {
+    font-size: 0.8rem;
+    color: #2563eb;
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.pkg-table-container {
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.pkg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.pkg-table thead {
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.pkg-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.pkg-table td {
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #1f2937;
+    vertical-align: middle;
+}
+
+.pkg-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.pkg-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Sortable columns */
+.pkg-col-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.pkg-col-sortable:hover {
+    background: #f3f4f6;
+}
+
+.pkg-sort-icon {
+    font-size: 0.7rem;
+    opacity: 0.4;
+    margin-left: 0.25rem;
+}
+
+.pkg-col-sortable.sort-asc .pkg-sort-icon,
+.pkg-col-sortable.sort-desc .pkg-sort-icon {
+    opacity: 1;
+    color: var(--hub-primary, #2563eb);
+}
+
+/* Checkbox column */
+.pkg-col-checkbox {
+    width: 40px;
+    text-align: center;
+}
+
+/* Actions column */
+.pkg-col-actions {
+    width: auto;
+    white-space: nowrap;
+}
+
+.pkg-action-group {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+}
+
+/* Cell styles */
+.pkg-masked-value {
+    color: #9ca3af;
+    font-family: monospace;
+    letter-spacing: 0.1em;
+}
+
+.pkg-copy-btn {
+    background: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 0.125rem 0.375rem;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-left: 0.375rem;
+    transition: all 0.15s;
+}
+
+.pkg-copy-btn:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+    border-color: #d1d5db;
+}
+
+.pkg-copy-btn.copied {
+    color: #059669;
+    border-color: #059669;
+}
+
+/* Empty state */
+.pkg-empty-state {
+    text-align: center;
+    padding: 3rem 1rem !important;
+    color: #9ca3af;
+}
+
+.pkg-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: #d1d5db;
+}
+
+.pkg-empty-text {
+    font-size: 0.95rem;
+}
+
+/* Error state */
+.pkg-error-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.pkg-error-icon {
+    font-size: 3rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.pkg-error-state h2 {
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.pkg-error-state p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+
+/* ========================================
+   PAGINATION
+   ======================================== */
+.pkg-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pkg-page-info {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.pkg-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pkg-page-btn {
+    min-width: 36px;
+    font-size: 0.8rem;
+}
+
+.pkg-page-ellipsis {
+    padding: 0 0.375rem;
+    color: #9ca3af;
+}
+
+.pkg-page-size select {
+    width: auto;
+    font-size: 0.8rem;
+}
+
+/* ========================================
+   FILTER COMPONENT
+   ======================================== */
+.pkg-filters {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.pkg-filters-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.pkg-filter-field {
+    flex: 0 0 auto;
+    min-width: 150px;
+}
+
+.pkg-filter-field:first-child {
+    flex: 1 1 250px;
+}
+
+.pkg-filter-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.pkg-filter-actions {
+    min-width: auto !important;
+    flex: 0 0 auto !important;
+}
+
+.pkg-search-input {
+    position: relative;
+}
+
+.pkg-search-icon {
+    position: absolute;
+    left: 0.625rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.pkg-search-input input {
+    padding-left: 2rem;
+}
+
+.pkg-date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.pkg-date-separator {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+/* ========================================
+   FORM COMPONENT
+   ======================================== */
+.pkg-form {
+    max-width: 720px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.pkg-form-section {
+    margin-bottom: 1.5rem;
+    border: none;
+    padding: 0;
+}
+
+.pkg-form-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.pkg-form-section-desc {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+    margin-top: -0.5rem;
+}
+
+.pkg-section-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pkg-form-group {
+    margin-bottom: 1rem;
+}
+
+.pkg-form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.375rem;
+}
+
+.pkg-required {
+    color: #dc2626;
+}
+
+.pkg-form-help {
+    display: block;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+}
+
+.pkg-form-error {
+    font-size: 0.8rem;
+    color: #dc2626;
+    margin-top: 0.25rem;
+}
+
+.pkg-form-group.has-error .pkg-input {
+    border-color: #dc2626;
+}
+
+.pkg-form-actions {
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.pkg-form-submit {
+    min-width: 120px;
+}
+
+/* ========================================
+   DETAIL COMPONENT
+   ======================================== */
+.pkg-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.pkg-detail-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pkg-detail-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pkg-detail-section {
+    padding: 1.25rem 1.5rem;
+}
+
+.pkg-detail-section + .pkg-detail-section {
+    border-top: 1px solid #f3f4f6;
+}
+
+.pkg-detail-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1rem;
+}
+
+.pkg-detail-grid {
+    display: grid;
+    gap: 0.75rem 2rem;
+}
+
+.pkg-detail-cols-1 { grid-template-columns: 1fr; }
+.pkg-detail-cols-2 { grid-template-columns: 1fr 1fr; }
+.pkg-detail-cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+@media (max-width: 768px) {
+    .pkg-detail-cols-2,
+    .pkg-detail-cols-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pkg-detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.pkg-detail-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin: 0;
+}
+
+.pkg-detail-value {
+    font-size: 0.9rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+.pkg-detail-longtext {
+    max-height: 200px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+.pkg-detail-image {
+    max-width: 200px;
+    border-radius: 4px;
+}
+
+.pkg-detail-list {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+/* ========================================
+   DASHBOARD / CARDS COMPONENT
+   ======================================== */
+.pkg-dashboard {
+    display: grid;
+    gap: 1rem;
+}
+
+.pkg-dashboard-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.pkg-dashboard-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.pkg-dashboard-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+    .pkg-dashboard-cols-3,
+    .pkg-dashboard-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .pkg-dashboard {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.pkg-dashboard-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s;
+}
+
+a.pkg-dashboard-card:hover {
+    border-color: var(--hub-primary, #2563eb);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.pkg-card-icon {
+    font-size: 1.75rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.pkg-card-primary .pkg-card-icon { background: #eff6ff; color: #2563eb; }
+.pkg-card-success .pkg-card-icon { background: #f0fdf4; color: #16a34a; }
+.pkg-card-warning .pkg-card-icon { background: #fffbeb; color: #d97706; }
+.pkg-card-danger .pkg-card-icon  { background: #fef2f2; color: #dc2626; }
+.pkg-card-info .pkg-card-icon    { background: #f0f9ff; color: #0284c7; }
+
+.pkg-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.pkg-card-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-top: 0.125rem;
+}
+
+.pkg-card-subtitle {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* ========================================
+   MUTATION/ACTION MODAL
+   ======================================== */
+.pkg-mutation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pkg-mutation-modal .modal-dialog {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.pkg-mutation-modal .modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pkg-mutation-modal .modal-body {
+    padding: 1.25rem;
+}
+
+.pkg-mutation-modal .modal-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.pkg-mutation-modal .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 0;
+    line-height: 1;
+}
+
+.pkg-mutation-modal .reason-field {
+    margin-bottom: 1rem;
+}
+
+.pkg-mutation-modal .reason-field label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+    font-size: 0.85rem;
+}
+
+/* Toast/feedback messages */
+.pkg-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.85rem;
+    z-index: 2000;
+    animation: pkgToastIn 0.2s ease-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pkg-toast-success { background: #059669; }
+.pkg-toast-error   { background: #dc2626; }
+.pkg-toast-info    { background: #2563eb; }
+
+@keyframes pkgToastIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .pkg-page-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .pkg-page-header-right {
+        align-self: flex-start;
+    }
+
+    .pkg-table-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .pkg-filters-row {
+        flex-direction: column;
+    }
+
+    .pkg-filter-field {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .pkg-form {
+        padding: 1rem;
+    }
+
+    .pkg-pagination {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pkg-page-nav {
+        justify-content: center;
+    }
+}

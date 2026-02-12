@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Root /p/ shows the landing/discovery page
+    RewriteRule ^$ landing.php [L]
+
+    # Route all /p/{packageId}/{pageId...} to index.php (Layer 3 package pages)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+)$ index.php [QSA,L]
+</IfModule>
