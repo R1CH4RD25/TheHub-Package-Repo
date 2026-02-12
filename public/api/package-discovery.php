@@ -178,7 +178,13 @@ function searchGitHubPackages($owner, $repo)
     // Deduplicate packages by package ID, keeping only the LATEST version.
     // When a package is updated, older versions are automatically hidden.
     // Old .hubpkg files should be moved to packages/archive/ in the GitHub repo.
+    //
+    // We deduplicate by BOTH:
+    // 1. The metadata package_id (e.g., 'district.student-directory')
+    // 2. The filename-based name (e.g., 'student-directory') — catches cases
+    //    where metadata fetch fails due to GitHub API rate limits
     $latestByPackageId = [];
+    $filenameToPackageId = []; // maps filename-based name → canonical package_id
 
     foreach ($packages as $package) {
         $pkgId = $package['id'] ?? '';
@@ -186,20 +192,47 @@ function searchGitHubPackages($owner, $repo)
             continue;
         }
 
-        if (!isset($latestByPackageId[$pkgId])) {
-            // First time seeing this package ID
-            $latestByPackageId[$pkgId] = $package;
+        // Extract the base name from filename (without version) for secondary matching
+        $fileBaseName = $pkgId;
+        if (preg_match('/(.+?)[-_]v?\d+\.\d+/', $pkgId, $m)) {
+            $fileBaseName = $m[1];
+        }
+        // Also strip category prefix (e.g., 'district.student-directory' → 'student-directory')
+        $normalizedName = preg_replace('/^[^.]+\./', '', $pkgId);
+
+        // Check if we've already seen this package under a different ID
+        $canonicalId = $pkgId;
+        if (isset($filenameToPackageId[$normalizedName])) {
+            $canonicalId = $filenameToPackageId[$normalizedName];
+        } elseif (isset($filenameToPackageId[$fileBaseName])) {
+            $canonicalId = $filenameToPackageId[$fileBaseName];
+        } else {
+            // Register both the normalized name and file base name
+            $filenameToPackageId[$normalizedName] = $pkgId;
+            $filenameToPackageId[$fileBaseName] = $pkgId;
+        }
+
+        if (!isset($latestByPackageId[$canonicalId])) {
+            // First time seeing this package
+            $latestByPackageId[$canonicalId] = $package;
         } else {
             // Compare versions — keep the higher one
-            $existingVersion = $latestByPackageId[$pkgId]['version'] ?? '0.0.0';
+            $existingVersion = $latestByPackageId[$canonicalId]['version'] ?? '0.0.0';
             $newVersion = $package['version'] ?? '0.0.0';
 
             if (version_compare($newVersion, $existingVersion, '>')) {
-                // Newer version found — archive the old one conceptually
-                error_log("Package '{$pkgId}': Showing v{$newVersion}, hiding older v{$existingVersion}");
-                $latestByPackageId[$pkgId] = $package;
+                error_log("Package '{$canonicalId}': Showing v{$newVersion}, hiding older v{$existingVersion}");
+                $latestByPackageId[$canonicalId] = $package;
             } else {
-                error_log("Package '{$pkgId}': Keeping v{$existingVersion}, hiding older v{$newVersion}");
+                // Same or older version — keep existing (prefer larger file = more complete)
+                $existingSize = $latestByPackageId[$canonicalId]['size'] ?? 0;
+                $newSize = $package['size'] ?? 0;
+                if ($newVersion === $existingVersion && $newSize > $existingSize) {
+                    error_log("Package '{$canonicalId}': Same v{$newVersion}, keeping larger file ({$newSize} > {$existingSize})");
+                    $latestByPackageId[$canonicalId] = $package;
+                } else {
+                    error_log("Package '{$canonicalId}': Keeping v{$existingVersion}, hiding v{$newVersion}");
+                }
             }
         }
     }
