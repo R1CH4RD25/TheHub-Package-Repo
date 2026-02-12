@@ -113,11 +113,29 @@ class PackageValidator
             }
             
             // New format should have hub_cards OR management_sections (or both)
+            // But packages can also use other structures (database, presentation, data, etc.)
             if (!isset($packageData['hub_cards']) && !isset($packageData['management_sections'])) {
-                $this->addCheck('structure', "Hub/Management Content", 'hub_cards or management_sections', 'missing',
-                    self::STATUS_FAIL, self::SEVERITY_ERROR,
-                    "Package must include either hub_cards or management_sections",
-                    "Add hub_cards for user-facing features or management_sections for admin features");
+                // Check if package has alternative content structures
+                $altStructures = ['database', 'presentation', 'data', 'policy', 'access', 'fields'];
+                $hasAltContent = false;
+                foreach ($altStructures as $alt) {
+                    if (isset($packageData[$alt])) {
+                        $hasAltContent = true;
+                        break;
+                    }
+                }
+
+                if ($hasAltContent) {
+                    $this->addCheck('structure', "Hub/Management Content", 'hub_cards or management_sections', 'alternative structure',
+                        self::STATUS_WARNING, self::SEVERITY_WARNING,
+                        "Package uses alternative content structure instead of hub_cards/management_sections",
+                        "Consider migrating to hub_cards/management_sections format for full feature support");
+                } else {
+                    $this->addCheck('structure', "Hub/Management Content", 'hub_cards or management_sections', 'missing',
+                        self::STATUS_FAIL, self::SEVERITY_WARNING,
+                        "Package has no content sections (hub_cards, management_sections, or alternatives)",
+                        "Add hub_cards for user-facing features or management_sections for admin features");
+                }
             }
         } else {
             // Old format requires: format_version, package, fields, permissions
@@ -158,7 +176,7 @@ class PackageValidator
         // Validate package metadata
         if (isset($packageData['package'])) {
             $pkg = $packageData['package'];
-            $requiredPkgFields = ['id', 'name', 'display_name', 'version'];
+            $requiredPkgFields = ['id', 'version'];
 
             foreach ($requiredPkgFields as $field) {
                 if (empty($pkg[$field])) {
@@ -166,6 +184,27 @@ class PackageValidator
                         self::STATUS_FAIL, self::SEVERITY_ERROR,
                         "Package metadata is missing: $field");
                 }
+            }
+
+            // 'name' can fall back to display_name or id
+            if (empty($pkg['name'])) {
+                $fallback = $pkg['display_name'] ?? $pkg['id'] ?? null;
+                if ($fallback) {
+                    $this->addCheck('structure', 'Package Metadata: name', 'name', 'fallback to ' . $fallback,
+                        self::STATUS_WARNING, self::SEVERITY_WARNING,
+                        "Package metadata missing 'name', using '" . $fallback . "' as fallback");
+                } else {
+                    $this->addCheck('structure', 'Package Metadata: name', 'name', 'missing',
+                        self::STATUS_FAIL, self::SEVERITY_ERROR,
+                        "Package metadata is missing: name (and no display_name or id to fall back to)");
+                }
+            }
+
+            // 'display_name' can fall back to name
+            if (empty($pkg['display_name']) && !empty($pkg['name'])) {
+                $this->addCheck('structure', 'Package Metadata: display_name', 'display_name', 'fallback to name',
+                    self::STATUS_WARNING, self::SEVERITY_WARNING,
+                    "Package metadata missing 'display_name', will use 'name'");
             }
 
             // Validate semantic version
