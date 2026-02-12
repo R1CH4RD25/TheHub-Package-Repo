@@ -966,12 +966,7 @@
             "counselor": "viewer",
             "staff": "viewer"
         },
-        "googleGroupMapping": {
-            "technology@woodsonisd.net": "importer",
-            "admin@woodsonisd.net": "editor",
-            "teachers@woodsonisd.net": "viewer",
-            "office@woodsonisd.net": "viewer"
-        }
+        "googleGroupMapping": {}
     },
     "access": {
         "fieldVisibility": {
