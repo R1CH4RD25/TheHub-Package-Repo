@@ -4,7 +4,7 @@
 # Run weekly via cron: 0 3 * * 0 /var/www/woodson/thehub/cli/db-maintenance.sh
 
 LOG_FILE="/var/www/woodson/thehub/logs/db-maintenance.log"
-DB_USER="WISDAdmin"
+DB_USER="$DB_USER"
 DB_PASS="$DB_PASSWORD"
 DB_NAME="woodson_hub"
 

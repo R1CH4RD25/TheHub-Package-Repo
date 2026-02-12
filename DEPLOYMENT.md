@@ -224,7 +224,7 @@ Analyze database performance and get tuning recommendations:
 
 ```bash
 cd /var/www/woodson/thehub/cli
-./mysqltuner.pl --host 127.0.0.1 --user WISDAdmin --pass '$DB_PASSWORD'
+./mysqltuner.pl --host 127.0.0.1 --user $DB_USER --pass '$DB_PASSWORD'
 ```
 
 Review the output for:
@@ -277,7 +277,7 @@ tail -f /var/www/woodson/thehub/logs/db-maintenance.log
 ls -lh /var/www/woodson/thehub/logs/backup_*.sql.gz
 
 # Restore from backup
-gunzip -c logs/backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub
+gunzip -c logs/backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub
 ```
 
 #### Percona Toolkit Commands
@@ -286,13 +286,13 @@ Advanced diagnostics when needed:
 
 ```bash
 # Find duplicate indexes
-pt-duplicate-key-checker --host=localhost --user=WISDAdmin --password='$DB_PASSWORD'
+pt-duplicate-key-checker --host=localhost --user=$DB_USER --password='$DB_PASSWORD'
 
 # Analyze slow queries
 pt-query-digest /var/log/mysql/mysql-slow.log
 
 # Check table fragmentation
-pt-online-schema-change --host=localhost --user=WISDAdmin --password='$DB_PASSWORD' \
+pt-online-schema-change --host=localhost --user=$DB_USER --password='$DB_PASSWORD' \
   --alter "ENGINE=InnoDB" D=woodson_hub,t=your_table --execute
 
 # Find unused indexes
@@ -317,16 +317,16 @@ sudo tail -f /var/log/apache2/maintenance.woodsonisd.net-access.log
 
 ```bash
 # Create backup
-mysqldump -u WISDAdmin -p'$DB_PASSWORD' woodson_hub > backup_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u $DB_USER -p'$DB_PASSWORD' woodson_hub > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Create compressed backup
-mysqldump -u WISDAdmin -p'$DB_PASSWORD' woodson_hub | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
+mysqldump -u $DB_USER -p'$DB_PASSWORD' woodson_hub | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
 
 # Restore from backup
-mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub < backup_YYYYMMDD_HHMMSS.sql
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub < backup_YYYYMMDD_HHMMSS.sql
 
 # Restore from compressed backup
-gunzip -c backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub
+gunzip -c backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub
 ```
 
 ### Update Application

@@ -141,7 +141,7 @@ ls -lh /var/www/woodson/thehub/logs/backup_*.sql.gz
 
 # Restore (replace YYYYMMDD_HHMMSS with actual timestamp)
 gunzip -c /var/www/woodson/thehub/logs/backup_YYYYMMDD_HHMMSS.sql.gz | \
-  mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub
+  mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub
 ```
 
 ## Additional Tools
@@ -152,14 +152,14 @@ Run monthly for performance recommendations:
 
 ```bash
 cd /var/www/woodson/thehub/cli
-./mysqltuner.pl --host 127.0.0.1 --user WISDAdmin --pass '$DB_PASSWORD'
+./mysqltuner.pl --host 127.0.0.1 --user $DB_USER --pass '$DB_PASSWORD'
 ```
 
 ### Percona Toolkit
 
 Check for duplicate indexes:
 ```bash
-pt-duplicate-key-checker --host=localhost --user=WISDAdmin --password='$DB_PASSWORD'
+pt-duplicate-key-checker --host=localhost --user=$DB_USER --password='$DB_PASSWORD'
 ```
 
 ## Support

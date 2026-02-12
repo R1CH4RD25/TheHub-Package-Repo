@@ -10,13 +10,16 @@
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
          failOnWarning="true">
-    
+
     <testsuites>
         <testsuite name="Unit Tests">
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Integration Tests">
             <directory>tests/Integration</directory>
+        </testsuite>
+        <testsuite name="Package Tests">
+            <directory>tests/Package</directory>
         </testsuite>
     </testsuites>
 
@@ -33,7 +36,7 @@
         <env name="APP_ENV" value="testing"/>
         <env name="DB_HOST" value="localhost"/>
         <env name="DB_NAME" value="woodson_hub"/>
-        <env name="DB_USER" value="WISDAdmin"/>
+        <env name="DB_USER" value="$DB_USER"/>
         <env name="DB_PASS" value="$DB_PASSWORD"/>
     </php>
 

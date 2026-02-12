@@ -208,7 +208,7 @@ const availablePackages = packages.filter(pkg => !pkg.is_installed);
 cd /var/www/woodson/thehub/public && php -S localhost:8000
 
 # Check package status
-mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub -e "SELECT * FROM section_packages;"
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub -e "SELECT * FROM section_packages;"
 
 # View error logs
 tail -f /var/www/woodson/thehub/logs/php-errors.log

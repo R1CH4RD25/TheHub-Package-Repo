@@ -2605,7 +2605,7 @@ Analyze database performance and get tuning recommendations:
 
 ```bash
 cd /var/www/woodson/thehub/cli
-./mysqltuner.pl --host 127.0.0.1 --user WISDAdmin --pass '$DB_PASSWORD'
+./mysqltuner.pl --host 127.0.0.1 --user $DB_USER --pass '$DB_PASSWORD'
 ```
 
 Review the output for:
@@ -2658,7 +2658,7 @@ tail -f /var/www/woodson/thehub/logs/db-maintenance.log
 ls -lh /var/www/woodson/thehub/logs/backup_*.sql.gz
 
 # Restore from backup
-gunzip -c logs/backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub
+gunzip -c logs/backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub
 ```
 
 #### Percona Toolkit Commands
@@ -2667,13 +2667,13 @@ Advanced diagnostics when needed:
 
 ```bash
 # Find duplicate indexes
-pt-duplicate-key-checker --host=localhost --user=WISDAdmin --password='$DB_PASSWORD'
+pt-duplicate-key-checker --host=localhost --user=$DB_USER --password='$DB_PASSWORD'
 
 # Analyze slow queries
 pt-query-digest /var/log/mysql/mysql-slow.log
 
 # Check table fragmentation
-pt-online-schema-change --host=localhost --user=WISDAdmin --password='$DB_PASSWORD' \
+pt-online-schema-change --host=localhost --user=$DB_USER --password='$DB_PASSWORD' \
   --alter "ENGINE=InnoDB" D=woodson_hub,t=your_table --execute
 
 # Find unused indexes
@@ -2698,16 +2698,16 @@ sudo tail -f /var/log/apache2/maintenance.woodsonisd.net-access.log
 
 ```bash
 # Create backup
-mysqldump -u WISDAdmin -p'$DB_PASSWORD' woodson_hub > backup_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u $DB_USER -p'$DB_PASSWORD' woodson_hub > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Create compressed backup
-mysqldump -u WISDAdmin -p'$DB_PASSWORD' woodson_hub | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
+mysqldump -u $DB_USER -p'$DB_PASSWORD' woodson_hub | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
 
 # Restore from backup
-mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub < backup_YYYYMMDD_HHMMSS.sql
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub < backup_YYYYMMDD_HHMMSS.sql
 
 # Restore from compressed backup
-gunzip -c backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub
+gunzip -c backup_YYYYMMDD_HHMMSS.sql.gz | mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub
 ```
 
 ### Update Application
@@ -12073,11 +12073,11 @@ ls -la /var/www/woodson/thehub/src/Management*
 ls -la /var/www/woodson/thehub/public/assets/js/management.js
 
 # Verify database settings
-mysql -u rsullivan -p'$DB_PASSWORD' woodson_hub -e \
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub -e \
   "SELECT setting_key, setting_value FROM site_settings WHERE setting_key LIKE 'mgmt_%';"
 
 # Verify column rename
-mysql -u rsullivan -p'$DB_PASSWORD' woodson_hub -e \
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub -e \
   "DESCRIBE sections;" | grep mgmt_prefix
 
 # Search for any remaining "command" references (should be minimal/documentation only)
@@ -22153,7 +22153,7 @@ const availablePackages = packages.filter(pkg => !pkg.is_installed);
 cd /var/www/woodson/thehub/public && php -S localhost:8000
 
 # Check package status
-mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub -e "SELECT * FROM section_packages;"
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub -e "SELECT * FROM section_packages;"
 
 # View error logs
 tail -f /var/www/woodson/thehub/logs/php-errors.log
@@ -26012,21 +26012,21 @@ This audit logging system supports:
 
 ```bash
 # View recent logs
-mysql -u WISDAdmin -p woodson_maintenance -e "
+mysql -u $DB_USER -p woodson_maintenance -e "
   SELECT user_id, action, table_name, record_id, created_at
   FROM audit_log
   ORDER BY created_at DESC
   LIMIT 10;"
 
 # Count logs by action type
-mysql -u WISDAdmin -p woodson_maintenance -e "
+mysql -u $DB_USER -p woodson_maintenance -e "
   SELECT action, COUNT(*) as count
   FROM audit_log
   GROUP BY action
   ORDER BY count DESC;"
 
 # View logs for specific user
-mysql -u WISDAdmin -p woodson_maintenance -e "
+mysql -u $DB_USER -p woodson_maintenance -e "
   SELECT * FROM audit_log
   WHERE user_id = 1
   ORDER BY created_at DESC;"
@@ -26036,7 +26036,7 @@ mysql -u WISDAdmin -p woodson_maintenance -e "
 
 ### No logs appearing?
 1. Check if `audit_log` table exists
-2. Verify user has permissions: `GRANT ALL ON woodson_maintenance.* TO 'WISDAdmin'@'localhost';`
+2. Verify user has permissions: `GRANT ALL ON woodson_maintenance.* TO '$DB_USER'@'localhost';`
 3. Check PHP error log: `tail -f /var/log/apache2/error.log`
 4. Ensure AuditLogger class is loaded in bootstrap
 
@@ -37786,7 +37786,7 @@ To apply the themes system to an existing installation:
 
 ```bash
 cd /var/www/woodson/thehub
-mysql -u WISDAdmin -p woodson_maintenance < database/migrations/add_themes_system.sql
+mysql -u $DB_USER -p woodson_maintenance < database/migrations/add_themes_system.sql
 ```
 
 This creates the `themes` table and populates with 3 system themes. No data loss occurs—existing `site_settings` remain unchanged.
@@ -40075,7 +40075,7 @@ You don't have to migrate everything at once:
 - **Usage:**
   ```bash
   cd /var/www/woodson/thehub/cli
-  ./mysqltuner.pl --host 127.0.0.1 --user WISDAdmin --pass '$DB_PASSWORD'
+  ./mysqltuner.pl --host 127.0.0.1 --user $DB_USER --pass '$DB_PASSWORD'
   ```
 
 ### 2. Percona Toolkit
@@ -40161,7 +40161,7 @@ Complete guide including:
 ### Test MySQLTuner
 ```bash
 cd /var/www/woodson/thehub/cli
-./mysqltuner.pl --host 127.0.0.1 --user WISDAdmin --pass '$DB_PASSWORD'
+./mysqltuner.pl --host 127.0.0.1 --user $DB_USER --pass '$DB_PASSWORD'
 ```
 
 Expected output:
@@ -40189,7 +40189,7 @@ ls -lh /var/www/woodson/thehub/logs/backup_*.sql.gz
 ### Test Percona Toolkit
 ```bash
 # Find duplicate indexes
-pt-duplicate-key-checker --host=localhost --user=WISDAdmin --password='$DB_PASSWORD'
+pt-duplicate-key-checker --host=localhost --user=$DB_USER --password='$DB_PASSWORD'
 
 # Expected: Analysis of all tables showing any duplicate indexes
 ```
@@ -40252,7 +40252,7 @@ ls -lh /var/www/woodson/thehub/logs/backup_*.sql.gz
 
 # Restore (replace timestamp)
 gunzip -c logs/backup_YYYYMMDD_HHMMSS.sql.gz | \
-  mysql -u WISDAdmin -p'$DB_PASSWORD' woodson_hub
+  mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub
 ```
 
 ## Next Steps

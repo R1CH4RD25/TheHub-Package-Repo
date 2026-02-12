@@ -288,11 +288,11 @@ ls -la /var/www/woodson/thehub/src/Management*
 ls -la /var/www/woodson/thehub/public/assets/js/management.js
 
 # Verify database settings
-mysql -u rsullivan -p'$DB_PASSWORD' woodson_hub -e \
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub -e \
   "SELECT setting_key, setting_value FROM site_settings WHERE setting_key LIKE 'mgmt_%';"
 
 # Verify column rename
-mysql -u rsullivan -p'$DB_PASSWORD' woodson_hub -e \
+mysql -u $DB_USER -p'$DB_PASSWORD' woodson_hub -e \
   "DESCRIBE sections;" | grep mgmt_prefix
 
 # Search for any remaining "command" references (should be minimal/documentation only)
