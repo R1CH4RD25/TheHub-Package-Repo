@@ -1,0 +1,1896 @@
+{
+  "schemaVersion": "3.0.0",
+  "package": {
+    "id": "operations.vehicle-maintenance",
+    "display_name": "Vehicle Maintenance & Fleet Tracking",
+    "description": "District-wide fleet inventory, fuel/trip tracking, and maintenance scheduling with Layer 2 manager oversight workflows",
+    "version": "2.1.0",
+    "author": "Woodson ISD Technology",
+    "icon": "lucide-truck",
+    "category": "operations",
+    "base_url": "/p/operations.vehicle-maintenance",
+    "tags": [
+      "fleet",
+      "vehicles",
+      "maintenance",
+      "fuel",
+      "operations"
+    ]
+  },
+  "database": {
+    "connection": "woodson_fleet",
+    "primaryTable": "vm_vehicles",
+    "auditTable": "vm_audit_logs"
+  },
+  "presentation": {
+    "pages": {
+      "index": {
+        "title": "Fleet Overview",
+        "route": "/",
+        "layout": "full",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                {
+                  "title": "Total Vehicles",
+                  "dataKey": "total_vehicles",
+                  "icon": "lucide-truck",
+                  "color": "primary"
+                },
+                {
+                  "title": "In Service",
+                  "dataKey": "in_service",
+                  "icon": "lucide-circle-check",
+                  "color": "success"
+                },
+                {
+                  "title": "Out of Service",
+                  "dataKey": "out_of_service",
+                  "icon": "lucide-circle-x",
+                  "color": "danger"
+                },
+                {
+                  "title": "Maintenance Due",
+                  "dataKey": "maintenance_due",
+                  "icon": "lucide-wrench",
+                  "color": "warning"
+                }
+              ]
+            },
+            "dataQuery": "getFleetStats"
+          },
+          {
+            "type": "filters",
+            "config": {
+              "targetTable": "pkg-table-vehicles",
+              "filters": [
+                {
+                  "name": "search",
+                  "type": "search",
+                  "placeholder": "Search by unit, VIN, or make/model...",
+                  "debounce": 300
+                },
+                {
+                  "name": "status",
+                  "type": "select",
+                  "label": "Status",
+                  "options": [
+                    {
+                      "value": "active",
+                      "label": "In Service"
+                    },
+                    {
+                      "value": "oos",
+                      "label": "Out of Service"
+                    }
+                  ]
+                },
+                {
+                  "name": "department",
+                  "type": "select",
+                  "label": "Department",
+                  "optionsQuery": "getDepartments"
+                }
+              ]
+            }
+          },
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-vehicles",
+              "columns": [
+                {
+                  "key": "unit_number",
+                  "label": "Unit #",
+                  "sortable": true,
+                  "width": "10%"
+                },
+                {
+                  "key": "display_name",
+                  "label": "Vehicle",
+                  "sortable": true,
+                  "width": "22%"
+                },
+                {
+                  "key": "vin",
+                  "label": "VIN",
+                  "responsive": "hide-mobile",
+                  "width": "15%"
+                },
+                {
+                  "key": "license_plate",
+                  "label": "Plate",
+                  "responsive": "hide-tablet",
+                  "width": "10%"
+                },
+                {
+                  "key": "current_odometer",
+                  "label": "Odometer",
+                  "sortable": true,
+                  "width": "10%",
+                  "responsive": "hide-mobile"
+                },
+                {
+                  "key": "status_badge",
+                  "label": "Status",
+                  "style": "badge",
+                  "width": "10%"
+                },
+                {
+                  "key": "department_name",
+                  "label": "Dept",
+                  "style": "badge",
+                  "responsive": "hide-mobile",
+                  "width": "12%"
+                }
+              ],
+              "actions": [
+                {
+                  "label": "View",
+                  "icon": "lucide-eye",
+                  "type": "route",
+                  "route": "/vehicle/{id}",
+                  "variant": "warning"
+                }
+              ],
+              "defaultSort": {
+                "column": "unit_number",
+                "direction": "asc"
+              },
+              "pagination": {
+                "perPage": 50,
+                "pageSizes": [
+                  25,
+                  50,
+                  100
+                ]
+              },
+              "emptyState": {
+                "icon": "lucide-truck",
+                "title": "No Vehicles Found",
+                "description": "No vehicles match your search criteria."
+              }
+            },
+            "dataQuery": "listVehicles"
+          }
+        ]
+      },
+      "vehicle": {
+        "title": "Vehicle Details",
+        "route": "/vehicle/{id}",
+        "layout": "standard",
+        "components": [
+          {
+            "type": "detail",
+            "config": {
+              "backRoute": "/",
+              "actions": [
+                {
+                  "label": "Edit",
+                  "icon": "lucide-pencil",
+                  "type": "route",
+                  "route": "/vehicle/{id}/edit",
+                  "style": "primary"
+                },
+                {
+                  "label": "Log Fuel",
+                  "icon": "lucide-fuel",
+                  "type": "route",
+                  "route": "/fuel/add?vehicle_id={id}",
+                  "style": "success"
+                },
+                {
+                  "label": "Log Maintenance",
+                  "icon": "lucide-wrench",
+                  "type": "route",
+                  "route": "/maintenance/add?vehicle_id={id}",
+                  "style": "info"
+                }
+              ],
+              "sections": [
+                {
+                  "title": "Vehicle Information",
+                  "icon": "lucide-truck",
+                  "columns": 2,
+                  "fields": [
+                    {
+                      "key": "unit_number",
+                      "label": "Unit Number",
+                      "copyable": true
+                    },
+                    {
+                      "key": "display_name",
+                      "label": "Year / Make / Model"
+                    },
+                    {
+                      "key": "vin",
+                      "label": "VIN",
+                      "copyable": true
+                    },
+                    {
+                      "key": "license_plate",
+                      "label": "License Plate"
+                    },
+                    {
+                      "key": "current_odometer",
+                      "label": "Current Odometer"
+                    },
+                    {
+                      "key": "status_badge",
+                      "label": "Status",
+                      "type": "badge"
+                    },
+                    {
+                      "key": "oos_reason",
+                      "label": "OOS Reason"
+                    },
+                    {
+                      "key": "department_name",
+                      "label": "Department",
+                      "type": "badge"
+                    },
+                    {
+                      "key": "campus_name",
+                      "label": "Campus",
+                      "type": "badge"
+                    }
+                  ]
+                },
+                {
+                  "title": "Maintenance Schedule",
+                  "icon": "lucide-calendar-clock",
+                  "collapsible": true,
+                  "fields": [
+                    {
+                      "key": "template_name",
+                      "label": "Maintenance Template"
+                    },
+                    {
+                      "key": "next_service_due",
+                      "label": "Next Service Due",
+                      "type": "date"
+                    },
+                    {
+                      "key": "next_service_miles",
+                      "label": "Next Service Miles"
+                    }
+                  ]
+                }
+              ]
+            },
+            "dataQuery": "getVehicle"
+          }
+        ]
+      },
+      "vehicle-add": {
+        "title": "Add Vehicle",
+        "route": "/vehicle/add",
+        "layout": "standard",
+        "access": [
+          "manager",
+          "admin"
+        ],
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "mutation": "createVehicle",
+              "submitLabel": "Add Vehicle",
+              "cancelRoute": "/",
+              "sections": [
+                {
+                  "title": "Vehicle Information",
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "unit_number",
+                      "type": "text",
+                      "label": "Unit Number",
+                      "required": true,
+                      "placeholder": "e.g. BUS-01",
+                      "helpText": "Unique fleet identifier"
+                    },
+                    {
+                      "key": "name",
+                      "type": "text",
+                      "label": "Vehicle Name",
+                      "placeholder": "e.g. Activity Bus 1",
+                      "helpText": "Friendly name (optional)"
+                    },
+                    {
+                      "key": "year",
+                      "type": "number",
+                      "label": "Year",
+                      "required": true,
+                      "placeholder": "e.g. 2022",
+                      "step": 1,
+                      "validation": {
+                        "min": 1990,
+                        "max": 2030
+                      }
+                    },
+                    {
+                      "key": "make",
+                      "type": "text",
+                      "label": "Make",
+                      "required": true,
+                      "placeholder": "e.g. Blue Bird"
+                    },
+                    {
+                      "key": "model",
+                      "type": "text",
+                      "label": "Model",
+                      "required": true,
+                      "placeholder": "e.g. Vision"
+                    },
+                    {
+                      "key": "vin",
+                      "type": "text",
+                      "label": "VIN",
+                      "placeholder": "17-character VIN",
+                      "validation": {
+                        "maxLength": 17,
+                        "pattern": "^[A-HJ-NPR-Z0-9]{17}$"
+                      }
+                    },
+                    {
+                      "key": "license_plate",
+                      "type": "text",
+                      "label": "License Plate",
+                      "placeholder": "e.g. TX 1234567"
+                    },
+                    {
+                      "key": "current_odometer",
+                      "type": "number",
+                      "label": "Current Odometer",
+                      "step": 1,
+                      "placeholder": "Current mileage",
+                      "validation": {
+                        "min": 0,
+                        "max": 999999
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Assignment",
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "department_id",
+                      "type": "select",
+                      "label": "Department",
+                      "optionsQuery": "getDepartments",
+                      "helpText": "Optional — assign to a department"
+                    },
+                    {
+                      "key": "campus_id",
+                      "type": "select",
+                      "label": "Campus",
+                      "optionsQuery": "getCampuses",
+                      "helpText": "Optional — assign to a campus"
+                    },
+                    {
+                      "key": "template_id",
+                      "type": "select",
+                      "label": "Maintenance Template",
+                      "optionsQuery": "getTemplates",
+                      "helpText": "Apply a maintenance schedule template"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "fuel-log": {
+        "title": "Submit Fuel Log",
+        "route": "/fuel/add",
+        "layout": "standard",
+        "access": [
+          "user",
+          "manager",
+          "admin"
+        ],
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "mutation": "createFuelLog",
+              "submitLabel": "Submit Fuel Log",
+              "cancelRoute": "/fuel",
+              "sections": [
+                {
+                  "title": "Trip Information",
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "vehicle_id",
+                      "type": "select",
+                      "label": "Vehicle",
+                      "required": true,
+                      "optionsQuery": "getVehicleOptions"
+                    },
+                    {
+                      "key": "fuel_date",
+                      "type": "date",
+                      "label": "Date",
+                      "required": true
+                    },
+                    {
+                      "key": "trip_category_id",
+                      "type": "select",
+                      "label": "Trip Category",
+                      "required": true,
+                      "optionsQuery": "getTripCategories",
+                      "helpText": "11=Extracurricular, 23=Transport, 34=Business, 36=Training, 41=Maintenance"
+                    },
+                    {
+                      "key": "odometer_reading",
+                      "type": "number",
+                      "label": "Odometer Reading",
+                      "required": true,
+                      "step": 1,
+                      "placeholder": "Current mileage",
+                      "validation": {
+                        "min": 0,
+                        "max": 999999
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Fuel Details",
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "fuel_type",
+                      "type": "select",
+                      "label": "Fuel Type",
+                      "required": true,
+                      "options": [
+                        {
+                          "value": "unleaded",
+                          "label": "Unleaded"
+                        },
+                        {
+                          "value": "diesel",
+                          "label": "Diesel"
+                        },
+                        {
+                          "value": "propane",
+                          "label": "Propane"
+                        },
+                        {
+                          "value": "other",
+                          "label": "Other"
+                        }
+                      ]
+                    },
+                    {
+                      "key": "fuel_gallons",
+                      "type": "number",
+                      "label": "Gallons",
+                      "required": true,
+                      "placeholder": "e.g. 45.5",
+                      "validation": {
+                        "min": 0.01,
+                        "max": 9999.99
+                      }
+                    },
+                    {
+                      "key": "is_purchased",
+                      "type": "checkbox",
+                      "label": "Purchased Fuel (not district tank)",
+                      "helpText": "Check if fuel was purchased from an external vendor"
+                    }
+                  ]
+                },
+                {
+                  "title": "Purchase Details",
+                  "description": "Complete if fuel was purchased externally",
+                  "collapsible": true,
+                  "collapsed": true,
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "vendor",
+                      "type": "text",
+                      "label": "Vendor",
+                      "placeholder": "e.g. Shell, Buc-ee's"
+                    },
+                    {
+                      "key": "location",
+                      "type": "text",
+                      "label": "Location",
+                      "placeholder": "City or address"
+                    },
+                    {
+                      "key": "fuel_cost",
+                      "type": "currency",
+                      "label": "Total Cost"
+                    },
+                    {
+                      "key": "price_per_gallon",
+                      "type": "currency",
+                      "label": "Price per Gallon"
+                    },
+                    {
+                      "key": "receipt",
+                      "type": "file",
+                      "label": "Receipt Upload",
+                      "accept": ".pdf,.jpg,.jpeg,.png",
+                      "fullWidth": true,
+                      "helpText": "PDF, JPG, or PNG — max 5 MB"
+                    }
+                  ]
+                },
+                {
+                  "title": "Notes",
+                  "fields": [
+                    {
+                      "key": "notes",
+                      "type": "textarea",
+                      "label": "Notes",
+                      "rows": 3,
+                      "placeholder": "Additional details about this trip..."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "fuel": {
+        "title": "Fuel Logs",
+        "route": "/fuel",
+        "layout": "full",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                {
+                  "title": "Logs This Month",
+                  "dataKey": "logs_this_month",
+                  "icon": "lucide-fuel",
+                  "color": "primary"
+                },
+                {
+                  "title": "Total Gallons",
+                  "dataKey": "total_gallons",
+                  "icon": "lucide-droplets",
+                  "color": "info"
+                },
+                {
+                  "title": "Total Cost",
+                  "dataKey": "total_cost",
+                  "icon": "lucide-dollar-sign",
+                  "color": "success",
+                  "format": "currency"
+                },
+                {
+                  "title": "Pending Review",
+                  "dataKey": "pending_review",
+                  "icon": "lucide-clock",
+                  "color": "warning"
+                }
+              ]
+            },
+            "dataQuery": "getFuelStats"
+          },
+          {
+            "type": "filters",
+            "config": {
+              "targetTable": "pkg-table-fuel",
+              "filters": [
+                {
+                  "name": "search",
+                  "type": "search",
+                  "placeholder": "Search by vehicle, driver...",
+                  "debounce": 300
+                },
+                {
+                  "name": "trip_category",
+                  "type": "select",
+                  "label": "Trip Code",
+                  "optionsQuery": "getTripCategories"
+                },
+                {
+                  "name": "vehicle_id",
+                  "type": "select",
+                  "label": "Vehicle",
+                  "optionsQuery": "getVehicleOptions"
+                },
+                {
+                  "name": "status",
+                  "type": "select",
+                  "label": "Status",
+                  "options": [
+                    {
+                      "value": "submitted",
+                      "label": "Submitted"
+                    },
+                    {
+                      "value": "in_review",
+                      "label": "In Review"
+                    },
+                    {
+                      "value": "corrected",
+                      "label": "Corrected"
+                    },
+                    {
+                      "value": "approved",
+                      "label": "Approved"
+                    },
+                    {
+                      "value": "rejected",
+                      "label": "Rejected"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-fuel",
+              "columns": [
+                {
+                  "key": "fuel_date",
+                  "label": "Date",
+                  "sortable": true,
+                  "style": "date",
+                  "width": "12%"
+                },
+                {
+                  "key": "unit_number",
+                  "label": "Vehicle",
+                  "sortable": true,
+                  "width": "12%"
+                },
+                {
+                  "key": "trip_code",
+                  "label": "Trip",
+                  "style": "badge",
+                  "width": "8%"
+                },
+                {
+                  "key": "fuel_gallons",
+                  "label": "Gallons",
+                  "sortable": true,
+                  "width": "10%"
+                },
+                {
+                  "key": "odometer_reading",
+                  "label": "Odometer",
+                  "width": "10%",
+                  "responsive": "hide-mobile"
+                },
+                {
+                  "key": "fuel_cost",
+                  "label": "Cost",
+                  "style": "currency",
+                  "width": "10%",
+                  "responsive": "hide-mobile"
+                },
+                {
+                  "key": "driver_name",
+                  "label": "Driver",
+                  "responsive": "hide-mobile",
+                  "width": "15%"
+                },
+                {
+                  "key": "workflow_status",
+                  "label": "Status",
+                  "style": "badge",
+                  "width": "10%"
+                }
+              ],
+              "actions": [
+                {
+                  "label": "View",
+                  "icon": "lucide-eye",
+                  "type": "route",
+                  "route": "/fuel/{id}",
+                  "variant": "warning"
+                }
+              ],
+              "defaultSort": {
+                "column": "fuel_date",
+                "direction": "desc"
+              },
+              "pagination": {
+                "perPage": 50,
+                "pageSizes": [
+                  25,
+                  50,
+                  100,
+                  200
+                ]
+              },
+              "emptyState": {
+                "icon": "lucide-fuel",
+                "title": "No Fuel Logs",
+                "description": "No fuel logs match your search criteria."
+              }
+            },
+            "dataQuery": "listFuelLogs"
+          }
+        ]
+      },
+      "fuel-detail": {
+        "title": "Fuel Log Details",
+        "route": "/fuel/{id}",
+        "layout": "standard",
+        "components": [
+          {
+            "type": "detail",
+            "config": {
+              "backRoute": "/fuel",
+              "actions": [
+                {
+                  "label": "Approve",
+                  "icon": "lucide-check",
+                  "type": "mutation",
+                  "mutation": "approveFuelLog",
+                  "style": "success",
+                  "confirm": "Approve this fuel log?"
+                },
+                {
+                  "label": "Reject",
+                  "icon": "lucide-x",
+                  "type": "mutation",
+                  "mutation": "rejectFuelLog",
+                  "style": "danger",
+                  "confirm": "Reject this fuel log? A reason is required."
+                }
+              ],
+              "sections": [
+                {
+                  "title": "Trip Information",
+                  "icon": "lucide-map-pin",
+                  "columns": 2,
+                  "fields": [
+                    {
+                      "key": "fuel_date",
+                      "label": "Date",
+                      "type": "date"
+                    },
+                    {
+                      "key": "unit_number",
+                      "label": "Vehicle"
+                    },
+                    {
+                      "key": "trip_code",
+                      "label": "Trip Category",
+                      "type": "badge"
+                    },
+                    {
+                      "key": "odometer_reading",
+                      "label": "Odometer Reading"
+                    },
+                    {
+                      "key": "driver_name",
+                      "label": "Submitted By"
+                    },
+                    {
+                      "key": "workflow_status",
+                      "label": "Status",
+                      "type": "badge"
+                    }
+                  ]
+                },
+                {
+                  "title": "Fuel Details",
+                  "icon": "lucide-fuel",
+                  "columns": 2,
+                  "fields": [
+                    {
+                      "key": "fuel_type",
+                      "label": "Fuel Type",
+                      "type": "badge"
+                    },
+                    {
+                      "key": "fuel_gallons",
+                      "label": "Gallons"
+                    },
+                    {
+                      "key": "fuel_cost",
+                      "label": "Cost",
+                      "type": "currency"
+                    },
+                    {
+                      "key": "price_per_gallon",
+                      "label": "Price/Gallon",
+                      "type": "currency"
+                    },
+                    {
+                      "key": "vendor",
+                      "label": "Vendor"
+                    },
+                    {
+                      "key": "location",
+                      "label": "Location"
+                    }
+                  ]
+                },
+                {
+                  "title": "Notes & Attachments",
+                  "icon": "lucide-paperclip",
+                  "collapsible": true,
+                  "fields": [
+                    {
+                      "key": "notes",
+                      "label": "Notes"
+                    },
+                    {
+                      "key": "receipt_url",
+                      "label": "Receipt",
+                      "type": "link"
+                    }
+                  ]
+                }
+              ]
+            },
+            "dataQuery": "getFuelLog"
+          }
+        ]
+      },
+      "maintenance-log": {
+        "title": "Submit Maintenance Log",
+        "route": "/maintenance/add",
+        "layout": "standard",
+        "access": [
+          "user",
+          "manager",
+          "admin"
+        ],
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "mutation": "createMaintenanceEvent",
+              "submitLabel": "Submit Maintenance Log",
+              "cancelRoute": "/maintenance",
+              "sections": [
+                {
+                  "title": "Service Information",
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "vehicle_id",
+                      "type": "select",
+                      "label": "Vehicle",
+                      "required": true,
+                      "optionsQuery": "getVehicleOptions"
+                    },
+                    {
+                      "key": "maintenance_item_id",
+                      "type": "select",
+                      "label": "Maintenance Type",
+                      "required": true,
+                      "optionsQuery": "getMaintenanceItems",
+                      "helpText": "e.g. Oil Change, Tire Rotation, Brake Inspection"
+                    },
+                    {
+                      "key": "maintenance_date",
+                      "type": "date",
+                      "label": "Service Date",
+                      "required": true
+                    },
+                    {
+                      "key": "odometer_reading",
+                      "type": "number",
+                      "label": "Odometer at Service",
+                      "required": true,
+                      "step": 1,
+                      "placeholder": "Current mileage",
+                      "validation": {
+                        "min": 0,
+                        "max": 999999
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Vendor & Costs",
+                  "grid": 2,
+                  "fields": [
+                    {
+                      "key": "vendor",
+                      "type": "text",
+                      "label": "Vendor / Shop",
+                      "placeholder": "e.g. WISD Bus Barn, Pep Boys"
+                    },
+                    {
+                      "key": "parts_cost",
+                      "type": "currency",
+                      "label": "Parts Cost"
+                    },
+                    {
+                      "key": "labor_cost",
+                      "type": "currency",
+                      "label": "Labor Cost"
+                    },
+                    {
+                      "key": "total_cost",
+                      "type": "currency",
+                      "label": "Total Cost",
+                      "helpText": "Auto-calculated if parts + labor provided"
+                    }
+                  ]
+                },
+                {
+                  "title": "Documentation",
+                  "collapsible": true,
+                  "collapsed": true,
+                  "fields": [
+                    {
+                      "key": "notes",
+                      "type": "textarea",
+                      "label": "Service Notes",
+                      "rows": 3,
+                      "placeholder": "Describe work performed..."
+                    },
+                    {
+                      "key": "invoice",
+                      "type": "file",
+                      "label": "Invoice Upload",
+                      "accept": ".pdf,.jpg,.jpeg,.png",
+                      "helpText": "PDF, JPG, or PNG — max 5 MB"
+                    },
+                    {
+                      "key": "photos",
+                      "type": "file",
+                      "label": "Service Photos",
+                      "accept": ".jpg,.jpeg,.png",
+                      "helpText": "JPG or PNG — max 10 MB"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "maintenance": {
+        "title": "Maintenance Logs",
+        "route": "/maintenance",
+        "layout": "full",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                {
+                  "title": "Events This Month",
+                  "dataKey": "events_this_month",
+                  "icon": "lucide-wrench",
+                  "color": "primary"
+                },
+                {
+                  "title": "Total Parts Cost",
+                  "dataKey": "total_parts_cost",
+                  "icon": "lucide-package",
+                  "color": "info",
+                  "format": "currency"
+                },
+                {
+                  "title": "Total Labor Cost",
+                  "dataKey": "total_labor_cost",
+                  "icon": "lucide-hard-hat",
+                  "color": "warning",
+                  "format": "currency"
+                },
+                {
+                  "title": "Pending Review",
+                  "dataKey": "pending_review",
+                  "icon": "lucide-clock",
+                  "color": "danger"
+                }
+              ]
+            },
+            "dataQuery": "getMaintenanceStats"
+          },
+          {
+            "type": "filters",
+            "config": {
+              "targetTable": "pkg-table-maintenance",
+              "filters": [
+                {
+                  "name": "search",
+                  "type": "search",
+                  "placeholder": "Search by vehicle, type, vendor...",
+                  "debounce": 300
+                },
+                {
+                  "name": "vehicle_id",
+                  "type": "select",
+                  "label": "Vehicle",
+                  "optionsQuery": "getVehicleOptions"
+                },
+                {
+                  "name": "maintenance_item_id",
+                  "type": "select",
+                  "label": "Type",
+                  "optionsQuery": "getMaintenanceItems"
+                },
+                {
+                  "name": "status",
+                  "type": "select",
+                  "label": "Status",
+                  "options": [
+                    {
+                      "value": "submitted",
+                      "label": "Submitted"
+                    },
+                    {
+                      "value": "in_review",
+                      "label": "In Review"
+                    },
+                    {
+                      "value": "approved",
+                      "label": "Approved"
+                    },
+                    {
+                      "value": "rejected",
+                      "label": "Rejected"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-maintenance",
+              "columns": [
+                {
+                  "key": "maintenance_date",
+                  "label": "Date",
+                  "sortable": true,
+                  "style": "date",
+                  "width": "12%"
+                },
+                {
+                  "key": "unit_number",
+                  "label": "Vehicle",
+                  "sortable": true,
+                  "width": "12%"
+                },
+                {
+                  "key": "maintenance_type",
+                  "label": "Service",
+                  "width": "18%"
+                },
+                {
+                  "key": "vendor",
+                  "label": "Vendor",
+                  "responsive": "hide-mobile",
+                  "width": "15%"
+                },
+                {
+                  "key": "total_cost",
+                  "label": "Cost",
+                  "style": "currency",
+                  "sortable": true,
+                  "width": "10%"
+                },
+                {
+                  "key": "odometer_reading",
+                  "label": "Odometer",
+                  "responsive": "hide-mobile",
+                  "width": "10%"
+                },
+                {
+                  "key": "workflow_status",
+                  "label": "Status",
+                  "style": "badge",
+                  "width": "10%"
+                }
+              ],
+              "actions": [
+                {
+                  "label": "View",
+                  "icon": "lucide-eye",
+                  "type": "route",
+                  "route": "/maintenance/{id}",
+                  "variant": "warning"
+                }
+              ],
+              "defaultSort": {
+                "column": "maintenance_date",
+                "direction": "desc"
+              },
+              "pagination": {
+                "perPage": 50,
+                "pageSizes": [
+                  25,
+                  50,
+                  100
+                ]
+              },
+              "emptyState": {
+                "icon": "lucide-wrench",
+                "title": "No Maintenance Records",
+                "description": "No maintenance logs match your criteria."
+              }
+            },
+            "dataQuery": "listMaintenanceEvents"
+          }
+        ]
+      },
+      "schedules": {
+        "title": "Maintenance Schedules",
+        "route": "/schedules",
+        "layout": "full",
+        "access": [
+          "manager",
+          "admin"
+        ],
+        "components": [
+          {
+            "type": "filters",
+            "config": {
+              "targetTable": "pkg-table-schedules",
+              "filters": [
+                {
+                  "name": "search",
+                  "type": "search",
+                  "placeholder": "Search vehicles...",
+                  "debounce": 300
+                },
+                {
+                  "name": "due_status",
+                  "type": "select",
+                  "label": "Due Status",
+                  "options": [
+                    {
+                      "value": "overdue",
+                      "label": "Overdue"
+                    },
+                    {
+                      "value": "due_soon",
+                      "label": "Due Soon"
+                    },
+                    {
+                      "value": "ok",
+                      "label": "Up to Date"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-schedules",
+              "columns": [
+                {
+                  "key": "unit_number",
+                  "label": "Vehicle",
+                  "sortable": true,
+                  "width": "12%"
+                },
+                {
+                  "key": "maintenance_type",
+                  "label": "Service Item",
+                  "width": "20%"
+                },
+                {
+                  "key": "last_service_date",
+                  "label": "Last Service",
+                  "style": "date",
+                  "width": "12%"
+                },
+                {
+                  "key": "next_due_date",
+                  "label": "Next Due",
+                  "style": "date",
+                  "sortable": true,
+                  "width": "12%"
+                },
+                {
+                  "key": "next_due_miles",
+                  "label": "Due at Miles",
+                  "width": "12%",
+                  "responsive": "hide-mobile"
+                },
+                {
+                  "key": "due_status",
+                  "label": "Status",
+                  "style": "badge",
+                  "width": "10%"
+                }
+              ],
+              "defaultSort": {
+                "column": "next_due_date",
+                "direction": "asc"
+              },
+              "pagination": {
+                "perPage": 100
+              },
+              "emptyState": {
+                "icon": "lucide-calendar-clock",
+                "title": "No Schedules",
+                "description": "No maintenance schedules configured. Apply templates to vehicles first."
+              }
+            },
+            "dataQuery": "listSchedules"
+          }
+        ]
+      },
+      "trip-categories": {
+        "title": "Trip Categories",
+        "route": "/config/trip-categories",
+        "layout": "standard",
+        "access": [
+          "admin"
+        ],
+        "components": [
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-trips",
+              "columns": [
+                {
+                  "key": "code",
+                  "label": "Code",
+                  "sortable": true,
+                  "width": "10%"
+                },
+                {
+                  "key": "name",
+                  "label": "Name",
+                  "sortable": true,
+                  "width": "30%"
+                },
+                {
+                  "key": "description",
+                  "label": "Description",
+                  "width": "35%"
+                },
+                {
+                  "key": "is_active",
+                  "label": "Active",
+                  "style": "boolean",
+                  "width": "10%"
+                }
+              ],
+              "actions": [
+                {
+                  "label": "Edit",
+                  "icon": "lucide-pencil",
+                  "type": "route",
+                  "route": "/config/trip-categories/{id}/edit",
+                  "variant": "primary"
+                }
+              ],
+              "emptyState": {
+                "icon": "lucide-route",
+                "title": "No Trip Categories",
+                "description": "Trip categories will be seeded on first install."
+              }
+            },
+            "dataQuery": "listTripCategories"
+          }
+        ]
+      },
+      "templates": {
+        "title": "Maintenance Templates",
+        "route": "/config/templates",
+        "layout": "standard",
+        "access": [
+          "admin"
+        ],
+        "components": [
+          {
+            "type": "table",
+            "config": {
+              "id": "pkg-table-templates",
+              "columns": [
+                {
+                  "key": "name",
+                  "label": "Template Name",
+                  "sortable": true,
+                  "width": "25%"
+                },
+                {
+                  "key": "description",
+                  "label": "Description",
+                  "width": "35%"
+                },
+                {
+                  "key": "item_count",
+                  "label": "Items",
+                  "width": "10%"
+                },
+                {
+                  "key": "vehicle_count",
+                  "label": "Vehicles Using",
+                  "width": "15%"
+                },
+                {
+                  "key": "is_active",
+                  "label": "Active",
+                  "style": "boolean",
+                  "width": "10%"
+                }
+              ],
+              "actions": [
+                {
+                  "label": "View",
+                  "icon": "lucide-eye",
+                  "type": "route",
+                  "route": "/config/templates/{id}",
+                  "variant": "warning"
+                }
+              ],
+              "emptyState": {
+                "icon": "lucide-clipboard-list",
+                "title": "No Templates",
+                "description": "Create maintenance templates to auto-generate schedules when applied to vehicles."
+              }
+            },
+            "dataQuery": "listTemplates"
+          }
+        ]
+      }
+    }
+  },
+  "data": {
+    "queries": {
+      "getFleetStats": {
+        "description": "Fleet dashboard statistics",
+        "handler": "VehicleQueryHandler::getFleetStats",
+        "cache": 300,
+        "type": "stats"
+      },
+      "listVehicles": {
+        "description": "List vehicles with search/filter/pagination",
+        "handler": "VehicleQueryHandler::listVehicles",
+        "parameters": {
+          "search": {
+            "type": "string",
+            "optional": true
+          },
+          "status": {
+            "type": "string",
+            "optional": true
+          },
+          "department": {
+            "type": "integer",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          },
+          "sort": {
+            "type": "string",
+            "optional": true
+          },
+          "sortDir": {
+            "type": "string",
+            "optional": true
+          }
+        },
+        "type": "list",
+        "searchColumns": [
+          "unit_number",
+          "make",
+          "model",
+          "vin",
+          "license_plate"
+        ],
+        "filterColumns": {
+          "status": "status",
+          "department": "department_id"
+        }
+      },
+      "getVehicle": {
+        "description": "Get a single vehicle by ID with schedule info",
+        "handler": "VehicleQueryHandler::getVehicle",
+        "parameters": {
+          "id": {
+            "type": "integer",
+            "required": true
+          }
+        },
+        "type": "get"
+      },
+      "getVehicleOptions": {
+        "description": "Vehicle dropdown options",
+        "handler": "VehicleQueryHandler::getVehicleOptions",
+        "cache": 600,
+        "type": "options"
+      },
+      "getDepartments": {
+        "description": "Department dropdown options",
+        "handler": "VehicleQueryHandler::getDepartments",
+        "cache": 3600,
+        "type": "options",
+        "table": "vm_departments"
+      },
+      "getCampuses": {
+        "description": "Campus dropdown options",
+        "handler": "VehicleQueryHandler::getCampuses",
+        "cache": 3600,
+        "type": "options",
+        "table": "vm_campuses"
+      },
+      "getTripCategories": {
+        "description": "Active trip category options",
+        "handler": "VehicleQueryHandler::getTripCategories",
+        "cache": 3600,
+        "type": "options",
+        "table": "vm_trip_categories"
+      },
+      "getMaintenanceItems": {
+        "description": "Maintenance item type options",
+        "handler": "VehicleQueryHandler::getMaintenanceItems",
+        "cache": 3600,
+        "type": "options",
+        "table": "vm_maintenance_items"
+      },
+      "getTemplates": {
+        "description": "Template dropdown options",
+        "handler": "VehicleQueryHandler::getTemplates",
+        "cache": 3600,
+        "type": "options",
+        "table": "vm_templates"
+      },
+      "getFuelStats": {
+        "description": "Fuel log dashboard stats",
+        "handler": "FuelQueryHandler::getFuelStats",
+        "cache": 300,
+        "type": "stats",
+        "table": "vm_fuel_logs"
+      },
+      "listFuelLogs": {
+        "description": "List fuel logs with filters",
+        "handler": "FuelQueryHandler::listFuelLogs",
+        "parameters": {
+          "search": {
+            "type": "string",
+            "optional": true
+          },
+          "trip_category": {
+            "type": "integer",
+            "optional": true
+          },
+          "vehicle_id": {
+            "type": "integer",
+            "optional": true
+          },
+          "status": {
+            "type": "string",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          },
+          "sort": {
+            "type": "string",
+            "optional": true
+          },
+          "sortDir": {
+            "type": "string",
+            "optional": true
+          }
+        },
+        "type": "list",
+        "table": "vm_fuel_logs",
+        "searchColumns": [
+          "vehicle_unit",
+          "vendor",
+          "location"
+        ]
+      },
+      "getFuelLog": {
+        "description": "Get a single fuel log with details",
+        "handler": "FuelQueryHandler::getFuelLog",
+        "parameters": {
+          "id": {
+            "type": "integer",
+            "required": true
+          }
+        },
+        "type": "get",
+        "table": "vm_fuel_logs"
+      },
+      "getMaintenanceStats": {
+        "description": "Maintenance dashboard stats",
+        "handler": "MaintenanceQueryHandler::getMaintenanceStats",
+        "cache": 300,
+        "type": "stats",
+        "table": "vm_maintenance_events"
+      },
+      "listMaintenanceEvents": {
+        "description": "List maintenance events with filters",
+        "handler": "MaintenanceQueryHandler::listMaintenanceEvents",
+        "parameters": {
+          "search": {
+            "type": "string",
+            "optional": true
+          },
+          "vehicle_id": {
+            "type": "integer",
+            "optional": true
+          },
+          "maintenance_item_id": {
+            "type": "integer",
+            "optional": true
+          },
+          "status": {
+            "type": "string",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          },
+          "sort": {
+            "type": "string",
+            "optional": true
+          },
+          "sortDir": {
+            "type": "string",
+            "optional": true
+          }
+        },
+        "type": "list",
+        "table": "vm_maintenance_events",
+        "searchColumns": [
+          "description",
+          "notes"
+        ]
+      },
+      "listSchedules": {
+        "description": "List maintenance schedules with due status",
+        "handler": "MaintenanceQueryHandler::listSchedules",
+        "parameters": {
+          "search": {
+            "type": "string",
+            "optional": true
+          },
+          "due_status": {
+            "type": "string",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          }
+        },
+        "type": "list",
+        "table": "vm_maintenance_schedules"
+      },
+      "listTripCategories": {
+        "description": "List all trip categories for admin config",
+        "handler": "VehicleQueryHandler::listTripCategories",
+        "type": "list",
+        "table": "vm_trip_categories"
+      },
+      "listTemplates": {
+        "description": "List all maintenance templates for admin config",
+        "handler": "MaintenanceQueryHandler::listTemplates",
+        "type": "list",
+        "table": "vm_templates"
+      }
+    },
+    "mutations": {
+      "createVehicle": {
+        "description": "Add a new vehicle to the fleet",
+        "handler": "VehicleMutationHandler::createVehicle",
+        "audit": true,
+        "type": "create"
+      },
+      "updateVehicle": {
+        "description": "Update vehicle information",
+        "handler": "VehicleMutationHandler::updateVehicle",
+        "audit": true,
+        "type": "update"
+      },
+      "toggleOOS": {
+        "description": "Toggle out-of-service status with reason",
+        "handler": "VehicleMutationHandler::toggleOOS",
+        "audit": true,
+        "type": "toggle",
+        "toggleField": "is_oos"
+      },
+      "createFuelLog": {
+        "description": "Submit a new fuel log entry",
+        "handler": "FuelMutationHandler::createFuelLog",
+        "audit": true,
+        "type": "create",
+        "table": "vm_fuel_logs"
+      },
+      "approveFuelLog": {
+        "description": "Approve a fuel log (Layer 2)",
+        "handler": "FuelMutationHandler::approveFuelLog",
+        "audit": true,
+        "type": "status",
+        "table": "vm_fuel_logs",
+        "newStatus": "approved"
+      },
+      "rejectFuelLog": {
+        "description": "Reject a fuel log with reason (Layer 2)",
+        "handler": "FuelMutationHandler::rejectFuelLog",
+        "audit": true,
+        "confirm": true,
+        "type": "status",
+        "table": "vm_fuel_logs",
+        "newStatus": "rejected"
+      },
+      "correctFuelLog": {
+        "description": "Correct fuel log fields with reason (Layer 2)",
+        "handler": "FuelMutationHandler::correctFuelLog",
+        "audit": true,
+        "type": "update",
+        "table": "vm_fuel_logs"
+      },
+      "createMaintenanceEvent": {
+        "description": "Submit a maintenance event",
+        "handler": "MaintenanceMutationHandler::createMaintenanceEvent",
+        "audit": true,
+        "type": "create",
+        "table": "vm_maintenance_events"
+      },
+      "approveMaintenanceEvent": {
+        "description": "Approve a maintenance event (Layer 2)",
+        "handler": "MaintenanceMutationHandler::approveMaintenanceEvent",
+        "audit": true,
+        "type": "status",
+        "table": "vm_maintenance_events",
+        "newStatus": "approved"
+      },
+      "rejectMaintenanceEvent": {
+        "description": "Reject a maintenance event with reason (Layer 2)",
+        "handler": "MaintenanceMutationHandler::rejectMaintenanceEvent",
+        "audit": true,
+        "confirm": true,
+        "type": "status",
+        "table": "vm_maintenance_events",
+        "newStatus": "rejected"
+      },
+      "correctMaintenanceEvent": {
+        "description": "Correct maintenance event fields (Layer 2)",
+        "handler": "MaintenanceMutationHandler::correctMaintenanceEvent",
+        "audit": true,
+        "type": "update",
+        "table": "vm_maintenance_events"
+      }
+    }
+  },
+  "policy": {
+    "roles": {
+      "user": {
+        "label": "Fleet User",
+        "description": "View fleet, submit fuel and maintenance logs, view own records",
+        "queries": [
+          "getFleetStats",
+          "listVehicles",
+          "getVehicle",
+          "getVehicleOptions",
+          "getDepartments",
+          "getCampuses",
+          "getTripCategories",
+          "getMaintenanceItems",
+          "getFuelStats",
+          "listFuelLogs",
+          "getFuelLog",
+          "getMaintenanceStats",
+          "listMaintenanceEvents"
+        ],
+        "mutations": [
+          "createFuelLog",
+          "createMaintenanceEvent"
+        ]
+      },
+      "manager": {
+        "label": "Fleet Manager",
+        "description": "Review/correct/approve submissions, manage fleet and schedules",
+        "inherits": "user",
+        "queries": [
+          "listSchedules",
+          "getTemplates"
+        ],
+        "mutations": [
+          "createVehicle",
+          "updateVehicle",
+          "toggleOOS",
+          "approveFuelLog",
+          "rejectFuelLog",
+          "correctFuelLog",
+          "approveMaintenanceEvent",
+          "rejectMaintenanceEvent",
+          "correctMaintenanceEvent"
+        ]
+      },
+      "admin": {
+        "label": "Fleet Administrator",
+        "description": "Full configuration — categories, templates, org, settings",
+        "inherits": "manager",
+        "queries": [
+          "listTripCategories",
+          "listTemplates"
+        ],
+        "mutations": []
+      }
+    },
+    "defaultRole": "user",
+    "globalRoleMapping": {
+      "super_admin": "admin",
+      "admin": "manager",
+      "staff": "user"
+    }
+  },
+  "access": {
+    "layer2": {
+      "workflow": {
+        "states": [
+          "submitted",
+          "in_review",
+          "corrected",
+          "approved",
+          "rejected"
+        ],
+        "transitions": [
+          {
+            "from": "submitted",
+            "to": "in_review",
+            "actor": [
+              "manager",
+              "admin"
+            ]
+          },
+          {
+            "from": "in_review",
+            "to": "corrected",
+            "actor": [
+              "manager",
+              "admin"
+            ]
+          },
+          {
+            "from": "in_review",
+            "to": "approved",
+            "actor": [
+              "manager",
+              "admin"
+            ]
+          },
+          {
+            "from": "in_review",
+            "to": "rejected",
+            "actor": [
+              "manager",
+              "admin"
+            ]
+          },
+          {
+            "from": "corrected",
+            "to": "approved",
+            "actor": [
+              "manager",
+              "admin"
+            ]
+          },
+          {
+            "from": "corrected",
+            "to": "rejected",
+            "actor": [
+              "manager",
+              "admin"
+            ]
+          }
+        ]
+      },
+      "editBoundaries": {
+        "fuel_logs": {
+          "editable": [
+            "fuel_gallons",
+            "odometer_reading",
+            "fuel_cost",
+            "trip_category_id"
+          ],
+          "immutable": [
+            "id",
+            "created_at",
+            "created_by_user_id",
+            "vehicle_id",
+            "fuel_date"
+          ],
+          "requiresReason": true,
+          "allowedStates": [
+            "in_review",
+            "corrected"
+          ]
+        },
+        "maintenance_events": {
+          "editable": [
+            "odometer_reading",
+            "maintenance_cost",
+            "notes"
+          ],
+          "immutable": [
+            "id",
+            "created_at",
+            "created_by_user_id",
+            "vehicle_id",
+            "maintenance_date"
+          ],
+          "requiresReason": true,
+          "allowedStates": [
+            "in_review",
+            "corrected"
+          ]
+        }
+      },
+      "auditEvents": [
+        "FUEL_LOG_SUBMITTED",
+        "FUEL_LOG_REVIEW_STARTED",
+        "FUEL_LOG_CORRECTED",
+        "FUEL_LOG_APPROVED",
+        "FUEL_LOG_REJECTED",
+        "MAINTENANCE_EVENT_SUBMITTED",
+        "MAINTENANCE_EVENT_REVIEW_STARTED",
+        "MAINTENANCE_EVENT_CORRECTED",
+        "MAINTENANCE_EVENT_APPROVED",
+        "MAINTENANCE_EVENT_REJECTED",
+        "VEHICLE_CREATED",
+        "VEHICLE_UPDATED",
+        "VEHICLE_OOS_TOGGLED"
+      ]
+    }
+  }
+}
