@@ -93,7 +93,7 @@ class PackageLoader
     private function loadFromFilesystem(string $packageId): ?array
     {
         $rootPath = dirname(__DIR__, 2) . '/packages/';
-        $searchDirs = ['local', 'district'];
+        $searchDirs = ['local', 'district', 'operations'];
 
         foreach ($searchDirs as $dir) {
             $basePath = $rootPath . $dir . '/';
@@ -116,8 +116,16 @@ class PackageLoader
             }
 
             // Search by folder name (id might differ from folder name)
-            $folders = glob($basePath . '*', GLOB_ONLYDIR);
-            foreach ($folders as $folder) {
+            // Also search nested subdirectories (e.g., operations/fleet/vehicle-maintenance/)
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($basePath, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+            $iterator->setMaxDepth(3); // Limit depth to avoid deep traversal
+
+            foreach ($iterator as $item) {
+                if (!$item->isDir()) continue;
+                $folder = $item->getPathname();
                 foreach (['manifest.json', 'package.json'] as $fileName) {
                     $path = $folder . '/' . $fileName;
                     if (file_exists($path)) {

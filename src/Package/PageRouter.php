@@ -358,27 +358,45 @@ class PageRouter
             }
         }
 
-        // Match by route pattern
+        // Match by route pattern — two passes:
+        // Pass 1: exact static routes only (no {params}), e.g. /vehicle/add
+        // Pass 2: parameterized routes, e.g. /vehicle/{id}
+        // This ensures /vehicle/add wins over /vehicle/{id} regardless of JSON order
+        $parameterizedMatches = [];
+
         foreach ($pages as $page) {
             $route = trim($page['route'] ?? '', '/');
             $routeParts = array_values(array_filter(explode('/', $route)));
             $pageParts = array_values(array_filter(explode('/', $pageId)));
 
-            if (count($routeParts) === count($pageParts)) {
-                $match = true;
-                for ($i = 0; $i < count($routeParts); $i++) {
-                    if (preg_match('/^\{(\w+)\}$/', $routeParts[$i])) {
-                        continue; // Parameter slot — always matches
-                    }
-                    if ($routeParts[$i] !== $pageParts[$i]) {
-                        $match = false;
-                        break;
-                    }
+            if (count($routeParts) !== count($pageParts)) {
+                continue;
+            }
+
+            $match = true;
+            $hasParams = false;
+            for ($i = 0; $i < count($routeParts); $i++) {
+                if (preg_match('/^\{(\w+)\}$/', $routeParts[$i])) {
+                    $hasParams = true;
+                    continue; // Parameter slot — always matches
                 }
-                if ($match) {
-                    return $page;
+                if ($routeParts[$i] !== $pageParts[$i]) {
+                    $match = false;
+                    break;
                 }
             }
+
+            if ($match) {
+                if (!$hasParams) {
+                    return $page; // Exact static match — return immediately
+                }
+                $parameterizedMatches[] = $page; // Defer parameterized matches
+            }
+        }
+
+        // Return first parameterized match if no static match found
+        if (!empty($parameterizedMatches)) {
+            return $parameterizedMatches[0];
         }
 
         // Default to first page if empty pageId
@@ -522,8 +540,8 @@ class PageRouter
         // Fallback: look up via section_installations
         $db = Database::getInstance();
         $row = $db->fetchOne(
-            "SELECT s.slug FROM section_installations si 
-             JOIN sections s ON si.section_id = s.id 
+            "SELECT s.slug FROM section_installations si
+             JOIN sections s ON si.section_id = s.id
              WHERE si.package_id = ? AND s.is_active = 1 LIMIT 1",
             [$packageId]
         );
