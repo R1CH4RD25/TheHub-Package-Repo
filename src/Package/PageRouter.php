@@ -81,12 +81,24 @@ class PageRouter
             return $this->errorResponse(404, 'Page Not Found', "The requested page does not exist in this package.");
         }
 
-        // 3. Check page access (Sprint 1: simple role-in-array check)
+        // 3. Check page access via PackageAccessResolver
+        //    Maps system roles (super_admin, admin, user) → package roles (viewer, editor, importer)
+        //    through the package's policy.globalRoleMapping
+        $userId = $user['id'] ?? 0;
+        $userSystemRole = $user['role'] ?? 'guest';
         $allowedRoles = $pageConfig['access'] ?? [];
-        $userRole = $user['role'] ?? 'guest';
 
-        if (!empty($allowedRoles) && !in_array($userRole, $allowedRoles)) {
-            return $this->errorResponse(403, 'Access Denied', 'You do not have permission to view this page.');
+        if (!empty($allowedRoles) && $userSystemRole !== 'super_admin') {
+            // Resolve user's package-level role via PackageAccessResolver
+            $sectionSlug = $this->getSectionSlug($packageId, $packageData);
+            if ($sectionSlug) {
+                $resolver = new \Hub\PackageAccessResolver();
+                $packageRole = $resolver->getUserPackageRole($userId, $sectionSlug);
+                if (!$packageRole || !in_array($packageRole, $allowedRoles)) {
+                    return $this->errorResponse(403, 'Access Denied', 'You do not have permission to view this page.');
+                }
+            }
+            // If no section slug found (package not installed via sections), fall through
         }
 
         // 4. Resolve route parameters (e.g., {student_id} from URL)
@@ -127,6 +139,18 @@ class PageRouter
             $queryName = $component['dataQuery'] ?? $component['query'] ?? '';
             if ($queryName) {
                 $data = $this->executeQuery($packageId, $queryName, $mergedParams, $user, $pageConfig, $packageData);
+            }
+
+            // For filters: pre-fetch optionsQuery data for select fields
+            if ($type === 'filters') {
+                $filterFields = $component['config']['filters'] ?? $component['config']['fields'] ?? $component['filters'] ?? $component['fields'] ?? [];
+                foreach ($filterFields as $field) {
+                    $optionsQuery = $field['optionsQuery'] ?? '';
+                    if ($optionsQuery) {
+                        $optionsData = $this->executeQuery($packageId, $optionsQuery, $mergedParams, $user, $pageConfig, $packageData);
+                        $data[$optionsQuery] = $optionsData;
+                    }
+                }
             }
 
             // Create renderer and render
@@ -477,5 +501,32 @@ class PageRouter
             'page' => null,
             'layout' => 'error',
         ];
+    }
+
+    /**
+     * Get the section slug for a package ID.
+     * Used to resolve package-level roles via PackageAccessResolver.
+     */
+    private function getSectionSlug(string $packageId, array $packageData): ?string
+    {
+        // Check if loader enriched with section data
+        $sectionId = $packageData['_section_id'] ?? null;
+        if ($sectionId) {
+            $db = Database::getInstance();
+            $row = $db->fetchOne("SELECT slug FROM sections WHERE id = ?", [$sectionId]);
+            if ($row) {
+                return $row['slug'];
+            }
+        }
+
+        // Fallback: look up via section_installations
+        $db = Database::getInstance();
+        $row = $db->fetchOne(
+            "SELECT s.slug FROM section_installations si 
+             JOIN sections s ON si.section_id = s.id 
+             WHERE si.package_id = ? AND s.is_active = 1 LIMIT 1",
+            [$packageId]
+        );
+        return $row['slug'] ?? null;
     }
 }
