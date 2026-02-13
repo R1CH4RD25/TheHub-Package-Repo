@@ -1,0 +1,955 @@
+{
+    "schemaVersion": "3.0.0",
+    "package": {
+        "id": "district.student-directory",
+        "display_name": "Student Directory",
+        "description": "Student records management \u2014 search, view, edit, import/export with Google Workspace integration",
+        "version": "1.0.0",
+        "author": "Woodson ISD Technology",
+        "icon": "lucide-graduation-cap",
+        "category": "district",
+        "base_url": "/p/district.student-directory"
+    },
+    "database": {
+        "connection": "woodson_students",
+        "primaryTable": "students",
+        "auditTable": "audit_log"
+    },
+    "presentation": {
+        "pages": {
+            "index": {
+                "title": "Student Directory",
+                "route": "/",
+                "layout": "full",
+                "components": [
+                    {
+                        "type": "dashboard",
+                        "config": {
+                            "columns": 4,
+                            "cards": [
+                                {
+                                    "title": "Total Students",
+                                    "dataKey": "total",
+                                    "icon": "lucide-users",
+                                    "color": "primary"
+                                },
+                                {
+                                    "title": "Elementary",
+                                    "dataKey": "elementary",
+                                    "icon": "lucide-backpack",
+                                    "color": "success"
+                                },
+                                {
+                                    "title": "Junior High",
+                                    "dataKey": "junior_high",
+                                    "icon": "lucide-book-open",
+                                    "color": "info"
+                                },
+                                {
+                                    "title": "High School",
+                                    "dataKey": "high_school",
+                                    "icon": "lucide-graduation-cap",
+                                    "color": "warning"
+                                }
+                            ]
+                        },
+                        "dataQuery": "getStats"
+                    },
+                    {
+                        "type": "filters",
+                        "config": {
+                            "targetTable": "pkg-table-students",
+                            "filters": [
+                                {
+                                    "name": "search",
+                                    "type": "search",
+                                    "placeholder": "Search by name, ID, or email...",
+                                    "debounce": 300
+                                },
+                                {
+                                    "name": "grade",
+                                    "type": "select",
+                                    "label": "Grade",
+                                    "optionsQuery": "getGrades",
+                                    "options": [
+                                        {"value": "PK", "label": "PK"},
+                                        {"value": "KG", "label": "KG"},
+                                        {"value": "1", "label": "1"},
+                                        {"value": "2", "label": "2"},
+                                        {"value": "3", "label": "3"},
+                                        {"value": "4", "label": "4"},
+                                        {"value": "5", "label": "5"},
+                                        {"value": "6", "label": "6"},
+                                        {"value": "7", "label": "7"},
+                                        {"value": "8", "label": "8"},
+                                        {"value": "9", "label": "9"},
+                                        {"value": "10", "label": "10"},
+                                        {"value": "11", "label": "11"},
+                                        {"value": "12", "label": "12"}
+                                    ]
+                                },
+                                {
+                                    "name": "graduation_year",
+                                    "type": "select",
+                                    "label": "Graduation Year",
+                                    "optionsQuery": "getGraduationYears"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "table",
+                        "config": {
+                            "id": "pkg-table-students",
+                            "columns": [
+                                {
+                                    "key": "student_id",
+                                    "label": "Student ID",
+                                    "sortable": true,
+                                    "responsive": "hide-mobile",
+                                    "width": "10%"
+                                },
+                                {
+                                    "key": "full_name",
+                                    "label": "Name",
+                                    "sortable": true,
+                                    "width": "25%"
+                                },
+                                {
+                                    "key": "grade",
+                                    "label": "Grade",
+                                    "sortable": true,
+                                    "style": "badge",
+                                    "width": "8%"
+                                },
+                                {
+                                    "key": "chromebook_login",
+                                    "label": "Chromebook Login",
+                                    "responsive": "hide-mobile",
+                                    "width": "20%"
+                                },
+                                {
+                                    "key": "password",
+                                    "label": "Password",
+                                    "style": "masked",
+                                    "width": "17%"
+                                },
+                                {
+                                    "key": "ou_for_google",
+                                    "label": "School",
+                                    "style": "badge",
+                                    "responsive": "hide-mobile",
+                                    "width": "15%"
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "label": "View",
+                                    "icon": "lucide-eye",
+                                    "type": "route",
+                                    "route": "/view/{student_id}",
+                                    "variant": "warning"
+                                }
+                            ],
+                            "bulkActions": [
+                                {
+                                    "label": "Print Cards",
+                                    "mutation": "printCards",
+                                    "icon": "lucide-printer",
+                                    "variant": "info"
+                                },
+                                {
+                                    "label": "Delete Selected",
+                                    "mutation": "bulkDelete",
+                                    "icon": "lucide-trash-2",
+                                    "variant": "danger",
+                                    "confirm": "Are you sure you want to delete the selected students?"
+                                }
+                            ],
+                            "defaultSort": {
+                                "column": "grade",
+                                "direction": "asc"
+                            },
+                            "pagination": {
+                                "perPage": 50,
+                                "pageSizes": [
+                                    25,
+                                    50,
+                                    100,
+                                    200
+                                ]
+                            },
+                            "emptyState": {
+                                "icon": "lucide-users",
+                                "title": "No Students Found",
+                                "description": "No students match your search criteria."
+                            }
+                        },
+                        "dataQuery": "listStudents"
+                    }
+                ]
+            },
+            "view": {
+                "title": "Student Details",
+                "route": "/view/{student_id}",
+                "layout": "standard",
+                "components": [
+                    {
+                        "type": "detail",
+                        "config": {
+                            "backRoute": "/",
+                            "actions": [
+                                {
+                                    "label": "Edit",
+                                    "icon": "lucide-pencil",
+                                    "type": "route",
+                                    "route": "/edit/{student_id}",
+                                    "style": "primary"
+                                },
+                                {
+                                    "label": "Reset Password",
+                                    "icon": "lucide-key-round",
+                                    "type": "mutation",
+                                    "mutation": "resetPassword",
+                                    "style": "warning",
+                                    "confirm": "Reset this student's password to default?"
+                                },
+                                {
+                                    "label": "Print Card",
+                                    "icon": "lucide-printer",
+                                    "type": "mutation",
+                                    "mutation": "printCards",
+                                    "style": "info"
+                                }
+                            ],
+                            "sections": [
+                                {
+                                    "title": "Personal Information",
+                                    "icon": "lucide-user",
+                                    "columns": 2,
+                                    "fields": [
+                                        {
+                                            "key": "student_id",
+                                            "label": "Student ID",
+                                            "type": "text",
+                                            "copyable": true
+                                        },
+                                        {
+                                            "key": "first_name",
+                                            "label": "First Name"
+                                        },
+                                        {
+                                            "key": "middle_name",
+                                            "label": "Middle Name"
+                                        },
+                                        {
+                                            "key": "last_name",
+                                            "label": "Last Name"
+                                        },
+                                        {
+                                            "key": "nickname",
+                                            "label": "Nickname"
+                                        },
+                                        {
+                                            "key": "sex",
+                                            "label": "Sex",
+                                            "type": "badge"
+                                        },
+                                        {
+                                            "key": "dob",
+                                            "label": "Date of Birth",
+                                            "type": "date"
+                                        },
+                                        {
+                                            "key": "grade",
+                                            "label": "Grade",
+                                            "type": "badge"
+                                        },
+                                        {
+                                            "key": "graduation_year",
+                                            "label": "Graduation Year"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "Account Information",
+                                    "icon": "lucide-laptop",
+                                    "columns": 2,
+                                    "fields": [
+                                        {
+                                            "key": "chromebook_login",
+                                            "label": "Chromebook Login",
+                                            "type": "email",
+                                            "copyable": true
+                                        },
+                                        {
+                                            "key": "password",
+                                            "label": "Password",
+                                            "type": "masked",
+                                            "copyable": true
+                                        },
+                                        {
+                                            "key": "group_email",
+                                            "label": "Group Email",
+                                            "type": "email"
+                                        },
+                                        {
+                                            "key": "ou_for_google",
+                                            "label": "Google OU",
+                                            "type": "badge"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "Demographics",
+                                    "icon": "lucide-globe",
+                                    "columns": 3,
+                                    "collapsible": true,
+                                    "fields": [
+                                        {
+                                            "key": "hispanic_latino",
+                                            "label": "Hispanic/Latino",
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "key": "white",
+                                            "label": "White",
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "key": "black_african_american",
+                                            "label": "Black/African American",
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "key": "asian",
+                                            "label": "Asian",
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "key": "american_indian_alaskan_native",
+                                            "label": "American Indian/Alaskan Native",
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "key": "hawaiian_pacific_isl",
+                                            "label": "Hawaiian/Pacific Islander",
+                                            "type": "boolean"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "dataQuery": "getStudent"
+                    }
+                ]
+            },
+            "add": {
+                "title": "Add Student",
+                "route": "/add",
+                "layout": "standard",
+                "access": ["editor", "importer"],
+                "components": [
+                    {
+                        "type": "form",
+                        "config": {
+                            "mutation": "createStudent",
+                            "submitLabel": "Add Student",
+                            "cancelRoute": "/",
+                            "sections": [
+                                {
+                                    "title": "Required Information",
+                                    "grid": 2,
+                                    "fields": [
+                                        {
+                                            "key": "student_id",
+                                            "type": "text",
+                                            "label": "Student ID",
+                                            "required": true,
+                                            "placeholder": "e.g. 100234",
+                                            "helpText": "Unique student identifier from SIS",
+                                            "validation": { "pattern": "^[0-9]+$" }
+                                        },
+                                        {
+                                            "key": "grade",
+                                            "type": "select",
+                                            "label": "Grade",
+                                            "required": true,
+                                            "options": [
+                                                {"value": "PK", "label": "Pre-K"},
+                                                {"value": "KG", "label": "Kindergarten"},
+                                                {"value": "1", "label": "1st"},
+                                                {"value": "2", "label": "2nd"},
+                                                {"value": "3", "label": "3rd"},
+                                                {"value": "4", "label": "4th"},
+                                                {"value": "5", "label": "5th"},
+                                                {"value": "6", "label": "6th"},
+                                                {"value": "7", "label": "7th"},
+                                                {"value": "8", "label": "8th"},
+                                                {"value": "9", "label": "9th"},
+                                                {"value": "10", "label": "10th"},
+                                                {"value": "11", "label": "11th"},
+                                                {"value": "12", "label": "12th"}
+                                            ]
+                                        },
+                                        {
+                                            "key": "first_name",
+                                            "type": "text",
+                                            "label": "First Name",
+                                            "required": true,
+                                            "placeholder": "Legal first name"
+                                        },
+                                        {
+                                            "key": "last_name",
+                                            "type": "text",
+                                            "label": "Last Name",
+                                            "required": true,
+                                            "placeholder": "Legal last name"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "Optional Information",
+                                    "collapsible": false,
+                                    "grid": 2,
+                                    "fields": [
+                                        {
+                                            "key": "middle_name",
+                                            "type": "text",
+                                            "label": "Middle Name",
+                                            "placeholder": "Middle name or initial"
+                                        },
+                                        {
+                                            "key": "nickname",
+                                            "type": "text",
+                                            "label": "Nickname",
+                                            "placeholder": "Preferred name",
+                                            "helpText": "Used for email if provided"
+                                        },
+                                        {
+                                            "key": "sex",
+                                            "type": "select",
+                                            "label": "Sex",
+                                            "options": [
+                                                {"value": "M", "label": "Male"},
+                                                {"value": "F", "label": "Female"}
+                                            ]
+                                        },
+                                        {
+                                            "key": "dob",
+                                            "type": "date",
+                                            "label": "Date of Birth"
+                                        },
+                                        {
+                                            "key": "graduation_year",
+                                            "type": "number",
+                                            "label": "Graduation Year",
+                                            "placeholder": "e.g. 2030",
+                                            "step": 1,
+                                            "validation": { "min": 2020, "max": 2040 },
+                                            "helpText": "Expected graduation year"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "Demographics",
+                                    "collapsible": true,
+                                    "collapsed": true,
+                                    "grid": 2,
+                                    "fields": [
+                                        {
+                                            "key": "hispanic_latino",
+                                            "type": "checkbox",
+                                            "label": "Hispanic/Latino"
+                                        },
+                                        {
+                                            "key": "white",
+                                            "type": "checkbox",
+                                            "label": "White"
+                                        },
+                                        {
+                                            "key": "black_african_american",
+                                            "type": "checkbox",
+                                            "label": "Black/African American"
+                                        },
+                                        {
+                                            "key": "asian",
+                                            "type": "checkbox",
+                                            "label": "Asian"
+                                        },
+                                        {
+                                            "key": "american_indian_alaskan_native",
+                                            "type": "checkbox",
+                                            "label": "American Indian/Alaskan Native"
+                                        },
+                                        {
+                                            "key": "hawaiian_pacific_isl",
+                                            "type": "checkbox",
+                                            "label": "Hawaiian/Pacific Islander"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "edit": {
+                "title": "Edit Student",
+                "route": "/edit/{student_id}",
+                "layout": "standard",
+                "access": ["editor", "importer"],
+                "components": [
+                    {
+                        "type": "form",
+                        "config": {
+                            "mutation": "updateStudent",
+                            "submitLabel": "Save Changes",
+                            "cancelRoute": "/view/{student_id}",
+                            "sections": [
+                                {
+                                    "title": "Personal Information",
+                                    "fields": [
+                                        {
+                                            "key": "student_id",
+                                            "type": "text",
+                                            "label": "Student ID",
+                                            "required": true
+                                        },
+                                        {
+                                            "key": "first_name",
+                                            "type": "text",
+                                            "label": "First Name",
+                                            "required": true
+                                        },
+                                        {
+                                            "key": "middle_name",
+                                            "type": "text",
+                                            "label": "Middle Name"
+                                        },
+                                        {
+                                            "key": "last_name",
+                                            "type": "text",
+                                            "label": "Last Name",
+                                            "required": true
+                                        },
+                                        {
+                                            "key": "nickname",
+                                            "type": "text",
+                                            "label": "Nickname"
+                                        },
+                                        {
+                                            "key": "sex",
+                                            "type": "select",
+                                            "label": "Sex",
+                                            "options": [
+                                                {
+                                                    "value": "M",
+                                                    "label": "Male"
+                                                },
+                                                {
+                                                    "value": "F",
+                                                    "label": "Female"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "key": "dob",
+                                            "type": "date",
+                                            "label": "Date of Birth"
+                                        },
+                                        {
+                                            "key": "grade",
+                                            "type": "select",
+                                            "label": "Grade",
+                                            "required": true,
+                                            "options": [
+                                                {
+                                                    "value": "PK",
+                                                    "label": "PK"
+                                                },
+                                                {
+                                                    "value": "KG",
+                                                    "label": "KG"
+                                                },
+                                                {
+                                                    "value": "1",
+                                                    "label": "1"
+                                                },
+                                                {
+                                                    "value": "2",
+                                                    "label": "2"
+                                                },
+                                                {
+                                                    "value": "3",
+                                                    "label": "3"
+                                                },
+                                                {
+                                                    "value": "4",
+                                                    "label": "4"
+                                                },
+                                                {
+                                                    "value": "5",
+                                                    "label": "5"
+                                                },
+                                                {
+                                                    "value": "6",
+                                                    "label": "6"
+                                                },
+                                                {
+                                                    "value": "7",
+                                                    "label": "7"
+                                                },
+                                                {
+                                                    "value": "8",
+                                                    "label": "8"
+                                                },
+                                                {
+                                                    "value": "9",
+                                                    "label": "9"
+                                                },
+                                                {
+                                                    "value": "10",
+                                                    "label": "10"
+                                                },
+                                                {
+                                                    "value": "11",
+                                                    "label": "11"
+                                                },
+                                                {
+                                                    "value": "12",
+                                                    "label": "12"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "Demographics",
+                                    "collapsible": true,
+                                    "fields": [
+                                        {
+                                            "key": "hispanic_latino",
+                                            "type": "checkbox",
+                                            "label": "Hispanic/Latino"
+                                        },
+                                        {
+                                            "key": "white",
+                                            "type": "checkbox",
+                                            "label": "White"
+                                        },
+                                        {
+                                            "key": "black_african_american",
+                                            "type": "checkbox",
+                                            "label": "Black/African American"
+                                        },
+                                        {
+                                            "key": "asian",
+                                            "type": "checkbox",
+                                            "label": "Asian"
+                                        },
+                                        {
+                                            "key": "american_indian_alaskan_native",
+                                            "type": "checkbox",
+                                            "label": "American Indian/Alaskan Native"
+                                        },
+                                        {
+                                            "key": "hawaiian_pacific_isl",
+                                            "type": "checkbox",
+                                            "label": "Hawaiian/Pacific Islander"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "dataQuery": "getStudent"
+                    }
+                ]
+            },
+            "import": {
+                "title": "Import Students",
+                "route": "/import",
+                "layout": "standard",
+                "access": ["importer"],
+                "components": [
+                    {
+                        "type": "form",
+                        "config": {
+                            "mutation": "importPreview",
+                            "submitLabel": "Upload & Preview",
+                            "sections": [
+                                {
+                                    "title": "CSV Import",
+                                    "description": "Upload a CSV file with student data. Required columns: Student ID, Grade, Last Name, First Name",
+                                    "fields": [
+                                        {
+                                            "key": "csvfile",
+                                            "type": "file",
+                                            "label": "CSV File",
+                                            "required": true,
+                                            "accept": ".csv"
+                                        },
+                                        {
+                                            "key": "import_mode",
+                                            "type": "select",
+                                            "label": "Import Mode",
+                                            "required": true,
+                                            "options": [
+                                                {
+                                                    "value": "append",
+                                                    "label": "Append \u2014 Add new students only"
+                                                },
+                                                {
+                                                    "value": "rewrite",
+                                                    "label": "Rewrite \u2014 Update existing, add new"
+                                                },
+                                                {
+                                                    "value": "ignore",
+                                                    "label": "Ignore \u2014 Skip existing students"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "table",
+                        "config": {
+                            "id": "pkg-table-import-history",
+                            "columns": [
+                                {
+                                    "key": "filename",
+                                    "label": "File"
+                                },
+                                {
+                                    "key": "import_mode",
+                                    "label": "Mode",
+                                    "style": "badge"
+                                },
+                                {
+                                    "key": "total_records",
+                                    "label": "Total"
+                                },
+                                {
+                                    "key": "new_records",
+                                    "label": "New"
+                                },
+                                {
+                                    "key": "updated_records",
+                                    "label": "Updated"
+                                },
+                                {
+                                    "key": "status",
+                                    "label": "Status",
+                                    "style": "badge"
+                                },
+                                {
+                                    "key": "created_at",
+                                    "label": "Date",
+                                    "style": "date"
+                                }
+                            ],
+                            "pagination": {
+                                "perPage": 10
+                            },
+                            "emptyState": {
+                                "icon": "lucide-upload",
+                                "title": "No Import History",
+                                "description": "No CSV imports have been performed yet."
+                            }
+                        },
+                        "dataQuery": "getImportHistory"
+                    }
+                ]
+            },
+            "export": {
+                "title": "Export Students",
+                "route": "/export",
+                "layout": "standard",
+                "components": [
+                    {
+                        "type": "dashboard",
+                        "config": {
+                            "columns": 3,
+                            "cards": [
+                                {
+                                    "title": "Standard CSV",
+                                    "icon": "lucide-file-spreadsheet",
+                                    "color": "primary",
+                                    "description": "All student fields",
+                                    "link": "/api/student-directory.php?action=exportStandard"
+                                },
+                                {
+                                    "title": "Google Workspace CSV",
+                                    "icon": "lucide-cloud-download",
+                                    "color": "success",
+                                    "description": "Google Admin console format",
+                                    "link": "/api/student-directory.php?action=exportGoogle"
+                                },
+                                {
+                                    "title": "Print All Cards",
+                                    "icon": "lucide-printer",
+                                    "color": "info",
+                                    "description": "Printable login cards"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "data": {
+        "queries": {
+            "listStudents": {
+                "description": "Search and list students with filtering and pagination",
+                "handler": "StudentQueryHandler::listStudents",
+                "parameters": {
+                    "search": {
+                        "type": "string",
+                        "optional": true
+                    },
+                    "grade": {
+                        "type": "string",
+                        "optional": true
+                    },
+                    "graduation_year": {
+                        "type": "integer",
+                        "optional": true
+                    },
+                    "page": {
+                        "type": "integer",
+                        "optional": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "optional": true
+                    },
+                    "sort": {
+                        "type": "string",
+                        "optional": true
+                    },
+                    "sortDir": {
+                        "type": "string",
+                        "optional": true
+                    }
+                }
+            },
+            "getStudent": {
+                "description": "Get a single student by ID",
+                "handler": "StudentQueryHandler::getStudent",
+                "parameters": {
+                    "id": {
+                        "type": "integer",
+                        "required": true
+                    }
+                }
+            },
+            "getStats": {
+                "description": "Dashboard statistics",
+                "handler": "StudentQueryHandler::getStats",
+                "cache": 300
+            },
+            "getGrades": {
+                "description": "Get distinct grade options",
+                "handler": "StudentQueryHandler::getGrades",
+                "cache": 3600
+            },
+            "getGraduationYears": {
+                "description": "Get distinct graduation year options",
+                "handler": "StudentQueryHandler::getGraduationYears",
+                "cache": 3600
+            },
+            "getImportHistory": {
+                "description": "Recent import history",
+                "handler": "StudentQueryHandler::getImportHistory"
+            }
+        },
+        "mutations": {
+            "createStudent": {
+                "description": "Add a new student with auto-generated credentials",
+                "handler": "StudentMutationHandler::createStudent",
+                "audit": true
+            },
+            "updateStudent": {
+                "description": "Update student record",
+                "handler": "StudentMutationHandler::updateStudent",
+                "audit": true
+            },
+            "resetPassword": {
+                "description": "Reset student password to generated default",
+                "handler": "StudentMutationHandler::resetPassword",
+                "audit": true
+            },
+            "bulkDelete": {
+                "description": "Delete selected students",
+                "handler": "StudentMutationHandler::bulkDelete",
+                "audit": true,
+                "confirm": true
+            },
+            "printCards": {
+                "description": "Generate printable login cards",
+                "handler": "StudentMutationHandler::printCards"
+            }
+        }
+    },
+    "policy": {
+        "roles": {
+            "viewer": {
+                "label": "Viewer",
+                "description": "View student records (teachers, office staff)",
+                "queries": [
+                    "listStudents",
+                    "getStudent",
+                    "getStats",
+                    "getGrades",
+                    "getGraduationYears"
+                ],
+                "mutations": [
+                    "printCards"
+                ]
+            },
+            "editor": {
+                "label": "Editor",
+                "description": "Edit/add/delete students, reset passwords",
+                "inherits": "viewer",
+                "mutations": [
+                    "createStudent",
+                    "updateStudent",
+                    "resetPassword",
+                    "bulkDelete"
+                ]
+            },
+            "importer": {
+                "label": "Importer",
+                "description": "CSV import/export, bulk operations",
+                "inherits": "editor",
+                "queries": [
+                    "getImportHistory"
+                ]
+            }
+        },
+        "defaultRole": "viewer",
+        "globalRoleMapping": {
+            "super_admin": "importer",
+            "admin": "importer",
+            "principal": "viewer",
+            "counselor": "viewer",
+            "staff": "viewer"
+        },
+        "googleGroupMapping": {}
+    },
+    "access": {
+        "fieldVisibility": {
+            "password": {
+                "default": "masked",
+                "reveal": {
+                    "minRole": "viewer",
+                    "audit": true
+                }
+            }
+        }
+    }
+}
