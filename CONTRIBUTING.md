@@ -123,292 +123,45 @@ Each package defines pages under `presentation.pages`. Every page has a `route`,
 |---|---|---|---|
 | `"full"` | `container-fluid` | 1600px | Data-heavy pages with wide tables |
 | `"standard"` (default) | `container` | ~1140px | Forms, detail views, simple pages |
+| `"sidebar"` | Side panel layout | ~1140px | Master-detail views |
+| `"narrow"` | Narrow centered | ~720px | Simple forms, settings |
+| `"split"` | Split columns | ~1140px | Compare / dual-panel views |
 
----
-
-## 📊 Dashboard Component
-
-Renders KPI stat cards in a responsive grid.
-
-```json
-{
-    "type": "dashboard",
-    "config": {
-        "columns": 4,
-        "cards": [
-            {
-                "title": "Total Students",
-                "dataKey": "total",
-                "icon": "lucide-users",
-                "color": "primary"
-            },
-            {
-                "title": "Elementary",
-                "dataKey": "elementary",
-                "icon": "lucide-backpack",
-                "color": "success"
-            }
-        ]
-    },
-    "dataQuery": "getStats"
-}
-```
-
-### Card Properties
-
-| Property | Type | Description |
-|---|---|---|
-| `title` | string | Card label displayed below the value |
-| `dataKey` | string | Key to look up the numeric value from query results |
-| `icon` | string | Icon name (lucide-* or fas fa-*) |
-| `color` | string | `primary`, `success`, `warning`, `danger`, `info` |
-| `link` | string | Optional route to navigate on click |
-| `format` | string | `number` (default), `currency`, `percent` |
-
-### Column Layout
-
-| `columns` | Desktop | Tablet (≤768px) | Phone (≤480px) |
-|---|---|---|---|
-| `2` | 2 across | 2 across | 1 stacked |
-| `3` | 3 across | 2 across | 1 stacked |
-| `4` | 4 across | 2 across | 1 stacked |
-
----
-
-## 🔍 Filters Component
-
-Renders search bars and filter dropdowns above a table.
-
-```json
-{
-    "type": "filters",
-    "config": {
-        "targetTable": "pkg-table-students",
-        "filters": [
-            {
-                "name": "search",
-                "type": "search",
-                "placeholder": "Search by name, ID, or email...",
-                "debounce": 300
-            },
-            {
-                "name": "grade",
-                "type": "select",
-                "label": "Grade",
-                "options": [
-                    {"value": "PK", "label": "PK"},
-                    {"value": "KG", "label": "KG"}
-                ]
-            },
-            {
-                "name": "graduation_year",
-                "type": "select",
-                "label": "Graduation Year",
-                "optionsQuery": "getGraduationYears"
-            }
-        ]
-    }
-}
-```
-
-### Filter Types
-
-| Type | Description | Special Props |
-|---|---|---|
-| `search` | Text input with search icon | `placeholder`, `debounce` (ms) |
-| `select` | Dropdown with options | `options` array or `optionsQuery` |
-| `date` | Date picker | — |
-| `date_range` | Start/end date pair | `startParam`, `endParam` |
-
-> **`optionsQuery`**: References a handler query method. The options are auto-populated from query results at render time.
-
----
-
-## 📋 Table Component
-
-Renders paginated, sortable data tables with row actions and bulk operations.
-
-```json
-{
-    "type": "table",
-    "config": {
-        "id": "pkg-table-students",
-        "columns": [ ... ],
-        "actions": [ ... ],
-        "bulkActions": [ ... ],
-        "pagination": { "perPage": 50, "pageSizes": [25, 50, 100, 200] }
-    },
-    "dataQuery": "listStudents"
-}
-```
-
-### Column Definition
-
-```json
-{
-    "key": "full_name",
-    "label": "Name",
-    "sortable": true,
-    "style": "text",
-    "width": "25%",
-    "responsive": "hide-mobile",
-    "copyable": false
-}
-```
-
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `key` | string | **required** | Database column name |
-| `label` | string | = key | Display header text |
-| `sortable` | bool | `false` | Enable click-to-sort |
-| `style` | string | `"text"` | Rendering style (see below) |
-| `width` | string | auto | CSS width (`"25%"`, `"150px"`) — applied on desktop |
-| `responsive` | string | (visible) | Responsive visibility rule (see below) |
-| `copyable` | bool | `false` | Show copy-to-clipboard button |
-
-### Column Styles
-
-| Style | Renders As |
-|---|---|
-| `text` | Plain text (default) |
-| `badge` | Colored badge. Color auto-inferred for `grade`, `ou_for_google`, etc. |
-| `masked` | Dots with Show/Hide toggle button (for passwords, SSNs) |
-| `link` | Clickable hyperlink |
-| `date` | Formatted as `Mar 5, 2026` |
-| `datetime` | Formatted as `Mar 5, 2026 2:30pm` |
-| `currency` | Formatted as `$1,234.56` |
-| `boolean` | Green check or red X icon |
-
-### Responsive Column Visibility
-
-Use the `responsive` property to control which columns show on smaller screens. Each package defines its **own** responsive rules — there is no global default.
-
-| Value | Behavior |
-|---|---|
-| *(omitted)* | Always visible on all screen sizes |
-| `"hide-mobile"` | Hidden at ≤ 768px (phones) |
-| `"hide-tablet"` | Hidden at ≤ 1024px (tablets and phones) |
-
-**Design guideline:** On mobile, show only the **essential** 3-4 columns plus the action button. For Student Directory, that's: Name, Grade, Password, View.
-
-Bulk action checkboxes are automatically hidden on mobile.
-
-### Column Width Guidelines
-
-Define `width` as percentages for consistent desktop layout. Columns should roughly total ~95% (the action column takes the rest).
-
-```json
-"columns": [
-    { "key": "student_id",       "width": "10%", "responsive": "hide-mobile" },
-    { "key": "full_name",        "width": "25%" },
-    { "key": "grade",            "width": "8%"  },
-    { "key": "chromebook_login", "width": "20%", "responsive": "hide-mobile" },
-    { "key": "password",         "width": "17%" },
-    { "key": "ou_for_google",    "width": "15%", "responsive": "hide-mobile" }
-]
-```
-
-### Row Actions
-
-```json
-"actions": [
-    {
-        "label": "View",
-        "icon": "lucide-eye",
-        "type": "route",
-        "route": "/view/{student_id}",
-        "variant": "warning"
-    }
-]
-```
-
-| Property | Description |
-|---|---|
-| `label` | Button text |
-| `icon` | Icon name (lucide-* or fa-*) |
-| `type` | `"route"` (navigate) or `"mutation"` (API call) |
-| `route` | URL pattern — `{column_key}` is replaced with row data |
-| `variant` | Bootstrap color: `warning`, `primary`, `danger`, `info`, `success` |
-
-### Bulk Actions
-
-```json
-"bulkActions": [
-    {
-        "label": "Print Cards",
-        "mutation": "printCards",
-        "icon": "lucide-printer",
-        "variant": "info"
-    },
-    {
-        "label": "Delete Selected",
-        "mutation": "bulkDelete",
-        "icon": "lucide-trash-2",
-        "variant": "danger",
-        "confirm": "Are you sure you want to delete the selected students?"
-    }
-]
-```
-
-> Bulk actions are hidden on mobile. The `confirm` property shows a modal before executing.
-
----
-
-## 📝 Detail Component
-
-Renders a read-only detail view for a single record.
-
-```json
-{
-    "type": "detail",
-    "config": {
-        "sections": [
-            {
-                "title": "Student Information",
-                "icon": "lucide-user",
-                "fields": [
-                    { "key": "full_name", "label": "Name" },
-                    { "key": "grade", "label": "Grade", "style": "badge" },
-                    { "key": "password", "label": "Password", "style": "masked", "copyable": true }
-                ]
-            }
-        ],
-        "backRoute": "/",
-        "actions": [
-            { "label": "Edit", "icon": "lucide-pencil", "route": "/edit/{student_id}", "variant": "warning" }
-        ]
-    },
-    "dataQuery": "getStudent"
-}
-```
-
----
-
-## 📝 Form Component
-
-Renders create/edit forms with validation.
-
-```json
-{
-    "type": "form",
-    "config": {
-        "fields": [
-            { "key": "first_name", "label": "First Name", "type": "text", "required": true },
-            { "key": "grade", "label": "Grade", "type": "select", "options": [...] },
-            { "key": "email", "label": "Email", "type": "email" }
-        ],
-        "submitMutation": "createStudent",
-        "cancelRoute": "/",
-        "submitLabel": "Save Student"
-    }
-}
-```
+> **For complete component rules, valid properties, and field types, see the [Component Stacks](#-component-stacks--the-rules-engine) section below.**
 
 ---
 
 ## 🗃️ Data Handlers
 
-Each package needs a PHP handler class that implements query methods referenced by `dataQuery` and mutation methods referenced by `mutation`.
+### GenericPackageHandler (No Code Required!)
+
+As of v3.0.0, packages **do not need custom PHP handler classes**. The Hub's `GenericPackageHandler` automatically generates SQL from your `package.json`. It reads your `database`, `data.queries`, `data.mutations`, and component column definitions to build all the queries your package needs.
+
+**How it works:**
+- Query names starting with `list` → paginated list with search, sort, filter
+- Query names starting with `get` and ending in `Stats` → aggregate COUNT queries
+- Query names starting with `get` → single-record SELECT
+- Query names containing `options` → DISTINCT value queries for dropdowns
+- Mutations named `create*` → INSERT
+- Mutations named `update*` → UPDATE
+- Mutations named `delete*` → soft DELETE (`is_active = 0`)
+
+**Query-level overrides** — add these inside any query definition:
+```json
+"data": {
+    "queries": {
+        "listStudents": {
+            "table": "students",
+            "select": "s.*, c.campus_name",
+            "searchColumns": ["first_name", "last_name", "email"]
+        }
+    }
+}
+```
+
+### Custom Handlers (Optional)
+
+For complex logic that GenericPackageHandler can't cover, you can still create a custom PHP handler:
 
 ```php
 // packages/district/student-directory/StudentQueryHandler.php
@@ -424,6 +177,397 @@ class StudentQueryHandler {
     }
 }
 ```
+
+---
+
+## 🏗️ Component Stacks — The Rules Engine
+
+The Hub uses a **"Stacks"** architecture. Each component type (called a **stack**) has a defined set of rules and boundaries. Package creators build within those constraints — and the system validates that every component follows the rules before it's allowed into production.
+
+Think of it like building blocks: you pick a stack type, configure it with the allowed properties, and the rendering engine handles the rest.
+
+### The 5 Stack Types
+
+| Stack | Purpose | Required Config | Key Properties |
+|-------|---------|-----------------|----------------|
+| **dashboard** | KPI cards, charts, queues, quick links | `cards` | `columns`, `charts`, `queues`, `quickLinks` |
+| **table** | Paginated, sortable data table | `columns` | `actions`, `bulkActions`, `pagination`, `emptyMessage` |
+| **form** | Create/edit forms with sections | `mutation` | `layout`, `submitLabel`, `cancelUrl`, `sections`, `fields` |
+| **detail** | Single-record detail view | *(none)* | `sections`, `actions`, `backUrl` |
+| **filters** | Search and filter bar | `filters` | `targetTable` |
+
+---
+
+### Dashboard Stack
+
+KPI summary panels with multiple sub-component types.
+
+**Cards** (required):
+```json
+{
+    "type": "dashboard",
+    "config": {
+        "columns": 4,
+        "cards": [
+            {
+                "title": "Total Records",
+                "icon": "fas fa-database",
+                "dataKey": "total",
+                "color": "primary"
+            }
+        ]
+    }
+}
+```
+
+| Card Property | Required | Values |
+|---------------|----------|--------|
+| `title` | ✅ | Any string |
+| `icon` | ✅ | FontAwesome/Bootstrap icon class |
+| `dataKey` | ⚠️ | Key in stats query response |
+| `color` | ❌ | `primary`, `success`, `warning`, `danger`, `info`, `secondary`, `dark` |
+| `format` | ❌ | `number`, `currency`, `percent` |
+| `link` | ❌ | URL to navigate on click |
+
+**Charts** (optional):
+```json
+"charts": [
+    {
+        "type": "bar",
+        "title": "Records by Status",
+        "dataKey": "byStatus",
+        "labelKey": "status",
+        "valueKey": "count"
+    }
+]
+```
+
+**Queues** (optional) — action queue panels showing pending items:
+```json
+"queues": [
+    {
+        "title": "Pending Approvals",
+        "dataQuery": "getPendingApprovals",
+        "emptyMessage": "All caught up!",
+        "columns": ["title", "submitted_by", "date"]
+    }
+]
+```
+
+**Quick Links** (optional):
+```json
+"quickLinks": [
+    {
+        "label": "Add New Record",
+        "url": "add",
+        "icon": "fas fa-plus",
+        "color": "success"
+    }
+]
+```
+
+---
+
+### Table Stack
+
+Paginated, sortable data tables with row-level and bulk actions.
+
+```json
+{
+    "type": "table",
+    "dataQuery": "listRecords",
+    "config": {
+        "columns": [
+            {
+                "key": "name",
+                "label": "Name",
+                "sortable": true,
+                "searchable": true
+            },
+            {
+                "key": "status",
+                "label": "Status",
+                "type": "badge",
+                "badgeMap": {
+                    "active": "success",
+                    "inactive": "danger"
+                }
+            },
+            {
+                "key": "created_at",
+                "label": "Created",
+                "type": "date",
+                "format": "M d, Y"
+            }
+        ],
+        "actions": [
+            { "type": "view", "label": "View", "icon": "fas fa-eye" },
+            { "type": "edit", "label": "Edit", "icon": "fas fa-edit" },
+            { "type": "delete", "label": "Delete", "icon": "fas fa-trash", "confirm": true }
+        ]
+    }
+}
+```
+
+**Column types:** `text` (default), `badge`, `date`, `currency`, `link`, `email`, `boolean`, `image`
+
+| Column Property | Required | Description |
+|-----------------|----------|-------------|
+| `key` | ✅ | Database column name |
+| `label` | ✅ | Display header |
+| `sortable` | ❌ | Enable column sorting (default: false) |
+| `searchable` | ❌ | Include in search (default: false) |
+| `type` | ❌ | Render type (see above) |
+| `format` | ❌ | Date format string |
+| `badgeMap` | ❌ | Value → color mapping for badge type |
+| `width` | ❌ | CSS width (e.g., `"120px"`) |
+
+---
+
+### Form Stack
+
+Create/edit forms with sections, grid layout, and field validation.
+
+```json
+{
+    "type": "form",
+    "config": {
+        "mutation": "createRecord",
+        "submitLabel": "Save Record",
+        "layout": "standard",
+        "sections": [
+            {
+                "title": "Basic Information",
+                "columns": 2,
+                "fields": [
+                    {
+                        "key": "name",
+                        "label": "Full Name",
+                        "type": "text",
+                        "required": true,
+                        "placeholder": "Enter full name"
+                    },
+                    {
+                        "key": "email",
+                        "label": "Email Address",
+                        "type": "email",
+                        "required": true
+                    },
+                    {
+                        "key": "department",
+                        "label": "Department",
+                        "type": "select",
+                        "optionsQuery": "getDepartments",
+                        "required": true
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+
+### 14 Field Types
+
+| Type | Rendered As | Special Properties |
+|------|------------|-------------------|
+| `text` | `<input type="text">` | `placeholder`, `maxlength`, `pattern` |
+| `textarea` | `<textarea>` | `rows`, `placeholder`, `maxlength` |
+| `number` | `<input type="number">` | `min`, `max`, `step` |
+| `currency` | `<input>` with $ prefix | `min`, `max`, `step` (default 0.01) |
+| `email` | `<input type="email">` | `placeholder` |
+| `date` | Date picker | `min`, `max` |
+| `datetime` | DateTime picker | `min`, `max` |
+| `select` | `<select>` dropdown | `options` or `optionsQuery`, `multiple` |
+| `radio` | Radio button group | `options` (required) |
+| `checkbox` | Single checkbox | `checkedValue`, `uncheckedValue` |
+| `file` | File upload | `accept`, `maxSize` |
+| `password` | Masked input | `minlength` |
+| `url` | `<input type="url">` | `placeholder` |
+| `tel` | `<input type="tel">` | `placeholder`, `pattern` |
+| `hidden` | Not rendered visually | `value` (default value) |
+
+**Field properties that apply to ALL types:**
+- `key` (required) — database column name
+- `label` (required) — display label
+- `type` (required) — one of the 14 types above
+- `required` — boolean, is this field mandatory?
+- `helpText` — tooltip or description below field
+- `defaultValue` — pre-fill value
+- `colSpan` — grid column span (1 or 2)
+- `showIf` — conditional visibility rule
+
+**Select/Radio `options` format:**
+```json
+"options": [
+    { "value": "active", "label": "Active" },
+    { "value": "inactive", "label": "Inactive" }
+]
+```
+Or use `optionsQuery` to load from a data query:
+```json
+"optionsQuery": "getDepartments"
+```
+
+---
+
+### Detail Stack
+
+Single-record detail views with sections.
+
+```json
+{
+    "type": "detail",
+    "dataQuery": "getRecord",
+    "config": {
+        "sections": [
+            {
+                "title": "Record Details",
+                "fields": [
+                    { "key": "name", "label": "Name" },
+                    { "key": "status", "label": "Status", "type": "badge" },
+                    { "key": "created_at", "label": "Created", "type": "date" }
+                ]
+            }
+        ],
+        "actions": [
+            { "label": "Edit", "url": "edit/{id}", "icon": "fas fa-edit", "color": "primary" },
+            { "label": "Delete", "mutation": "deleteRecord", "icon": "fas fa-trash", "color": "danger", "confirm": true }
+        ]
+    }
+}
+```
+
+---
+
+### Filters Stack
+
+Search and filter controls that target a table component on the same page.
+
+```json
+{
+    "type": "filters",
+    "config": {
+        "targetTable": "recordsTable",
+        "filters": [
+            { "type": "search", "placeholder": "Search records..." },
+            {
+                "type": "select",
+                "key": "status",
+                "label": "Status",
+                "options": [
+                    { "value": "active", "label": "Active" },
+                    { "value": "inactive", "label": "Inactive" }
+                ]
+            },
+            {
+                "type": "date_range",
+                "key": "created_at",
+                "label": "Date Range"
+            }
+        ]
+    }
+}
+```
+
+**Filter types:** `search`, `select`, `date`, `date_range`, `checkbox`
+
+---
+
+## 🔐 Policy & Access
+
+### Policy Block
+
+```json
+"policy": {
+    "roles": ["viewer", "editor", "admin"],
+    "defaultRole": "viewer",
+    "globalRoleMapping": {
+        "super_admin": "admin",
+        "admin": "admin",
+        "manager": "editor",
+        "staff": "viewer",
+        "teacher": "viewer"
+    }
+}
+```
+
+- `roles` — package-specific roles (at least one required)
+- `defaultRole` — assigned to new users who access the package
+- `globalRoleMapping` — maps global Hub roles to package roles
+
+### Access Block (Layer 2 Workflow)
+
+```json
+"access": {
+    "layer2": {
+        "requireApproval": true,
+        "approvalRoles": ["admin"],
+        "selfRegister": true
+    }
+}
+```
+
+---
+
+## ✅ Validation Rules
+
+The Hub validates every `package.json` before it's installed. The validator checks:
+
+1. **Structure** — all required top-level keys present
+2. **Package metadata** — valid ID format (`category.package-name`), semver version, valid category
+3. **Database** — connection and primaryTable defined
+4. **Pages** — every page has a valid route, layout, and at least one component
+5. **Components** — each component matches its stack type rules (see above)
+6. **Data** — all queries and mutations referenced by components are defined
+7. **Policy** — roles array and defaultRole present, globalRoleMapping uses valid system roles
+8. **Cross-references** — no dangling references (e.g., a table's `dataQuery` that doesn't exist in `data.queries`)
+
+**Valid categories:** `district`, `operations`, `campus`, `custom`
+
+**Valid layouts:** `full`, `standard`, `sidebar`, `narrow`, `split`
+
+**Valid system roles for globalRoleMapping:** `super_admin`, `admin`, `district_admin`, `campus_admin`, `principal`, `manager`, `department_head`, `coordinator`, `counselor`, `teacher`, `staff`, `aide`, `paraprofessional`, `viewer`
+
+### Running Validation
+
+Use the Package Schema API:
+```bash
+curl -X POST /api/package-schema.php?action=validate \
+  -H "Content-Type: application/json" \
+  -d @packages/district/my-package/package.json
+```
+
+Response:
+```json
+{
+    "valid": true,
+    "errors": [],
+    "warnings": [
+        {
+            "path": "$.policy.globalRoleMapping",
+            "message": "Role 'custom_role' not in system roles",
+            "fix": "Use standard system roles"
+        }
+    ],
+    "summary": { "errors": 0, "warnings": 1 }
+}
+```
+
+---
+
+## 🧙 Package Creator Wizard
+
+Don't want to write JSON by hand? Use the **Package Creator Wizard** at `/admin/packages/create`. It walks you through 6 steps:
+
+1. **Package Info** — name, category, icon, description
+2. **Database** — connection name, primary table
+3. **Fields** — define your columns (type, required, sortable, searchable)
+4. **Pages & Components** — add pages and pick stack types
+5. **Policy** — set roles and permissions
+6. **Preview & Validate** — see the generated JSON, fix any issues, download
+
+The wizard generates a valid `package.json` that works with GenericPackageHandler out of the box.
 
 ---
 

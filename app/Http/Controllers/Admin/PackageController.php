@@ -50,6 +50,19 @@ class PackageController extends Controller
     }
 
     /**
+     * Display package creator wizard.
+     */
+    public function create(Request $request)
+    {
+        $currentUser = $request->attributes->get('user');
+        $isSuperAdmin = ($currentUser['role'] === 'super_admin');
+
+        return view('admin.packages-create', [
+            'isSuperAdmin' => $isSuperAdmin,
+        ]);
+    }
+
+    /**
      * Display configuration for a specific package.
      */
     public function configurePackage(Request $request, string $packageId)
@@ -99,7 +112,7 @@ class PackageController extends Controller
 
                 $packages = Package::whereNotIn('package_id', $installedPackageIds)
                     ->where('can_install', 1)
-                    ->whereIn('validation_status', ['validated', 'pass'])
+                    ->whereIn('validation_status', ['validated', 'pass', 'warning'])
                     ->orderBy('created_at', 'desc')
                     ->get()
                     ->toArray();
@@ -230,6 +243,178 @@ class PackageController extends Controller
             return response()->json(['success' => true, 'message' => 'Package deleted']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Delete failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get configuration data for a package (roles, mappings, org_roles, settings).
+     */
+    public function getConfigData(Request $request, int $sectionId): JsonResponse
+    {
+        try {
+            $db = \Hub\Database::getInstance();
+
+            // Get section + installation info
+            $section = $db->fetchOne(
+                "SELECT s.*, si.installed_version, si.package_id as pkg_id, si.status as install_status
+                 FROM sections s
+                 JOIN section_installations si ON si.section_id = s.id
+                 WHERE s.id = ? AND si.status = 'installed'",
+                [$sectionId]
+            );
+
+            if (!$section) {
+                return response()->json(['error' => 'Installed package not found'], 404);
+            }
+
+            // Get package-defined roles
+            $packageRoles = $db->fetchAll(
+                "SELECT id, role_key, role_name, tier_level, description, permissions
+                 FROM package_roles WHERE package_id = ? ORDER BY tier_level ASC",
+                [$sectionId]
+            );
+
+            // Decode permissions JSON for each role
+            foreach ($packageRoles as &$role) {
+                $role['permissions'] = json_decode($role['permissions'], true) ?? [];
+            }
+
+            // Get current role mappings
+            $roleMappings = $db->fetchAll(
+                "SELECT prm.id, prm.package_role_id, prm.org_role_id,
+                        pr.role_key, pr.role_name,
+                        org.name as org_role_name
+                 FROM package_role_mappings prm
+                 JOIN package_roles pr ON prm.package_role_id = pr.id
+                 JOIN org_roles org ON prm.org_role_id = org.id
+                 WHERE prm.package_id = ?",
+                [$sectionId]
+            );
+
+            // Get all available org_roles
+            $orgRoles = $db->fetchAll(
+                "SELECT id, name, description FROM org_roles WHERE is_active = 1 ORDER BY name"
+            );
+
+            // Get section_role_access (legacy ENUM roles)
+            $sectionRoles = $db->fetchAll(
+                "SELECT role FROM section_role_access WHERE section_id = ?",
+                [$sectionId]
+            );
+
+            // Get capabilities if v3
+            $capabilities = null;
+            if ($section['supports_capabilities'] && $section['capabilities_json']) {
+                $capabilities = json_decode($section['capabilities_json'], true);
+            }
+
+            return response()->json([
+                'success' => true,
+                'section' => [
+                    'id' => $section['id'],
+                    'display_name' => $section['display_name'],
+                    'slug' => $section['slug'],
+                    'description' => $section['description'],
+                    'icon' => $section['icon'],
+                    'base_url' => $section['base_url'],
+                    'is_active' => (bool) $section['is_active'],
+                    'installed_version' => $section['installed_version'],
+                    'package_id' => $section['pkg_id'],
+                ],
+                'packageRoles' => $packageRoles,
+                'roleMappings' => $roleMappings,
+                'orgRoles' => $orgRoles,
+                'sectionRoles' => array_column($sectionRoles, 'role'),
+                'capabilities' => $capabilities,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to load config: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Update role mappings for a package.
+     */
+    public function updateRoleMappings(Request $request, int $sectionId): JsonResponse
+    {
+        $currentUser = $request->attributes->get('user');
+        if ($currentUser['role'] !== 'super_admin') {
+            return response()->json(['error' => 'Only super admins can configure packages'], 403);
+        }
+
+        try {
+            $db = \Hub\Database::getInstance();
+            $mappings = $request->input('mappings', []); // [{package_role_id, org_role_id}, ...]
+
+            // Clear existing mappings for this package
+            $db->execute("DELETE FROM package_role_mappings WHERE package_id = ?", [$sectionId]);
+
+            // Insert new mappings
+            $created = 0;
+            foreach ($mappings as $mapping) {
+                if (empty($mapping['package_role_id']) || empty($mapping['org_role_id'])) continue;
+                $db->insert('package_role_mappings', [
+                    'package_id' => $sectionId,
+                    'package_role_id' => (int) $mapping['package_role_id'],
+                    'org_role_id' => (int) $mapping['org_role_id'],
+                    'mapped_by' => $currentUser['id'],
+                    'mapped_at' => date('Y-m-d H:i:s'),
+                ]);
+                $created++;
+            }
+
+            AuditLogger::logUpdate(
+                'package_role_mappings',
+                $sectionId,
+                [],
+                ['mappings_count' => $created],
+                $currentUser['id']
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => "Updated {$created} role mapping(s)",
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update mappings: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Toggle package active/inactive status.
+     */
+    public function toggleActive(Request $request, int $sectionId): JsonResponse
+    {
+        $currentUser = $request->attributes->get('user');
+        if ($currentUser['role'] !== 'super_admin') {
+            return response()->json(['error' => 'Only super admins can toggle packages'], 403);
+        }
+
+        try {
+            $db = \Hub\Database::getInstance();
+            $section = $db->fetchOne("SELECT id, is_active, display_name FROM sections WHERE id = ?", [$sectionId]);
+            if (!$section) {
+                return response()->json(['error' => 'Section not found'], 404);
+            }
+
+            $newStatus = $section['is_active'] ? 0 : 1;
+            $db->execute("UPDATE sections SET is_active = ? WHERE id = ?", [$newStatus, $sectionId]);
+
+            AuditLogger::logUpdate(
+                'sections',
+                $sectionId,
+                ['is_active' => $section['is_active']],
+                ['is_active' => $newStatus],
+                $currentUser['id']
+            );
+
+            return response()->json([
+                'success' => true,
+                'is_active' => (bool) $newStatus,
+                'message' => $section['display_name'] . ($newStatus ? ' enabled' : ' disabled'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to toggle status: ' . $e->getMessage()], 500);
         }
     }
 

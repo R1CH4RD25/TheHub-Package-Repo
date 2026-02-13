@@ -85,9 +85,15 @@ Route::prefix('admin')->middleware(['web', 'auth:admin,super_admin'])->group(fun
         Route::get('/installed', [PackageController::class, 'installed'])->name('installed');
         Route::get('/updates', [PackageController::class, 'updates'])->name('updates');
         
+        // Package creator wizard
+        Route::get('/create', [PackageController::class, 'create'])->name('create');
+        
         // Package configuration
         Route::get('/configure', [PackageController::class, 'configure'])->name('configure');
         Route::get('/{packageId}/configure', [PackageController::class, 'configurePackage'])->name('configure.detail');
+        Route::get('/{sectionId}/config-data', [PackageController::class, 'getConfigData'])->name('config.data');
+        Route::post('/{sectionId}/role-mappings', [PackageController::class, 'updateRoleMappings'])->name('config.roleMappings');
+        Route::post('/{sectionId}/toggle-active', [PackageController::class, 'toggleActive'])->name('config.toggleActive');
         
         // Package operations
         Route::get('/list', [PackageController::class, 'list'])->name('list');
