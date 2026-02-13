@@ -125,6 +125,7 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
 
         <!-- Main Content Area -->
         <main class="admin-main">
+            <div class="admin-main-content">
             <div class="admin-page-header">
                 <div class="admin-page-header-content">
                     <?php if ($section['icon']): ?>
@@ -222,6 +223,7 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
                     </tbody>
                 </table>
             </div>
+            </div><!-- end admin-main-content -->
         </main>
 
         <?php

@@ -144,6 +144,7 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
 
         <!-- Main Content Area -->
         <main class="admin-main">
+            <div class="admin-main-content">
             <!-- Overview Metrics -->
             <div class="metrics-grid">
                 <div class="metric-card">
@@ -328,6 +329,7 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
                     </div>
                 <?php endif; ?>
             </div>
+            </div><!-- end admin-main-content -->
         </main>
 
         <?php

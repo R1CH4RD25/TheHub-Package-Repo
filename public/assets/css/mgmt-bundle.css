@@ -8232,19 +8232,19 @@ input[type="checkbox"]:checked+label::before {
  * MANAGEMENT SYSTEM (formerly Command Center) - THEME-AWARE STYLES
  * ============================================================================
  * Professional management interface for tracking and processing submissions.
- * 
+ *
  * THEME INHERITANCE:
  * - Uses CSS custom properties from site_settings
  * - All colors/fonts/spacing inherit from admin theme
  * - No hardcoded values - fully customizable via Admin Dashboard
- * 
+ *
  * PACKAGE DEVELOPERS:
  * Copy this pattern for theme-aware styling:
  * 1. Use var(--primary-color) instead of #667eea
  * 2. Use var(--text-primary) instead of #2c3e50
  * 3. Use var(--spacing-md) instead of 20px
  * 4. Leverage existing .card, .btn classes from production.css
- * 
+ *
  * Generated: 2025-11-18
  * ============================================================================
  */

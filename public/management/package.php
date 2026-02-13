@@ -178,13 +178,15 @@ if ($pageId && $pageId !== 'index') {
     <?php endforeach; ?>
 
     <style>
-        /* Package content within management shell */
+        /* Package content within management shell - match admin dashboard padding */
         .mgmt-package-content {
-            padding: 0;
+            padding-top: var(--space-4, 1rem);
         }
 
         .mgmt-package-content .pkg-page-header {
-            margin-bottom: var(--space-4, 1rem);
+            margin-bottom: var(--space-5, 1.25rem);
+            padding-bottom: var(--space-4, 1rem);
+            border-bottom: 1px solid var(--gray-300, #e0e0e0);
         }
 
         .mgmt-package-content .pkg-content {
@@ -225,7 +227,7 @@ if ($pageId && $pageId !== 'index') {
 
         <!-- Main Content Area -->
         <main class="admin-main">
-            <div class="mgmt-package-content">
+            <div class="admin-main-content mgmt-package-content">
                 <?php if ($layout !== 'error'): ?>
                     <!-- Page Header -->
                     <div class="pkg-page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4, 1rem);">
