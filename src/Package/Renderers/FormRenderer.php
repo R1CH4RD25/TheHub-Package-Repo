@@ -34,7 +34,7 @@ class FormRenderer implements ComponentRendererInterface
         $fields = $config['fields'] ?? [];
         $sections = $config['sections'] ?? [];
         $submitLabel = $config['submitLabel'] ?? 'Save';
-        $cancelUrl = $config['cancelUrl'] ?? '';
+        $cancelUrl = $config['cancelUrl'] ?? $config['cancelRoute'] ?? '';
         $layout = $config['layout'] ?? 'vertical'; // vertical | horizontal | inline
 
         $packageId = $context['packageId'] ?? '';
@@ -106,6 +106,7 @@ class FormRenderer implements ComponentRendererInterface
         $fields = $section['fields'] ?? [];
         $collapsible = $section['collapsible'] ?? false;
         $collapsed = $section['collapsed'] ?? false;
+        $grid = $section['grid'] ?? null; // e.g. 2 for two-column layout
 
         $sectionId = 'pkg-form-section-' . $idx;
 
@@ -114,7 +115,8 @@ class FormRenderer implements ComponentRendererInterface
         if ($title) {
             $html .= '<legend class="pkg-form-section-title">';
             if ($collapsible) {
-                $html .= '<button type="button" class="pkg-section-toggle" data-target="' . $sectionId . '-body">';
+                $html .= '<button type="button" class="pkg-section-toggle" data-target="' . $sectionId . '-body"';
+                $html .= ' aria-expanded="' . ($collapsed ? 'false' : 'true') . '">';
                 $html .= e($title);
                 $html .= ' <i class="bi bi-chevron-' . ($collapsed ? 'right' : 'down') . '"></i>';
                 $html .= '</button>';
@@ -129,7 +131,8 @@ class FormRenderer implements ComponentRendererInterface
         }
 
         $bodyStyle = ($collapsible && $collapsed) ? ' style="display:none;"' : '';
-        $html .= '<div class="pkg-form-section-body" id="' . $sectionId . '-body"' . $bodyStyle . '>';
+        $gridClass = $grid ? ' pkg-form-grid pkg-form-grid-' . (int)$grid : '';
+        $html .= '<div class="pkg-form-section-body' . $gridClass . '" id="' . $sectionId . '-body"' . $bodyStyle . '>';
 
         foreach ($fields as $field) {
             $html .= $this->renderField($field, $record, $errors);
@@ -159,7 +162,13 @@ class FormRenderer implements ComponentRendererInterface
         }
 
         $fieldId = 'field-' . e($key);
-        $html = '<div class="pkg-form-group' . ($error ? ' has-error' : '') . '" data-field="' . e($key) . '">';
+        $spanClass = '';
+        if (!empty($field['span'])) {
+            $spanClass = ' pkg-form-span-' . (int)$field['span'];
+        } elseif (!empty($field['fullWidth'])) {
+            $spanClass = ' pkg-form-span-full';
+        }
+        $html = '<div class="pkg-form-group' . ($error ? ' has-error' : '') . $spanClass . '" data-field="' . e($key) . '">';
 
         // Label
         $html .= '<label for="' . $fieldId . '" class="pkg-form-label">';

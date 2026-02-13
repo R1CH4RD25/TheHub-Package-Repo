@@ -359,25 +359,16 @@
                             "sections": [
                                 {
                                     "title": "Required Information",
+                                    "grid": 2,
                                     "fields": [
                                         {
                                             "key": "student_id",
                                             "type": "text",
                                             "label": "Student ID",
                                             "required": true,
-                                            "helpText": "Unique student identifier from SIS"
-                                        },
-                                        {
-                                            "key": "first_name",
-                                            "type": "text",
-                                            "label": "First Name",
-                                            "required": true
-                                        },
-                                        {
-                                            "key": "last_name",
-                                            "type": "text",
-                                            "label": "Last Name",
-                                            "required": true
+                                            "placeholder": "e.g. 100234",
+                                            "helpText": "Unique student identifier from SIS",
+                                            "validation": { "pattern": "^[0-9]+$" }
                                         },
                                         {
                                             "key": "grade",
@@ -385,79 +376,54 @@
                                             "label": "Grade",
                                             "required": true,
                                             "options": [
-                                                {
-                                                    "value": "PK",
-                                                    "label": "PK"
-                                                },
-                                                {
-                                                    "value": "KG",
-                                                    "label": "KG"
-                                                },
-                                                {
-                                                    "value": "1",
-                                                    "label": "1"
-                                                },
-                                                {
-                                                    "value": "2",
-                                                    "label": "2"
-                                                },
-                                                {
-                                                    "value": "3",
-                                                    "label": "3"
-                                                },
-                                                {
-                                                    "value": "4",
-                                                    "label": "4"
-                                                },
-                                                {
-                                                    "value": "5",
-                                                    "label": "5"
-                                                },
-                                                {
-                                                    "value": "6",
-                                                    "label": "6"
-                                                },
-                                                {
-                                                    "value": "7",
-                                                    "label": "7"
-                                                },
-                                                {
-                                                    "value": "8",
-                                                    "label": "8"
-                                                },
-                                                {
-                                                    "value": "9",
-                                                    "label": "9"
-                                                },
-                                                {
-                                                    "value": "10",
-                                                    "label": "10"
-                                                },
-                                                {
-                                                    "value": "11",
-                                                    "label": "11"
-                                                },
-                                                {
-                                                    "value": "12",
-                                                    "label": "12"
-                                                }
+                                                {"value": "PK", "label": "Pre-K"},
+                                                {"value": "KG", "label": "Kindergarten"},
+                                                {"value": "1", "label": "1st"},
+                                                {"value": "2", "label": "2nd"},
+                                                {"value": "3", "label": "3rd"},
+                                                {"value": "4", "label": "4th"},
+                                                {"value": "5", "label": "5th"},
+                                                {"value": "6", "label": "6th"},
+                                                {"value": "7", "label": "7th"},
+                                                {"value": "8", "label": "8th"},
+                                                {"value": "9", "label": "9th"},
+                                                {"value": "10", "label": "10th"},
+                                                {"value": "11", "label": "11th"},
+                                                {"value": "12", "label": "12th"}
                                             ]
+                                        },
+                                        {
+                                            "key": "first_name",
+                                            "type": "text",
+                                            "label": "First Name",
+                                            "required": true,
+                                            "placeholder": "Legal first name"
+                                        },
+                                        {
+                                            "key": "last_name",
+                                            "type": "text",
+                                            "label": "Last Name",
+                                            "required": true,
+                                            "placeholder": "Legal last name"
                                         }
                                     ]
                                 },
                                 {
                                     "title": "Optional Information",
                                     "collapsible": false,
+                                    "grid": 2,
                                     "fields": [
                                         {
                                             "key": "middle_name",
                                             "type": "text",
-                                            "label": "Middle Name"
+                                            "label": "Middle Name",
+                                            "placeholder": "Middle name or initial"
                                         },
                                         {
                                             "key": "nickname",
                                             "type": "text",
                                             "label": "Nickname",
+                                            "placeholder": "Preferred name",
                                             "helpText": "Used for email if provided"
                                         },
                                         {
@@ -465,20 +431,23 @@
                                             "type": "select",
                                             "label": "Sex",
                                             "options": [
-                                                {
-                                                    "value": "M",
-                                                    "label": "Male"
-                                                },
-                                                {
-                                                    "value": "F",
-                                                    "label": "Female"
-                                                }
+                                                {"value": "M", "label": "Male"},
+                                                {"value": "F", "label": "Female"}
                                             ]
                                         },
                                         {
                                             "key": "dob",
                                             "type": "date",
                                             "label": "Date of Birth"
+                                        },
+                                        {
+                                            "key": "graduation_year",
+                                            "type": "number",
+                                            "label": "Graduation Year",
+                                            "placeholder": "e.g. 2030",
+                                            "step": 1,
+                                            "validation": { "min": 2020, "max": 2040 },
+                                            "helpText": "Expected graduation year"
                                         }
                                     ]
                                 },
@@ -486,6 +455,7 @@
                                     "title": "Demographics",
                                     "collapsible": true,
                                     "collapsed": true,
+                                    "grid": 2,
                                     "fields": [
                                         {
                                             "key": "hispanic_latino",
