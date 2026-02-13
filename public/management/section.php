@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Management - Section Submissions List
  *
@@ -13,9 +14,8 @@ use Hub\ManagementCenter;
 use Hub\Database;
 use Hub\SiteSettings;
 
-// Require login and admin/super_admin role
+// Require login and check role-based access
 Auth::requireLogin();
-Auth::requireRole(['admin', 'super_admin']);
 
 $userId = $_SESSION['user_id'];
 $user = Auth::getCurrentUser();
@@ -24,6 +24,14 @@ $slug = $_GET['slug'] ?? null;
 
 if (!$slug) {
     header('Location: /management/index.php');
+    exit;
+}
+
+// Check if user has access to this section
+$sra = new \Hub\SectionRoleAccess();
+if (!$sra->hasAccess($userId, $slug)) {
+    http_response_code(403);
+    header('Location: /management/');
     exit;
 }
 
@@ -44,21 +52,31 @@ $statuses = $mc->getStatuses($section['id']);
 $mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
 $mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
 
-// Get sections for sidebar
+// Get installed packages for sidebar
+$packages = $mc->getInstalledPackagesForUser($userId, $userRole);
+
+// Get legacy sections for sidebar
 if ($userRole === 'super_admin') {
     $sections = $mc->getSectionsWithCounts();
 } else {
     $sections = $mc->getSectionsWithCounts($userId);
 }
 
-// Build navigation items for sidebar
-$navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections, $slug);
+// Filter legacy sections that are covered by dynamic packages
+$packageSlugs = array_column($packages, 'slug');
+$legacySections = array_filter($sections, function ($s) use ($packageSlugs) {
+    return !in_array($s['slug'], $packageSlugs);
+});
+
+// Build navigation items for sidebar (packages + legacy sections)
+$navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($legacySections, $slug, $packages);
 
 $pageTitle = $mgmtDisplayName . ' - ' . $section['name'];
 $siteName = SiteSettings::get('site_name', 'The Hub');
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -79,6 +97,7 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
 </head>
+
 <body class="admin-root">
     <div class="admin-shell">
         <?php
@@ -133,7 +152,7 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
                         <select id="filter-status" class="nd-filter-select">
                             <option value="">All Statuses</option>
                             <?php foreach ($statuses as $status): ?>
-                            <option value="<?= $status['id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
+                                <option value="<?= $status['id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -216,82 +235,84 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
         ?>
     </div><!-- end admin-shell -->
 
-<script nonce="<?php echo CSP_NONCE; ?>">
-document.addEventListener('DOMContentLoaded', function() {
-    const sectionId = <?= $section['id'] ?>;
-    let selectedRows = new Set();
+    <script nonce="<?php echo CSP_NONCE; ?>">
+        document.addEventListener('DOMContentLoaded', function() {
+            const sectionId = <?= $section['id'] ?>;
+            let selectedRows = new Set();
 
-    // Initialize DataTable
-    const table = $('#submissions-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '/management/api/submissions.php',
-            type: 'GET',
-            data: function(d) {
-                d.section_id = sectionId;
-                d.status_id = $('#filter-status').val();
-                d.priority = $('#filter-priority').val();
-                d.date_from = $('#filter-date-from').val();
-                d.date_to = $('#filter-date-to').val();
-            }
-        },
-        columns: [
-            {
-                data: 'id',
-                orderable: false,
-                render: function(data) {
-                    return `<input type="checkbox" class="row-select" value="${data}">`;
-                }
-            },
-            {
-                data: 'display_id',
-                render: function(data, type, row) {
-                    return `<a href="/management/submission.php?id=${row.id}" class="display-id">${data || row.id}</a>`;
-                }
-            },
-            {
-                data: 'status_name',
-                render: function(data, type, row) {
-                    return `<span class="nd-pill" style="background-color: ${row.status_color}">${data}</span>`;
-                }
-            },
-            {
-                data: 'priority',
-                render: function(data) {
-                    const colors = {
-                        urgent: 'var(--error)',
-                        high: 'var(--warning)',
-                        normal: 'var(--gray-600)',
-                        low: 'var(--gray-400)'
-                    };
-                    return `<span class="nd-chip" style="background-color: ${colors[data] || colors.normal}">${data.toUpperCase()}</span>`;
-                }
-            },
-            {
-                data: 'submitted_by_name',
-                render: function(data) {
-                    return data || '<em>Anonymous</em>';
-                }
-            },
-            {
-                data: 'assigned_to_name',
-                render: function(data) {
-                    return data || '<em class="text-muted">Unassigned</em>';
-                }
-            },
-            {
-                data: 'created_at',
-                render: function(data) {
-                    const date = new Date(data);
-                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                }
-            },
-            {
-                data: 'id',
-                orderable: false,
-                render: function(data) {
-                    return `
+            // Initialize DataTable
+            const table = $('#submissions-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '/management/api/submissions.php',
+                    type: 'GET',
+                    data: function(d) {
+                        d.section_id = sectionId;
+                        d.status_id = $('#filter-status').val();
+                        d.priority = $('#filter-priority').val();
+                        d.date_from = $('#filter-date-from').val();
+                        d.date_to = $('#filter-date-to').val();
+                    }
+                },
+                columns: [{
+                        data: 'id',
+                        orderable: false,
+                        render: function(data) {
+                            return `<input type="checkbox" class="row-select" value="${data}">`;
+                        }
+                    },
+                    {
+                        data: 'display_id',
+                        render: function(data, type, row) {
+                            return `<a href="/management/submission.php?id=${row.id}" class="display-id">${data || row.id}</a>`;
+                        }
+                    },
+                    {
+                        data: 'status_name',
+                        render: function(data, type, row) {
+                            return `<span class="nd-pill" style="background-color: ${row.status_color}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'priority',
+                        render: function(data) {
+                            const colors = {
+                                urgent: 'var(--error)',
+                                high: 'var(--warning)',
+                                normal: 'var(--gray-600)',
+                                low: 'var(--gray-400)'
+                            };
+                            return `<span class="nd-chip" style="background-color: ${colors[data] || colors.normal}">${data.toUpperCase()}</span>`;
+                        }
+                    },
+                    {
+                        data: 'submitted_by_name',
+                        render: function(data) {
+                            return data || '<em>Anonymous</em>';
+                        }
+                    },
+                    {
+                        data: 'assigned_to_name',
+                        render: function(data) {
+                            return data || '<em class="text-muted">Unassigned</em>';
+                        }
+                    },
+                    {
+                        data: 'created_at',
+                        render: function(data) {
+                            const date = new Date(data);
+                            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
+                    },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        render: function(data) {
+                            return `
                         <div class="btn-group btn-group-sm">
                             <a href="/management/submission.php?id=${data}" class="btn btn-sm btn-primary" title="View">
                                 <i class="bi bi-eye"></i>
@@ -301,122 +322,133 @@ document.addEventListener('DOMContentLoaded', function() {
                             </button>
                         </div>
                     `;
+                        }
+                    }
+                ],
+                order: [
+                    [6, 'desc']
+                ], // Sort by created_at DESC
+                pageLength: 25,
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100]
+                ],
+                language: {
+                    emptyTable: 'No submissions found',
+                    zeroRecords: 'No matching submissions found'
+                }
+            });
+
+            // Filter handlers
+            $('#btn-apply-filters').on('click', function() {
+                table.ajax.reload();
+            });
+
+            $('#btn-clear-filters').on('click', function() {
+                $('#filter-status').val('');
+                $('#filter-priority').val('');
+                $('#filter-date-from').val('');
+                $('#filter-date-to').val('');
+                table.ajax.reload();
+            });
+
+            // Select all checkbox
+            $('#select-all').on('change', function() {
+                const isChecked = $(this).prop('checked');
+                $('.row-select').prop('checked', isChecked);
+
+                if (isChecked) {
+                    $('.row-select').each(function() {
+                        selectedRows.add($(this).val());
+                    });
+                } else {
+                    selectedRows.clear();
+                }
+
+                updateBulkActions();
+            });
+
+            // Individual row selection
+            $(document).on('change', '.row-select', function() {
+                const id = $(this).val();
+                if ($(this).prop('checked')) {
+                    selectedRows.add(id);
+                } else {
+                    selectedRows.delete(id);
+                    $('#select-all').prop('checked', false);
+                }
+                updateBulkActions();
+            });
+
+            function updateBulkActions() {
+                const count = selectedRows.size;
+                $('#selected-count').text(count);
+
+                if (count > 0) {
+                    $('#bulk-actions-bar').addClass('active');
+                } else {
+                    $('#bulk-actions-bar').removeClass('active');
                 }
             }
-        ],
-        order: [[6, 'desc']], // Sort by created_at DESC
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-        language: {
-            emptyTable: 'No submissions found',
-            zeroRecords: 'No matching submissions found'
-        }
-    });
 
-    // Filter handlers
-    $('#btn-apply-filters').on('click', function() {
-        table.ajax.reload();
-    });
+            // Bulk actions
+            $('#btn-apply-bulk').on('click', function() {
+                const action = $('#bulk-action').val();
+                if (!action || selectedRows.size === 0) return;
 
-    $('#btn-clear-filters').on('click', function() {
-        $('#filter-status').val('');
-        $('#filter-priority').val('');
-        $('#filter-date-from').val('');
-        $('#filter-date-to').val('');
-        table.ajax.reload();
-    });
+                const ids = Array.from(selectedRows);
 
-    // Select all checkbox
-    $('#select-all').on('change', function() {
-        const isChecked = $(this).prop('checked');
-        $('.row-select').prop('checked', isChecked);
-
-        if (isChecked) {
-            $('.row-select').each(function() {
-                selectedRows.add($(this).val());
+                if (action === 'delete') {
+                    if (confirm(`Delete ${ids.length} submission(s)?`)) {
+                        applyBulkAction(action, ids);
+                    }
+                } else {
+                    // TODO: Show modal for assign/status change
+                    alert('Assign/Status change modals coming in Phase 2!');
+                }
             });
-        } else {
-            selectedRows.clear();
-        }
 
-        updateBulkActions();
-    });
-
-    // Individual row selection
-    $(document).on('change', '.row-select', function() {
-        const id = $(this).val();
-        if ($(this).prop('checked')) {
-            selectedRows.add(id);
-        } else {
-            selectedRows.delete(id);
-            $('#select-all').prop('checked', false);
-        }
-        updateBulkActions();
-    });
-
-    function updateBulkActions() {
-        const count = selectedRows.size;
-        $('#selected-count').text(count);
-
-        if (count > 0) {
-            $('#bulk-actions-bar').addClass('active');
-        } else {
-            $('#bulk-actions-bar').removeClass('active');
-        }
-    }
-
-    // Bulk actions
-    $('#btn-apply-bulk').on('click', function() {
-        const action = $('#bulk-action').val();
-        if (!action || selectedRows.size === 0) return;
-
-        const ids = Array.from(selectedRows);
-
-        if (action === 'delete') {
-            if (confirm(`Delete ${ids.length} submission(s)?`)) {
-                applyBulkAction(action, ids);
-            }
-        } else {
-            // TODO: Show modal for assign/status change
-            alert('Assign/Status change modals coming in Phase 2!');
-        }
-    });
-
-    $('#btn-cancel-bulk').on('click', function() {
-        $('.row-select').prop('checked', false);
-        $('#select-all').prop('checked', false);
-        selectedRows.clear();
-        updateBulkActions();
-    });
-
-    function applyBulkAction(action, ids) {
-        fetch('/management/api/submissions.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({action: action, ids: ids})
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                table.ajax.reload();
+            $('#btn-cancel-bulk').on('click', function() {
+                $('.row-select').prop('checked', false);
+                $('#select-all').prop('checked', false);
                 selectedRows.clear();
                 updateBulkActions();
-                alert(data.message || 'Action completed successfully');
-            } else {
-                alert('Error: ' + (data.message || 'Unknown error'));
+            });
+
+            function applyBulkAction(action, ids) {
+                fetch('/management/api/submissions.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: action,
+                            ids: ids
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            table.ajax.reload();
+                            selectedRows.clear();
+                            updateBulkActions();
+                            alert(data.message || 'Action completed successfully');
+                        } else {
+                            alert('Error: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(err => alert('Network error: ' + err.message));
             }
-        })
-        .catch(err => alert('Network error: ' + err.message));
-    }
-});
-</script>
+        });
+    </script>
 
     <!-- jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    
+
     <!-- Management JS -->
     <script src="/assets/js/management.js"></script>
 </body>
+
 </html>

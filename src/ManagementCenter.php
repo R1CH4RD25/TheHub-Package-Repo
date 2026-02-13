@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ManagementCenter - High-level orchestration for submission management
  *
@@ -157,7 +158,8 @@ class ManagementCenter
             $accessJoin = "INNER JOIN section_access sa ON s.section_id = sa.section_id
                            AND sa.user_id = ?";
             $params[] = $userId;
-        }        $params[] = $limit;
+        }
+        $params[] = $limit;
 
         $sql = "SELECT
                     s.id,
@@ -430,5 +432,172 @@ class ManagementCenter
         }
 
         return true;
+    }
+
+    /**
+     * Get installed packages accessible to a user (role-based)
+     *
+     * Uses section_role_access to determine which installed packages
+     * the user's role grants access to. Returns package data enriched
+     * with page definitions from capabilities_json.
+     *
+     * @param int $userId User ID
+     * @param string $userRole User's effective role
+     * @return array Array of packages with page info
+     */
+    public function getInstalledPackagesForUser(int $userId, string $userRole): array
+    {
+        // Super admins see all installed packages
+        if ($userRole === 'super_admin') {
+            $sql = "SELECT
+                        s.id as section_id,
+                        s.name,
+                        s.slug,
+                        s.display_name,
+                        s.icon,
+                        s.base_url,
+                        s.is_dynamic,
+                        s.capabilities_json,
+                        si.package_id,
+                        si.installed_version,
+                        si.status as install_status
+                    FROM section_installations si
+                    JOIN sections s ON si.section_id = s.id
+                    WHERE si.status = 'installed'
+                      AND s.is_active = 1
+                    ORDER BY s.sort_order, s.display_name, s.name";
+
+            $rows = $this->db->fetchAll($sql);
+        } else {
+            // Get user's roles (primary + global roles)
+            $userRoles = $this->db->fetchAll(
+                "SELECT role FROM user_global_roles WHERE user_id = ?",
+                [$userId]
+            );
+            $allRoles = array_column($userRoles, 'role');
+            if (!in_array($userRole, $allRoles)) {
+                $allRoles[] = $userRole;
+            }
+
+            if (empty($allRoles)) {
+                return [];
+            }
+
+            $placeholders = implode(',', array_fill(0, count($allRoles), '?'));
+
+            $sql = "SELECT DISTINCT
+                        s.id as section_id,
+                        s.name,
+                        s.slug,
+                        s.display_name,
+                        s.icon,
+                        s.base_url,
+                        s.is_dynamic,
+                        s.capabilities_json,
+                        si.package_id,
+                        si.installed_version,
+                        si.status as install_status
+                    FROM section_installations si
+                    JOIN sections s ON si.section_id = s.id
+                    JOIN section_role_access sra ON s.id = sra.section_id
+                    WHERE si.status = 'installed'
+                      AND s.is_active = 1
+                      AND sra.role IN ({$placeholders})
+                    ORDER BY s.sort_order, s.display_name, s.name";
+
+            $rows = $this->db->fetchAll($sql, $allRoles);
+        }
+
+        // Enrich with pages from capabilities_json
+        $packages = [];
+        foreach ($rows as $row) {
+            $pages = [];
+            if (!empty($row['capabilities_json'])) {
+                $caps = json_decode($row['capabilities_json'], true);
+                if ($caps) {
+                    $rawPages = $caps['presentation']['pages'] ?? [];
+                    foreach ($rawPages as $key => $page) {
+                        $pages[] = [
+                            'id' => $page['id'] ?? $key,
+                            'title' => $page['title'] ?? ucfirst($key),
+                            'route' => $page['route'] ?? '/',
+                            'icon' => $page['icon'] ?? null,
+                            'access' => $page['access'] ?? [],
+                        ];
+                    }
+                }
+            }
+
+            $displayName = $row['display_name'] ?: $row['name'];
+            // Clean up package-style names (e.g., "district.student-directory" → "Student Directory")
+            if (strpos($displayName, '.') !== false || strpos($displayName, '-') !== false) {
+                $parts = explode('.', $displayName);
+                $last = end($parts);
+                $displayName = ucwords(str_replace('-', ' ', $last));
+            }
+
+            $packages[] = [
+                'section_id' => $row['section_id'],
+                'package_id' => $row['package_id'],
+                'name' => $displayName,
+                'slug' => $row['slug'],
+                'icon' => $row['icon'] ?? 'bi-box',
+                'base_url' => $row['base_url'] ?? '/p/' . $row['package_id'],
+                'version' => $row['installed_version'],
+                'is_dynamic' => (bool) $row['is_dynamic'],
+                'pages' => $pages,
+            ];
+        }
+
+        return $packages;
+    }
+
+    /**
+     * Check if a user has access to any installed package
+     *
+     * @param int $userId User ID
+     * @param string $userRole User's effective role
+     * @return bool True if user has access to management
+     */
+    public function userHasManagementAccess(int $userId, string $userRole): bool
+    {
+        // Super admins always have access
+        if ($userRole === 'super_admin') {
+            return true;
+        }
+
+        // Admin always has access
+        if ($userRole === 'admin') {
+            return true;
+        }
+
+        // Check if user's role(s) have access to any installed section
+        $userRoles = $this->db->fetchAll(
+            "SELECT role FROM user_global_roles WHERE user_id = ?",
+            [$userId]
+        );
+        $allRoles = array_column($userRoles, 'role');
+        if (!in_array($userRole, $allRoles)) {
+            $allRoles[] = $userRole;
+        }
+
+        if (empty($allRoles)) {
+            return false;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($allRoles), '?'));
+
+        $count = $this->db->fetchOne(
+            "SELECT COUNT(*) as cnt
+             FROM section_installations si
+             JOIN sections s ON si.section_id = s.id
+             JOIN section_role_access sra ON s.id = sra.section_id
+             WHERE si.status = 'installed'
+               AND s.is_active = 1
+               AND sra.role IN ({$placeholders})",
+            $allRoles
+        );
+
+        return ($count['cnt'] ?? 0) > 0;
     }
 }

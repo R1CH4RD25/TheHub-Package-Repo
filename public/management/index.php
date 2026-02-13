@@ -1,10 +1,11 @@
 <?php
 
 /**
- * Management Console - Google Admin Console Style
+ * Management Console - Package-Driven Experience
  *
- * Module grid interface showing all sections/packages the user has access to.
- * Each card displays key metrics and provides quick access to management functions.
+ * Shows installed packages the user has access to, based on their role.
+ * Each package card links to the package's pages within the management shell.
+ * Roles are determined by section_role_access, not hardcoded admin check.
  */
 
 require_once __DIR__ . '/../../src/bootstrap.php';
@@ -14,9 +15,8 @@ use Hub\ManagementCenter;
 use Hub\Database;
 use Hub\SiteSettings;
 
-// Require login and manager+ role
+// Require login
 Auth::requireLogin();
-Auth::requireRole(['admin', 'super_admin']);
 
 $userId = $_SESSION['user_id'];
 $user = Auth::getCurrentUser();
@@ -26,25 +26,41 @@ $isSuperAdmin = ($userRole === 'super_admin');
 $mc = new ManagementCenter();
 $db = Database::getInstance();
 
+// Check if user has access to any management packages
+if (!$mc->userHasManagementAccess($userId, $userRole)) {
+    http_response_code(403);
+    header('Location: /hub.php');
+    exit;
+}
+
 // Get management display name
 $mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
 $mgmtDescription = SiteSettings::get('mgmt_description', 'Centralized management system for tracking and processing submissions');
 $mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
 
-// Get sections user has access to with stats
+// Get installed packages user has access to (package-driven)
+$packages = $mc->getInstalledPackagesForUser($userId, $userRole);
+
+// Also get legacy sections with submissions (backward compatible)
 if ($isSuperAdmin) {
     $sections = $mc->getSectionsWithCounts();
 } else {
     $sections = $mc->getSectionsWithCounts($userId);
 }
 
-// Calculate aggregate stats across all accessible sections
+// Filter out legacy sections that are already covered by dynamic packages
+$packageSlugs = array_column($packages, 'slug');
+$legacySections = array_filter($sections, function ($s) use ($packageSlugs) {
+    return !in_array($s['slug'], $packageSlugs);
+});
+
+// Calculate aggregate stats from legacy sections
 $totalSubmissions = 0;
 $totalPending = 0;
 $totalUrgent = 0;
 $totalRecent = 0;
 
-foreach ($sections as &$section) {
+foreach ($legacySections as &$section) {
     $totalSubmissions += $section['submission_count'];
     $totalPending += $section['pending_count'];
 
@@ -72,8 +88,14 @@ $pageTitle = $mgmtDisplayName . ' Console';
 $orgName = SiteSettings::get('organization_name', 'Your Organization');
 $siteName = SiteSettings::get('site_name', 'The Hub');
 
-// Build navigation items for sidebar
-$navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections, null);
+// Build navigation items for sidebar (packages + legacy sections)
+$navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
+    $legacySections,
+    null,
+    $packages,
+    null,
+    null
+);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -126,60 +148,66 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-icon">
-                        <i class="bi bi-grid-3x3-gap"></i>
+                        <i class="bi bi-box-seam"></i>
                     </div>
                     <div class="metric-content">
-                        <div class="metric-value"><?= count($sections) ?></div>
-                        <div class="metric-label">Active Modules</div>
+                        <div class="metric-value"><?= count($packages) + count($legacySections) ?></div>
+                        <div class="metric-label">Available Packages</div>
                     </div>
                 </div>
 
-                <div class="metric-card">
-                    <div class="metric-icon gold">
-                        <i class="bi bi-file-earmark-text"></i>
+                <?php if ($totalSubmissions > 0): ?>
+                    <div class="metric-card">
+                        <div class="metric-icon gold">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value"><?= number_format($totalSubmissions) ?></div>
+                            <div class="metric-label">Total Submissions</div>
+                        </div>
                     </div>
-                    <div class="metric-content">
-                        <div class="metric-value"><?= number_format($totalSubmissions) ?></div>
-                        <div class="metric-label">Total Submissions</div>
-                    </div>
-                </div>
+                <?php endif; ?>
 
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: var(--warning-light); color: var(--warning);">
-                        <i class="bi bi-clock-history"></i>
+                <?php if ($totalPending > 0): ?>
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: var(--warning-light); color: var(--warning);">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value"><?= $totalPending ?></div>
+                            <div class="metric-label">Pending Review</div>
+                        </div>
                     </div>
-                    <div class="metric-content">
-                        <div class="metric-value"><?= $totalPending ?></div>
-                        <div class="metric-label">Pending Review</div>
-                    </div>
-                </div>
+                <?php endif; ?>
 
-                <div class="metric-card">
-                    <div class="metric-icon error">
-                        <i class="bi bi-exclamation-triangle"></i>
+                <?php if ($totalUrgent > 0): ?>
+                    <div class="metric-card">
+                        <div class="metric-icon error">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value"><?= $totalUrgent ?></div>
+                            <div class="metric-label">Urgent Items</div>
+                        </div>
                     </div>
-                    <div class="metric-content">
-                        <div class="metric-value"><?= $totalUrgent ?></div>
-                        <div class="metric-label">Urgent Items</div>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Module Cards Grid -->
+            <!-- Package Cards Grid -->
             <div>
                 <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--gray-900); margin: 0 0 var(--space-1) 0;">
-                    Your Modules
+                    Your Packages
                 </h2>
                 <p style="font-size: var(--text-sm); color: var(--gray-600); margin: 0 0 var(--space-4) 0;">
-                    Select a module to view and manage submissions
+                    Select a package to manage its data and settings
                 </p>
 
-                <?php if (empty($sections)): ?>
+                <?php if (empty($packages) && empty($legacySections)): ?>
                     <!-- Empty State -->
                     <div class="mgmt-empty-modules">
                         <i class="bi bi-inbox"></i>
-                        <h3>No Modules Assigned</h3>
-                        <p>You don't have access to any management modules yet.</p>
+                        <h3>No Packages Available</h3>
+                        <p>You don't have access to any management packages yet.</p>
                         <?php if ($isSuperAdmin): ?>
                             <a href="/admin/" class="btn btn-primary">
                                 <i class="bi bi-gear"></i> Configure Access
@@ -191,9 +219,55 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
-                    <!-- Module Grid -->
+                    <!-- Package Grid -->
                     <div class="mgmt-module-grid">
-                        <?php foreach ($sections as $section): ?>
+                        <?php foreach ($packages as $pkg): ?>
+                            <div class="mgmt-module-card" onclick="window.location.href='/management/package.php?id=<?= urlencode($pkg['package_id']) ?>'">
+                                <!-- Card Header with Icon & Title -->
+                                <div class="mgmt-module-header">
+                                    <div class="mgmt-module-icon">
+                                        <i class="<?= htmlspecialchars($pkg['icon'] ?? 'bi-box') ?>"></i>
+                                    </div>
+                                    <div class="mgmt-module-info">
+                                        <h3 class="mgmt-module-title"><?= htmlspecialchars($pkg['name']) ?></h3>
+                                        <p class="mgmt-module-subtitle">v<?= htmlspecialchars($pkg['version'] ?? '1.0') ?></p>
+                                    </div>
+                                </div>
+
+                                <!-- Package Pages List -->
+                                <?php if (!empty($pkg['pages'])): ?>
+                                    <div class="mgmt-module-stats">
+                                        <?php
+                                        $visiblePages = array_filter($pkg['pages'], function ($p) {
+                                            return !preg_match('/\{[^}]+\}/', $p['route'] ?? '');
+                                        });
+                                        ?>
+                                        <div class="mgmt-module-stat">
+                                            <span class="mgmt-module-stat-value"><?= count($visiblePages) ?></span>
+                                            <span class="mgmt-module-stat-label">Pages</span>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Footer with Actions -->
+                                <div class="mgmt-module-footer">
+                                    <a href="/management/package.php?id=<?= urlencode($pkg['package_id']) ?>"
+                                        class="mgmt-module-action"
+                                        onclick="event.stopPropagation();">
+                                        <i class="bi bi-box-arrow-in-right"></i>
+                                        <span>Open Package</span>
+                                    </a>
+                                    <?php if ($pkg['is_dynamic']): ?>
+                                        <div class="mgmt-module-badge" style="background: var(--info-light, #e8f4f8); color: var(--info, #0077b6);">
+                                            <i class="bi bi-lightning-charge"></i>
+                                            <span>Dynamic</span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <?php foreach ($legacySections as $section): ?>
                             <div class="mgmt-module-card" onclick="window.location.href='/management/section.php?slug=<?= urlencode($section['slug']) ?>'">
                                 <!-- Card Header with Icon & Title -->
                                 <div class="mgmt-module-header">
@@ -205,13 +279,6 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections
                                         <p class="mgmt-module-subtitle"><?= htmlspecialchars($section['mgmt_prefix'] ?? 'Section') ?></p>
                                     </div>
                                 </div>
-
-                                <!-- Description -->
-                                <?php if (!empty($section['description'])): ?>
-                                    <p class="mgmt-module-description">
-                                        <?= htmlspecialchars($section['description']) ?>
-                                    </p>
-                                <?php endif; ?>
 
                                 <!-- Stats Grid -->
                                 <div class="mgmt-module-stats">

@@ -132,8 +132,8 @@ class EnterpriseSidebar
                             }
                             $parentId = $item['id'];
                             ?>
-                            <div class="nav-expandable <?= $hasActiveChild ? 'expanded has-active-child' : '' ?>" 
-                                 data-nav-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="nav-expandable <?= $hasActiveChild ? 'expanded has-active-child' : '' ?>"
+                                data-nav-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
                                 <!-- Google-style expandable: chevron on left, parent highlights only when collapsed -->
                                 <button class="<?= $navLinkClass ?> nav-expandable-trigger"
                                     title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
@@ -144,9 +144,9 @@ class EnterpriseSidebar
                                     <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </button>
                                 <?php if (!empty($item['submenu']) && count($item['submenu']) > 0): ?>
-                                    <div class="nav-submenu" 
-                                         data-nav-submenu="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
-                                         <?= $hasActiveChild ? '' : 'style="display: none;"' ?>>
+                                    <div class="nav-submenu"
+                                        data-nav-submenu="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
+                                        <?= $hasActiveChild ? '' : 'style="display: none;"' ?>>
                                         <?php foreach ($item['submenu'] as $subitem): ?>
                                             <?php
                                             $isSubitemActive = ($subitem['active'] ?? false) === true;
@@ -194,13 +194,17 @@ class EnterpriseSidebar
             (function() {
                 const DEBUG = true; // Set to false to disable logging
                 const log = (...args) => DEBUG && console.log('🔧 SIDEBAR:', ...args);
-                
+
                 const sidebar = document.querySelector('[data-sidebar="enterprise"]');
                 const toggle = sidebar?.querySelector('.sidebar-toggle');
                 const shell = document.querySelector('.admin-shell');
                 const STORAGE_KEY = 'enterprise-sidebar-collapsed';
 
-                log('Initialized', { sidebar: !!sidebar, toggle: !!toggle, shell: !!shell });
+                log('Initialized', {
+                    sidebar: !!sidebar,
+                    toggle: !!toggle,
+                    shell: !!shell
+                });
 
                 // Restore saved state
                 const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
@@ -216,38 +220,40 @@ class EnterpriseSidebar
                     shell.classList.toggle('has-collapsed-sidebar');
                     const collapsed = sidebar.classList.contains('collapsed');
                     localStorage.setItem(STORAGE_KEY, collapsed);
-                    log('Toggle clicked', { collapsed });
+                    log('Toggle clicked', {
+                        collapsed
+                    });
                 });
 
                 // Expandable menu functionality (Google Admin style)
                 const expandableTriggers = sidebar?.querySelectorAll('.nav-expandable-trigger');
                 log('Found expandable triggers:', expandableTriggers?.length);
-                
+
                 // Google Admin Pattern: Sync active highlights based on expanded state
                 function syncActiveHighlights() {
                     const isNavCollapsed = sidebar?.classList.contains('collapsed');
-                    
+
                     sidebar?.querySelectorAll('[data-nav-parent]').forEach(expandableSection => {
                         const parentId = expandableSection.dataset.navParent;
                         const parentBtn = expandableSection.querySelector('.nav-expandable-trigger');
                         const submenu = expandableSection.querySelector('.nav-submenu');
                         const isSectionExpanded = expandableSection.classList.contains('expanded');
-                        
+
                         // Find active child
                         const activeChild = expandableSection.querySelector('[data-nav-child][data-active="true"]');
                         const hasActiveChild = !!activeChild;
-                        
+
                         // Clear existing highlights
                         parentBtn?.classList.remove('active', 'has-active-descendant');
                         expandableSection.querySelectorAll('[data-nav-child]').forEach(child => {
                             child.classList.remove('active');
                         });
-                        
+
                         if (hasActiveChild) {
                             // KEY RULE (Google Admin style):
                             // Only highlight child if section is expanded AND nav isn't collapsed
                             const highlightChild = !isNavCollapsed && isSectionExpanded;
-                            
+
                             log(`  ${parentId}:`, {
                                 hasActiveChild,
                                 isSectionExpanded,
@@ -255,7 +261,7 @@ class EnterpriseSidebar
                                 highlightChild,
                                 willHighlight: highlightChild ? 'CHILD' : 'PARENT'
                             });
-                            
+
                             if (highlightChild) {
                                 // Section open: highlight the active submenu item
                                 activeChild.classList.add('active');
@@ -267,28 +273,32 @@ class EnterpriseSidebar
                             }
                         }
                     });
-                    
-                    log('Active highlights synced', { isNavCollapsed });
+
+                    log('Active highlights synced', {
+                        isNavCollapsed
+                    });
                 }
-                
+
                 // Initial sync on page load
                 syncActiveHighlights();
-                
+
                 expandableTriggers?.forEach((trigger, index) => {
                     const parent = trigger.closest('.nav-expandable');
                     const itemLabel = trigger.querySelector('span')?.textContent?.trim();
                     log(`Setup trigger ${index}:`, itemLabel);
-                    
+
                     trigger.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        
+
                         const parent = trigger.closest('.nav-expandable');
                         const submenu = parent.querySelector('.nav-submenu');
                         const icon = trigger.querySelector('.nav-expand-icon');
                         const isExpanded = parent.classList.contains('expanded');
-                        
-                        log('Click on:', itemLabel, { wasExpanded: isExpanded });
+
+                        log('Click on:', itemLabel, {
+                            wasExpanded: isExpanded
+                        });
 
                         // Close all other expandables
                         sidebar.querySelectorAll('.nav-expandable').forEach(item => {
@@ -308,14 +318,14 @@ class EnterpriseSidebar
                         if (icon) {
                             icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
                         }
-                        
+
                         // Re-sync highlights after toggle
                         syncActiveHighlights();
-                        
+
                         log('Toggled to:', parent.classList.contains('expanded'));
                     });
                 });
-                
+
                 // Re-sync highlights when sidebar is collapsed/expanded
                 toggle?.addEventListener('click', () => {
                     setTimeout(syncActiveHighlights, 50); // Small delay for transition
@@ -328,14 +338,64 @@ class EnterpriseSidebar
     /**
      * Helper: Build nav items array for Management Console
      *
-     * @param array $sections Array of sections/modules user has access to
-     * @param string $currentSlug Currently active section slug
+     * Supports two modes:
+     * 1. Legacy sections (flat links to section.php)
+     * 2. Package-driven (expandable groups with sub-pages from capabilities_json)
+     *
+     * @param array $sections Legacy sections array (from getSectionsWithCounts)
+     * @param string|null $currentSlug Currently active section slug
+     * @param array $packages Installed packages (from getInstalledPackagesForUser)
+     * @param string|null $activePackageId Currently active package ID
+     * @param string|null $activePageId Currently active page within a package
      * @return array Nav items
      */
-    public static function buildManagementNavItems($sections = [], $currentSlug = null)
+    public static function buildManagementNavItems($sections = [], $currentSlug = null, $packages = [], $activePackageId = null, $activePageId = null)
     {
         $items = [];
 
+        // Package-driven nav items (expandable groups with sub-pages)
+        if (!empty($packages)) {
+            foreach ($packages as $pkg) {
+                $isActivePackage = ($pkg['package_id'] === $activePackageId);
+
+                // Build sub-items from package pages
+                $subItems = [];
+                foreach ($pkg['pages'] as $page) {
+                    // Skip detail/edit routes with parameters (e.g., /view/{id})
+                    if (preg_match('/\{[^}]+\}/', $page['route'] ?? '')) {
+                        continue;
+                    }
+
+                    $pageRoute = trim($page['route'] ?? '/', '/');
+                    $pageUrl = '/management/package.php?id=' . urlencode($pkg['package_id']);
+                    if ($pageRoute && $pageRoute !== '/') {
+                        $pageUrl .= '&page=' . urlencode($page['id']);
+                    }
+
+                    // Map page icons based on common patterns
+                    $pageIcon = $page['icon'] ?? self::guessPageIcon($page['id'], $page['title']);
+
+                    $subItems[] = [
+                        'id' => $pkg['package_id'] . ':' . ($page['id'] ?? 'index'),
+                        'label' => $page['title'] ?? ucfirst($page['id'] ?? 'Home'),
+                        'url' => $pageUrl,
+                        'icon' => $pageIcon,
+                        'active' => ($isActivePackage && ($page['id'] === $activePageId || (!$activePageId && ($page['id'] === 'index' || $page['route'] === '/')))),
+                    ];
+                }
+
+                $items[] = [
+                    'id' => 'pkg:' . $pkg['package_id'],
+                    'type' => 'expandable',
+                    'icon' => $pkg['icon'] ?? 'bi-box',
+                    'label' => $pkg['name'],
+                    'expanded' => $isActivePackage,
+                    'children' => $subItems,
+                ];
+            }
+        }
+
+        // Legacy section nav items (flat links) — only for non-dynamic sections
         if (!empty($sections)) {
             foreach ($sections as $section) {
                 $badge = null;
@@ -358,6 +418,27 @@ class EnterpriseSidebar
         }
 
         return $items;
+    }
+
+    /**
+     * Guess an appropriate icon for a package page based on its ID/title
+     */
+    private static function guessPageIcon(string $pageId, string $title = ''): string
+    {
+        $id = strtolower($pageId);
+        $t = strtolower($title);
+
+        if (in_array($id, ['index', 'home', 'dashboard', 'list'])) return 'bi-grid-3x3-gap';
+        if (str_contains($id, 'add') || str_contains($t, 'add')) return 'bi-plus-circle';
+        if (str_contains($id, 'import') || str_contains($t, 'import')) return 'bi-upload';
+        if (str_contains($id, 'export') || str_contains($t, 'export')) return 'bi-download';
+        if (str_contains($id, 'view') || str_contains($id, 'detail')) return 'bi-eye';
+        if (str_contains($id, 'edit')) return 'bi-pencil-square';
+        if (str_contains($id, 'setting')) return 'bi-gear';
+        if (str_contains($id, 'report')) return 'bi-bar-chart';
+        if (str_contains($id, 'search') || str_contains($t, 'search')) return 'bi-search';
+
+        return 'bi-file-text';
     }
 
     /**
@@ -388,16 +469,32 @@ class EnterpriseSidebar
         // Users (expandable)
         if ($isAdmin) {
             $usersSubmenu = [
-                ['id' => 'users-active', 'label' => 'Active Users', 'url' => '/admin/users',
-                 'active' => ($currentPath === '/admin/users' || $currentPath === '/admin/users/')],
-                ['id' => 'users-pending', 'label' => 'Pending Approvals', 'url' => '/admin/users/pending',
-                 'active' => (strpos($currentPath, '/admin/users/pending') === 0)],
-                ['id' => 'users-invitations', 'label' => 'Invitations', 'url' => '/admin/users/invitations',
-                 'active' => (strpos($currentPath, '/admin/users/invitations') === 0)],
+                [
+                    'id' => 'users-active',
+                    'label' => 'Active Users',
+                    'url' => '/admin/users',
+                    'active' => ($currentPath === '/admin/users' || $currentPath === '/admin/users/')
+                ],
+                [
+                    'id' => 'users-pending',
+                    'label' => 'Pending Approvals',
+                    'url' => '/admin/users/pending',
+                    'active' => (strpos($currentPath, '/admin/users/pending') === 0)
+                ],
+                [
+                    'id' => 'users-invitations',
+                    'label' => 'Invitations',
+                    'url' => '/admin/users/invitations',
+                    'active' => (strpos($currentPath, '/admin/users/invitations') === 0)
+                ],
             ];
             if ($isSuperAdmin) {
-                $usersSubmenu[] = ['id' => 'users-roles', 'label' => 'Organization Roles', 'url' => '/admin/roles',
-                                   'active' => (strpos($currentPath, '/admin/roles') === 0)];
+                $usersSubmenu[] = [
+                    'id' => 'users-roles',
+                    'label' => 'Organization Roles',
+                    'url' => '/admin/roles',
+                    'active' => (strpos($currentPath, '/admin/roles') === 0)
+                ];
             }
 
             $items[] = [
@@ -414,14 +511,30 @@ class EnterpriseSidebar
         // Package Management (expandable)
         if ($isAdmin) {
             $packagesSubmenu = [
-                ['id' => 'packages-available', 'label' => 'Available', 'url' => '/admin/packages/available',
-                 'active' => (strpos($currentPath, '/admin/packages/available') === 0 || $currentPath === '/admin/packages' || $currentPath === '/admin/packages/')],
-                ['id' => 'packages-installed', 'label' => 'Installed', 'url' => '/admin/packages/installed',
-                 'active' => (strpos($currentPath, '/admin/packages/installed') === 0)],
-                ['id' => 'packages-updates', 'label' => 'Updates', 'url' => '/admin/packages/updates',
-                 'active' => (strpos($currentPath, '/admin/packages/updates') === 0)],
-                ['id' => 'packages-configure', 'label' => 'Configure', 'url' => '/admin/packages/configure',
-                 'active' => (strpos($currentPath, '/admin/packages/configure') === 0)],
+                [
+                    'id' => 'packages-available',
+                    'label' => 'Available',
+                    'url' => '/admin/packages/available',
+                    'active' => (strpos($currentPath, '/admin/packages/available') === 0 || $currentPath === '/admin/packages' || $currentPath === '/admin/packages/')
+                ],
+                [
+                    'id' => 'packages-installed',
+                    'label' => 'Installed',
+                    'url' => '/admin/packages/installed',
+                    'active' => (strpos($currentPath, '/admin/packages/installed') === 0)
+                ],
+                [
+                    'id' => 'packages-updates',
+                    'label' => 'Updates',
+                    'url' => '/admin/packages/updates',
+                    'active' => (strpos($currentPath, '/admin/packages/updates') === 0)
+                ],
+                [
+                    'id' => 'packages-configure',
+                    'label' => 'Configure',
+                    'url' => '/admin/packages/configure',
+                    'active' => (strpos($currentPath, '/admin/packages/configure') === 0)
+                ],
             ];
 
             $items[] = [
@@ -444,16 +557,36 @@ class EnterpriseSidebar
                 'icon' => 'fas fa-cog',
                 'label' => 'Settings',
                 'submenu' => [
-                    ['id' => 'settings-general', 'label' => 'General', 'url' => '/admin/settings/general',
-                     'active' => (strpos($currentPath, '/admin/settings/general') === 0 || $currentPath === '/admin/settings' || $currentPath === '/admin/settings/')],
-                    ['id' => 'settings-auth', 'label' => 'Authentication', 'url' => '/admin/settings/auth',
-                     'active' => (strpos($currentPath, '/admin/settings/auth') === 0)],
-                    ['id' => 'settings-modules', 'label' => 'Modules', 'url' => '/admin/settings/modules',
-                     'active' => (strpos($currentPath, '/admin/settings/modules') === 0)],
-                    ['id' => 'settings-theme', 'label' => 'Theme', 'url' => '/admin/settings/theme',
-                     'active' => (strpos($currentPath, '/admin/settings/theme') === 0)],
-                    ['id' => 'settings-layout', 'label' => 'Layout', 'url' => '/admin/settings/layout',
-                     'active' => (strpos($currentPath, '/admin/settings/layout') === 0)],
+                    [
+                        'id' => 'settings-general',
+                        'label' => 'General',
+                        'url' => '/admin/settings/general',
+                        'active' => (strpos($currentPath, '/admin/settings/general') === 0 || $currentPath === '/admin/settings' || $currentPath === '/admin/settings/')
+                    ],
+                    [
+                        'id' => 'settings-auth',
+                        'label' => 'Authentication',
+                        'url' => '/admin/settings/auth',
+                        'active' => (strpos($currentPath, '/admin/settings/auth') === 0)
+                    ],
+                    [
+                        'id' => 'settings-modules',
+                        'label' => 'Modules',
+                        'url' => '/admin/settings/modules',
+                        'active' => (strpos($currentPath, '/admin/settings/modules') === 0)
+                    ],
+                    [
+                        'id' => 'settings-theme',
+                        'label' => 'Theme',
+                        'url' => '/admin/settings/theme',
+                        'active' => (strpos($currentPath, '/admin/settings/theme') === 0)
+                    ],
+                    [
+                        'id' => 'settings-layout',
+                        'label' => 'Layout',
+                        'url' => '/admin/settings/layout',
+                        'active' => (strpos($currentPath, '/admin/settings/layout') === 0)
+                    ],
                 ],
                 'permission' => ['super_admin'],
             ];
