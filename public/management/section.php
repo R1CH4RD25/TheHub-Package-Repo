@@ -126,103 +126,103 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
         <!-- Main Content Area -->
         <main class="admin-main">
             <div class="admin-main-content">
-            <div class="admin-page-header">
-                <div class="admin-page-header-content">
-                    <?php if ($section['icon']): ?>
-                        <div class="admin-page-icon">
-                            <i class="<?= htmlspecialchars($section['icon']) ?>"></i>
+                <div class="admin-page-header">
+                    <div class="admin-page-header-content">
+                        <?php if ($section['icon']): ?>
+                            <div class="admin-page-icon">
+                                <i class="<?= htmlspecialchars($section['icon']) ?>"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div>
+                            <div class="admin-page-subtitle"><?= htmlspecialchars($mgmtDisplayName) ?></div>
+                            <h1 class="admin-page-title"><?= htmlspecialchars($section['name']) ?></h1>
                         </div>
-                    <?php endif; ?>
-                    <div>
-                        <div class="admin-page-subtitle"><?= htmlspecialchars($mgmtDisplayName) ?></div>
-                        <h1 class="admin-page-title"><?= htmlspecialchars($section['name']) ?></h1>
+                    </div>
+                    <div class="admin-page-actions">
+                        <a href="/management/" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
                     </div>
                 </div>
-                <div class="admin-page-actions">
-                    <a href="/management/" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Back to Dashboard
-                    </a>
-                </div>
-            </div>
 
-            <!-- Filters Bar -->
-            <div class="nd-command-bar">
-                <div class="nd-command-bar-section">
-                    <div class="nd-filter-group">
-                        <label class="nd-filter-label">Status</label>
-                        <select id="filter-status" class="nd-filter-select">
-                            <option value="">All Statuses</option>
-                            <?php foreach ($statuses as $status): ?>
-                                <option value="<?= $status['id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
-                            <?php endforeach; ?>
+                <!-- Filters Bar -->
+                <div class="nd-command-bar">
+                    <div class="nd-command-bar-section">
+                        <div class="nd-filter-group">
+                            <label class="nd-filter-label">Status</label>
+                            <select id="filter-status" class="nd-filter-select">
+                                <option value="">All Statuses</option>
+                                <?php foreach ($statuses as $status): ?>
+                                    <option value="<?= $status['id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="nd-filter-group">
+                            <label class="nd-filter-label">Priority</label>
+                            <select id="filter-priority" class="nd-filter-select">
+                                <option value="">All Priorities</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="high">High</option>
+                                <option value="normal">Normal</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="nd-filter-group">
+                            <label class="nd-filter-label">Date From</label>
+                            <input type="date" id="filter-date-from" class="nd-filter-input">
+                        </div>
+                        <div class="nd-filter-group">
+                            <label class="nd-filter-label">Date To</label>
+                            <input type="date" id="filter-date-to" class="nd-filter-input">
+                        </div>
+                    </div>
+                    <div class="nd-command-bar-section">
+                        <button id="btn-apply-filters" class="btn btn-sm btn-primary">
+                            <i class="bi bi-funnel-fill"></i> Apply
+                        </button>
+                        <button id="btn-clear-filters" class="btn btn-sm btn-secondary">
+                            <i class="bi bi-x-circle"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions Bar -->
+                <div class="nd-bulk-actions" id="bulk-actions-bar" style="display: none;">
+                    <div class="nd-bulk-actions-inner">
+                        <div class="nd-bulk-actions-label">
+                            <i class="bi bi-check-square"></i> <span id="selected-count">0</span> selected
+                        </div>
+                        <select id="bulk-action" class="nd-filter-select" style="width: 200px;">
+                            <option value="">Bulk Actions...</option>
+                            <option value="assign">Assign To...</option>
+                            <option value="status">Change Status...</option>
+                            <option value="delete">Delete Selected</option>
                         </select>
-                    </div>
-                    <div class="nd-filter-group">
-                        <label class="nd-filter-label">Priority</label>
-                        <select id="filter-priority" class="nd-filter-select">
-                            <option value="">All Priorities</option>
-                            <option value="urgent">Urgent</option>
-                            <option value="high">High</option>
-                            <option value="normal">Normal</option>
-                            <option value="low">Low</option>
-                        </select>
-                    </div>
-                    <div class="nd-filter-group">
-                        <label class="nd-filter-label">Date From</label>
-                        <input type="date" id="filter-date-from" class="nd-filter-input">
-                    </div>
-                    <div class="nd-filter-group">
-                        <label class="nd-filter-label">Date To</label>
-                        <input type="date" id="filter-date-to" class="nd-filter-input">
+                        <button id="btn-apply-bulk" class="btn btn-sm btn-warning">Apply</button>
+                        <button id="btn-cancel-bulk" class="btn btn-sm btn-secondary">Cancel</button>
                     </div>
                 </div>
-                <div class="nd-command-bar-section">
-                    <button id="btn-apply-filters" class="btn btn-sm btn-primary">
-                        <i class="bi bi-funnel-fill"></i> Apply
-                    </button>
-                    <button id="btn-clear-filters" class="btn btn-sm btn-secondary">
-                        <i class="bi bi-x-circle"></i> Clear
-                    </button>
-                </div>
-            </div>
 
-            <!-- Bulk Actions Bar -->
-            <div class="nd-bulk-actions" id="bulk-actions-bar" style="display: none;">
-                <div class="nd-bulk-actions-inner">
-                    <div class="nd-bulk-actions-label">
-                        <i class="bi bi-check-square"></i> <span id="selected-count">0</span> selected
-                    </div>
-                    <select id="bulk-action" class="nd-filter-select" style="width: 200px;">
-                        <option value="">Bulk Actions...</option>
-                        <option value="assign">Assign To...</option>
-                        <option value="status">Change Status...</option>
-                        <option value="delete">Delete Selected</option>
-                    </select>
-                    <button id="btn-apply-bulk" class="btn btn-sm btn-warning">Apply</button>
-                    <button id="btn-cancel-bulk" class="btn btn-sm btn-secondary">Cancel</button>
+                <!-- Submissions Table -->
+                <div class="nd-card">
+                    <table id="submissions-table" class="nd-table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th width="40"><input type="checkbox" id="select-all"></th>
+                                <th>Display ID</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Submitted By</th>
+                                <th>Assigned To</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by DataTables -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <!-- Submissions Table -->
-            <div class="nd-card">
-                <table id="submissions-table" class="nd-table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th width="40"><input type="checkbox" id="select-all"></th>
-                            <th>Display ID</th>
-                            <th>Status</th>
-                            <th>Priority</th>
-                            <th>Submitted By</th>
-                            <th>Assigned To</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Populated by DataTables -->
-                    </tbody>
-                </table>
-            </div>
             </div><!-- end admin-main-content -->
         </main>
 

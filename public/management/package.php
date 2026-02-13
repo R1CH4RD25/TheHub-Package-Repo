@@ -21,6 +21,7 @@ use Hub\ManagementCenter;
 use Hub\Database;
 use Hub\SiteSettings;
 use Hub\SectionRoleAccess;
+use Hub\PackageAccessResolver;
 use Hub\Package\PageRouter;
 use Hub\Package\IconMapper;
 
@@ -67,6 +68,25 @@ if (!$sra->hasAccess($userId, $sectionRow['slug'])) {
     exit;
 }
 
+// Resolve user's package role and permissions
+$resolver = new PackageAccessResolver();
+$userPkgRole = $resolver->getUserPackageRole($userId, $sectionRow['slug']);
+$userPerms = $resolver->getUserPermissions($userId, $sectionRow['slug']);
+$accessiblePages = $resolver->getAccessiblePages($userId, $sectionRow['slug']);
+
+// Check page-level access (can user access this specific page?)
+$effectivePageId = $pageId ?: 'index';
+if (!$resolver->canAccessPage($userId, $sectionRow['slug'], $effectivePageId)) {
+    http_response_code(403);
+    // Redirect to the package index if they have some access, else management home
+    if ($resolver->canAccessPage($userId, $sectionRow['slug'], 'index')) {
+        header('Location: /management/package.php?id=' . urlencode($packageId) . '&denied=1');
+    } else {
+        header('Location: /management/');
+    }
+    exit;
+}
+
 // Get management branding
 $mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
 $mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
@@ -75,19 +95,22 @@ $siteName = SiteSettings::get('site_name', 'The Hub');
 // Get all installed packages for sidebar
 $packages = $mc->getInstalledPackagesForUser($userId, $userRole);
 
-// Build sidebar nav
+// Build sidebar nav (filtered by accessible pages)
 $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
     [],           // no legacy sections in sidebar when viewing a package
     null,
     $packages,
     $packageId,
-    $pageId ?: 'index'
+    $pageId ?: 'index',
+    $accessiblePages
 );
 
-// Build user array for PageRouter
+// Build user array for PageRouter (include package role + permissions)
 $userArray = [
     'id' => $user['id'] ?? null,
     'role' => $userRole,
+    'packageRole' => $userPkgRole,
+    'permissions' => $userPerms,
     'email' => $user['email'] ?? '',
     'name' => $user['display_name'] ?? $user['name'] ?? '',
 ];
@@ -242,8 +265,13 @@ if ($pageId && $pageId !== 'index') {
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div>
+                        <div style="display: flex; align-items: center; gap: var(--space-2, 0.5rem);">
                             <span style="background: var(--primary-light, #eef); color: var(--primary, #4361ee); padding: 4px 12px; border-radius: 9999px; font-size: var(--text-xs, 0.75rem); font-weight: 500;"><?= htmlspecialchars($packageName) ?></span>
+                            <?php if ($userPkgRole): ?>
+                                <span style="background: var(--success-light, #e8f5e9); color: var(--success, #2e7d32); padding: 4px 12px; border-radius: 9999px; font-size: var(--text-xs, 0.75rem); font-weight: 500; text-transform: capitalize;">
+                                    <i class="bi bi-shield-check"></i> <?= htmlspecialchars($userPkgRole) ?>
+                                </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endif; ?>

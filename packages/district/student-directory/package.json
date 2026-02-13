@@ -348,6 +348,7 @@
                 "title": "Add Student",
                 "route": "/add",
                 "layout": "standard",
+                "access": ["editor", "importer"],
                 "components": [
                     {
                         "type": "form",
@@ -527,6 +528,7 @@
                 "title": "Edit Student",
                 "route": "/edit/{student_id}",
                 "layout": "standard",
+                "access": ["editor", "importer"],
                 "components": [
                     {
                         "type": "form",
@@ -698,6 +700,7 @@
                 "title": "Import Students",
                 "route": "/import",
                 "layout": "standard",
+                "access": ["importer"],
                 "components": [
                     {
                         "type": "form",

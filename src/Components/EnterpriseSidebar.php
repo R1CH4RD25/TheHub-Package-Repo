@@ -349,7 +349,7 @@ class EnterpriseSidebar
      * @param string|null $activePageId Currently active page within a package
      * @return array Nav items
      */
-    public static function buildManagementNavItems($sections = [], $currentSlug = null, $packages = [], $activePackageId = null, $activePageId = null)
+    public static function buildManagementNavItems($sections = [], $currentSlug = null, $packages = [], $activePackageId = null, $activePageId = null, $accessiblePages = [])
     {
         $items = [];
 
@@ -364,6 +364,15 @@ class EnterpriseSidebar
                     // Skip detail/edit routes with parameters (e.g., /view/{id})
                     if (preg_match('/\{[^}]+\}/', $page['route'] ?? '')) {
                         continue;
+                    }
+
+                    $pageId = $page['id'] ?? 'index';
+
+                    // If we have accessible pages info, skip pages the user can't access
+                    if (!empty($accessiblePages) && $isActivePackage) {
+                        if (isset($accessiblePages[$pageId]) && !$accessiblePages[$pageId]['accessible']) {
+                            continue;
+                        }
                     }
 
                     $pageRoute = trim($page['route'] ?? '/', '/');
