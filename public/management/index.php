@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Management Console - Package-Driven Experience
+ * Management Console - Home Dashboard
  *
- * Shows installed packages the user has access to, based on their role.
- * Each package card links to the package's pages within the management shell.
- * Roles are determined by section_role_access, not hardcoded admin check.
+ * Alerts & attention-focused landing page.
+ * Package navigation lives in the sidebar (expandable groups).
+ * The main dashboard shows what needs your attention today.
  */
 
 require_once __DIR__ . '/../../src/bootstrap.php';
@@ -36,10 +36,11 @@ if (!$mc->userHasManagementAccess($userId, $userRole)) {
 
 // Get management display name
 $mgmtDisplayName = SiteSettings::get('mgmt_display_name', 'Management');
-$mgmtDescription = SiteSettings::get('mgmt_description', 'Centralized management system for tracking and processing submissions');
 $mgmtIcon = SiteSettings::get('mgmt_icon', 'bi-kanban');
+$siteName = SiteSettings::get('site_name', 'The Hub');
+$orgName = SiteSettings::get('organization_name', 'Your Organization');
 
-// Get installed packages user has access to (package-driven)
+// Get installed packages user has access to
 $packages = $mc->getInstalledPackagesForUser($userId, $userRole);
 
 // Resolve package roles for each package
@@ -47,7 +48,6 @@ $resolver = new PackageAccessResolver();
 foreach ($packages as &$pkg) {
     $slug = $pkg['slug'] ?? '';
     $pkg['userPkgRole'] = $resolver->getUserPackageRole($userId, $slug);
-    $pkg['userPerms'] = $resolver->getUserPermissions($userId, $slug);
     $pkg['accessiblePages'] = $resolver->getAccessiblePages($userId, $slug);
     // Filter pages to only accessible ones
     $pkg['pages'] = array_filter($pkg['pages'] ?? [], function ($page) use ($resolver, $userId, $slug) {
@@ -57,54 +57,113 @@ foreach ($packages as &$pkg) {
 }
 unset($pkg);
 
-// Also get legacy sections with submissions (backward compatible)
+// Legacy sections
 if ($isSuperAdmin) {
     $sections = $mc->getSectionsWithCounts();
 } else {
     $sections = $mc->getSectionsWithCounts($userId);
 }
-
-// Filter out legacy sections that are already covered by dynamic packages
 $packageSlugs = array_column($packages, 'slug');
-$legacySections = array_filter($sections, function ($s) use ($packageSlugs) {
-    return !in_array($s['slug'], $packageSlugs);
-});
+$legacySections = array_filter($sections, fn($s) => !in_array($s['slug'], $packageSlugs));
 
-// Calculate aggregate stats from legacy sections
-$totalSubmissions = 0;
-$totalPending = 0;
-$totalUrgent = 0;
-$totalRecent = 0;
+// ─── Gather dashboard data ──────────────────────────────────────────
+$attentionItems = [];
+$stats = [];
 
-foreach ($legacySections as &$section) {
-    $totalSubmissions += $section['submission_count'];
-    $totalPending += $section['pending_count'];
-
-    // Get urgent count for this section
-    $urgentResult = $db->fetchOne(
-        "SELECT COUNT(*) as count FROM section_submissions
-         WHERE section_id = ? AND priority = 'urgent' AND is_draft = 0 AND is_active = 1",
-        [$section['id']]
+// Pending submissions (unreviewed)
+try {
+    $pendingSubs = $db->fetchAll(
+        "SELECT s.name, s.slug, COUNT(ss.id) as cnt
+         FROM section_submissions ss
+         JOIN sections s ON ss.section_id = s.id
+         WHERE ss.is_draft = 0 AND ss.is_active = 1 AND ss.reviewed_at IS NULL
+         GROUP BY s.name, s.slug ORDER BY cnt DESC"
     );
-    $section['urgent_count'] = $urgentResult['count'] ?? 0;
-    $totalUrgent += $section['urgent_count'];
-
-    // Get recent (last 7 days) count
-    $recentResult = $db->fetchOne(
-        "SELECT COUNT(*) as count FROM section_submissions
-         WHERE section_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND is_draft = 0",
-        [$section['id']]
-    );
-    $section['recent_count'] = $recentResult['count'] ?? 0;
-    $totalRecent += $section['recent_count'];
+    foreach ($pendingSubs as $ps) {
+        $attentionItems[] = [
+            'type' => 'warning',
+            'icon' => 'bi-inbox',
+            'title' => $ps['cnt'] . ' unreviewed submission' . ($ps['cnt'] > 1 ? 's' : ''),
+            'subtitle' => $ps['name'],
+            'url' => '/management/section.php?slug=' . urlencode($ps['slug']),
+            'action' => 'Review'
+        ];
+    }
+} catch (\Exception $e) { /* table may not exist yet */
 }
-unset($section);
+
+// Unresolved package alerts
+try {
+    $alertCount = $db->fetchOne(
+        "SELECT COUNT(*) as cnt FROM package_triggered_alerts WHERE resolved_at IS NULL"
+    );
+    if (($alertCount['cnt'] ?? 0) > 0) {
+        $attentionItems[] = [
+            'type' => 'danger',
+            'icon' => 'bi-exclamation-triangle',
+            'title' => $alertCount['cnt'] . ' unresolved alert' . ($alertCount['cnt'] > 1 ? 's' : ''),
+            'subtitle' => 'Package monitoring',
+            'url' => '#',
+            'action' => 'View'
+        ];
+    }
+} catch (\Exception $e) {
+}
+
+// Urgent submissions
+try {
+    $urgentCount = $db->fetchOne(
+        "SELECT COUNT(*) as cnt FROM section_submissions
+         WHERE priority = 'urgent' AND is_draft = 0 AND is_active = 1 AND reviewed_at IS NULL"
+    );
+    if (($urgentCount['cnt'] ?? 0) > 0) {
+        $attentionItems[] = [
+            'type' => 'danger',
+            'icon' => 'bi-exclamation-octagon',
+            'title' => $urgentCount['cnt'] . ' urgent item' . ($urgentCount['cnt'] > 1 ? 's' : '') . ' need attention',
+            'subtitle' => 'Priority submissions',
+            'url' => '#',
+            'action' => 'Review'
+        ];
+    }
+} catch (\Exception $e) {
+}
+
+// Recent activity from audit log (last 7 days)
+try {
+    $recentActivity = $db->fetchAll(
+        "SELECT al.action, al.table_name, al.created_at, u.name as user_name, u.email
+         FROM audit_log al
+         LEFT JOIN users u ON al.user_id = u.id
+         WHERE al.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+           AND al.action NOT IN ('login_success', 'logout', 'package_discovery_search', 'package_discovery_download')
+         ORDER BY al.created_at DESC
+         LIMIT 15"
+    );
+} catch (\Exception $e) {
+    $recentActivity = [];
+}
+
+// Package-specific stats
+try {
+    $totalStudents = $db->fetchOne("SELECT COUNT(*) as cnt FROM woodson_students.students");
+    $stats['total_students'] = $totalStudents['cnt'] ?? 0;
+
+    $recentStudents = $db->fetchOne(
+        "SELECT COUNT(*) as cnt FROM woodson_students.students WHERE updated_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    );
+    $stats['recent_student_updates'] = $recentStudents['cnt'] ?? 0;
+
+    $newStudents = $db->fetchOne(
+        "SELECT COUNT(*) as cnt FROM woodson_students.students WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    );
+    $stats['new_students'] = $newStudents['cnt'] ?? 0;
+} catch (\Exception $e) {
+}
 
 $pageTitle = $mgmtDisplayName . ' Console';
-$orgName = SiteSettings::get('organization_name', 'Your Organization');
-$siteName = SiteSettings::get('site_name', 'The Hub');
 
-// Build navigation items for sidebar (packages + legacy sections)
+// Build navigation items for sidebar
 $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
     $legacySections,
     null,
@@ -121,7 +180,7 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> - <?= htmlspecialchars($siteName) ?></title>
 
-    <!-- MGMT BUNDLE (Theme-aware workflow) -->
+    <!-- MGMT BUNDLE -->
     <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
 
     <!-- Bootstrap Icons -->
@@ -132,22 +191,316 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+
+    <style>
+        .mgmt-welcome {
+            margin-bottom: var(--space-5, 1.25rem);
+        }
+
+        .mgmt-welcome h1 {
+            font-size: var(--text-2xl, 1.5rem);
+            font-weight: var(--font-bold, 700);
+            color: var(--gray-900, #111);
+            margin: 0 0 var(--space-1, 0.25rem) 0;
+        }
+
+        .mgmt-welcome p {
+            font-size: var(--text-sm, 0.875rem);
+            color: var(--gray-500, #888);
+            margin: 0;
+        }
+
+        .attention-section {
+            margin-bottom: var(--space-6, 1.5rem);
+        }
+
+        .attention-section h2 {
+            font-size: var(--text-base, 1rem);
+            font-weight: var(--font-semibold, 600);
+            color: var(--gray-800, #222);
+            margin: 0 0 var(--space-3, 0.75rem) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2, 0.5rem);
+        }
+
+        .attention-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2, 0.5rem);
+        }
+
+        .attention-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3, 0.75rem);
+            padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+            background: var(--white, #fff);
+            border: 1px solid var(--gray-200, #e5e5e5);
+            border-radius: var(--radius-lg, 12px);
+            transition: all 0.15s ease;
+        }
+
+        .attention-item:hover {
+            border-color: var(--primary, #4361ee);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .attention-item.type-warning {
+            border-left: 3px solid var(--warning, #f59e0b);
+        }
+
+        .attention-item.type-danger {
+            border-left: 3px solid var(--error, #ef4444);
+        }
+
+        .attention-item.type-info {
+            border-left: 3px solid var(--info, #0077b6);
+        }
+
+        .attention-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md, 8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .attention-icon.warning {
+            background: var(--warning-light, #fef3cd);
+            color: var(--warning, #f59e0b);
+        }
+
+        .attention-icon.danger {
+            background: var(--error-light, #fde8e8);
+            color: var(--error, #ef4444);
+        }
+
+        .attention-icon.info {
+            background: var(--info-light, #e8f4f8);
+            color: var(--info, #0077b6);
+        }
+
+        .attention-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .attention-title {
+            font-size: var(--text-sm, 0.875rem);
+            font-weight: var(--font-medium, 500);
+            color: var(--gray-900, #111);
+            margin: 0;
+        }
+
+        .attention-subtitle {
+            font-size: var(--text-xs, 0.75rem);
+            color: var(--gray-500, #888);
+            margin: 0;
+        }
+
+        .attention-action {
+            font-size: var(--text-xs, 0.75rem);
+            font-weight: var(--font-semibold, 600);
+            color: var(--primary, #4361ee);
+            text-decoration: none;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: var(--primary-light, #eef);
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .attention-action:hover {
+            background: var(--primary, #4361ee);
+            color: #fff;
+        }
+
+        .all-clear {
+            text-align: center;
+            padding: var(--space-6, 1.5rem) var(--space-4, 1rem);
+            background: var(--success-light, #e8f5e9);
+            border-radius: var(--radius-lg, 12px);
+            border: 1px solid #c8e6c9;
+        }
+
+        .all-clear i {
+            font-size: 2rem;
+            color: var(--success, #2e7d32);
+            margin-bottom: var(--space-2, 0.5rem);
+        }
+
+        .all-clear h3 {
+            font-size: var(--text-base, 1rem);
+            color: var(--success, #2e7d32);
+            margin: 0 0 var(--space-1, 0.25rem) 0;
+        }
+
+        .all-clear p {
+            font-size: var(--text-sm, 0.875rem);
+            color: var(--gray-600, #666);
+            margin: 0;
+        }
+
+        .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .activity-entry {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3, 0.75rem);
+            padding: var(--space-3, 0.75rem) 0;
+            border-bottom: 1px solid var(--gray-100, #f0f0f0);
+        }
+
+        .activity-entry:last-child {
+            border-bottom: none;
+        }
+
+        .activity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gray-300, #d0d0d0);
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .activity-dot.action-update {
+            background: var(--info, #0077b6);
+        }
+
+        .activity-dot.action-delete {
+            background: var(--error, #ef4444);
+        }
+
+        .activity-dot.action-create,
+        .activity-dot.action-insert {
+            background: var(--success, #2e7d32);
+        }
+
+        .activity-dot.action-package_install {
+            background: var(--primary, #4361ee);
+        }
+
+        .activity-text {
+            font-size: var(--text-sm, 0.875rem);
+            color: var(--gray-700, #444);
+            line-height: 1.4;
+        }
+
+        .activity-text strong {
+            font-weight: var(--font-medium, 500);
+            color: var(--gray-900, #111);
+        }
+
+        .activity-time {
+            font-size: var(--text-xs, 0.75rem);
+            color: var(--gray-400, #aaa);
+            margin-top: 2px;
+        }
+
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-3, 0.75rem);
+        }
+
+        .quick-access-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3, 0.75rem);
+            padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+            background: var(--white, #fff);
+            border: 1px solid var(--gray-200, #e5e5e5);
+            border-radius: var(--radius-lg, 12px);
+            text-decoration: none;
+            color: var(--gray-800, #222);
+            transition: all 0.15s ease;
+        }
+
+        .quick-access-card:hover {
+            border-color: var(--primary, #4361ee);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .quick-access-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md, 8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light, #eef);
+            color: var(--primary, #4361ee);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .quick-access-label {
+            font-size: var(--text-sm, 0.875rem);
+            font-weight: var(--font-medium, 500);
+        }
+
+        .quick-access-meta {
+            font-size: var(--text-xs, 0.75rem);
+            color: var(--gray-500, #888);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-5, 1.25rem);
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-section {
+            background: var(--white, #fff);
+            border: 1px solid var(--gray-200, #e5e5e5);
+            border-radius: var(--radius-lg, 12px);
+            padding: var(--space-4, 1rem);
+        }
+
+        .dashboard-section h3 {
+            font-size: var(--text-sm, 0.875rem);
+            font-weight: var(--font-semibold, 600);
+            color: var(--gray-700, #444);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 var(--space-3, 0.75rem) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2, 0.5rem);
+        }
+    </style>
 </head>
 
 <body class="admin-root">
     <div class="admin-shell">
         <?php
-        // Render Enterprise Sidebar
         \Hub\Components\EnterpriseSidebar::render($user, $userRole, [
             'context' => 'management',
             'title' => $mgmtDisplayName,
             'icon' => $mgmtIcon,
             'logo_url' => '/management/',
             'nav_items' => $navItems,
-            'active_item' => null
+            'active_item' => 'home'
         ]);
 
-        // Render Enterprise Header
         \Hub\Components\EnterpriseHeader::render($user, $userRole, [
             'context' => 'management',
             'breadcrumbs' => [
@@ -158,205 +511,179 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
         ]);
         ?>
 
-        <!-- Main Content Area -->
         <main class="admin-main">
             <div class="admin-main-content">
-                <!-- Overview Metrics -->
-                <div class="metrics-grid">
+
+                <!-- Welcome -->
+                <div class="mgmt-welcome">
+                    <h1>Welcome back, <?= htmlspecialchars(explode(' ', $user['display_name'] ?? $user['name'] ?? 'User')[0]) ?></h1>
+                    <p><?= date('l, F j, Y') ?> &mdash; <?= htmlspecialchars($orgName) ?></p>
+                </div>
+
+                <!-- Metrics Row -->
+                <div class="metrics-grid" style="margin-bottom: var(--space-5, 1.25rem);">
                     <div class="metric-card">
-                        <div class="metric-icon">
-                            <i class="bi bi-box-seam"></i>
-                        </div>
+                        <div class="metric-icon"><i class="bi bi-box-seam"></i></div>
                         <div class="metric-content">
                             <div class="metric-value"><?= count($packages) + count($legacySections) ?></div>
-                            <div class="metric-label">Available Packages</div>
+                            <div class="metric-label">Package<?= (count($packages) + count($legacySections)) !== 1 ? 's' : '' ?></div>
                         </div>
                     </div>
-
-                    <?php if ($totalSubmissions > 0): ?>
+                    <?php if (($stats['total_students'] ?? 0) > 0): ?>
                         <div class="metric-card">
-                            <div class="metric-icon gold">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
+                            <div class="metric-icon" style="background: var(--info-light); color: var(--info);"><i class="bi bi-people"></i></div>
                             <div class="metric-content">
-                                <div class="metric-value"><?= number_format($totalSubmissions) ?></div>
-                                <div class="metric-label">Total Submissions</div>
+                                <div class="metric-value"><?= number_format($stats['total_students']) ?></div>
+                                <div class="metric-label">Total Students</div>
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <?php if ($totalPending > 0): ?>
+                    <?php if (($stats['recent_student_updates'] ?? 0) > 0): ?>
                         <div class="metric-card">
-                            <div class="metric-icon" style="background: var(--warning-light); color: var(--warning);">
-                                <i class="bi bi-clock-history"></i>
-                            </div>
+                            <div class="metric-icon" style="background: var(--success-light); color: var(--success);"><i class="bi bi-pencil-square"></i></div>
                             <div class="metric-content">
-                                <div class="metric-value"><?= $totalPending ?></div>
-                                <div class="metric-label">Pending Review</div>
+                                <div class="metric-value"><?= $stats['recent_student_updates'] ?></div>
+                                <div class="metric-label">Updated This Week</div>
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <?php if ($totalUrgent > 0): ?>
+                    <?php if (($stats['new_students'] ?? 0) > 0): ?>
                         <div class="metric-card">
-                            <div class="metric-icon error">
-                                <i class="bi bi-exclamation-triangle"></i>
-                            </div>
+                            <div class="metric-icon" style="background: var(--warning-light); color: var(--warning);"><i class="bi bi-person-plus"></i></div>
                             <div class="metric-content">
-                                <div class="metric-value"><?= $totalUrgent ?></div>
-                                <div class="metric-label">Urgent Items</div>
+                                <div class="metric-value"><?= $stats['new_students'] ?></div>
+                                <div class="metric-label">Added This Week</div>
                             </div>
                         </div>
                     <?php endif; ?>
                 </div>
 
-                <!-- Package Cards Grid -->
-                <div>
-                    <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--gray-900); margin: 0 0 var(--space-1) 0;">
-                        Your Packages
-                    </h2>
-                    <p style="font-size: var(--text-sm); color: var(--gray-600); margin: 0 0 var(--space-4) 0;">
-                        Select a package to manage its data and settings
-                    </p>
-
-                    <?php if (empty($packages) && empty($legacySections)): ?>
-                        <!-- Empty State -->
-                        <div class="mgmt-empty-modules">
-                            <i class="bi bi-inbox"></i>
-                            <h3>No Packages Available</h3>
-                            <p>You don't have access to any management packages yet.</p>
-                            <?php if ($isSuperAdmin): ?>
-                                <a href="/admin/" class="btn btn-primary">
-                                    <i class="bi bi-gear"></i> Configure Access
-                                </a>
-                            <?php else: ?>
-                                <p style="font-size: var(--text-sm); color: var(--gray-500);">
-                                    Contact your administrator for access.
-                                </p>
-                            <?php endif; ?>
+                <!-- Attention Items -->
+                <div class="attention-section">
+                    <h2><i class="bi bi-bell" style="color: var(--warning, #f59e0b);"></i> Needs Your Attention</h2>
+                    <?php if (empty($attentionItems)): ?>
+                        <div class="all-clear">
+                            <i class="bi bi-check-circle"></i>
+                            <h3>All Clear</h3>
+                            <p>Nothing needs your attention right now. Use the sidebar to navigate your packages.</p>
                         </div>
                     <?php else: ?>
-                        <!-- Package Grid -->
-                        <div class="mgmt-module-grid">
-                            <?php foreach ($packages as $pkg): ?>
-                                <div class="mgmt-module-card" onclick="window.location.href='/management/package.php?id=<?= urlencode($pkg['package_id']) ?>'">
-                                    <!-- Card Header with Icon & Title -->
-                                    <div class="mgmt-module-header">
-                                        <div class="mgmt-module-icon">
-                                            <i class="<?= htmlspecialchars($pkg['icon'] ?? 'bi-box') ?>"></i>
-                                        </div>
-                                        <div class="mgmt-module-info">
-                                            <h3 class="mgmt-module-title"><?= htmlspecialchars($pkg['name']) ?></h3>
-                                            <div style="display: flex; align-items: center; gap: var(--space-2, 0.5rem); margin-top: 2px;">
-                                                <p class="mgmt-module-subtitle" style="margin: 0;">v<?= htmlspecialchars($pkg['version'] ?? '1.0') ?></p>
-                                                <?php if (!empty($pkg['userPkgRole'])): ?>
-                                                    <span style="background: var(--success-light, #e8f5e9); color: var(--success, #2e7d32); padding: 2px 8px; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                                        <?= htmlspecialchars($pkg['userPkgRole']) ?>
-                                                    </span>
+                        <div class="attention-list">
+                            <?php foreach ($attentionItems as $item): ?>
+                                <div class="attention-item type-<?= htmlspecialchars($item['type']) ?>">
+                                    <div class="attention-icon <?= htmlspecialchars($item['type']) ?>">
+                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
+                                    </div>
+                                    <div class="attention-body">
+                                        <p class="attention-title"><?= htmlspecialchars($item['title']) ?></p>
+                                        <p class="attention-subtitle"><?= htmlspecialchars($item['subtitle']) ?></p>
+                                    </div>
+                                    <a href="<?= htmlspecialchars($item['url']) ?>" class="attention-action">
+                                        <?= htmlspecialchars($item['action']) ?> <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Two-column: Recent Activity + Quick Access -->
+                <div class="dashboard-grid">
+                    <!-- Recent Activity -->
+                    <div class="dashboard-section">
+                        <h3><i class="bi bi-clock-history"></i> Recent Activity</h3>
+                        <?php if (empty($recentActivity)): ?>
+                            <p style="color: var(--gray-500); font-size: var(--text-sm); text-align: center; padding: var(--space-4) 0;">
+                                No recent activity
+                            </p>
+                        <?php else: ?>
+                            <div class="activity-feed">
+                                <?php foreach ($recentActivity as $activity): ?>
+                                    <?php
+                                    $action = $activity['action'] ?? 'unknown';
+                                    $table = $activity['table_name'] ?? '';
+                                    $who = $activity['user_name'] ?? $activity['email'] ?? 'System';
+                                    $when = $activity['created_at'] ?? '';
+                                    $timeAgo = '';
+                                    if ($when) {
+                                        $diff = time() - strtotime($when);
+                                        if ($diff < 60) $timeAgo = 'just now';
+                                        elseif ($diff < 3600) $timeAgo = floor($diff / 60) . 'm ago';
+                                        elseif ($diff < 86400) $timeAgo = floor($diff / 3600) . 'h ago';
+                                        else $timeAgo = floor($diff / 86400) . 'd ago';
+                                    }
+                                    $actionLabel = match ($action) {
+                                        'insert', 'create' => 'created',
+                                        'update' => 'updated',
+                                        'delete' => 'deleted',
+                                        'package_install' => 'installed package',
+                                        'package_uninstall' => 'uninstalled package',
+                                        'package_upgrade' => 'upgraded package',
+                                        default => str_replace('_', ' ', $action)
+                                    };
+                                    $tableLabel = str_replace('_', ' ', $table);
+                                    ?>
+                                    <div class="activity-entry">
+                                        <div class="activity-dot action-<?= htmlspecialchars($action) ?>"></div>
+                                        <div>
+                                            <div class="activity-text">
+                                                <strong><?= htmlspecialchars($who) ?></strong> <?= htmlspecialchars($actionLabel) ?>
+                                                <?php if ($tableLabel): ?>
+                                                    <span style="color: var(--gray-500);"><?= htmlspecialchars($tableLabel) ?></span>
                                                 <?php endif; ?>
                                             </div>
+                                            <div class="activity-time"><?= htmlspecialchars($timeAgo) ?></div>
                                         </div>
                                     </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-                                    <!-- Package Pages List -->
-                                    <?php if (!empty($pkg['pages'])): ?>
-                                        <div class="mgmt-module-stats">
-                                            <?php
-                                            $visiblePages = array_filter($pkg['pages'], function ($p) {
-                                                return !preg_match('/\{[^}]+\}/', $p['route'] ?? '');
-                                            });
-                                            ?>
-                                            <div class="mgmt-module-stat">
-                                                <span class="mgmt-module-stat-value"><?= count($visiblePages) ?></span>
-                                                <span class="mgmt-module-stat-label">Pages</span>
-                                            </div>
+                    <!-- Quick Access -->
+                    <div class="dashboard-section">
+                        <h3><i class="bi bi-lightning-charge"></i> Quick Access</h3>
+                        <div class="quick-access-grid">
+                            <?php foreach ($packages as $pkg): ?>
+                                <?php
+                                $visiblePages = array_filter($pkg['pages'] ?? [], function ($p) {
+                                    return !preg_match('/\{[^}]+\}/', $p['route'] ?? '');
+                                });
+                                foreach ($visiblePages as $page):
+                                    $pageIcon = \Hub\Components\EnterpriseSidebar::guessPageIcon($page['id'] ?? '', $page['title'] ?? '');
+                                    $pageUrl = '/management/package.php?id=' . urlencode($pkg['package_id']);
+                                    $pageRoute = trim($page['route'] ?? '/', '/');
+                                    if ($pageRoute && $pageRoute !== '/') {
+                                        $pageUrl .= '&page=' . urlencode($page['id']);
+                                    }
+                                ?>
+                                    <a href="<?= htmlspecialchars($pageUrl) ?>" class="quick-access-card">
+                                        <div class="quick-access-icon"><i class="<?= htmlspecialchars($pageIcon) ?>"></i></div>
+                                        <div>
+                                            <div class="quick-access-label"><?= htmlspecialchars($page['title'] ?? 'Page') ?></div>
+                                            <div class="quick-access-meta"><?= htmlspecialchars($pkg['name']) ?></div>
                                         </div>
-                                    <?php endif; ?>
-
-                                    <!-- Footer with Actions -->
-                                    <div class="mgmt-module-footer">
-                                        <a href="/management/package.php?id=<?= urlencode($pkg['package_id']) ?>"
-                                            class="mgmt-module-action"
-                                            onclick="event.stopPropagation();">
-                                            <i class="bi bi-box-arrow-in-right"></i>
-                                            <span>Open Package</span>
-                                        </a>
-                                        <?php if ($pkg['is_dynamic']): ?>
-                                            <div class="mgmt-module-badge" style="background: var(--info-light, #e8f4f8); color: var(--info, #0077b6);">
-                                                <i class="bi bi-lightning-charge"></i>
-                                                <span>Dynamic</span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
+                                    </a>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
 
                             <?php foreach ($legacySections as $section): ?>
-                                <div class="mgmt-module-card" onclick="window.location.href='/management/section.php?slug=<?= urlencode($section['slug']) ?>'">
-                                    <!-- Card Header with Icon & Title -->
-                                    <div class="mgmt-module-header">
-                                        <div class="mgmt-module-icon">
-                                            <i class="<?= htmlspecialchars($section['icon'] ?? 'bi-folder') ?>"></i>
-                                        </div>
-                                        <div class="mgmt-module-info">
-                                            <h3 class="mgmt-module-title"><?= htmlspecialchars($section['name']) ?></h3>
-                                            <p class="mgmt-module-subtitle"><?= htmlspecialchars($section['mgmt_prefix'] ?? 'Section') ?></p>
-                                        </div>
+                                <a href="/management/section.php?slug=<?= urlencode($section['slug']) ?>" class="quick-access-card">
+                                    <div class="quick-access-icon"><i class="<?= htmlspecialchars($section['icon'] ?? 'bi-folder') ?>"></i></div>
+                                    <div>
+                                        <div class="quick-access-label"><?= htmlspecialchars($section['name']) ?></div>
+                                        <div class="quick-access-meta">Section</div>
                                     </div>
-
-                                    <!-- Stats Grid -->
-                                    <div class="mgmt-module-stats">
-                                        <div class="mgmt-module-stat">
-                                            <span class="mgmt-module-stat-value"><?= $section['submission_count'] ?></span>
-                                            <span class="mgmt-module-stat-label">Total</span>
-                                        </div>
-                                        <div class="mgmt-module-stat">
-                                            <span class="mgmt-module-stat-value"><?= $section['pending_count'] ?></span>
-                                            <span class="mgmt-module-stat-label">Pending</span>
-                                        </div>
-                                        <div class="mgmt-module-stat">
-                                            <span class="mgmt-module-stat-value"><?= $section['recent_count'] ?></span>
-                                            <span class="mgmt-module-stat-label">Last 7 Days</span>
-                                        </div>
-                                        <?php if ($section['urgent_count'] > 0): ?>
-                                            <div class="mgmt-module-stat">
-                                                <span class="mgmt-module-stat-value" style="color: var(--error);"><?= $section['urgent_count'] ?></span>
-                                                <span class="mgmt-module-stat-label">Urgent</span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <!-- Footer with Actions -->
-                                    <div class="mgmt-module-footer">
-                                        <a href="/management/section.php?slug=<?= urlencode($section['slug']) ?>"
-                                            class="mgmt-module-action"
-                                            onclick="event.stopPropagation();">
-                                            <i class="bi bi-box-arrow-in-right"></i>
-                                            <span>Open Module</span>
-                                        </a>
-
-                                        <?php if ($section['urgent_count'] > 0): ?>
-                                            <div class="mgmt-module-badge">
-                                                <i class="bi bi-exclamation-circle"></i>
-                                                <span>Needs Attention</span>
-                                            </div>
-                                        <?php elseif ($section['recent_count'] > 0): ?>
-                                            <div class="mgmt-module-badge" style="background: var(--info-light); color: var(--info);">
-                                                <i class="bi bi-clock-history"></i>
-                                                <span>Recent Activity</span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
-            </div><!-- end admin-main-content -->
+
+            </div>
         </main>
 
         <?php
-        // Render Enterprise Footer
         \Hub\Components\EnterpriseFooter::render($user, [
             'context' => 'management',
             'show_version' => true,
@@ -364,7 +691,7 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
             'show_custom_text' => true
         ]);
         ?>
-    </div><!-- end admin-shell -->
+    </div>
 </body>
 
 </html>

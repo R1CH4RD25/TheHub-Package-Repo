@@ -353,6 +353,16 @@ class EnterpriseSidebar
     {
         $items = [];
 
+        // Home link (mirrors Admin Dashboard pattern)
+        $items[] = [
+            'id' => 'home',
+            'type' => 'link',
+            'url' => '/management/',
+            'icon' => 'bi-house',
+            'label' => 'Home',
+            'active' => ($activePackageId === null && $currentSlug === null),
+        ];
+
         // Package-driven nav items (expandable groups with sub-pages)
         if (!empty($packages)) {
             foreach ($packages as $pkg) {
@@ -399,7 +409,7 @@ class EnterpriseSidebar
                     'icon' => $pkg['icon'] ?? 'bi-box',
                     'label' => $pkg['name'],
                     'expanded' => $isActivePackage,
-                    'children' => $subItems,
+                    'submenu' => $subItems,
                 ];
             }
         }
@@ -432,7 +442,7 @@ class EnterpriseSidebar
     /**
      * Guess an appropriate icon for a package page based on its ID/title
      */
-    private static function guessPageIcon(string $pageId, string $title = ''): string
+    public static function guessPageIcon(string $pageId, string $title = ''): string
     {
         $id = strtolower($pageId);
         $t = strtolower($title);
