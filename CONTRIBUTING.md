@@ -386,23 +386,241 @@ Renders a read-only detail view for a single record.
 
 ## 📝 Form Component
 
-Renders create/edit forms with validation.
+Renders create/edit forms with sections, grid layouts, validation, and CSRF protection.
+
+Forms use **sections** to group related fields. Each section can optionally use a **grid layout** so fields sit side-by-side instead of stacking vertically.
+
+### Basic Structure
 
 ```json
 {
     "type": "form",
     "config": {
-        "fields": [
-            { "key": "first_name", "label": "First Name", "type": "text", "required": true },
-            { "key": "grade", "label": "Grade", "type": "select", "options": [...] },
-            { "key": "email", "label": "Email", "type": "email" }
-        ],
-        "submitMutation": "createStudent",
+        "mutation": "createStudent",
+        "submitLabel": "Add Student",
         "cancelRoute": "/",
-        "submitLabel": "Save Student"
+        "sections": [
+            {
+                "title": "Required Information",
+                "grid": 2,
+                "fields": [
+                    { "key": "first_name", "label": "First Name", "type": "text", "required": true, "placeholder": "Legal first name" },
+                    { "key": "last_name",  "label": "Last Name",  "type": "text", "required": true, "placeholder": "Legal last name" },
+                    { "key": "grade",      "label": "Grade",      "type": "select", "required": true, "options": [...] }
+                ]
+            },
+            {
+                "title": "Demographics",
+                "collapsible": true,
+                "collapsed": true,
+                "grid": 2,
+                "fields": [
+                    { "key": "hispanic_latino", "type": "checkbox", "label": "Hispanic/Latino" },
+                    { "key": "white",           "type": "checkbox", "label": "White" }
+                ]
+            }
+        ]
     }
 }
 ```
+
+### Section Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `title` | string | — | Section heading displayed as a `<legend>` |
+| `description` | string | — | Subtitle text below the heading |
+| `grid` | number | — | Number of columns (2, 3, or 4). Omit for single-column stacked layout |
+| `collapsible` | bool | `false` | Adds a toggle to show/hide the section body |
+| `collapsed` | bool | `false` | If collapsible, start collapsed |
+
+### Grid Layout Rules
+
+When a section has `"grid": N`, its fields render in an N-column CSS grid.
+
+| `grid` | Desktop | ≤ 640px (Phone) |
+|---|---|---|
+| *(omitted)* | Single column, full width | Same |
+| `2` | 2 columns side-by-side | Collapses to 1 column |
+| `3` | 3 columns | Collapses to 1 column |
+| `4` | 4 columns | Collapses to 1 column |
+
+Individual fields can control their column span:
+
+| Field Property | Effect |
+|---|---|
+| `"fullWidth": true` | Field spans all columns in the grid |
+| `"span": 2` | Field spans 2 columns |
+| `"span": 3` | Field spans 3 columns |
+
+**Design guidelines:**
+- Use `"grid": 2` for most form sections — puts related fields side-by-side (e.g., First Name / Last Name)
+- Use `"fullWidth": true` for fields that need breathing room (text areas, important standalone fields)
+- Use `"grid": 2` for checkbox groups to save vertical space
+- All grids collapse to single-column on phones (≤ 640px) automatically
+
+### Field Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `key` | string | **required** | Database column / form field name |
+| `type` | string | `"text"` | Input type (see Field Types below) |
+| `label` | string | = key | Display label |
+| `required` | bool | `false` | Adds `required` attribute & asterisk |
+| `placeholder` | string | — | Placeholder text inside the input |
+| `helpText` | string | — | Small help text displayed below the input |
+| `fullWidth` | bool | `false` | Span all grid columns (only applies inside a grid section) |
+| `span` | number | — | Number of grid columns to span (2, 3) |
+| `step` | number/string | `"any"` | Step increment for `number` fields (use `1` for integers like year) |
+| `rows` | number | `4` | Number of rows for `textarea` fields |
+| `accept` | string | — | Accepted file types for `file` fields (e.g., `".csv,.xlsx"`) |
+| `options` | array | — | Options for `select` and `radio` fields |
+| `optionsQuery` | string | — | Handler method to dynamically populate `select` options |
+| `multiple` | bool | `false` | Allow multiple selection in `select` fields |
+| `allowAll` | bool | `false` | Add a blank "— Select —" option to `select` fields |
+| `validation` | object | — | Validation rules (see below) |
+
+### Field Types
+
+| Type | Renders As | Notes |
+|---|---|---|
+| `text` | `<input type="text">` | Default. Supports `placeholder`, `maxLength`, `pattern` |
+| `email` | `<input type="email">` | Browser email validation |
+| `number` | `<input type="number">` | Supports `min`, `max`, `step`, `placeholder` |
+| `date` | `<input type="date">` | Native date picker |
+| `datetime` | `<input type="datetime-local">` | Date + time picker |
+| `textarea` | `<textarea>` | Multi-line text. Use `rows` to control height |
+| `select` | `<select>` | Dropdown. Requires `options` array or `optionsQuery` |
+| `checkbox` | `<input type="checkbox">` | Single boolean toggle |
+| `radio` | Radio button group | Requires `options` array |
+| `file` | `<input type="file">` | File upload. Use `accept` to restrict types |
+| `currency` | Number input with `$` prefix | Auto-sets `step="0.01"` and `min="0"` |
+| `password` | `<input type="password">` | Masked input |
+
+### Validation Object
+
+```json
+"validation": {
+    "min": 2020,
+    "max": 2040,
+    "maxLength": 100,
+    "pattern": "^[0-9]+$"
+}
+```
+
+| Property | Type | Description |
+|---|---|---|
+| `min` | number | Minimum value (for `number`, `date`) |
+| `max` | number | Maximum value |
+| `maxLength` | number | Maximum character length (for `text`, `textarea`) |
+| `pattern` | string | Regex pattern the value must match |
+
+### Select Options Format
+
+Options can be objects or plain strings:
+
+```json
+"options": [
+    { "value": "PK", "label": "Pre-K" },
+    { "value": "KG", "label": "Kindergarten" },
+    { "value": "1",  "label": "1st" },
+    { "value": "2",  "label": "2nd" }
+]
+```
+
+### Complete Form Example
+
+This is the actual Add Student form from the Student Directory package:
+
+```json
+{
+    "type": "form",
+    "config": {
+        "mutation": "createStudent",
+        "submitLabel": "Add Student",
+        "cancelRoute": "/",
+        "sections": [
+            {
+                "title": "Required Information",
+                "grid": 2,
+                "fields": [
+                    {
+                        "key": "student_id",
+                        "type": "text",
+                        "label": "Student ID",
+                        "required": true,
+                        "placeholder": "e.g. 100234",
+                        "helpText": "Unique student identifier from SIS",
+                        "validation": { "pattern": "^[0-9]+$" }
+                    },
+                    {
+                        "key": "grade",
+                        "type": "select",
+                        "label": "Grade",
+                        "required": true,
+                        "options": [
+                            { "value": "PK", "label": "Pre-K" },
+                            { "value": "KG", "label": "Kindergarten" },
+                            { "value": "1",  "label": "1st" }
+                        ]
+                    },
+                    {
+                        "key": "first_name",
+                        "type": "text",
+                        "label": "First Name",
+                        "required": true,
+                        "placeholder": "Legal first name"
+                    },
+                    {
+                        "key": "last_name",
+                        "type": "text",
+                        "label": "Last Name",
+                        "required": true,
+                        "placeholder": "Legal last name"
+                    }
+                ]
+            },
+            {
+                "title": "Optional Information",
+                "grid": 2,
+                "fields": [
+                    {
+                        "key": "graduation_year",
+                        "type": "number",
+                        "label": "Graduation Year",
+                        "placeholder": "e.g. 2030",
+                        "step": 1,
+                        "validation": { "min": 2020, "max": 2040 },
+                        "helpText": "Expected graduation year"
+                    },
+                    {
+                        "key": "dob",
+                        "type": "date",
+                        "label": "Date of Birth"
+                    }
+                ]
+            },
+            {
+                "title": "Demographics",
+                "collapsible": true,
+                "collapsed": true,
+                "grid": 2,
+                "fields": [
+                    { "key": "hispanic_latino", "type": "checkbox", "label": "Hispanic/Latino" },
+                    { "key": "white",           "type": "checkbox", "label": "White" },
+                    { "key": "asian",           "type": "checkbox", "label": "Asian" }
+                ]
+            }
+        ]
+    }
+}
+```
+
+**Key patterns in this example:**
+- Student ID + Grade share row 1, First Name + Last Name share row 2 (via `"grid": 2`)
+- Demographics collapses by default to reduce visual clutter (`"collapsible": true, "collapsed": true`)
+- Graduation year uses `"step": 1` to prevent decimals and `"validation"` with min/max
+- Descriptive `placeholder` values guide the user ("Legal first name" not just "First name")
 
 ---
 
