@@ -640,43 +640,59 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
                         <?php endif; ?>
                     </div>
 
-                    <!-- Quick Access -->
+                    <!-- Quick Access — one card per package (sidebar handles page-level nav) -->
                     <div class="dashboard-section">
                         <h3><i class="bi bi-lightning-charge"></i> Quick Access</h3>
-                        <div class="quick-access-grid">
-                            <?php foreach ($packages as $pkg): ?>
-                                <?php
-                                $visiblePages = array_filter($pkg['pages'] ?? [], function ($p) {
-                                    return !preg_match('/\{[^}]+\}/', $p['route'] ?? '');
-                                });
-                                foreach ($visiblePages as $page):
-                                    $pageIcon = \Hub\Components\EnterpriseSidebar::guessPageIcon($page['id'] ?? '', $page['title'] ?? '');
-                                    $pageUrl = '/management/package.php?id=' . urlencode($pkg['package_id']);
-                                    $pageRoute = trim($page['route'] ?? '/', '/');
-                                    if ($pageRoute && $pageRoute !== '/') {
-                                        $pageUrl .= '&page=' . urlencode($page['id']);
-                                    }
-                                ?>
-                                    <a href="<?= htmlspecialchars($pageUrl) ?>" class="quick-access-card">
-                                        <div class="quick-access-icon"><i class="<?= htmlspecialchars($pageIcon) ?>"></i></div>
-                                        <div>
-                                            <div class="quick-access-label"><?= htmlspecialchars($page['title'] ?? 'Page') ?></div>
-                                            <div class="quick-access-meta"><?= htmlspecialchars($pkg['name']) ?></div>
+                        <?php
+                        $allItems = [];
+                        foreach ($packages as $pkg) {
+                            $visiblePages = array_filter($pkg['pages'] ?? [], function ($p) {
+                                return !preg_match('/\{[^}]+\}/', $p['route'] ?? '');
+                            });
+                            $allItems[] = [
+                                'url' => '/management/package.php?id=' . urlencode($pkg['package_id']),
+                                'icon' => $pkg['icon'] ?? 'bi-box',
+                                'label' => $pkg['name'],
+                                'meta' => count($visiblePages) . ' page' . (count($visiblePages) !== 1 ? 's' : ''),
+                                'role' => $pkg['userPkgRole'] ?? null,
+                            ];
+                        }
+                        foreach ($legacySections as $section) {
+                            $allItems[] = [
+                                'url' => '/management/section.php?slug=' . urlencode($section['slug']),
+                                'icon' => $section['icon'] ?? 'bi-folder',
+                                'label' => $section['name'],
+                                'meta' => 'Section',
+                                'role' => null,
+                            ];
+                        }
+                        $initialShow = 8;
+                        $hasMore = count($allItems) > $initialShow;
+                        ?>
+                        <div class="quick-access-grid" id="quickAccessGrid">
+                            <?php foreach ($allItems as $idx => $qa): ?>
+                                <a href="<?= htmlspecialchars($qa['url']) ?>"
+                                    class="quick-access-card<?= $idx >= $initialShow ? ' qa-hidden' : '' ?>"
+                                    <?= $idx >= $initialShow ? 'style="display:none;"' : '' ?>>
+                                    <div class="quick-access-icon"><i class="<?= htmlspecialchars($qa['icon']) ?>"></i></div>
+                                    <div style="flex:1; min-width:0;">
+                                        <div class="quick-access-label"><?= htmlspecialchars($qa['label']) ?></div>
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span class="quick-access-meta"><?= htmlspecialchars($qa['meta']) ?></span>
+                                            <?php if (!empty($qa['role'])): ?>
+                                                <span style="background:var(--success-light,#e8f5e9);color:var(--success,#2e7d32);padding:1px 6px;border-radius:9999px;font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;"><?= htmlspecialchars($qa['role']) ?></span>
+                                            <?php endif; ?>
                                         </div>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php endforeach; ?>
-
-                            <?php foreach ($legacySections as $section): ?>
-                                <a href="/management/section.php?slug=<?= urlencode($section['slug']) ?>" class="quick-access-card">
-                                    <div class="quick-access-icon"><i class="<?= htmlspecialchars($section['icon'] ?? 'bi-folder') ?>"></i></div>
-                                    <div>
-                                        <div class="quick-access-label"><?= htmlspecialchars($section['name']) ?></div>
-                                        <div class="quick-access-meta">Section</div>
                                     </div>
                                 </a>
                             <?php endforeach; ?>
                         </div>
+                        <?php if ($hasMore): ?>
+                            <button id="qaShowAll" onclick="document.querySelectorAll('.qa-hidden').forEach(el=>{el.style.display='';});this.style.display='none';"
+                                style="display:block;margin:var(--space-3,0.75rem) auto 0;padding:6px 16px;font-size:var(--text-xs,0.75rem);font-weight:600;color:var(--primary,#4361ee);background:var(--primary-light,#eef);border:none;border-radius:9999px;cursor:pointer;transition:all 0.15s ease;">
+                                Show all <?= count($allItems) ?> packages
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
