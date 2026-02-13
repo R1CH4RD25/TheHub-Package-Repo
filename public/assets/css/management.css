@@ -170,22 +170,181 @@
 }
 
 /* Empty state */
-.mgmt-empty-state {
+.mgmt-empty-state,
+.mgmt-empty-modules {
     text-align: center;
     padding: var(--spacing-xxxl, 60px) var(--spacing-lg, 20px);
     color: var(--text-muted, #95a5a6);
 }
 
-.mgmt-empty-state i {
+.mgmt-empty-state i,
+.mgmt-empty-modules i {
     font-size: 64px;
     margin-bottom: var(--spacing-lg, 20px);
     opacity: 0.3;
 }
 
-.mgmt-empty-state h3 {
+.mgmt-empty-state h3,
+.mgmt-empty-modules h3 {
     font-size: var(--font-size-lg, 20px);
     margin-bottom: var(--spacing-sm, 10px);
     color: var(--text-secondary, #7f8c8d);
+}
+
+/* ============================================================================
+   MODULE CARDS GRID (Management Console Dashboard)
+   ============================================================================ */
+.mgmt-module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-5, 20px);
+}
+
+.mgmt-module-card {
+    background: var(--gray-50, #fafafa);
+    border: 1px solid var(--gray-300, #e0e0e0);
+    border-radius: var(--radius-lg, 12px);
+    padding: var(--space-5, 20px);
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 12px);
+}
+
+.mgmt-module-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: var(--gray-400, #bdbdbd);
+    transform: translateY(-2px);
+}
+
+.mgmt-module-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3, 12px);
+}
+
+.mgmt-module-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-base, 8px);
+    background: var(--gray-200, #e8e8e8);
+    font-size: 20px;
+    color: var(--gray-700, #616161);
+    flex-shrink: 0;
+}
+
+.mgmt-module-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mgmt-module-title {
+    font-size: var(--text-md, 15px);
+    font-weight: var(--font-semibold, 600);
+    color: var(--gray-900, #212121);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.mgmt-module-subtitle {
+    font-size: var(--text-xs, 12px);
+    color: var(--gray-600, #757575);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 2px 0 0;
+}
+
+.mgmt-module-description {
+    font-size: var(--text-sm, 13px);
+    color: var(--gray-600, #757575);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mgmt-module-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: var(--space-2, 8px);
+    padding: var(--space-3, 12px) 0;
+    border-top: 1px solid var(--gray-200, #e8e8e8);
+    border-bottom: 1px solid var(--gray-200, #e8e8e8);
+}
+
+.mgmt-module-stat {
+    text-align: center;
+}
+
+.mgmt-module-stat-value {
+    display: block;
+    font-size: var(--text-xl, 20px);
+    font-weight: var(--font-semibold, 600);
+    color: var(--gray-900, #212121);
+    line-height: 1.2;
+}
+
+.mgmt-module-stat-label {
+    display: block;
+    font-size: var(--text-xs, 11px);
+    color: var(--gray-500, #9e9e9e);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.mgmt-module-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2, 8px);
+}
+
+.mgmt-module-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2, 6px);
+    color: var(--ms-blue, #0078d4);
+    font-size: var(--text-sm, 13px);
+    font-weight: var(--font-medium, 500);
+    text-decoration: none;
+    padding: var(--space-1, 4px) var(--space-2, 8px);
+    border-radius: var(--radius-base, 6px);
+    transition: background 0.15s;
+}
+
+.mgmt-module-action:hover {
+    background: rgba(0, 120, 212, 0.08);
+    text-decoration: none;
+}
+
+.mgmt-module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs, 11px);
+    font-weight: var(--font-medium, 500);
+    padding: 3px 8px;
+    border-radius: var(--radius-full, 999px);
+    background: var(--error-light, #fef2f2);
+    color: var(--error, #dc2626);
+}
+
+@media (max-width: 640px) {
+    .mgmt-module-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+    .mgmt-module-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* ============================================================================

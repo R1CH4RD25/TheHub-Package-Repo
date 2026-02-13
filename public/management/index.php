@@ -121,8 +121,15 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems($sections
         ?>
 
         <!-- Main Content Area -->
-                <!-- Main Content Area -->
-        <main class="admin-main">"><?= count($sections) ?></div>
+        <main class="admin-main">
+            <!-- Overview Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value"><?= count($sections) ?></div>
                         <div class="metric-label">Active Modules</div>
                     </div>
                 </div>

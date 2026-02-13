@@ -129,6 +129,48 @@ HUBBUILD
 echo ""
 
 # ==============================================================================
+# Build Management Bundle
+# ==============================================================================
+
+echo -e "${BLUE}${BOLD}3. Management Bundle${NC}"
+
+python3 << 'MGMTBUILD'
+import os
+
+files = [
+    "shared/enterprise-design-system.css",
+    "shared/enterprise-components.css",
+    "shared/enterprise-header-sidebar.css",
+    "shared/footer.css",
+    "admin/admin-layout.css",
+    "admin/admin-dashboard.css",
+    "admin/admin-theme.css",
+    "admin/admin-animations.css",
+    "management.css",
+    "shared/shared-media.css"
+]
+
+output = []
+output.append("/**\n * Management Bundle - Concatenated CSS\n * Generated: auto\n */\n\n")
+
+for file in files:
+    if os.path.exists(file):
+        output.append(f"\n/* ========== {file} ========== */\n\n")
+        with open(file, 'r', encoding='utf-8') as f:
+            output.append(f.read())
+    else:
+        print(f"⚠️  Missing: {file}")
+
+bundle_content = ''.join(output)
+with open('mgmt-bundle.css', 'w', encoding='utf-8') as f:
+    f.write(bundle_content)
+
+print(f"✅ mgmt-bundle.css: {len(bundle_content)} bytes ({len(bundle_content)//1024}KB)")
+MGMTBUILD
+
+echo ""
+
+# ==============================================================================
 # Minification (if requested)
 # ==============================================================================
 
@@ -136,7 +178,7 @@ if $MINIFY; then
     echo -e "${BLUE}${BOLD}3. Minification${NC}"
     echo ""
 
-    for bundle in admin-bundle hub-bundle; do
+    for bundle in admin-bundle hub-bundle mgmt-bundle; do
         if [ -f "${bundle}.css" ]; then
             echo -e "${YELLOW}  Minifying ${bundle}.css...${NC}"
             csso "${bundle}.css" -o "${bundle}.min.css" --no-restructure 2>/dev/null || {
@@ -165,12 +207,14 @@ if $MINIFY; then
     echo -e "${GREEN}Production bundles ready:${NC}"
     echo -e "  • ${BOLD}admin-bundle.min.css${NC}"
     echo -e "  • ${BOLD}hub-bundle.min.css${NC}"
+    echo -e "  • ${BOLD}mgmt-bundle.min.css${NC}"
     echo ""
     echo -e "${YELLOW}Next: Enable production mode in bootstrap.php${NC}"
 else
     echo -e "${GREEN}Development bundles ready:${NC}"
     echo -e "  • ${BOLD}admin-bundle.css${NC}"
     echo -e "  • ${BOLD}hub-bundle.css${NC}"
+    echo -e "  • ${BOLD}mgmt-bundle.css${NC}"
     echo ""
     echo -e "${YELLOW}For production minified bundles: ${CYAN}./build-css-bundles.sh --min${NC}"
 fi

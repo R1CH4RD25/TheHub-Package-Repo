@@ -346,9 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
     $(document).on('change', '.row-select', function() {
         const id = $(this).val();
         if ($(this).prop('checked')) {
-            selectedRows.add(id);css('display', 'block');
+            selectedRows.add(id);
         } else {
-            $('#bulk-actions-bar').css('display', 'non
+            selectedRows.delete(id);
             $('#select-all').prop('checked', false);
         }
         updateBulkActions();
