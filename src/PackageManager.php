@@ -507,6 +507,20 @@ class PackageManager
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
 
+            // Update capabilities_json so sidebar/pages reflect new version
+            if (!empty($newPackageData['presentation'])) {
+                $capabilitiesJson = json_encode([
+                    'presentation' => $newPackageData['presentation'],
+                    'data' => $newPackageData['data'] ?? null,
+                    'policy' => $newPackageData['policy'] ?? null,
+                    'access' => $newPackageData['access'] ?? null,
+                ]);
+                $this->db->execute(
+                    "UPDATE sections SET capabilities_json = ? WHERE id = ?",
+                    [$capabilitiesJson, $installation['section_id']]
+                );
+            }
+
             // Update installation record
             $this->db->update('section_installations', $installation['id'], [
                 'package_record_id' => $packageRecordId,

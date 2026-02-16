@@ -18,6 +18,7 @@
 
 namespace Hub\Components;
 
+use Hub\IconResolver;
 use Hub\SiteSettings;
 
 class EnterpriseSidebar
@@ -465,12 +466,21 @@ class EnterpriseSidebar
 
                 // Build page links for this package
                 $pageItems = [];
+                $pkgName = strtolower(trim($pkg['name']));
                 foreach ($pkg['pages'] ?? [] as $page) {
                     if (preg_match('/\{[^}]+\}/', $page['route'] ?? '')) {
                         continue;
                     }
 
                     $pageId = $page['id'] ?? 'index';
+                    $pageTitle = $page['title'] ?? ucfirst($pageId);
+
+                    // Avoid duplicate label: if index page title matches the
+                    // package name, relabel to something distinct
+                    if (($page['route'] === '/' || $pageId === 'index')
+                        && strtolower(trim($pageTitle)) === $pkgName) {
+                        $pageTitle = 'Overview';
+                    }
 
                     if (!empty($accessiblePages)) {
                         if (isset($accessiblePages[$pageId]) && !$accessiblePages[$pageId]['accessible']) {
@@ -491,7 +501,7 @@ class EnterpriseSidebar
 
                     $pageItems[] = [
                         'id' => $pkg['package_id'] . ':' . $pageId,
-                        'label' => $page['title'] ?? ucfirst($pageId),
+                        'label' => $pageTitle,
                         'url' => $pageUrl,
                         'active' => $isActivePage,
                     ];
@@ -501,7 +511,7 @@ class EnterpriseSidebar
                     'id' => 'nav:' . $pkg['package_id'],
                     'type' => 'expandable',
                     'label' => $pkg['name'],
-                    'icon' => $pkg['icon'] ?? 'fas fa-box',
+                    'icon' => IconResolver::resolve($pkg['icon'] ?? null),
                     'expanded' => $isActivePackage,
                     'submenu' => $pageItems,
                 ];
