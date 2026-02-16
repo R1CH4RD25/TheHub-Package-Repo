@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Mon Feb 16 06:40:35 PM UTC 2026
+ * Generated: Mon Feb 16 06:49:23 PM UTC 2026
  */
 
 
@@ -2199,35 +2199,37 @@ html {
 
 /* SIDEBAR NAVIGATION LINKS */
 
-/* All nav items share the same padding-left.
-   The .admin-nav container has 10px left padding (caret gutter).
-   Items have 10px padding-left: icon starts at 20px from sidebar edge.
+/* All nav items extend to the sidebar edge via margin-left: -10px
+   (cancels .admin-nav's 10px left padding). Padding-left is increased
+   by 10px to compensate, keeping text/icons aligned.
 
-   Layout:  [10px nav pad] [10px item pad] [ICON 20px] [12px gap] [TEXT]
-   Caret lives in the nav's 10px gutter via ::before at left:-8px.
+   Layout from sidebar edge:  [0px edge] [20px pad] [ICON 20px] [12px gap] [TEXT]
+   Caret at left:2px (always 2px from sidebar edge, inside bounds).
+   border-radius: 0 999px = flat left edge, round right = pill to edge.
    ======================================== */
 
 .admin-nav-link,
 .mgmt-nav-link {
-    padding-left: 10px;
+    margin-left: -10px;
+    padding-left: 20px; /* 10px original + 10px margin compensation */
+    border-radius: 0 999px 999px 0;
+    margin-right: 4px;
 }
 
 /* ========================================
    EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
 
-   Caret is a CSS ::before pseudo-element.
-   It's positioned at left:-8px on the trigger, which places it
-   2px into the .admin-nav's 10px left padding (10 - 8 = 2).
-   This is INSIDE the sidebar's overflow bounds — never clipped.
+   ALL items extend to the sidebar edge via margin-left: -10px.
+   Caret is a CSS ::before at left:2px (2px from sidebar edge).
 
    Positions (from sidebar left edge):
-     Caret:     10(nav) - 8(left) = 2px
-     Icon:      10(nav) + 10(item pad) = 20px
+     Caret:     2px (left:2px on trigger at edge)
+     Icon:      20px (padding-left)
      Text:      20 + 20(icon) + 12(gap) = 52px
-     L2 text:   padding-left 42px  (aligns under L1 text: 52 - 10 nav pad = 42)
-     L3 text:   padding-left 58px  (+16px step)
+     L2 text:   padding-left 52px
+     L3 text:   padding-left 68px  (+16px step)
 
-   Active pill extends left via margin-left: -(10+nav_pad) edge.
+   Active states only change colors — no margin/padding overrides needed.
    ======================================== */
 
 .nav-expandable {
@@ -2241,10 +2243,10 @@ html {
     margin: 0;
 }
 
-/* Trigger button — same layout as regular nav links */
+/* Trigger button — extends to sidebar edge like all nav items */
 .nav-expandable-trigger {
     position: relative; /* Anchor for ::before caret */
-    width: 100%;
+    width: calc(100% + 10px); /* Compensate for negative margin */
     border: none;
     background: transparent;
     cursor: pointer;
@@ -2253,19 +2255,22 @@ html {
     align-items: center;
     gap: var(--space-3); /* 12px — same as .admin-nav-link */
     padding: var(--space-2) var(--space-3);
-    padding-left: 10px; /* Same as nav links — icons align */
+    padding-left: 20px; /* 10px + 10px margin compensation */
     margin: 0;
+    margin-left: -10px; /* Extend to sidebar edge */
+    margin-right: 4px;
+    border-radius: 0 999px 999px 0;
     color: inherit;
     font: inherit;
 }
 
-/* ===== CARET via ::before — in the nav container's left padding ===== */
+/* ===== CARET via ::before — 2px from sidebar edge ===== */
 .nav-expandable-trigger::before {
     content: '\f0da'; /* FontAwesome fa-caret-right */
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
-    left: -8px; /* 10px nav padding - 8 = 2px from sidebar edge — always inside bounds */
+    left: 2px; /* 2px from sidebar edge (trigger is at edge via margin-left:-10px) */
     top: 50%;
     transform: translateY(-50%) rotate(0deg);
     font-size: 11px;
@@ -2298,7 +2303,7 @@ html {
 /* ===== LEVEL 2: Sublinks (text items under L1 expandable) ===== */
 .admin-nav-link.nav-sublink,
 .mgmt-nav-link.nav-sublink {
-    padding-left: 42px !important; /* Aligns under L1 text (10+20+12=42 from nav edge) */
+    padding-left: 52px !important; /* 42px indent + 10px margin compensation */
     font-size: var(--text-md) !important;
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
@@ -2316,14 +2321,14 @@ html {
 
 /* ===== LEVEL 2: Nested expandable trigger (package under category) ===== */
 .nav-nested-expandable > .nav-expandable-trigger {
-    padding-left: 42px !important; /* Text aligns with L2 sublinks */
+    padding-left: 52px !important; /* Aligns with L2 sublinks (42 + 10 compensation) */
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
 }
 
 /* Nested caret — repositioned for L2 indentation */
 .nav-nested-expandable > .nav-expandable-trigger::before {
-    left: 27px; /* ~15px before the 42px text start */
+    left: 37px; /* ~15px before the 52px text start */
 }
 
 .nav-nested-expandable > .nav-expandable-trigger:hover {
@@ -2332,7 +2337,7 @@ html {
 
 /* ===== LEVEL 3: Leaf links (pages inside packages) ===== */
 .nav-submenu-nested .nav-leaf-link {
-    padding-left: 58px !important; /* +16px from L2 (42+16) */
+    padding-left: 68px !important; /* +16px from L2 (52+16) */
     font-size: var(--text-md) !important;
 }
 
@@ -2349,8 +2354,7 @@ html {
 }
 
 /* ===== ACTIVE PILL STATES ===== */
-/* All active pills extend to sidebar edge via margin-left: -12px
-   (nav padding is 12px) with padding-left increased to compensate */
+/* All items already extend to sidebar edge — active only changes colors */
 
 /* Level 2 sublink active */
 .admin-nav-link.nav-sublink.active,
@@ -2359,9 +2363,6 @@ html {
     opacity: 1;
     font-weight: var(--font-medium) !important;
     color: #2D1F05;
-    border-radius: 0 999px 999px 0;
-    margin-left: -12px; /* Extend pill to sidebar edge */
-    padding-left: calc(42px + 10px) !important; /* L2 (42) + margin compensation (10) */
     margin-right: var(--space-2);
 }
 
@@ -2371,9 +2372,6 @@ html {
     opacity: 1;
     font-weight: var(--font-medium) !important;
     color: #2D1F05;
-    border-radius: 0 999px 999px 0;
-    margin-left: -12px;
-    padding-left: calc(58px + 10px) !important; /* L3 (58) + margin compensation (10) */
     margin-right: var(--space-2);
 }
 
@@ -2386,16 +2384,11 @@ html {
 .nav-expandable-trigger.active {
     background: var(--nd-gold) !important;
     color: white !important;
-    border-radius: 0 999px 999px 0 !important;
-    margin-left: -10px !important; /* Extend to sidebar edge (nav padding) */
-    padding-left: calc(10px + 10px) !important; /* item pad (10) + compensation (10) */
-    margin-right: 4px !important;
 }
 
 /* Caret color in active state */
 .nav-expandable-trigger.active::before {
     color: white !important;
-    left: 2px; /* Normal (-8px) + 10px margin-left compensation */
 }
 
 .nav-expandable-trigger.active i {
@@ -2406,17 +2399,7 @@ html {
 .admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger,
 .mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
     border: 2px solid rgba(201, 151, 0, 0.6) !important;
-    border-radius: 0 999px 999px 0 !important;
     border-left: none !important;
-    margin-left: -10px !important;
-    padding-left: calc(10px + 10px) !important;
-    margin-right: 4px !important;
-}
-
-/* Caret position for gold border state */
-.admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before,
-.mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before {
-    left: 2px; /* Normal (-8px) + 10px margin-left compensation */
 }
 
 /* Collapsed sidebar handling */
