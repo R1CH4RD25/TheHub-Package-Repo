@@ -933,6 +933,7 @@
 }
 
 .nav-expandable-trigger {
+    position: relative;
     width: 100%;
     border: none;
     background: transparent;
@@ -940,9 +941,33 @@
     text-align: left;
 }
 
-/* Hide the chevron icon completely */
+/* Google Admin caret: tiny triangle hugging the left edge, 
+   absolutely positioned so it never shifts icons or text */
 .nav-expand-icon {
-    display: none !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    width: 12px;
+    height: 100%;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Expanded state: rotate caret from right-pointing to down-pointing */
+.nav-expandable.expanded > .nav-expandable-trigger > .nav-expand-icon {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* Nested expandable caret positioning (inside submenus) */
+.nav-submenu .nav-expand-icon {
+    left: 28px;
 }
 
 .nav-submenu {
@@ -964,9 +989,9 @@
     font-weight: var(--font-normal) !important; /* Not bold - 400 */
 }
 
-.admin-nav-link.nav-sublink i,
-.mgmt-nav-link.nav-sublink i {
-    display: none; /* Hide submenu icons */
+.admin-nav-link.nav-sublink i:not(.nav-expand-icon),
+.mgmt-nav-link.nav-sublink i:not(.nav-expand-icon) {
+    display: none; /* Hide submenu icons but not the expand caret */
 }
 
 .admin-nav-link.nav-sublink:hover,

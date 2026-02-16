@@ -47,10 +47,10 @@ class EnterpriseSidebar
         ];
         $opts = array_merge($defaults, $options);
 
-        // Both admin and management use the same sidebar class (280px width)
+        // Both admin and management use the same sidebar styling
         $contextClass = 'admin-sidebar';
-        $navClass = $opts['context'] === 'admin' ? 'admin-nav' : 'mgmt-nav';
-        $navLinkClass = $opts['context'] === 'admin' ? 'admin-nav-link' : 'mgmt-nav-link';
+        $navClass = 'admin-nav';
+        $navLinkClass = 'admin-nav-link';
 
 ?>
         <!-- Enterprise Sidebar Component -->
@@ -60,7 +60,7 @@ class EnterpriseSidebar
                     <i class="bi bi-list"></i>
                 </button>
                 <a href="<?= htmlspecialchars($opts['logo_url'], ENT_QUOTES, 'UTF-8') ?>"
-                    style="display: flex; align-items: center; gap: var(--space-3); text-decoration: none;">
+                    class="sidebar-brand-link">
                     <div class="sidebar-logo">
                         <i class="<?= htmlspecialchars($opts['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
                     </div>
@@ -97,7 +97,7 @@ class EnterpriseSidebar
                         ?>
 
                         <?php if ($item['type'] === 'divider'): ?>
-                            <div style="height: 1px; background: rgba(255,255,255,0.1); margin: var(--space-2) 0;"></div>
+                            <div class="sidebar-divider"></div>
 
                         <?php elseif ($item['type'] === 'link'): ?>
                             <a href="<?= htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') ?>"
@@ -118,7 +118,7 @@ class EnterpriseSidebar
 
                         <?php elseif ($item['type'] === 'expandable'): ?>
                             <?php
-                            // Check if any submenu item is active
+                            // Check if any submenu item is active OR if explicitly expanded
                             $hasActiveChild = false;
                             $activeChildId = null;
                             if (!empty($item['submenu'])) {
@@ -128,16 +128,26 @@ class EnterpriseSidebar
                                         $activeChildId = $subitem['id'] ?? null;
                                         break;
                                     }
+                                    // Also check nested expandable children for active leaves
+                                    if (($subitem['type'] ?? 'link') === 'expandable' && !empty($subitem['submenu'])) {
+                                        foreach ($subitem['submenu'] as $leaf) {
+                                            if (($leaf['active'] ?? false) === true) {
+                                                $hasActiveChild = true;
+                                                break 2;
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                            $isExpanded = $hasActiveChild || ($item['expanded'] ?? false);
                             $parentId = $item['id'];
                             ?>
-                            <div class="nav-expandable <?= $hasActiveChild ? 'expanded has-active-child' : '' ?>"
+                            <div class="nav-expandable <?= $isExpanded ? 'expanded has-active-child' : '' ?>"
                                 data-nav-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
-                                <!-- Google-style expandable: chevron on left, parent highlights only when collapsed -->
+                                <!-- Google-style expandable: chevron on left -->
                                 <button class="<?= $navLinkClass ?> nav-expandable-trigger"
                                     title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
-                                    aria-expanded="<?= $hasActiveChild ? 'true' : 'false' ?>"
+                                    aria-expanded="<?= $isExpanded ? 'true' : 'false' ?>"
                                     data-parent-id="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
                                     <i class="fas fa-caret-right nav-expand-icon"></i>
                                     <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
@@ -146,21 +156,60 @@ class EnterpriseSidebar
                                 <?php if (!empty($item['submenu']) && count($item['submenu']) > 0): ?>
                                     <div class="nav-submenu"
                                         data-nav-submenu="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
-                                        <?= $hasActiveChild ? '' : 'style="display: none;"' ?>>
+                                        <?= $isExpanded ? '' : 'style="display: none;"' ?>>
                                         <?php foreach ($item['submenu'] as $subitem): ?>
                                             <?php
                                             $isSubitemActive = ($subitem['active'] ?? false) === true;
                                             ?>
-                                            <a href="<?= htmlspecialchars($subitem['url'], ENT_QUOTES, 'UTF-8') ?>"
-                                                class="<?= $navLinkClass ?> nav-sublink"
-                                                data-nav-child
-                                                data-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
-                                                data-active="<?= $isSubitemActive ? 'true' : 'false' ?>"
-                                                <?php if (!empty($subitem['data_tab'])): ?>
-                                                data-tab="<?= htmlspecialchars($subitem['data_tab'], ENT_QUOTES, 'UTF-8') ?>"
-                                                <?php endif; ?>>
-                                                <span><?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?></span>
-                                            </a>
+                                            <?php if (($subitem['type'] ?? 'link') === 'expandable' && !empty($subitem['submenu'])): ?>
+                                                <?php
+                                                // Nested expandable (3-tier: e.g. package under category)
+                                                $nestedHasActive = false;
+                                                foreach ($subitem['submenu'] as $leaf) {
+                                                    if (($leaf['active'] ?? false) === true) {
+                                                        $nestedHasActive = true;
+                                                        break;
+                                                    }
+                                                }
+                                                $nestedExpanded = $nestedHasActive || ($subitem['expanded'] ?? false);
+                                                $nestedId = $subitem['id'] ?? 'nested';
+                                                ?>
+                                                <div class="nav-expandable nav-nested-expandable <?= $nestedExpanded ? 'expanded has-active-child' : '' ?>"
+                                                    data-nav-parent="<?= htmlspecialchars($nestedId, ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button class="<?= $navLinkClass ?> nav-sublink nav-expandable-trigger"
+                                                        title="<?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?>"
+                                                        aria-expanded="<?= $nestedExpanded ? 'true' : 'false' ?>"
+                                                        data-parent-id="<?= htmlspecialchars($nestedId, ENT_QUOTES, 'UTF-8') ?>">
+                                                        <i class="fas fa-caret-right nav-expand-icon"></i>
+                                                        <span><?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                                    </button>
+                                                    <div class="nav-submenu nav-submenu-nested"
+                                                        data-nav-submenu="<?= htmlspecialchars($nestedId, ENT_QUOTES, 'UTF-8') ?>"
+                                                        <?= $nestedExpanded ? '' : 'style="display: none;"' ?>>
+                                                        <?php foreach ($subitem['submenu'] as $leaf): ?>
+                                                            <?php $isLeafActive = ($leaf['active'] ?? false) === true; ?>
+                                                            <a href="<?= htmlspecialchars($leaf['url'], ENT_QUOTES, 'UTF-8') ?>"
+                                                                class="<?= $navLinkClass ?> nav-sublink nav-leaf-link"
+                                                                data-nav-child
+                                                                data-parent="<?= htmlspecialchars($nestedId, ENT_QUOTES, 'UTF-8') ?>"
+                                                                data-active="<?= $isLeafActive ? 'true' : 'false' ?>">
+                                                                <span><?= htmlspecialchars($leaf['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                                            </a>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
+                                                <a href="<?= htmlspecialchars($subitem['url'], ENT_QUOTES, 'UTF-8') ?>"
+                                                    class="<?= $navLinkClass ?> nav-sublink"
+                                                    data-nav-child
+                                                    data-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>"
+                                                    data-active="<?= $isSubitemActive ? 'true' : 'false' ?>"
+                                                    <?php if (!empty($subitem['data_tab'])): ?>
+                                                    data-tab="<?= htmlspecialchars($subitem['data_tab'], ENT_QUOTES, 'UTF-8') ?>"
+                                                    <?php endif; ?>>
+                                                    <span><?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                                </a>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
@@ -171,22 +220,21 @@ class EnterpriseSidebar
                 <?php endif; ?>
             </nav>
 
-            <?php if ($opts['context'] === 'admin'): ?>
-                <!-- Sidebar Footer - Dashboard Info -->
-                <div class="sidebar-footer">
-                    <div class="sidebar-footer-content">
-                        <div class="footer-info">
-                            <span>&copy; <?= date('Y') ?> <?= htmlspecialchars(\Hub\SiteSettings::get('organization_name', 'Your Organization'), ENT_QUOTES, 'UTF-8') ?></span>
-                        </div>
-                        <?php
-                        $version = \Hub\SiteSettings::get('site_version', '1.0');
-                        ?>
-                        <div class="footer-version">
-                            Admin Dashboard v<?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?>
-                        </div>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-content">
+                    <div class="footer-info">
+                        <span>&copy; <?= date('Y') ?> <?= htmlspecialchars(\Hub\SiteSettings::get('organization_name', 'Your Organization'), ENT_QUOTES, 'UTF-8') ?></span>
+                    </div>
+                    <?php
+                    $version = \Hub\SiteSettings::get('site_version', '1.0');
+                    $dashLabel = $opts['context'] === 'admin' ? 'Admin' : htmlspecialchars($opts['title'], ENT_QUOTES, 'UTF-8');
+                    ?>
+                    <div class="footer-version">
+                        <?= $dashLabel ?> Dashboard v<?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?>
                     </div>
                 </div>
-            <?php endif; ?>
+            </div>
         </aside>
 
         <!-- Sidebar Toggle Script -->
@@ -292,31 +340,32 @@ class EnterpriseSidebar
                         e.stopPropagation();
 
                         const parent = trigger.closest('.nav-expandable');
-                        const submenu = parent.querySelector('.nav-submenu');
-                        const icon = trigger.querySelector('.nav-expand-icon');
+                        const submenu = parent.querySelector(':scope > .nav-submenu');
                         const isExpanded = parent.classList.contains('expanded');
 
                         log('Click on:', itemLabel, {
                             wasExpanded: isExpanded
                         });
 
-                        // Close all other expandables
-                        sidebar.querySelectorAll('.nav-expandable').forEach(item => {
+                        // Close sibling expandables at the same level (not ancestors or descendants)
+                        const parentContainer = parent.parentElement;
+                        const siblings = parentContainer.querySelectorAll(':scope > .nav-expandable');
+                        siblings.forEach(item => {
                             if (item !== parent) {
                                 item.classList.remove('expanded');
-                                item.querySelector('.nav-submenu')?.style.setProperty('display', 'none');
-                                const otherIcon = item.querySelector('.nav-expand-icon');
-                                if (otherIcon) otherIcon.style.setProperty('transform', 'rotate(0deg)');
+                                // Close all nested expandables inside the sibling too
+                                item.querySelectorAll('.nav-expandable').forEach(nested => {
+                                    nested.classList.remove('expanded');
+                                    nested.querySelector('.nav-submenu')?.style.setProperty('display', 'none');
+                                });
+                                item.querySelector(':scope > .nav-submenu')?.style.setProperty('display', 'none');
                             }
                         });
 
-                        // Toggle this one
+                        // Toggle this one (CSS handles caret rotation via .expanded class)
                         parent.classList.toggle('expanded');
                         if (submenu) {
                             submenu.style.display = isExpanded ? 'none' : 'block';
-                        }
-                        if (icon) {
-                            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
                         }
 
                         // Re-sync highlights after toggle
@@ -336,50 +385,96 @@ class EnterpriseSidebar
     }
 
     /**
-     * Helper: Build nav items array for Management Console
+     * Helper: Build nav items for Management Console
      *
-     * Supports two modes:
-     * 1. Legacy sections (flat links to section.php)
-     * 2. Package-driven (expandable groups with sub-pages from capabilities_json)
+     * Google Admin Console pattern — the sidebar ALWAYS shows the full
+     * navigation tree. The active package is auto-expanded and the
+     * active page highlighted. No mode switching.
      *
-     * @param array $sections Legacy sections array (from getSectionsWithCounts)
-     * @param string|null $currentSlug Currently active section slug
-     * @param array $packages Installed packages (from getInstalledPackagesForUser)
-     * @param string|null $activePackageId Currently active package ID
-     * @param string|null $activePageId Currently active page within a package
+     *   🏠 Home
+     *   🏫 District              ← category (expandable)
+     *     ▸ Student Directory    ← package (expandable, auto-expanded when active)
+     *       ├─ Student Directory ← page (leaf, highlighted when active)
+     *       ├─ Add Student
+     *       ├─ Import Students
+     *       └─ Export Students
+     *     ▸ Staff Directory
+     *   🔧 Operations
+     *     ▸ Maintenance Requests
+     *   ─────────────────
+     *   📋 Legacy Section        ← legacy sections (if any)
+     *
+     * @param array $sections Legacy sections
+     * @param string|null $currentSlug Active section slug
+     * @param array $packages All packages the user can access
+     * @param string|null $activePackageId Active package ID (null = dashboard)
+     * @param string|null $activePageId Active page within a package
+     * @param array $accessiblePages Accessible pages info
+     * @param array $categoryMap Category metadata (icon, color, label)
      * @return array Nav items
      */
-    public static function buildManagementNavItems($sections = [], $currentSlug = null, $packages = [], $activePackageId = null, $activePageId = null, $accessiblePages = [])
+    public static function buildManagementNavItems($sections = [], $currentSlug = null, $packages = [], $activePackageId = null, $activePageId = null, $accessiblePages = [], $categoryMap = [])
     {
         $items = [];
 
-        // Home link (mirrors Admin Dashboard pattern)
+        // Default category definitions
+        if (empty($categoryMap)) {
+            $categoryMap = [
+                'district'     => ['icon' => 'fas fa-school',          'label' => 'District'],
+                'operations'   => ['icon' => 'fas fa-tools',           'label' => 'Operations'],
+                'finance'      => ['icon' => 'fas fa-dollar-sign',     'label' => 'Finance'],
+                'reporting'    => ['icon' => 'fas fa-chart-bar',       'label' => 'Reporting'],
+                'analytics'    => ['icon' => 'fas fa-chart-line',      'label' => 'Analytics'],
+                'forms'        => ['icon' => 'fas fa-file-alt',        'label' => 'Forms'],
+                'integrations' => ['icon' => 'fas fa-plug',            'label' => 'Integrations'],
+                'workflows'    => ['icon' => 'fas fa-project-diagram', 'label' => 'Workflows'],
+                'student'      => ['icon' => 'fas fa-user-graduate',   'label' => 'Student'],
+            ];
+        }
+
+        // ── Home link (always present) ───────────────────────────────
         $items[] = [
             'id' => 'home',
             'type' => 'link',
             'url' => '/management/',
-            'icon' => 'bi-house',
+            'icon' => 'fas fa-home',
             'label' => 'Home',
             'active' => ($activePackageId === null && $currentSlug === null),
         ];
 
-        // Package-driven nav items (expandable groups with sub-pages)
-        if (!empty($packages)) {
-            foreach ($packages as $pkg) {
-                $isActivePackage = ($pkg['package_id'] === $activePackageId);
+        // ── Group packages by category ───────────────────────────────
+        $categoriesWithPackages = [];
+        foreach ($packages as $pkg) {
+            $pkgId = $pkg['package_id'] ?? '';
+            $category = explode('.', $pkgId)[0] ?? 'other';
+            if (!isset($categoriesWithPackages[$category])) {
+                $categoriesWithPackages[$category] = [];
+            }
+            $categoriesWithPackages[$category][] = $pkg;
+        }
 
-                // Build sub-items from package pages
-                $subItems = [];
-                foreach ($pkg['pages'] as $page) {
-                    // Skip detail/edit routes with parameters (e.g., /view/{id})
+        // ── Build category → package → pages tree ────────────────────
+        foreach ($categoriesWithPackages as $catKey => $catPackages) {
+            $catInfo = $categoryMap[$catKey] ?? ['icon' => 'fas fa-box', 'label' => ucfirst($catKey)];
+            $catHasActiveChild = false;
+
+            $subItems = [];
+            foreach ($catPackages as $pkg) {
+                $isActivePackage = ($pkg['package_id'] === $activePackageId);
+                if ($isActivePackage) {
+                    $catHasActiveChild = true;
+                }
+
+                // Build page links for this package
+                $pageItems = [];
+                foreach ($pkg['pages'] ?? [] as $page) {
                     if (preg_match('/\{[^}]+\}/', $page['route'] ?? '')) {
                         continue;
                     }
 
                     $pageId = $page['id'] ?? 'index';
 
-                    // If we have accessible pages info, skip pages the user can't access
-                    if (!empty($accessiblePages) && $isActivePackage) {
+                    if (!empty($accessiblePages)) {
                         if (isset($accessiblePages[$pageId]) && !$accessiblePages[$pageId]['accessible']) {
                             continue;
                         }
@@ -391,31 +486,43 @@ class EnterpriseSidebar
                         $pageUrl .= '&page=' . urlencode($page['id']);
                     }
 
-                    // Map page icons based on common patterns
-                    $pageIcon = $page['icon'] ?? self::guessPageIcon($page['id'], $page['title']);
+                    $isActivePage = $isActivePackage && (
+                        $page['id'] === $activePageId ||
+                        (!$activePageId && ($page['id'] === 'index' || $page['route'] === '/'))
+                    );
 
-                    $subItems[] = [
-                        'id' => $pkg['package_id'] . ':' . ($page['id'] ?? 'index'),
-                        'label' => $page['title'] ?? ucfirst($page['id'] ?? 'Home'),
+                    $pageItems[] = [
+                        'id' => $pkg['package_id'] . ':' . $pageId,
+                        'label' => $page['title'] ?? ucfirst($pageId),
                         'url' => $pageUrl,
-                        'icon' => $pageIcon,
-                        'active' => ($isActivePackage && ($page['id'] === $activePageId || (!$activePageId && ($page['id'] === 'index' || $page['route'] === '/')))),
+                        'active' => $isActivePage,
                     ];
                 }
 
-                $items[] = [
-                    'id' => 'pkg:' . $pkg['package_id'],
+                $subItems[] = [
+                    'id' => 'nav:' . $pkg['package_id'],
                     'type' => 'expandable',
-                    'icon' => $pkg['icon'] ?? 'bi-box',
                     'label' => $pkg['name'],
+                    'icon' => $pkg['icon'] ?? 'fas fa-box',
                     'expanded' => $isActivePackage,
-                    'submenu' => $subItems,
+                    'submenu' => $pageItems,
                 ];
             }
+
+            $items[] = [
+                'id' => 'cat:' . $catKey,
+                'type' => 'expandable',
+                'icon' => $catInfo['icon'],
+                'label' => $catInfo['label'],
+                'expanded' => $catHasActiveChild,
+                'submenu' => $subItems,
+            ];
         }
 
-        // Legacy section nav items (flat links) — only for non-dynamic sections
+        // ── Legacy section nav items ─────────────────────────────────
         if (!empty($sections)) {
+            $items[] = ['type' => 'divider'];
+
             foreach ($sections as $section) {
                 $badge = null;
                 if (($section['urgent_count'] ?? 0) > 0) {
@@ -428,10 +535,10 @@ class EnterpriseSidebar
                     'id' => $section['slug'],
                     'type' => 'link',
                     'url' => '/management/section.php?slug=' . urlencode($section['slug']),
-                    'icon' => $section['icon'] ?? 'bi-folder',
+                    'icon' => $section['icon'] ?? 'fas fa-folder',
                     'label' => $section['name'],
                     'badge' => $badge,
-                    'active' => ($section['slug'] === $currentSlug)
+                    'active' => ($section['slug'] === $currentSlug),
                 ];
             }
         }
@@ -447,17 +554,17 @@ class EnterpriseSidebar
         $id = strtolower($pageId);
         $t = strtolower($title);
 
-        if (in_array($id, ['index', 'home', 'dashboard', 'list'])) return 'bi-grid-3x3-gap';
-        if (str_contains($id, 'add') || str_contains($t, 'add')) return 'bi-plus-circle';
-        if (str_contains($id, 'import') || str_contains($t, 'import')) return 'bi-upload';
-        if (str_contains($id, 'export') || str_contains($t, 'export')) return 'bi-download';
-        if (str_contains($id, 'view') || str_contains($id, 'detail')) return 'bi-eye';
-        if (str_contains($id, 'edit')) return 'bi-pencil-square';
-        if (str_contains($id, 'setting')) return 'bi-gear';
-        if (str_contains($id, 'report')) return 'bi-bar-chart';
-        if (str_contains($id, 'search') || str_contains($t, 'search')) return 'bi-search';
+        if (in_array($id, ['index', 'home', 'dashboard', 'list'])) return 'fas fa-th-large';
+        if (str_contains($id, 'add') || str_contains($t, 'add')) return 'fas fa-plus-circle';
+        if (str_contains($id, 'import') || str_contains($t, 'import')) return 'fas fa-upload';
+        if (str_contains($id, 'export') || str_contains($t, 'export')) return 'fas fa-download';
+        if (str_contains($id, 'view') || str_contains($id, 'detail')) return 'fas fa-eye';
+        if (str_contains($id, 'edit')) return 'fas fa-pencil-alt';
+        if (str_contains($id, 'setting')) return 'fas fa-cog';
+        if (str_contains($id, 'report')) return 'fas fa-chart-bar';
+        if (str_contains($id, 'search') || str_contains($t, 'search')) return 'fas fa-search';
 
-        return 'bi-file-text';
+        return 'fas fa-file-alt';
     }
 
     /**
