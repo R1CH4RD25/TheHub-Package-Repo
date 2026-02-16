@@ -143,6 +143,9 @@
                             <button class="action-btn">Add new user</button>
                             <button class="action-btn">Bulk update users</button>
                             <button class="action-btn">Download users</button>
+                            <button class="action-btn" id="syncGoogleGroupsBtn" title="Force sync Google Groups for all users">
+                                <i class="fab fa-google"></i> Sync Groups
+                            </button>
                             <button class="action-btn dropdown-toggle">
                                 More options <i class="fas fa-chevron-down"></i>
                             </button>
@@ -194,6 +197,10 @@
                     <button class="panel-action-btn" id="bulkResetPassword">
                         <i class="fas fa-key"></i>
                         <span>Reset password</span>
+                    </button>
+                    <button class="panel-action-btn" id="bulkSyncGroups">
+                        <i class="fab fa-google"></i>
+                        <span>Sync Google Groups</span>
                     </button>
                     <button class="panel-action-btn danger" id="bulkDelete">
                         <i class="fas fa-trash"></i>
@@ -1207,6 +1214,195 @@ loadActiveUsers();
 
 // Setup search and filter after DOM is ready
 setTimeout(setupSearchAndFilter, 100);
+
+// ============================================
+// GOOGLE GROUPS SYNC
+// ============================================
+
+// Sync All Users button in header
+document.getElementById('syncGoogleGroupsBtn')?.addEventListener('click', async function() {
+    // First check config
+    try {
+        const configCheck = await fetch('/api/google-sync.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify({ action: 'check-config', csrf_token: csrfToken })
+        }).then(r => r.json());
+
+        if (!configCheck.success || !configCheck.config.configured) {
+            const issues = configCheck.config?.issues?.join('<br>• ') || 'Unknown configuration issue';
+            Swal.fire({
+                title: 'Google Groups Not Configured',
+                html: `<p>Google Groups sync requires proper configuration:</p><p style="text-align:left;color:#DC2626;">• ${issues}</p>`,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+    } catch (e) {
+        notyf.error('Failed to check Google Groups configuration');
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: '<i class="fab fa-google" style="color:#4285F4;"></i> Sync Google Groups',
+        html: `
+            <p>This will fetch Google Groups memberships for all active users and update their organization roles.</p>
+            <div style="background:#F0F4FF;border:1px solid #C7D2FE;border-radius:8px;padding:12px;margin:12px 0;text-align:left;font-size:13px;">
+                <strong>What happens:</strong><br>
+                • Queries Google Admin Directory API for each user<br>
+                • Matches groups against configured role mappings<br>
+                • Assigns/updates organization roles automatically
+            </div>
+            <p style="color:#6B7280;font-size:13px;">This may take a moment for many users.</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4285F4',
+        confirmButtonText: '<i class="fas fa-sync-alt"></i> Sync All Users',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async () => {
+            try {
+                const resp = await fetch('/api/google-sync.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify({ action: 'sync-all', csrf_token: csrfToken })
+                });
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.error || 'Sync failed');
+                return data;
+            } catch (err) {
+                Swal.showValidationMessage(`Sync failed: ${err.message}`);
+                return false;
+            }
+        }
+    });
+
+    if (result.isConfirmed && result.value) {
+        const data = result.value;
+        const s = data.summary;
+        showGoogleSyncResults(s, data.users);
+    }
+});
+
+// Bulk sync selected users
+document.getElementById('bulkSyncGroups')?.addEventListener('click', async function() {
+    const selected = getSelectedUserIds();
+    if (selected.length === 0) {
+        notyf.error('No users selected');
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: '<i class="fab fa-google" style="color:#4285F4;"></i> Sync Selected Users',
+        html: `<p>Sync Google Groups for <strong>${selected.length}</strong> selected user(s)?</p>`,
+        showCancelButton: true,
+        confirmButtonColor: '#4285F4',
+        confirmButtonText: '<i class="fas fa-sync-alt"></i> Sync',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async () => {
+            try {
+                const results = [];
+                for (const userId of selected) {
+                    const resp = await fetch('/api/google-sync.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        body: JSON.stringify({ action: 'sync-user', user_id: userId, csrf_token: csrfToken })
+                    });
+                    results.push(await resp.json());
+                }
+                return results;
+            } catch (err) {
+                Swal.showValidationMessage(`Sync failed: ${err.message}`);
+                return false;
+            }
+        }
+    });
+
+    if (result.isConfirmed && result.value) {
+        const users = result.value;
+        const synced = users.filter(u => u.success).length;
+        const errors = users.filter(u => !u.success).length;
+        showGoogleSyncResults({ total: users.length, synced, errors, skipped: 0, roles_assigned: users.reduce((sum, u) => sum + (u.matched_roles?.length || 0), 0) }, users);
+        document.getElementById('actionPanel')?.classList.remove('active');
+    }
+});
+
+// Helper: get selected user IDs
+function getSelectedUserIds() {
+    return Array.from(document.querySelectorAll('.user-checkbox:not(#selectAll):checked'))
+        .map(cb => parseInt(cb.dataset.userId));
+}
+
+// Show sync results in a detailed modal
+function showGoogleSyncResults(summary, users) {
+    let userDetails = '';
+    if (users && users.length > 0) {
+        const rows = users.map(u => {
+            const icon = u.success ? (u.groups_count > 0 ? '✅' : '➖') : '❌';
+            const groups = u.groups_count || 0;
+            const roles = u.matched_roles?.map(r => r.role_name).join(', ') || '—';
+            const roleUpdate = u.base_role_update ? ` <span style="color:#059669;">(${u.base_role_update.from} → ${u.base_role_update.to})</span>` : '';
+            const error = u.error && u.error !== 'No Google Groups found' ? ` <span style="color:#DC2626;">${u.error}</span>` : '';
+            return `<tr>
+                <td>${icon}</td>
+                <td>${u.user_name || 'Unknown'}</td>
+                <td style="color:#6B7280;font-size:12px;">${u.user_email || ''}</td>
+                <td style="text-align:center;">${groups}</td>
+                <td>${roles}${roleUpdate}${error}</td>
+            </tr>`;
+        }).join('');
+
+        userDetails = `
+            <div style="max-height:300px;overflow-y:auto;margin-top:16px;">
+                <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                    <thead><tr style="border-bottom:2px solid #E5E7EB;text-align:left;">
+                        <th style="width:30px;"></th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th style="text-align:center;">Groups</th>
+                        <th>Roles Matched</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    Swal.fire({
+        title: '<i class="fab fa-google" style="color:#4285F4;"></i> Sync Complete',
+        html: `
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:#F0FDF4;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#16A34A;">${summary.synced}</div>
+                    <div style="font-size:11px;color:#6B7280;">Synced</div>
+                </div>
+                <div style="background:#FEF3C7;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#D97706;">${summary.skipped}</div>
+                    <div style="font-size:11px;color:#6B7280;">No Groups</div>
+                </div>
+                <div style="background:#FEE2E2;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#DC2626;">${summary.errors}</div>
+                    <div style="font-size:11px;color:#6B7280;">Errors</div>
+                </div>
+                <div style="background:#EFF6FF;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#2563EB;">${summary.roles_assigned}</div>
+                    <div style="font-size:11px;color:#6B7280;">Roles Set</div>
+                </div>
+            </div>
+            ${userDetails}
+        `,
+        width: '700px',
+        confirmButtonText: 'Done',
+        confirmButtonColor: '#4285F4',
+    });
+
+    // Refresh user list after sync
+    loadActiveUsers();
+}
 </script>
 
 <!-- Organization Roles JavaScript -->
