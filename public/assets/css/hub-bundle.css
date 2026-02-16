@@ -1,6 +1,6 @@
 /**
  * Hub Bundle - Concatenated CSS
- * Generated: Mon Feb 16 05:38:24 PM UTC 2026
+ * Generated: Mon Feb 16 05:47:45 PM UTC 2026
  */
 
 
@@ -1968,7 +1968,7 @@ html {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    overflow-x: visible;
+    overflow-x: hidden;
 }
 
 /* Sidebar header styling moved to admin-layout.css */
@@ -2262,7 +2262,7 @@ html {
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
-    left: -5px; /* Hugs left edge, outside trigger but inside sidebar-menu padding */
+    left: 2px; /* Inside the 18px padding — always visible regardless of overflow */
     top: 50%;
     transform: translateY(-50%) rotate(0deg);
     font-size: 11px;
@@ -2392,7 +2392,7 @@ html {
 /* Caret color in active state */
 .nav-expandable-trigger.active::before {
     color: white !important;
-    left: 7px; /* Normal (-5px) + 12px margin-left compensation */
+    left: 14px; /* Normal (2px) + 12px margin-left compensation */
 }
 
 .nav-expandable-trigger.active i {
@@ -2413,7 +2413,7 @@ html {
 /* Caret position for gold border state */
 .admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before,
 .mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before {
-    left: 7px; /* Normal (-5px) + 12px margin-left compensation */
+    left: 14px; /* Normal (2px) + 12px margin-left compensation */
 }
 
 /* Collapsed sidebar handling */
