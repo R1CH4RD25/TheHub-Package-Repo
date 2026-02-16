@@ -941,33 +941,33 @@
     text-align: left;
 }
 
-/* Google Admin caret: tiny triangle hugging the left edge, 
-   absolutely positioned so it never shifts icons or text */
+/* Google Admin caret: tiny inline triangle that lives in the padding zone.
+   Negative margins make it occupy zero effective width so icons stay aligned
+   with non-expandable items. The caret visually sits in the left padding space. */
 .nav-expand-icon {
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    left: 0px;
-    top: 50%;
-    transform: translateY(-50%) rotate(0deg);
-    width: 12px;
-    height: 100%;
-    font-size: 9px;
-    color: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    width: 0;
+    overflow: visible;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.45);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-    z-index: 1;
+    transform: rotate(0deg);
+    margin-left: -10px;
+    margin-right: -2px;
 }
 
-/* Expanded state: rotate caret from right-pointing to down-pointing */
+/* Expanded state: rotate caret from right-pointing ▸ to down-pointing ▾ */
 .nav-expandable.expanded > .nav-expandable-trigger > .nav-expand-icon {
-    transform: translateY(-50%) rotate(90deg);
+    transform: rotate(90deg);
 }
 
-/* Nested expandable caret positioning (inside submenus) */
-.nav-submenu .nav-expand-icon {
-    left: 28px;
+/* Nested expandable caret */
+.nav-nested-expandable > .nav-expandable-trigger > .nav-expand-icon {
+    margin-left: -10px;
+    margin-right: -2px;
 }
 
 .nav-submenu {
