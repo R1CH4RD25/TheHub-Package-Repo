@@ -271,6 +271,7 @@ class ComponentRendererTest extends TestCase
 
         $this->assertStringContainsString('type="checkbox"', $html);
         $this->assertStringContainsString('I Agree', $html);
+        $this->assertStringContainsString('pkg-form-group-checkbox', $html);
     }
 
     public function testFormRenderDateField(): void

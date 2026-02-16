@@ -168,6 +168,27 @@ class FormRenderer implements ComponentRendererInterface
         } elseif (!empty($field['fullWidth'])) {
             $spanClass = ' pkg-form-span-full';
         }
+
+        // Checkboxes use inline layout: [checkbox] Label
+        if ($type === 'checkbox') {
+            $html = '<div class="pkg-form-group pkg-form-group-checkbox' . ($error ? ' has-error' : '') . $spanClass . '" data-field="' . e($key) . '">';
+            $html .= $this->renderInput($field, $fieldId, $value, $readOnly, $placeholder);
+            $html .= '<label for="' . $fieldId . '" class="pkg-form-label">';
+            $html .= e($label);
+            if ($required) {
+                $html .= ' <span class="pkg-required">*</span>';
+            }
+            $html .= '</label>';
+            if ($helpText) {
+                $html .= '<small class="pkg-form-help">' . e($helpText) . '</small>';
+            }
+            if ($error) {
+                $html .= '<div class="pkg-form-error"><i class="bi bi-exclamation-circle"></i> ' . e($error) . '</div>';
+            }
+            $html .= '</div>';
+            return $html;
+        }
+
         $html = '<div class="pkg-form-group' . ($error ? ' has-error' : '') . $spanClass . '" data-field="' . e($key) . '">';
 
         // Label
@@ -245,7 +266,7 @@ class FormRenderer implements ComponentRendererInterface
 
             case 'checkbox':
                 $checked = $value ? ' checked' : '';
-                return '<div class="form-check"><input type="checkbox" class="form-check-input pkg-input"' . $attrs . $checked . ' value="1"></div>';
+                return '<input type="checkbox" class="form-check-input pkg-input"' . $attrs . $checked . ' value="1">';
 
             case 'radio':
                 $options = $field['options'] ?? [];
