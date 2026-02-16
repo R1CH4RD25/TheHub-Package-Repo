@@ -369,32 +369,25 @@ document.addEventListener('DOMContentLoaded', function () {
         var config = (window.__pkgTableConfig || {})[tableId];
         if (!config) return;
 
-        var url = '/api/package.php?action=query&package=' + encodeURIComponent(config.packageId) +
-                  '&query=' + encodeURIComponent(config.query);
+        // Build new URL with pagination/sort/filter params for server-side rendering
+        var currentUrl = new URL(window.location.href);
+        var searchParams = currentUrl.searchParams;
 
+        // Apply new params (page, pageSize, sort, sortDir, filters)
         Object.keys(params).forEach(function (key) {
-            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+            if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+                // Map JS param names to server-side expected names
+                var serverKey = key;
+                if (key === 'pageSize') serverKey = 'per_page';
+                if (key === 'sortDir') serverKey = 'direction';
+                searchParams.set(serverKey, params[key]);
+            } else {
+                searchParams.delete(key);
+            }
         });
 
-        var table = document.getElementById(tableId);
-        if (table) {
-            var tbody = table.querySelector('tbody');
-            if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="99" style="text-align:center;padding:2rem;color:#9ca3af;"><i class="bi bi-arrow-repeat spin"></i> Loading...</td></tr>';
-            }
-        }
-
-        fetch(url)
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-                // Full page reload for now — will implement partial DOM update in Sprint 2
-                if (data.data) {
-                    location.reload();
-                }
-            })
-            .catch(function (err) {
-                showToast('Failed to load data: ' + err.message, 'error');
-            });
+        // Navigate to updated URL — server re-renders with correct page/sort
+        window.location.href = currentUrl.toString();
     };
 
     // ========================================
@@ -487,13 +480,24 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             var container = this.closest('.pkg-filters') || this;
             var filters = collectFilters(container);
-            // Build URL with filter params for server-side filtering
-            var params = new URLSearchParams();
+            // Build URL preserving existing params (id, page route) and adding filter params
+            var currentUrl = new URL(window.location.href);
+            var searchParams = currentUrl.searchParams;
+            // Remove old filter params, add new ones, reset to page 1
             Object.keys(filters).forEach(function (key) {
-                if (filters[key]) params.set(key, filters[key]);
+                if (filters[key]) {
+                    searchParams.set(key, filters[key]);
+                } else {
+                    searchParams.delete(key);
+                }
             });
-            var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            window.location.href = newUrl;
+            searchParams.set('page_num', '1'); // Reset to page 1 on filter change
+            searchParams.delete('page_num'); // Remove if the backend uses 'page' not 'page_num'
+            // If a 'page' filter param exists as a number, keep it at 1
+            if (searchParams.has('page') && !isNaN(searchParams.get('page'))) {
+                // 'page' might be used for route (e.g. 'index'), only reset if numeric
+            }
+            window.location.href = currentUrl.toString();
         });
     });
 

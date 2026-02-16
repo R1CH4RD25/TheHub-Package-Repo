@@ -58,6 +58,11 @@ class TableRenderer implements ComponentRendererInterface
         $html .= '<span class="count-label">Showing <strong>' . count($rows) . '</strong> of <strong>' . (int)$total . '</strong> records</span>';
         $html .= '</div>';
 
+        // Top pagination controls (right side of toolbar)
+        if ($totalPages > 1) {
+            $html .= $this->renderCompactPagination($page, $totalPages, $perPage, $pagination, $componentId);
+        }
+
         // Bulk actions (hidden on mobile)
         if (!empty($bulkActions)) {
             $html .= '<div class="pkg-bulk-actions pkg-hide-mobile" style="display:none;" id="' . e($componentId) . '-bulk">';
@@ -428,6 +433,39 @@ class TableRenderer implements ComponentRendererInterface
         $html .= '</div>';
 
         $html .= '</div>'; // pagination
+        return $html;
+    }
+
+    /**
+     * Render compact pagination for the toolbar (prev/next + page size, no page numbers)
+     */
+    private function renderCompactPagination(int $page, int $totalPages, int $perPage, array $pagination, string $componentId): string
+    {
+        $html = '<div class="pkg-pagination pkg-pagination-compact" data-table="' . e($componentId) . '">';
+
+        // Per-page selector
+        $pageSizeOptions = $pagination['pageSizeOptions'] ?? [25, 50, 100];
+        $html .= '<div class="pkg-page-size">';
+        $html .= '<select class="form-select form-select-sm pkg-page-size-select" data-table="' . e($componentId) . '">';
+        foreach ($pageSizeOptions as $size) {
+            $selected = $size == $perPage ? ' selected' : '';
+            $html .= '<option value="' . (int)$size . '"' . $selected . '>' . $size . ' per page</option>';
+        }
+        $html .= '</select>';
+        $html .= '</div>';
+
+        // Page info + nav
+        $html .= '<div class="pkg-page-nav">';
+        $html .= '<span class="pkg-page-info">Page ' . $page . ' of ' . $totalPages . '</span>';
+
+        $html .= '<button class="btn btn-sm btn-outline-secondary pkg-page-btn" data-page="' . max(1, $page - 1) . '"' . ($page <= 1 ? ' disabled' : '') . '>';
+        $html .= '<i class="bi bi-chevron-left"></i></button>';
+
+        $html .= '<button class="btn btn-sm btn-outline-secondary pkg-page-btn" data-page="' . min($totalPages, $page + 1) . '"' . ($page >= $totalPages ? ' disabled' : '') . '>';
+        $html .= '<i class="bi bi-chevron-right"></i></button>';
+
+        $html .= '</div>'; // page-nav
+        $html .= '</div>'; // pagination-compact
         return $html;
     }
 }
