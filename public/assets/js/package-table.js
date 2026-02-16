@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             var container = this.closest('.pkg-filters');
+            // Clear all filter inputs
             container.querySelectorAll('.pkg-filter-input').forEach(function (input) {
                 if (input.type === 'checkbox') {
                     input.checked = false;
@@ -117,8 +118,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     input.value = '';
                 }
             });
-            // Navigate to page without filter params
-            window.location.href = window.location.pathname;
+            // Navigate preserving route params (id, page) but removing filter/sort/pagination params
+            var currentUrl = new URL(window.location.href);
+            var keepParams = ['id', 'page'];
+            var keysToRemove = [];
+            currentUrl.searchParams.forEach(function (val, key) {
+                if (keepParams.indexOf(key) === -1) {
+                    keysToRemove.push(key);
+                }
+            });
+            keysToRemove.forEach(function (key) {
+                currentUrl.searchParams.delete(key);
+            });
+            window.location.href = currentUrl.toString();
         });
     });
 
@@ -377,7 +389,9 @@ document.addEventListener('DOMContentLoaded', function () {
         Object.keys(params).forEach(function (key) {
             if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
                 // Map JS param names to server-side expected names
+                // 'page' (pagination) → 'pg' to avoid collision with 'page' (route)
                 var serverKey = key;
+                if (key === 'page') serverKey = 'pg';
                 if (key === 'pageSize') serverKey = 'per_page';
                 if (key === 'sortDir') serverKey = 'direction';
                 searchParams.set(serverKey, params[key]);
@@ -480,10 +494,9 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             var container = this.closest('.pkg-filters') || this;
             var filters = collectFilters(container);
-            // Build URL preserving existing params (id, page route) and adding filter params
+            // Merge filters into URL, preserving route params (id, page)
             var currentUrl = new URL(window.location.href);
             var searchParams = currentUrl.searchParams;
-            // Remove old filter params, add new ones, reset to page 1
             Object.keys(filters).forEach(function (key) {
                 if (filters[key]) {
                     searchParams.set(key, filters[key]);
@@ -491,12 +504,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     searchParams.delete(key);
                 }
             });
-            searchParams.set('page_num', '1'); // Reset to page 1 on filter change
-            searchParams.delete('page_num'); // Remove if the backend uses 'page' not 'page_num'
-            // If a 'page' filter param exists as a number, keep it at 1
-            if (searchParams.has('page') && !isNaN(searchParams.get('page'))) {
-                // 'page' might be used for route (e.g. 'index'), only reset if numeric
-            }
+            // Reset pagination to page 1 on filter change
+            searchParams.delete('pg');
             window.location.href = currentUrl.toString();
         });
     });

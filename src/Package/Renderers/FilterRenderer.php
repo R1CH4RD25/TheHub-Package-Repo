@@ -3,6 +3,7 @@
 namespace Hub\Package\Renderers;
 
 use Hub\Package\Contracts\ComponentRendererInterface;
+use Hub\Package\IconMapper;
 
 /**
  * Filter Renderer
@@ -30,8 +31,8 @@ class FilterRenderer implements ComponentRendererInterface
     public function render(array $config, array $data, array $context): string
     {
         $componentId = $config['id'] ?? 'pkg-filters-' . uniqid();
-        $fields = $config['fields'] ?? [];
-        $targetTable = $config['target'] ?? ''; // table component ID to filter
+        $fields = $config['fields'] ?? $config['filters'] ?? [];
+        $targetTable = $config['target'] ?? $config['targetTable'] ?? '';
 
         $currentParams = $context['queryParams'] ?? $_GET ?? [];
 
@@ -41,28 +42,38 @@ class FilterRenderer implements ComponentRendererInterface
         }
         $html .= '>';
 
-        $html .= '<div class="pkg-filters-row">';
+        $html .= '<form class="pkg-filters-row" method="get">';
 
-        foreach ($fields as $field) {
-            $html .= $this->renderFilterField($field, $currentParams);
+        // Preserve route params (id, page) as hidden inputs so GET form doesn't lose them
+        $preserveKeys = ['id', 'page'];
+        foreach ($preserveKeys as $pk) {
+            if (isset($currentParams[$pk])) {
+                $html .= '<input type="hidden" name="' . e($pk) . '" value="' . e($currentParams[$pk]) . '">';
+            }
         }
 
-        // Clear filters button
+        foreach ($fields as $field) {
+            $html .= $this->renderFilterField($field, $currentParams, $data);
+        }
+
+        // Action buttons
         $html .= '<div class="pkg-filter-field pkg-filter-actions">';
-        $html .= '<button class="btn btn-sm btn-outline-secondary pkg-clear-filters" title="Clear all filters">';
-        $html .= '<i class="bi bi-x-circle"></i> Clear</button>';
+        $html .= '<button type="submit" class="btn btn-sm btn-primary pkg-apply-filters">';
+        $html .= '<i class="fas fa-search"></i> Search</button>';
+        $html .= ' <button type="button" class="btn btn-sm btn-outline-secondary pkg-clear-filters" title="Clear all filters">';
+        $html .= '<i class="fas fa-times-circle"></i> Reset</button>';
         $html .= '</div>';
 
-        $html .= '</div>'; // filters-row
+        $html .= '</form>'; // filters-row
         $html .= '</div>'; // filters
 
         return $html;
     }
 
-    private function renderFilterField(array $field, array $currentParams): string
+    private function renderFilterField(array $field, array $currentParams, array $data = []): string
     {
         $type = $field['type'] ?? 'text';
-        $param = $field['param'] ?? $field['key'] ?? '';
+        $param = $field['param'] ?? $field['key'] ?? $field['name'] ?? '';
         $label = $field['label'] ?? '';
         $placeholder = $field['placeholder'] ?? '';
         $debounce = $field['debounce'] ?? 0;
@@ -77,7 +88,7 @@ class FilterRenderer implements ComponentRendererInterface
         switch ($type) {
             case 'search':
                 $html .= '<div class="pkg-search-input">';
-                $html .= '<i class="bi bi-search pkg-search-icon"></i>';
+                $html .= '<i class="fas fa-search pkg-search-icon"></i>';
                 $html .= '<input type="search" class="form-control form-control-sm pkg-filter-input" ';
                 $html .= 'name="' . e($param) . '" value="' . e($value) . '" ';
                 $html .= 'placeholder="' . e($placeholder ?: 'Search...') . '"';
@@ -93,8 +104,23 @@ class FilterRenderer implements ComponentRendererInterface
                 $optionsQuery = $field['optionsQuery'] ?? '';
                 $allowAll = $field['allowAll'] ?? true;
 
+                // If options came from a query, use the data
+                if (empty($options) && $optionsQuery && isset($data[$optionsQuery])) {
+                    $queryData = $data[$optionsQuery]['data'] ?? $data[$optionsQuery] ?? [];
+                    foreach ($queryData as $row) {
+                        if (is_array($row)) {
+                            // Auto-detect value/label from query result columns
+                            $optValue = $row['value'] ?? $row['id'] ?? reset($row);
+                            $optLabel = $row['label'] ?? $row['name'] ?? $optValue;
+                            $options[] = ['value' => $optValue, 'label' => $optLabel];
+                        } else {
+                            $options[] = ['value' => $row, 'label' => $row];
+                        }
+                    }
+                }
+
                 $html .= '<select class="form-select form-select-sm pkg-filter-input" name="' . e($param) . '"';
-                if ($optionsQuery) {
+                if ($optionsQuery && empty($options)) {
                     $html .= ' data-options-query="' . e($optionsQuery) . '"';
                 }
                 $html .= '>';

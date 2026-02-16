@@ -33,7 +33,7 @@ class StudentQueryHandler
         $search = trim($params['search'] ?? '');
         $grade = trim($params['grade'] ?? '');
         $gradYear = (int) ($params['graduation_year'] ?? 0);
-        $page = max(1, (int) ($params['page'] ?? 1));
+        $page = max(1, (int) ($params['pg'] ?? $params['page_num'] ?? 1));
         $perPage = min(200, max(1, (int) ($params['per_page'] ?? 50)));
         $sort = $params['sort'] ?? 'grade';
         $direction = strtoupper($params['direction'] ?? 'ASC') === 'DESC' ? 'DESC' : 'ASC';
