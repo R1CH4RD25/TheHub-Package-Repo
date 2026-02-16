@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Management;
 
 use App\Http\Controllers\Controller;
 use Hub\Auth;
+use Hub\Components\EnterpriseSidebar;
 use Hub\Database;
+use Hub\IconResolver;
 use Hub\ManagementCenter;
 use Hub\PackageAccessResolver;
 use Hub\SiteSettings;
@@ -141,10 +143,17 @@ class DashboardController extends Controller
             $quickActions = [];
             $baseUrl = '/management/package.php?id=' . urlencode($pkgId);
             foreach (array_slice(array_values($visiblePages), 0, 4) as $page) {
+                $pageId = $page['id'] ?? $page['key'] ?? 'index';
+                $pageTitle = $page['title'] ?? ucfirst($pageId);
+                // Use smart icon guessing based on page ID/title instead of generic box
+                $pageIcon = !empty($page['icon'])
+                    ? IconResolver::resolve($page['icon'])
+                    : EnterpriseSidebar::guessPageIcon($pageId, $pageTitle);
+
                 $quickActions[] = [
-                    'title' => $page['title'] ?? ucfirst($page['id'] ?? 'Page'),
-                    'url'   => $baseUrl . '&page=' . urlencode($page['id'] ?? $page['key'] ?? ''),
-                    'icon'  => $page['icon'] ?? null,
+                    'title' => $pageTitle,
+                    'url'   => $baseUrl . '&page=' . urlencode($pageId),
+                    'icon'  => $pageIcon,
                 ];
             }
 
@@ -155,14 +164,14 @@ class DashboardController extends Controller
                 'package_id'   => $pkgId,
                 'name'         => $pkg['name'],
                 'slug'         => $pkg['slug'],
-                'icon'         => $pkg['icon'] ?? $catInfo['icon'],
+                'icon'         => IconResolver::resolve($pkg['icon'] ?? null, $catInfo['icon']),
                 'color'        => $catInfo['color'],
                 'category'     => $catInfo['label'],
                 'url'          => $baseUrl,
                 'page_count'   => count($visiblePages),
                 'pkg_role'     => $pkg['userPkgRole'] ?? null,
                 'version'      => $pkg['version'] ?? '1.0.0',
-                'quick_actions'=> $quickActions,
+                'quick_actions' => $quickActions,
                 'subtitle'     => $subtitle,
             ];
         }
