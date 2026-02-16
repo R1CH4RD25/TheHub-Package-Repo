@@ -1,6 +1,6 @@
 /**
  * Hub Bundle - Concatenated CSS
- * Generated: Mon Feb 16 05:16:23 PM UTC 2026
+ * Generated: Mon Feb 16 05:30:59 PM UTC 2026
  */
 
 
@@ -997,6 +997,7 @@ html {
     width: 20px;
     text-align: center;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 /* Page Header Component */
@@ -2196,31 +2197,34 @@ html {
 
 /* SIDEBAR NAVIGATION LINKS */
 
-/* All nav links: icons align at the same left position.
-   28px = caret gutter (6px pad + 14px caret + 8px gap).
-   Non-expandable items have empty gutter space; icons still align. */
+/* All nav items share the same gutter + icon + text alignment.
+   Gutter (18px padding-left) reserves space for the ::before caret.
+   Regular links have empty gutter; expandable triggers show a caret there.
+
+   Layout:  [18px gutter] [ICON 20px] [12px gap] [TEXT...]
+   The icon starts at 18px from left for ALL items — perfect alignment.
+   ======================================== */
+
 .admin-nav-link,
 .mgmt-nav-link {
-    padding-left: 28px;
-    gap: 8px; /* Consistent with trigger gap */
+    padding-left: 18px;
 }
 
 /* ========================================
    EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
 
-   3-column layout:  [CARET 14px] [ICON 20px] [TEXT...]
-   Caret is a flex item (not absolute) in a dedicated gutter.
+   Caret is a CSS ::before pseudo-element, positioned absolutely
+   in the 18px gutter. No DOM element = no flex conflicts.
 
-   Positions (from trigger left edge):
-     L1 caret:  6px pad → caret at 6px
-     L1 icon:   6 + 14(caret) + 8(gap) = 28px (matches nav-link padding)
-     L1 text:   28 + 20(icon) + 8(gap) = 56px
-     L2 text:   padding-left 56px  (aligns under L1 text)
-     L2 caret:  18px pad → caret at 18px
-     L3 text:   padding-left 72px  (+16px step from L2)
+   Positions (measured from item left edge):
+     Caret:     absolute, centered in 0–18px gutter
+     Icon:      18px (padding-left)
+     Text:      18 + 20(icon) + 12(gap) = 50px
+     L2 text:   padding-left 50px  (aligns under L1 text)
+     L3 text:   padding-left 66px  (+16px step from L2)
 
-   Active pill extends left via margin-left: -12px
-   with padding-left compensation to keep text in place.
+   Active pill extends to sidebar edge via margin-left: -12px
+   with padding-left compensation to keep content in place.
    ======================================== */
 
 .nav-expandable {
@@ -2234,9 +2238,9 @@ html {
     margin: 0;
 }
 
-/* Trigger button — caret lives in the 6px→20px gutter area */
+/* Trigger button — same layout as regular nav links */
 .nav-expandable-trigger {
-    position: relative;
+    position: relative; /* Anchor for ::before caret */
     width: 100%;
     border: none;
     background: transparent;
@@ -2244,39 +2248,41 @@ html {
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-3); /* 12px — same as .admin-nav-link */
     padding: var(--space-2) var(--space-3);
-    padding-left: 6px; /* Caret gutter: 6+14(caret)+8(gap)=28 → icon aligns with nav-links */
+    padding-left: 18px; /* Same gutter as nav links — icons align */
     margin: 0;
     color: inherit;
     font: inherit;
 }
 
-/* ===== CARET: Inline flex item in dedicated gutter column ===== */
-.nav-expand-icon {
-    width: 14px !important;
-    flex-shrink: 0;
+/* ===== CARET via ::before — lives in the 18px gutter ===== */
+.nav-expandable-trigger::before {
+    content: '\f0da'; /* FontAwesome fa-caret-right */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 3px; /* Centered-ish in 18px gutter (3 + ~8px char + ~7px) */
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    font-size: 11px;
+    color: #9CA3AF;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.15s ease;
+    width: 12px;
     text-align: center;
-    font-size: 10px !important;
-    font-weight: 900 !important;
-    color: #6B7280 !important;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: rotate(0deg);
     line-height: 1;
+    pointer-events: none;
 }
 
 /* Rotate caret when expanded */
-.nav-expandable.expanded > .nav-expandable-trigger > .nav-expand-icon {
-    transform: rotate(90deg);
+.nav-expandable.expanded > .nav-expandable-trigger::before {
+    transform: translateY(-50%) rotate(90deg);
+    color: #6B7280;
 }
 
-.nav-expandable-trigger:hover .nav-expand-icon {
-    color: #374151 !important;
-}
-
-/* Main icon after caret — gap handles spacing */
-.nav-expandable-trigger > i:not(.nav-expand-icon) {
-    margin-right: 0;
+.nav-expandable-trigger:hover::before {
+    color: #374151;
 }
 
 .nav-submenu {
@@ -2289,7 +2295,7 @@ html {
 /* ===== LEVEL 2: Sublinks (text items under L1 expandable) ===== */
 .admin-nav-link.nav-sublink,
 .mgmt-nav-link.nav-sublink {
-    padding-left: 56px !important; /* Aligns text under L1 text (6+14+8+20+8=56) */
+    padding-left: 50px !important; /* Aligns text under L1 text (18+20+12=50) */
     font-size: var(--text-md) !important;
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
@@ -2302,19 +2308,19 @@ html {
 
 .admin-nav-link.nav-sublink i,
 .mgmt-nav-link.nav-sublink i {
-    display: none; /* Hide icons on sublinks */
+    display: none; /* Hide icons on sublinks — text only */
 }
 
 /* ===== LEVEL 2: Nested expandable trigger (package under category) ===== */
 .nav-nested-expandable > .nav-expandable-trigger {
-    padding-left: 34px !important; /* 34+14(caret)+8(gap)=56px, aligns text with L2 sublinks */
+    padding-left: 50px !important; /* Text aligns with L2 sublinks */
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
 }
 
-/* Nested caret — ensure visible (sublink rule hides all <i>) */
-.nav-nested-expandable > .nav-expandable-trigger > .nav-expand-icon {
-    display: block !important; /* Override .nav-sublink i { display:none } */
+/* Nested caret — repositioned for L2 indentation */
+.nav-nested-expandable > .nav-expandable-trigger::before {
+    left: 35px; /* ~15px before the 50px text start */
 }
 
 .nav-nested-expandable > .nav-expandable-trigger:hover {
@@ -2323,7 +2329,7 @@ html {
 
 /* ===== LEVEL 3: Leaf links (pages inside packages) ===== */
 .nav-submenu-nested .nav-leaf-link {
-    padding-left: 72px !important; /* +16px from L2 (56+16) */
+    padding-left: 66px !important; /* +16px from L2 (50+16) */
     font-size: var(--text-md) !important;
 }
 
@@ -2352,7 +2358,7 @@ html {
     color: #2D1F05;
     border-radius: 0 999px 999px 0;
     margin-left: -12px; /* Extend pill to sidebar edge */
-    padding-left: calc(56px + 12px) !important; /* L2 (56) + margin compensation (12) */
+    padding-left: calc(50px + 12px) !important; /* L2 (50) + margin compensation (12) */
     margin-right: var(--space-2);
 }
 
@@ -2364,7 +2370,7 @@ html {
     color: #2D1F05;
     border-radius: 0 999px 999px 0;
     margin-left: -12px;
-    padding-left: calc(72px + 12px) !important; /* L3 (72) + margin compensation (12) */
+    padding-left: calc(66px + 12px) !important; /* L3 (66) + margin compensation (12) */
     margin-right: var(--space-2);
 }
 
@@ -2379,16 +2385,17 @@ html {
     color: white !important;
     border-radius: 0 999px 999px 0 !important;
     margin-left: -12px !important;
-    padding-left: calc(6px + 12px) !important; /* L1 pad (6) + margin compensation (12) = 18px */
+    padding-left: calc(18px + 12px) !important; /* gutter (18) + margin compensation (12) = 30px */
     margin-right: 4px !important;
 }
 
-/* Caret color in active state (position auto-compensates as flex item) */
-.nav-expandable-trigger.active > .nav-expand-icon {
+/* Caret color in active state */
+.nav-expandable-trigger.active::before {
     color: white !important;
+    left: 15px; /* Normal (3px) + 12px margin-left compensation */
 }
 
-.nav-expandable-trigger.active i:not(.nav-expand-icon) {
+.nav-expandable-trigger.active i {
     color: white !important;
 }
 
@@ -2399,8 +2406,14 @@ html {
     border-radius: 0 999px 999px 0 !important;
     border-left: none !important;
     margin-left: -12px !important;
-    padding-left: calc(6px + 12px) !important; /* 18px — caret auto-compensates as flex item */
+    padding-left: calc(18px + 12px) !important; /* 30px — caret auto-adjusts */
     margin-right: 4px !important;
+}
+
+/* Caret position for gold border state */
+.admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before,
+.mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before {
+    left: 15px; /* Normal (3px) + 12px margin-left compensation */
 }
 
 /* Collapsed sidebar handling */

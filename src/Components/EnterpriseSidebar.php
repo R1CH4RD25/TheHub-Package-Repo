@@ -144,12 +144,11 @@ class EnterpriseSidebar
                             ?>
                             <div class="nav-expandable <?= $isExpanded ? 'expanded has-active-child' : '' ?>"
                                 data-nav-parent="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
-                                <!-- Google-style expandable: chevron on left -->
+                                <!-- Google-style expandable: caret via CSS ::before -->
                                 <button class="<?= $navLinkClass ?> nav-expandable-trigger"
                                     title="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
                                     aria-expanded="<?= $isExpanded ? 'true' : 'false' ?>"
                                     data-parent-id="<?= htmlspecialchars($parentId, ENT_QUOTES, 'UTF-8') ?>">
-                                    <i class="fas fa-caret-right nav-expand-icon"></i>
                                     <i class="<?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
                                     <span><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </button>
@@ -180,7 +179,6 @@ class EnterpriseSidebar
                                                         title="<?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?>"
                                                         aria-expanded="<?= $nestedExpanded ? 'true' : 'false' ?>"
                                                         data-parent-id="<?= htmlspecialchars($nestedId, ENT_QUOTES, 'UTF-8') ?>">
-                                                        <i class="fas fa-caret-right nav-expand-icon"></i>
                                                         <span><?= htmlspecialchars($subitem['label'], ENT_QUOTES, 'UTF-8') ?></span>
                                                     </button>
                                                     <div class="nav-submenu nav-submenu-nested"
