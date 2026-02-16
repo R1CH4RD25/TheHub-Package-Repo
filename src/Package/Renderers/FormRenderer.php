@@ -3,6 +3,7 @@
 namespace Hub\Package\Renderers;
 
 use Hub\Package\Contracts\ComponentRendererInterface;
+use Hub\Package\VisualConfig;
 
 /**
  * Form Renderer
@@ -47,6 +48,16 @@ class FormRenderer implements ComponentRendererInterface
         $errors = $data['errors'] ?? [];
 
         $html = '';
+
+        // Emit visual token overrides as a scoped <style> block
+        if (!empty($config['visual'])) {
+            $preset = $config['visual']['preset'] ?? 'comfortable';
+            $tokens = $config['visual']['tokens'] ?? [];
+            $resolved = VisualConfig::resolveConfig($preset, $tokens);
+            if (!empty($resolved)) {
+                $html .= VisualConfig::toStyleBlock($resolved, '', $componentId);
+            }
+        }
 
         // Form element
         $html .= '<form class="pkg-form pkg-form-' . e($layout) . '" id="' . e($componentId) . '" ';

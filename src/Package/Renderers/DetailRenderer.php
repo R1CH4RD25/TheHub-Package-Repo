@@ -3,6 +3,8 @@
 namespace Hub\Package\Renderers;
 
 use Hub\Package\Contracts\ComponentRendererInterface;
+use Hub\Package\IconMapper;
+use Hub\Package\VisualConfig;
 
 /**
  * Detail Renderer
@@ -33,7 +35,7 @@ class DetailRenderer implements ComponentRendererInterface
         $sections = $config['sections'] ?? [];
         $actions = $config['actions'] ?? [];
         $queryName = $config['query'] ?? '';
-        $backUrl = $config['backUrl'] ?? '';
+        $backUrl = $config['backUrl'] ?? $config['backRoute'] ?? '';
 
         $record = $data['data'] ?? $data['record'] ?? $data;
         $packageId = $context['packageId'] ?? '';
@@ -45,6 +47,16 @@ class DetailRenderer implements ComponentRendererInterface
         }
 
         $html = '';
+
+        // Emit visual token overrides as a scoped <style> block
+        if (!empty($config['visual'])) {
+            $preset = $config['visual']['preset'] ?? 'comfortable';
+            $tokens = $config['visual']['tokens'] ?? [];
+            $resolved = VisualConfig::resolveConfig($preset, $tokens);
+            if (!empty($resolved)) {
+                $html .= VisualConfig::toStyleBlock($resolved, '', $componentId);
+            }
+        }
 
         // Header with back button and actions
         $html .= '<div class="pkg-detail-header">';
@@ -148,7 +160,11 @@ class DetailRenderer implements ComponentRendererInterface
                 break;
 
             case 'masked':
-                $html .= '<span class="pkg-masked-value">••••••</span>';
+                $actualValue = $value;
+                $maskedDisplay = $actualValue ? str_repeat('•', min(strlen($actualValue), 8)) : '••••••';
+                $html .= '<span class="pkg-masked-value" data-actual="' . e($actualValue) . '">' . e($maskedDisplay) . '</span>';
+                $html .= ' <button type="button" class="btn btn-xs btn-outline-warning pkg-show-btn" title="Show/Hide">';
+                $html .= '<i class="fas fa-eye"></i> Show</button>';
                 break;
 
             case 'long_text':
@@ -210,8 +226,13 @@ class DetailRenderer implements ComponentRendererInterface
 
         $classes = "btn btn-sm btn-{$variant}";
 
+        // Map lucide icons
+        if ($icon) {
+            $icon = IconMapper::map($icon);
+        }
+
         if ($type === 'route') {
-            $to = $action['to'] ?? '#';
+            $to = $action['to'] ?? $action['route'] ?? '#';
             $to = preg_replace_callback('/\{(\w+)\}/', function ($m) use ($record) {
                 return $record[$m[1]] ?? $m[0];
             }, $to);
@@ -221,7 +242,7 @@ class DetailRenderer implements ComponentRendererInterface
         }
 
         if ($type === 'mutation') {
-            $rowId = $record['id'] ?? '';
+            $rowId = $record['id'] ?? $record['student_id'] ?? '';
             $mutation = $action['mutation'] ?? '';
             return '<button class="' . $classes . ' pkg-row-action" data-action="mutation" ' .
                 'data-mutation="' . e($mutation) . '" data-row-id="' . e($rowId) . '" ' .
