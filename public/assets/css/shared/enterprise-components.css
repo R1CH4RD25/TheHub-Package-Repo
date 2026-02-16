@@ -1661,27 +1661,30 @@
 
 /* SIDEBAR NAVIGATION LINKS */
 
-/* All nav links: icons align at the same left position */
+/* All nav links: icons align at the same left position.
+   28px = caret gutter (6px pad + 14px caret + 8px gap).
+   Non-expandable items have empty gutter space; icons still align. */
 .admin-nav-link,
 .mgmt-nav-link {
-    padding-left: 12px;
+    padding-left: 28px;
+    gap: 8px; /* Consistent with trigger gap */
 }
 
 /* ========================================
    EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
 
-   Key pattern: Caret is position:absolute in the gutter (left of content).
-   All icons and text stay aligned regardless of caret presence.
+   3-column layout:  [CARET 14px] [ICON 20px] [TEXT...]
+   Caret is a flex item (not absolute) in a dedicated gutter.
 
-   Positions (from nav content edge, nav has 12px padding):
-     L1 caret:  absolute left: -8px  (in gutter)
-     L1 icon:   padding-left 12px
-     L1 text:   ~12 + 20(icon) + 8(gap) = 40px
-     L2 text:   padding-left 40px     (aligns under L1 text)
-     L2 caret:  absolute left: 22px   (in gap before L2 text)
-     L3 text:   padding-left 56px     (+16px step from L2)
+   Positions (from trigger left edge):
+     L1 caret:  6px pad → caret at 6px
+     L1 icon:   6 + 14(caret) + 8(gap) = 28px (matches nav-link padding)
+     L1 text:   28 + 20(icon) + 8(gap) = 56px
+     L2 text:   padding-left 56px  (aligns under L1 text)
+     L2 caret:  18px pad → caret at 18px
+     L3 text:   padding-left 72px  (+16px step from L2)
 
-   Active pill extends to sidebar edge via margin-left: -12px
+   Active pill extends left via margin-left: -12px
    with padding-left compensation to keep text in place.
    ======================================== */
 
@@ -1696,9 +1699,9 @@
     margin: 0;
 }
 
-/* Trigger button — same padding-left as regular nav links */
+/* Trigger button — caret lives in the 6px→20px gutter area */
 .nav-expandable-trigger {
-    position: relative; /* Anchor for absolute caret */
+    position: relative;
     width: 100%;
     border: none;
     background: transparent;
@@ -1706,41 +1709,39 @@
     text-align: left;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 8px;
     padding: var(--space-2) var(--space-3);
-    padding-left: 12px; /* Same as .admin-nav-link — icons align */
+    padding-left: 6px; /* Caret gutter: 6+14(caret)+8(gap)=28 → icon aligns with nav-links */
     margin: 0;
     color: inherit;
     font: inherit;
 }
 
-/* ===== CARET: Absolutely positioned inside trigger padding ===== */
+/* ===== CARET: Inline flex item in dedicated gutter column ===== */
 .nav-expand-icon {
-    position: absolute;
-    left: 1px; /* Inside the 12px padding-left, visible (not clipped by overflow-x:hidden) */
-    top: 50%;
-    transform: translateY(-50%);
+    width: 14px !important;
+    flex-shrink: 0;
+    text-align: center;
     font-size: 10px !important;
     font-weight: 900 !important;
     color: #6B7280 !important;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Google-style transition */
-    width: 16px;
-    text-align: center;
-    pointer-events: none; /* Click passes through to trigger */
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: rotate(0deg);
+    line-height: 1;
 }
 
 /* Rotate caret when expanded */
 .nav-expandable.expanded > .nav-expandable-trigger > .nav-expand-icon {
-    transform: translateY(-50%) rotate(90deg);
+    transform: rotate(90deg);
 }
 
 .nav-expandable-trigger:hover .nav-expand-icon {
     color: #374151 !important;
 }
 
-/* Main icon after caret — caret is absolute so this is first in flow */
+/* Main icon after caret — gap handles spacing */
 .nav-expandable-trigger > i:not(.nav-expand-icon) {
-    margin-right: var(--space-1);
+    margin-right: 0;
 }
 
 .nav-submenu {
@@ -1753,7 +1754,7 @@
 /* ===== LEVEL 2: Sublinks (text items under L1 expandable) ===== */
 .admin-nav-link.nav-sublink,
 .mgmt-nav-link.nav-sublink {
-    padding-left: 40px !important; /* Aligns text under L1 text */
+    padding-left: 56px !important; /* Aligns text under L1 text (6+14+8+20+8=56) */
     font-size: var(--text-md) !important;
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
@@ -1771,15 +1772,14 @@
 
 /* ===== LEVEL 2: Nested expandable trigger (package under category) ===== */
 .nav-nested-expandable > .nav-expandable-trigger {
-    padding-left: 40px !important; /* Text aligns with other L2 items */
+    padding-left: 34px !important; /* 34+14(caret)+8(gap)=56px, aligns text with L2 sublinks */
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
 }
 
-/* Nested caret — sits in the gap before L2 text */
+/* Nested caret — ensure visible (sublink rule hides all <i>) */
 .nav-nested-expandable > .nav-expandable-trigger > .nav-expand-icon {
-    left: 22px !important; /* In the gap between L1 icon area and L2 text */
-    display: block !important; /* Override the i { display:none } from sublink */
+    display: block !important; /* Override .nav-sublink i { display:none } */
 }
 
 .nav-nested-expandable > .nav-expandable-trigger:hover {
@@ -1788,7 +1788,7 @@
 
 /* ===== LEVEL 3: Leaf links (pages inside packages) ===== */
 .nav-submenu-nested .nav-leaf-link {
-    padding-left: 56px !important; /* +16px from L2 (40+16) */
+    padding-left: 72px !important; /* +16px from L2 (56+16) */
     font-size: var(--text-md) !important;
 }
 
@@ -1817,7 +1817,7 @@
     color: #2D1F05;
     border-radius: 0 999px 999px 0;
     margin-left: -12px; /* Extend pill to sidebar edge */
-    padding-left: calc(40px + 12px) !important; /* L2 (40) + margin compensation (12) */
+    padding-left: calc(56px + 12px) !important; /* L2 (56) + margin compensation (12) */
     margin-right: var(--space-2);
 }
 
@@ -1829,7 +1829,7 @@
     color: #2D1F05;
     border-radius: 0 999px 999px 0;
     margin-left: -12px;
-    padding-left: calc(56px + 12px) !important; /* L3 (56) + margin compensation (12) */
+    padding-left: calc(72px + 12px) !important; /* L3 (72) + margin compensation (12) */
     margin-right: var(--space-2);
 }
 
@@ -1844,14 +1844,13 @@
     color: white !important;
     border-radius: 0 999px 999px 0 !important;
     margin-left: -12px !important;
-    padding-left: calc(12px + 12px) !important; /* L1 (12) + margin compensation (12) */
+    padding-left: calc(6px + 12px) !important; /* L1 pad (6) + margin compensation (12) = 18px */
     margin-right: 4px !important;
 }
 
-/* Adjust caret position when trigger has active margin shift */
+/* Caret color in active state (position auto-compensates as flex item) */
 .nav-expandable-trigger.active > .nav-expand-icon {
     color: white !important;
-    left: 13px; /* Normal (1px) + 12px margin-left compensation */
 }
 
 .nav-expandable-trigger.active i:not(.nav-expand-icon) {
@@ -1865,14 +1864,8 @@
     border-radius: 0 999px 999px 0 !important;
     border-left: none !important;
     margin-left: -12px !important;
-    padding-left: calc(12px + 12px) !important;
+    padding-left: calc(6px + 12px) !important; /* 18px — caret auto-compensates as flex item */
     margin-right: 4px !important;
-}
-
-/* Adjust caret for gold border state too */
-.admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger > .nav-expand-icon,
-.mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger > .nav-expand-icon {
-    left: 13px; /* Normal (1px) + 12px margin-left compensation */
 }
 
 /* Collapsed sidebar handling */
