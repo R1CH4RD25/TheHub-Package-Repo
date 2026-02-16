@@ -117,12 +117,13 @@ class PackageManager
             $validation = $this->validator->validate($packageData, $installType);
 
             // Store package record with 'pending' status initially
+            $pkgName = $pkg['name'] ?? $pkg['id'] ?? $packageId;
             $this->db->execute(
                 "INSERT INTO section_packages (package_id, name, version, display_name, description, author, license, file_path, file_size, package_data, uploaded_by, uploaded_at, validation_status, can_install)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                     $packageId,
-                    $pkg['name'],
+                    $pkgName,
                     $version,
                     $displayName,
                     $pkg['description'] ?? null,
@@ -200,6 +201,18 @@ class PackageManager
             // Parse package data
             $packageData = json_decode($pkgRecord['package_data'], true);
             $pkg = $packageData['package'];
+            
+            // Detect schema version
+            $schemaVersion = $packageData['schemaVersion'] ?? $packageData['schema_version'] ?? '1.0.0';
+            $isV3 = version_compare($schemaVersion, '3.0.0', '>=');
+            
+            // Normalize package identity — v3 uses 'id' + 'display_name', older uses 'name'
+            $pkgId = $pkg['id'] ?? $pkg['name'] ?? $pkgRecord['package_id'];
+            $pkgName = $pkg['name'] ?? $pkg['id'] ?? $pkgRecord['name'];
+            $pkgDisplayName = $pkg['display_name'] ?? $pkg['name'] ?? $pkgId;
+            $pkgSlug = $this->generateSlug($pkgName);
+            
+            // v2 schema fields (may be empty for v3)
             $fields = $packageData['fields'] ?? [];
             $permissions = $packageData['permissions'] ?? [];
             $menuItems = $packageData['menu_items'] ?? [];
@@ -207,21 +220,29 @@ class PackageManager
             // Check if already installed
             $existing = $this->db->fetchOne(
                 "SELECT id FROM section_installations WHERE package_id = ?",
-                [$pkg['id']]
+                [$pkgId]
             );
 
             if ($existing) {
                 throw new Exception('Package already installed. Use upgrade instead.');
             }
 
+            // Determine section_type from package data
+            $sectionType = $pkg['section_type'] ?? 'other';
+            $validSectionTypes = ['recording', 'request_form', 'scheduled_report', 'hub', 'other'];
+            if (!in_array($sectionType, $validSectionTypes)) {
+                $sectionType = 'other';
+            }
+
             // Create section record (inactive by default - admin must enable)
             $sectionId = $this->db->insert('sections', [
-                'name' => $pkg['name'],
-                'slug' => $pkg['name'],
-                'display_name' => $pkg['display_name'],
+                'name' => $pkgName,
+                'slug' => $pkgSlug,
+                'display_name' => $pkgDisplayName,
                 'description' => $pkg['description'] ?? null,
                 'icon' => $pkg['icon'] ?? 'bi-box',
-                'base_url' => $pkg['base_url'] ?? "/modules/sections/{$pkg['name']}/",
+                'base_url' => $pkg['base_url'] ?? "/p/{$pkgId}/",
+                'section_type' => $sectionType,
                 'order_position' => $this->getNextSectionOrder(),
                 'is_active' => 0,  // Start inactive - admin must enable in Manage Sections
                 'is_dynamic' => 1,
@@ -231,7 +252,7 @@ class PackageManager
             // Create installation record
             $installId = $this->db->insert('section_installations', [
                 'section_id' => $sectionId,
-                'package_id' => $pkg['id'],
+                'package_id' => $pkgId,
                 'package_record_id' => $packageRecordId,
                 'installed_version' => $pkg['version'],
                 'installed_by' => $installedBy,
@@ -239,13 +260,19 @@ class PackageManager
                 'status' => self::STATUS_INSTALLED
             ]);
 
-            // Install fields
+            // ========================================
+            // V2 Schema: fields, permissions, hub_cards, management_sections, menu_items
+            // ========================================
+            
+            // Install fields (v2)
             foreach ($fields as $field) {
                 $this->installField($sectionId, $field);
             }
 
-            // Install permissions (role access)
-            $this->installPermissions($sectionId, $permissions, $installedBy);
+            // Install permissions/role access (v2)
+            if (!empty($permissions)) {
+                $this->installPermissions($sectionId, $permissions, $installedBy);
+            }
 
             // V2 Spec: Process hub_cards access to create section_role_access entries
             if (!empty($packageData['hub_cards'])) {
@@ -274,8 +301,7 @@ class PackageManager
                 }
             }
             
-            // V2 Spec: management_sections → menu items (or skip for separate management nav)
-            // Decision: install to main nav for now; can split later
+            // V2 Spec: management_sections → menu items
             if (!empty($packageData['management_sections'])) {
                 foreach ($packageData['management_sections'] as $section) {
                     $normalized = $this->normalizeMenuItem([
@@ -287,15 +313,78 @@ class PackageManager
                     $this->installMenuItem($sectionId, $normalized);
                 }
             }
+
+            // ========================================
+            // V3 Schema: presentation.pages → menu items, policy → role access
+            // ========================================
+            if ($isV3) {
+                // Create menu items from presentation pages
+                if (!empty($packageData['presentation']['pages'])) {
+                    foreach ($packageData['presentation']['pages'] as $pageKey => $page) {
+                        // Skip sub-pages like view/{id}, edit/{id}, add — only top-level nav
+                        $route = $page['route'] ?? "/{$pageKey}";
+                        if (strpos($route, '{') !== false) {
+                            continue; // Skip parameterized routes
+                        }
+                        // Only create menu items for primary navigation pages
+                        if (in_array($pageKey, ['index', 'import', 'export'])) {
+                            $label = $page['title'] ?? ucfirst($pageKey);
+                            $icon = $this->extractPageIcon($page) ?? $pkg['icon'] ?? 'fa-circle';
+                            $normalized = $this->normalizeMenuItem([
+                                'label' => $label,
+                                'route' => $route,
+                                'icon' => $icon,
+                            ], $menuOrder++);
+                            $this->installMenuItem($sectionId, $normalized);
+                        }
+                    }
+                }
+
+                // Install package-defined roles into package_roles table
+                if (!empty($packageData['policy']['roles'])) {
+                    $this->installPackageRoles(
+                        $sectionId,
+                        $packageData['policy']['roles'],
+                        $packageData['policy']['globalRoleMapping'] ?? [],
+                        $installedBy
+                    );
+                }
+
+                // Install role access from policy.globalRoleMapping
+                if (!empty($packageData['policy']['globalRoleMapping'])) {
+                    $this->installPolicyRoleAccess(
+                        $sectionId, 
+                        $packageData['policy']['globalRoleMapping'], 
+                        $installedBy
+                    );
+                } else {
+                    // No policy defined — grant super_admin access by default
+                    $this->installPolicyRoleAccess($sectionId, ['super_admin' => 'admin'], $installedBy);
+                }
+
+                // Store package config as capabilities JSON for the runtime engine
+                $capabilitiesJson = json_encode([
+                    'schemaVersion' => $schemaVersion,
+                    'database' => $packageData['database'] ?? null,
+                    'presentation' => $packageData['presentation'] ?? null,
+                    'data' => $packageData['data'] ?? null,
+                    'policy' => $packageData['policy'] ?? null,
+                    'access' => $packageData['access'] ?? null,
+                ]);
+                $this->db->execute(
+                    "UPDATE sections SET capabilities_json = ?, supports_capabilities = 1 WHERE id = ?",
+                    [$capabilitiesJson, $sectionId]
+                );
+            }
             
             // Warn if no menu items created
             if ($menuOrder === 1) {
-                error_log("PackageManager: Warning - No menu items created for package {$pkg['id']}");
+                error_log("PackageManager: Warning - No menu items created for package {$pkgId}");
             }
 
             // Store installation in package_installs table for history
             $installHistoryId = $this->db->insert('section_package_installs', [
-                'package_id' => $pkg['id'],
+                'package_id' => $pkgId,
                 'package_version' => $pkg['version'],
                 'status' => 'success',
                 'installation_type' => 'new',
@@ -306,11 +395,13 @@ class PackageManager
             ]);
 
             // Move package to permanent storage
-            $permanentPath = self::PACKAGE_DIR . 'local/' . $pkg['id'] . '_' . $pkg['version'] . '.hubpkg';
+            $permanentPath = self::PACKAGE_DIR . 'local/' . $pkgId . '_' . $pkg['version'] . '.hubpkg';
             if (!is_dir(dirname($permanentPath))) {
                 mkdir(dirname($permanentPath), 0775, true);
             }
-            copy($pkgRecord['file_path'], $permanentPath);
+            if (!empty($pkgRecord['file_path']) && file_exists($pkgRecord['file_path'])) {
+                copy($pkgRecord['file_path'], $permanentPath);
+            }
 
             $this->db->commit();
 
@@ -319,17 +410,18 @@ class PackageManager
 
             // Log installation
             $this->auditLogger->log('package_install', 'section_installations', $installId, null, [
-                'package_id' => $pkg['id'],
+                'package_id' => $pkgId,
                 'version' => $pkg['version'],
                 'section_id' => $sectionId,
-                'section_name' => $pkg['name']
+                'section_name' => $pkgDisplayName,
+                'schema_version' => $schemaVersion
             ], $installedBy);
 
             return [
                 'success' => true,
                 'section_id' => $sectionId,
                 'installation_id' => $installId,
-                'message' => "Package '{$pkg['display_name']}' installed successfully"
+                'message' => "Package '{$pkgDisplayName}' installed successfully"
             ];
         } catch (Exception $e) {
             $this->db->rollback();
@@ -446,6 +538,9 @@ class PackageManager
                 ['version' => $newPkg['version']],
                 $upgradedBy
             );
+
+            // Clear installed packages cache
+            Cache::delete('packages:installed');
 
             return [
                 'success' => true,
@@ -859,6 +954,159 @@ class PackageManager
         }
 
         error_log("PackageManager: Created " . count($rolesToGrant) . " role access entries for section {$sectionId}");
+    }
+
+    /**
+     * Generate a URL-safe slug from a package name/id
+     */
+    private function generateSlug(string $name): string
+    {
+        // Replace dots and underscores with hyphens
+        $slug = str_replace(['.', '_', ' '], '-', $name);
+        // Remove non-alphanumeric chars except hyphens
+        $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower($slug));
+        // Collapse multiple hyphens
+        $slug = preg_replace('/-+/', '-', trim($slug, '-'));
+        // Ensure max 50 chars (slug column limit)
+        return substr($slug, 0, 50);
+    }
+
+    /**
+     * Extract a representative icon from a v3 presentation page
+     */
+    private function extractPageIcon(array $page): ?string
+    {
+        if (!empty($page['components'])) {
+            foreach ($page['components'] as $component) {
+                if (!empty($component['config']['icon'])) {
+                    return $component['config']['icon'];
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Install role access from v3 policy.globalRoleMapping
+     * Maps global roles (super_admin, admin, staff, etc.) to section_role_access entries
+     */
+    private function installPolicyRoleAccess(int $sectionId, array $globalRoleMapping, int $installedBy): void
+    {
+        // Valid database role ENUMs for section_role_access table
+        $validDbRoles = [
+            'staff', 'student', 'maintenance_staff', 'custodial', 'cafeteria',
+            'custodial_manager', 'maintenance_director', 'business_manager',
+            'substitute_manager', 'counselor', 'principal', 'admin', 'super_admin'
+        ];
+
+        // Clear existing for this section
+        $this->db->execute("DELETE FROM section_role_access WHERE section_id = ?", [$sectionId]);
+
+        $rolesToGrant = [];
+        $unmappedRoles = [];
+        foreach ($globalRoleMapping as $globalRole => $packageRole) {
+            // Only add to section_role_access if the global role matches a valid ENUM
+            if (in_array($globalRole, $validDbRoles, true)) {
+                $rolesToGrant[$globalRole] = true;
+            } else {
+                // Non-ENUM roles (custom school roles) — try to map via org_roles
+                $unmappedRoles[$globalRole] = $packageRole;
+            }
+        }
+
+        // Always grant super_admin access
+        $rolesToGrant['super_admin'] = true;
+
+        foreach (array_keys($rolesToGrant) as $role) {
+            $this->db->insert('section_role_access', [
+                'section_id' => $sectionId,
+                'role' => $role,
+                'granted_by' => $installedBy,
+                'granted_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        // Log unmapped roles for admin attention
+        if (!empty($unmappedRoles)) {
+            error_log("PackageManager: " . count($unmappedRoles) . " role(s) from package not in ENUM: " . implode(', ', array_keys($unmappedRoles)) . " — use Package Role Mapping to assign to org_roles");
+        }
+
+        error_log("PackageManager: Created " . count($rolesToGrant) . " section_role_access entries for section {$sectionId} (v3 policy)");
+    }
+
+    /**
+     * Install package-defined roles into package_roles table and create
+     * default mappings to org_roles where globalRoleMapping provides hints.
+     *
+     * This is the many-to-many role system: package roles (viewer, editor, importer)
+     * get mapped to org_roles (Principal, Teacher, Administrator) by admins.
+     * The globalRoleMapping in the package JSON provides initial suggestions.
+     */
+    private function installPackageRoles(int $sectionId, array $policyRoles, array $globalRoleMapping, int $installedBy): void
+    {
+        // Clear existing package roles for this section
+        $this->db->execute("DELETE FROM package_roles WHERE package_id = ?", [$sectionId]);
+
+        $tierLevel = 1;
+        $roleIdMap = []; // role_key => package_roles.id
+
+        foreach ($policyRoles as $roleKey => $roleDef) {
+            // Determine tier from inheritance chain or explicit level
+            $currentTier = $roleDef['tier'] ?? $tierLevel;
+
+            // Build permissions JSON from queries + mutations
+            $permissions = json_encode([
+                'queries' => $roleDef['queries'] ?? [],
+                'mutations' => $roleDef['mutations'] ?? [],
+                'inherits' => $roleDef['inherits'] ?? null,
+            ]);
+
+            $roleId = $this->db->insert('package_roles', [
+                'package_id' => $sectionId,
+                'role_key' => $roleKey,
+                'role_name' => $roleDef['label'] ?? ucfirst($roleKey),
+                'tier_level' => $currentTier,
+                'description' => $roleDef['description'] ?? null,
+                'permissions' => $permissions,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            $roleIdMap[$roleKey] = $roleId;
+            $tierLevel++;
+        }
+
+        // Create default package_role_mappings from globalRoleMapping hints
+        // e.g., "principal" => "viewer" means map org_role "Principal" to package_role "viewer"
+        $mappingsCreated = 0;
+        foreach ($globalRoleMapping as $globalRoleName => $packageRoleKey) {
+            if (!isset($roleIdMap[$packageRoleKey])) {
+                continue; // Package role doesn't exist
+            }
+
+            // Try to find matching org_role by name (case-insensitive)
+            $orgRole = $this->db->fetchOne(
+                "SELECT id FROM org_roles WHERE LOWER(name) = LOWER(?) AND is_active = 1",
+                [$globalRoleName]
+            );
+
+            if ($orgRole) {
+                try {
+                    $this->db->insert('package_role_mappings', [
+                        'package_id' => $sectionId,
+                        'package_role_id' => $roleIdMap[$packageRoleKey],
+                        'org_role_id' => $orgRole['id'],
+                        'mapped_by' => $installedBy,
+                        'mapped_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $mappingsCreated++;
+                } catch (Exception $e) {
+                    // Duplicate mapping — skip silently
+                    error_log("PackageManager: Skipped duplicate role mapping {$globalRoleName} => {$packageRoleKey}");
+                }
+            }
+        }
+
+        error_log("PackageManager: Created " . count($roleIdMap) . " package roles and {$mappingsCreated} org_role mappings for section {$sectionId}");
     }
 
     /**
