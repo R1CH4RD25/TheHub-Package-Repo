@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Mon Feb 16 06:53:49 PM UTC 2026
+ * Generated: Mon Feb 16 06:54:50 PM UTC 2026
  */
 
 
@@ -2211,7 +2211,7 @@ html {
 .admin-nav-link,
 .mgmt-nav-link {
     margin-left: -10px;
-    padding-left: 20px; /* 10px original + 10px margin compensation */
+    padding-left: 24px; /* 14px + 10px margin compensation */
     border-radius: 0 999px 999px 0;
     margin-right: 4px;
 }
@@ -2255,7 +2255,7 @@ html {
     align-items: center;
     gap: var(--space-3); /* 12px — same as .admin-nav-link */
     padding: var(--space-2) var(--space-3);
-    padding-left: 20px; /* 10px + 10px margin compensation */
+    padding-left: 24px; /* 14px + 10px margin compensation */
     margin: 0;
     margin-left: -10px; /* Extend to sidebar edge */
     margin-right: 4px;
@@ -2303,7 +2303,7 @@ html {
 /* ===== LEVEL 2: Sublinks (text items under L1 expandable) ===== */
 .admin-nav-link.nav-sublink,
 .mgmt-nav-link.nav-sublink {
-    padding-left: 52px !important; /* 42px indent + 10px margin compensation */
+    padding-left: 56px !important; /* 46px indent + 10px margin compensation */
     font-size: var(--text-md) !important;
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
@@ -2321,14 +2321,14 @@ html {
 
 /* ===== LEVEL 2: Nested expandable trigger (package under category) ===== */
 .nav-nested-expandable > .nav-expandable-trigger {
-    padding-left: 52px !important; /* Aligns with L2 sublinks (42 + 10 compensation) */
+    padding-left: 56px !important; /* Aligns with L2 sublinks (46 + 10 compensation) */
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
 }
 
 /* Nested caret — repositioned for L2 indentation */
 .nav-nested-expandable > .nav-expandable-trigger::before {
-    left: 37px; /* ~15px before the 52px text start */
+    left: 41px; /* ~15px before the 56px text start */
 }
 
 .nav-nested-expandable > .nav-expandable-trigger:hover {
@@ -2337,7 +2337,7 @@ html {
 
 /* ===== LEVEL 3: Leaf links (pages inside packages) ===== */
 .nav-submenu-nested .nav-leaf-link {
-    padding-left: 68px !important; /* +16px from L2 (52+16) */
+    padding-left: 72px !important; /* +16px from L2 (56+16) */
     font-size: var(--text-md) !important;
 }
 
