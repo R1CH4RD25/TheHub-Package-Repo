@@ -200,6 +200,13 @@ sudo certbot --apache -d hub.example.com
 - **[PACKAGE_ARCHITECTURE_SPEC.md](PACKAGE_ARCHITECTURE_SPEC.md)** - Deep architecture spec
 - **[src/Package/IconMapper.php](src/Package/IconMapper.php)** - Lucide → FontAwesome icon mapping reference
 
+> **⚠️ Dual Repository Workflow**: Package JSON files (`packages/`) live in this repo but must also be pushed to [TheHub-Package-Repo](https://github.com/R1CH4RD25/TheHub-Package-Repo). After committing package changes:
+> ```bash
+> git push origin laravel-migration       # Push to TheHub
+> git push packages laravel-migration     # Push to TheHub-Package-Repo
+> ```
+> The `packages` remote is configured in this repo pointing to `R1CH4RD25/TheHub-Package-Repo`.
+
 ## 🎯 Usage
 
 ### For End Users

@@ -34,6 +34,7 @@
 - Config comes from `.env` (copied from `.env.example`); keep secrets out of source and ensure `GOOGLE_SERVICE_ACCOUNT_JSON` points to files in `config/`.
 - Monitor runtime issues in `logs/php-errors.log` and session state in `sessions/`; production runs require HTTPS because cookies set `secure`.
 - Before deploying, rerun migrations, clear stale sessions if auth changes, and verify admin/super admin flows including Activity Logs.
+- **Dual repo**: Package files (`packages/`) must be pushed to BOTH remotes after changes: `git push origin <branch>` AND `git push packages <branch>` (packages remote → `R1CH4RD25/TheHub-Package-Repo`).
 
 ---
 
