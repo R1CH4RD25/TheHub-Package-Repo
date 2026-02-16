@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Mon Feb 16 05:35:05 PM UTC 2026
+ * Generated: Mon Feb 16 05:35:58 PM UTC 2026
  */
 
 
@@ -1968,7 +1968,7 @@ html {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible;
 }
 
 /* Sidebar header styling moved to admin-layout.css */
@@ -2440,7 +2440,7 @@ html {
     color: var(--gray-900);
     padding: 0;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible;
     display: flex;
     flex-direction: column;
     width: 280px;

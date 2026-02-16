@@ -15,7 +15,7 @@
     color: var(--gray-900);
     padding: 0;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible;
     display: flex;
     flex-direction: column;
     width: 280px;
