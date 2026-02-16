@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Mon Feb 16 03:27:19 PM UTC 2026
+ * Generated: Mon Feb 16 05:07:35 PM UTC 2026
  */
 
 
@@ -737,6 +737,233 @@ html {
     border-color: var(--ms-blue);
 }
 
+/* ========================================
+   ENTERPRISE FORM INPUTS
+   Google Workspace / Microsoft 365 style
+   ======================================== */
+
+/* --- Base text inputs & textareas --- */
+.admin-root .form-control,
+.admin-root input[type="text"],
+.admin-root input[type="search"],
+.admin-root input[type="email"],
+.admin-root input[type="number"],
+.admin-root input[type="date"],
+.admin-root input[type="datetime-local"],
+.admin-root input[type="password"],
+.admin-root input[type="tel"],
+.admin-root input[type="url"],
+.admin-root textarea {
+    font-family: var(--font-family);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    color: var(--gray-800);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-400);
+    border-radius: var(--radius-base);
+    padding: 8px 12px;
+    line-height: var(--leading-snug);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.admin-root .form-control:hover,
+.admin-root input[type="text"]:hover,
+.admin-root input[type="search"]:hover,
+.admin-root input[type="email"]:hover,
+.admin-root input[type="number"]:hover,
+.admin-root input[type="date"]:hover,
+.admin-root input[type="password"]:hover,
+.admin-root textarea:hover {
+    border-color: var(--gray-700);
+}
+
+.admin-root .form-control:focus,
+.admin-root input[type="text"]:focus,
+.admin-root input[type="search"]:focus,
+.admin-root input[type="email"]:focus,
+.admin-root input[type="number"]:focus,
+.admin-root input[type="date"]:focus,
+.admin-root input[type="password"]:focus,
+.admin-root textarea:focus {
+    outline: none;
+    border-color: var(--ms-blue);
+    box-shadow: 0 0 0 1px var(--ms-blue);
+}
+
+.admin-root .form-control::placeholder,
+.admin-root input::placeholder,
+.admin-root textarea::placeholder {
+    color: var(--gray-600);
+    opacity: 1;
+}
+
+.admin-root .form-control:disabled,
+.admin-root input:disabled,
+.admin-root textarea:disabled,
+.admin-root .form-control[readonly],
+.admin-root input[readonly] {
+    background: var(--gray-200);
+    color: var(--gray-600);
+    border-color: var(--gray-300);
+    cursor: not-allowed;
+}
+
+/* --- Small variant --- */
+.admin-root .form-control-sm,
+.admin-root .form-control.form-control-sm {
+    font-size: var(--text-sm);
+    padding: 6px 10px;
+    height: auto;
+    line-height: var(--leading-snug);
+}
+
+/* --- Select inputs --- */
+.admin-root .form-select,
+.admin-root select {
+    font-family: var(--font-family);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    color: var(--gray-800);
+    background-color: var(--gray-50);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23605E5C' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    border: 1px solid var(--gray-400);
+    border-radius: var(--radius-base);
+    padding: 8px 32px 8px 12px;
+    line-height: var(--leading-snug);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.admin-root .form-select:hover,
+.admin-root select:hover {
+    border-color: var(--gray-700);
+}
+
+.admin-root .form-select:focus,
+.admin-root select:focus {
+    outline: none;
+    border-color: var(--ms-blue);
+    box-shadow: 0 0 0 1px var(--ms-blue);
+}
+
+.admin-root .form-select:disabled,
+.admin-root select:disabled {
+    background-color: var(--gray-200);
+    color: var(--gray-600);
+    border-color: var(--gray-300);
+    cursor: not-allowed;
+}
+
+/* --- Small select variant --- */
+.admin-root .form-select-sm,
+.admin-root .form-select.form-select-sm {
+    font-size: var(--text-sm);
+    padding: 6px 28px 6px 10px;
+    background-position: right 8px center;
+    background-size: 10px;
+    height: auto;
+}
+
+/* --- Checkbox & Radio (Google style) --- */
+.admin-root .form-check-input {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--gray-600);
+    border-radius: var(--radius-sm);
+    background: var(--gray-50);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    vertical-align: middle;
+    position: relative;
+}
+
+.admin-root .form-check-input[type="radio"] {
+    border-radius: 50%;
+}
+
+.admin-root .form-check-input:checked {
+    background-color: var(--ms-blue);
+    border-color: var(--ms-blue);
+}
+
+.admin-root .form-check-input:checked[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.admin-root .form-check-input:focus {
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.25);
+    border-color: var(--ms-blue);
+}
+
+.admin-root .form-check-label {
+    font-size: var(--text-base);
+    color: var(--gray-800);
+    margin-left: 6px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* --- Input groups (e.g., currency prefix) --- */
+.admin-root .input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.admin-root .input-group .input-group-text {
+    font-size: var(--text-base);
+    color: var(--gray-700);
+    background: var(--gray-200);
+    border: 1px solid var(--gray-400);
+    border-right: none;
+    border-radius: var(--radius-base) 0 0 var(--radius-base);
+    padding: 8px 12px;
+    line-height: var(--leading-snug);
+}
+
+.admin-root .input-group .form-control {
+    border-radius: 0 var(--radius-base) var(--radius-base) 0;
+}
+
+/* --- Labels & Form groups --- */
+.admin-root .form-label,
+.admin-root label:not(.form-check-label):not(.pkg-filter-label) {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--gray-700);
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+.admin-root .form-group {
+    margin-bottom: var(--space-4);
+}
+
+.admin-root .form-text {
+    font-size: var(--text-xs);
+    color: var(--gray-600);
+    margin-top: 4px;
+}
+
 /* Admin Navigation Links */
 .admin-nav {
     display: flex;
@@ -971,8 +1198,8 @@ html {
 
 .admin-root .mgmt-module-card {
     display: block;
-    background: var(--white, #fff);
-    border: 1px solid var(--gray-200);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
     border-radius: var(--radius-lg);
     padding: var(--space-5) var(--space-6);
     text-decoration: none;
@@ -984,6 +1211,7 @@ html {
 
 .admin-root .mgmt-module-card:hover {
     border-color: var(--primary-color);
+    background: var(--gray-50);
     box-shadow: var(--elevation-2);
     transform: translateY(-2px);
 }
@@ -1967,30 +2195,45 @@ html {
 }
 
 /* SIDEBAR NAVIGATION LINKS */
+
+/* All nav links: icons align at the same left position */
 .admin-nav-link,
 .mgmt-nav-link {
-    padding-left: 14px; /* Space for chevron on expandable items */
-}
-
-/* Expandable items: chevron at very left edge, minimal padding */
-.nav-expandable .admin-nav-link,
-.nav-expandable .mgmt-nav-link {
-    padding-left: 8px; /* Adjusted for negative margin on caret */
+    padding-left: 12px;
 }
 
 /* ========================================
    EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
+
+   Key pattern: Caret is position:absolute in the gutter (left of content).
+   All icons and text stay aligned regardless of caret presence.
+
+   Positions (from nav content edge, nav has 12px padding):
+     L1 caret:  absolute left: -8px  (in gutter)
+     L1 icon:   padding-left 12px
+     L1 text:   ~12 + 20(icon) + 8(gap) = 40px
+     L2 text:   padding-left 40px     (aligns under L1 text)
+     L2 caret:  absolute left: 22px   (in gap before L2 text)
+     L3 text:   padding-left 56px     (+16px step from L2)
+
+   Active pill extends to sidebar edge via margin-left: -12px
+   with padding-left compensation to keep text in place.
    ======================================== */
 
 .nav-expandable {
     position: relative;
     overflow: visible;
     margin: 0;
-    margin-left: -18px; /* CRITICAL: Required for proper alignment with sidebar edge */
     padding: 0;
 }
 
+.nav-nested-expandable {
+    margin: 0;
+}
+
+/* Trigger button — same padding-left as regular nav links */
 .nav-expandable-trigger {
+    position: relative; /* Anchor for absolute caret */
     width: 100%;
     border: none;
     background: transparent;
@@ -1999,29 +2242,38 @@ html {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: 0;
+    padding: var(--space-2) var(--space-3);
+    padding-left: 12px; /* Same as .admin-nav-link — icons align */
     margin: 0;
+    color: inherit;
+    font: inherit;
 }
 
-/* Chevron icon on LEFT side - Google style (solid filled triangle) */
+/* ===== CARET: Absolutely positioned inside trigger padding ===== */
 .nav-expand-icon {
+    position: absolute;
+    left: 1px; /* Inside the 12px padding-left, visible (not clipped by overflow-x:hidden) */
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 10px !important;
     font-weight: 900 !important;
     color: #6B7280 !important;
-    transition: transform 0.15s ease;
-    margin-right: -11px; /* CRITICAL: Required for precise icon spacing and alignment */
-    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Google-style transition */
+    width: 16px;
+    text-align: center;
+    pointer-events: none; /* Click passes through to trigger */
 }
 
-.nav-expandable.expanded .nav-expand-icon {
-    transform: rotate(90deg);
+/* Rotate caret when expanded */
+.nav-expandable.expanded > .nav-expandable-trigger > .nav-expand-icon {
+    transform: translateY(-50%) rotate(90deg);
 }
 
 .nav-expandable-trigger:hover .nav-expand-icon {
-    color: #374151 !important; /* Darker on hover */
+    color: #374151 !important;
 }
 
-/* Main icon after chevron */
+/* Main icon after caret — caret is absolute so this is first in flow */
 .nav-expandable-trigger > i:not(.nav-expand-icon) {
     margin-right: var(--space-1);
 }
@@ -2033,24 +2285,53 @@ html {
     padding-left: 0;
 }
 
+/* ===== LEVEL 2: Sublinks (text items under L1 expandable) ===== */
 .admin-nav-link.nav-sublink,
 .mgmt-nav-link.nav-sublink {
-    padding-left: var(--space-10) !important; /* Deep indent like Google */
-    font-size: var(--text-md) !important; /* Same size as parent, just not bold */
-    font-weight: var(--font-normal) !important; /* Not bold - 400 */
+    padding-left: 40px !important; /* Aligns text under L1 text */
+    font-size: var(--text-md) !important;
+    font-weight: var(--font-normal) !important;
     opacity: 0.85;
 }
 
 .admin-nav-link.nav-sublink span,
 .mgmt-nav-link.nav-sublink span {
-    font-weight: var(--font-normal) !important; /* Not bold - 400 */
+    font-weight: var(--font-normal) !important;
 }
 
 .admin-nav-link.nav-sublink i,
 .mgmt-nav-link.nav-sublink i {
-    display: none; /* Hide submenu icons */
+    display: none; /* Hide icons on sublinks */
 }
 
+/* ===== LEVEL 2: Nested expandable trigger (package under category) ===== */
+.nav-nested-expandable > .nav-expandable-trigger {
+    padding-left: 40px !important; /* Text aligns with other L2 items */
+    font-weight: var(--font-normal) !important;
+    opacity: 0.85;
+}
+
+/* Nested caret — sits in the gap before L2 text */
+.nav-nested-expandable > .nav-expandable-trigger > .nav-expand-icon {
+    left: 22px !important; /* In the gap between L1 icon area and L2 text */
+    display: block !important; /* Override the i { display:none } from sublink */
+}
+
+.nav-nested-expandable > .nav-expandable-trigger:hover {
+    opacity: 1;
+}
+
+/* ===== LEVEL 3: Leaf links (pages inside packages) ===== */
+.nav-submenu-nested .nav-leaf-link {
+    padding-left: 56px !important; /* +16px from L2 (40+16) */
+    font-size: var(--text-md) !important;
+}
+
+.nav-submenu-nested .nav-leaf-link i {
+    display: none;
+}
+
+/* ===== HOVER STATES ===== */
 .admin-nav-link.nav-sublink:hover,
 .mgmt-nav-link.nav-sublink:hover {
     opacity: 1;
@@ -2058,54 +2339,75 @@ html {
     font-weight: var(--font-normal) !important;
 }
 
+/* ===== ACTIVE PILL STATES ===== */
+/* All active pills extend to sidebar edge via margin-left: -12px
+   (nav padding is 12px) with padding-left increased to compensate */
+
+/* Level 2 sublink active */
 .admin-nav-link.nav-sublink.active,
 .mgmt-nav-link.nav-sublink.active {
-    /* Google Admin style: Light gold pill background for active submenu */
-    background: rgba(201, 151, 0, 0.2); /* Gold with 20% opacity */
+    background: rgba(201, 151, 0, 0.2);
     opacity: 1;
-    font-weight: var(--font-medium) !important; /* Slightly bolder for readability */
-    color: #2D1F05; /* Dark brown/black for contrast against gold background */
-    border-radius: 0 999px 999px 0; /* Flat left, perfect half-circle right */
-    margin-left: -8px; /* Extend to left edge */
-    padding-left: calc(var(--space-10) + 8px); /* Compensate for negative margin */
-    margin-right: var(--space-2); /* Slight margin for pill effect */
+    font-weight: var(--font-medium) !important;
+    color: #2D1F05;
+    border-radius: 0 999px 999px 0;
+    margin-left: -12px; /* Extend pill to sidebar edge */
+    padding-left: calc(40px + 12px) !important; /* L2 (40) + margin compensation (12) */
+    margin-right: var(--space-2);
 }
 
-/* Google Admin Pattern: Parent button highlighting
- * - When section expanded: highlight child, parent gets subtle state
- * - When section collapsed: highlight parent only
- */
+/* Level 3 leaf active */
+.nav-submenu-nested .nav-leaf-link.active {
+    background: rgba(201, 151, 0, 0.2);
+    opacity: 1;
+    font-weight: var(--font-medium) !important;
+    color: #2D1F05;
+    border-radius: 0 999px 999px 0;
+    margin-left: -12px;
+    padding-left: calc(56px + 12px) !important; /* L3 (56) + margin compensation (12) */
+    margin-right: var(--space-2);
+}
+
+/* ===== PARENT TRIGGER HIGHLIGHTING ===== */
 .nav-expandable-trigger.has-active-descendant {
-    /* Subtle indication that a child is active (only when section is expanded) */
     background: rgba(255, 255, 255, 0.05);
 }
 
+/* L1 trigger: solid gold when collapsed with active child */
 .nav-expandable-trigger.active {
-    /* Parent gets SOLID highlight when section is collapsed but has active child */
-    background: var(--nd-gold) !important; /* Solid gold like before */
+    background: var(--nd-gold) !important;
     color: white !important;
-    border-radius: 0 999px 999px 0 !important; /* Flat left, perfect half-circle right */
-    margin-left: -8px !important; /* Extend to left edge */
-    padding-left: calc(var(--space-4) + 8px) !important; /* Compensate for negative margin */
-    margin-right: 4px !important; /* Spacing on right */
+    border-radius: 0 999px 999px 0 !important;
+    margin-left: -12px !important;
+    padding-left: calc(12px + 12px) !important; /* L1 (12) + margin compensation (12) */
+    margin-right: 4px !important;
 }
 
-.nav-expandable-trigger.active .nav-expand-icon {
+/* Adjust caret position when trigger has active margin shift */
+.nav-expandable-trigger.active > .nav-expand-icon {
     color: white !important;
+    left: 13px; /* Normal (1px) + 12px margin-left compensation */
 }
 
 .nav-expandable-trigger.active i:not(.nav-expand-icon) {
     color: white !important;
 }
 
-/* Expanded section indicator (for sections you manually expand that aren't active) */
-.nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
-    border: 2px solid rgba(201, 151, 0, 0.6) !important; /* Gold border */
-    border-radius: 0 999px 999px 0 !important; /* Flat left, perfect half-circle right */
-    border-left: none !important; /* No border on left side */
-    margin-left: -8px !important; /* Extend to left edge */
-    padding-left: calc(var(--space-4) + 8px) !important; /* Compensate for negative margin */
+/* L1 gold border when expanded without active child */
+.admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger,
+.mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
+    border: 2px solid rgba(201, 151, 0, 0.6) !important;
+    border-radius: 0 999px 999px 0 !important;
+    border-left: none !important;
+    margin-left: -12px !important;
+    padding-left: calc(12px + 12px) !important;
     margin-right: 4px !important;
+}
+
+/* Adjust caret for gold border state too */
+.admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger > .nav-expand-icon,
+.mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger > .nav-expand-icon {
+    left: 13px; /* Normal (1px) + 12px margin-left compensation */
 }
 
 /* Collapsed sidebar handling */
