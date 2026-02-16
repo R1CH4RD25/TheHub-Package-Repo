@@ -443,7 +443,7 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-base);
+    border-radius: 0 999px 999px 0; /* Google-style half-circle right edge */
     text-decoration: none;
     color: rgba(255, 255, 255, 0.8);
     font-size: var(--text-md);
