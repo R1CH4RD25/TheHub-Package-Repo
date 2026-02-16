@@ -270,11 +270,11 @@ function renderPackageUpdates(updates) {
                 ${updates.length === 0 ? '<tr><td colspan="4" class="text-center">All packages up to date</td></tr>' : ''}
                 ${updates.map(u => `
                     <tr>
-                        <td><strong>${u.name}</strong></td>
+                        <td><strong>${u.display_name || u.name || u.package_id}</strong></td>
                         <td>${u.current_version}</td>
                         <td>${u.available_version}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" onclick="upgradePackage(${u.id})">
+                            <button class="btn btn-sm btn-primary" onclick="upgradePackage('${u.package_id}')">
                                 <i class="fas fa-arrow-up"></i> Upgrade
                             </button>
                         </td>
@@ -284,6 +284,41 @@ function renderPackageUpdates(updates) {
         </table>
     `;
     document.getElementById('packageUpdatesTable').innerHTML = html;
+}
+
+function upgradePackage(packageId) {
+    debugLog('ACTION', `User clicked UPGRADE for package: ${packageId}`);
+    Swal.fire({
+        title: 'Upgrade Package?',
+        text: 'This will upgrade the package to the latest available version.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-arrow-up"></i> Yes, upgrade',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            debugLog('API', `Sending POST to /admin/packages/${packageId}/upgrade`);
+            fetch(`/admin/packages/${packageId}/upgrade`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken }
+            })
+            .then(r => r.json())
+            .then(data => {
+                debugLog('RESPONSE', 'Upgrade data', data);
+                if (data.success) {
+                    notyf.success(data.message || 'Package upgraded successfully');
+                    loadInstalledPackages();
+                    loadPackageUpdates();
+                } else {
+                    notyf.error(data.error || 'Upgrade failed');
+                }
+            })
+            .catch(err => {
+                debugLog('ERROR', 'Upgrade error', err);
+                notyf.error('Failed to upgrade package');
+            });
+        }
+    });
 }
 
 function installPackage(packageId) {
@@ -331,44 +366,162 @@ function installPackage(packageId) {
 
 function uninstallPackage(packageId) {
     debugLog('ACTION', `User clicked UNINSTALL for package: ${packageId}`);
-    Swal.fire({
-        title: 'Uninstall Package?',
-        text: 'This will remove the section and all its data',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, uninstall',
-        confirmButtonColor: '#d32f2f'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            debugLog('ACTION', `User confirmed uninstall for: ${packageId}`);
-            debugLog('API', `Sending DELETE request to /admin/packages/${packageId}/uninstall`);
-            fetch(`/admin/packages/${packageId}/uninstall`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken }
-            })
-            .then(r => {
-                debugLog('RESPONSE', 'Uninstall response received', { status: r.status });
-                return r.json();
-            })
-            .then(data => {
-                debugLog('RESPONSE', 'Uninstall data', data);
-                if (data.success) {
-                    debugLog('SUCCESS', 'Package uninstalled successfully');
-                    notyf.success('Package uninstalled');
-                    debugLog('UI', 'Reloading installed packages table...');
-                    loadInstalledPackages();
-                } else {
-                    debugLog('ERROR', 'Uninstall failed', data);
-                    notyf.error(data.error || 'Uninstall failed');
+
+    // First fetch record count to inform the user
+    fetch(`/admin/packages/${packageId}/record-count`)
+        .then(r => r.json())
+        .then(info => {
+            const count = info.record_count || 0;
+            const name = info.display_name || 'this package';
+            const hasData = count > 0;
+
+            const dataInfo = hasData
+                ? `<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px 16px;margin:12px 0;text-align:left;">
+                     <div style="font-weight:600;color:#9A3412;margin-bottom:4px;">
+                       <i class="fas fa-database" style="margin-right:6px;"></i>${count.toLocaleString()} record${count !== 1 ? 's' : ''} found
+                     </div>
+                     <div style="font-size:13px;color:#78350F;">Choose what happens to this data below.</div>
+                   </div>`
+                : `<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:12px 16px;margin:12px 0;text-align:left;">
+                     <div style="font-weight:600;color:#065F46;">
+                       <i class="fas fa-check-circle" style="margin-right:6px;"></i>No records to worry about
+                     </div>
+                     <div style="font-size:13px;color:#047857;">This package has no stored data.</div>
+                   </div>`;
+
+            const radioSection = hasData
+                ? `<div style="margin-top:16px;text-align:left;">
+                     <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #3B82F6;border-radius:8px;margin-bottom:8px;cursor:pointer;background:#EFF6FF;">
+                       <input type="radio" name="swal-uninstall-mode" value="keep" checked style="margin-top:3px;accent-color:#3B82F6;">
+                       <div>
+                         <div style="font-weight:600;color:#1E40AF;">Keep data</div>
+                         <div style="font-size:13px;color:#3B82F6;">Preserve all ${count.toLocaleString()} records for future reinstallation</div>
+                       </div>
+                     </label>
+                     <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid var(--gray-300,#D1D5DB);border-radius:8px;cursor:pointer;background:white;">
+                       <input type="radio" name="swal-uninstall-mode" value="delete" style="margin-top:3px;accent-color:#DC2626;">
+                       <div>
+                         <div style="font-weight:600;color:#991B1B;">Delete everything</div>
+                         <div style="font-size:13px;color:#B91C1C;">Permanently remove all records — this cannot be undone</div>
+                       </div>
+                     </label>
+                   </div>`
+                : '';
+
+            // Style radio selection on click
+            Swal.fire({
+                title: `Uninstall ${name}?`,
+                html: `<div style="font-size:14px;color:#4B5563;">
+                         This will remove the package, its fields, permissions, and menu items.
+                       </div>
+                       ${dataInfo}
+                       ${radioSection}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: hasData ? 'Uninstall' : 'Yes, uninstall',
+                confirmButtonColor: '#d32f2f',
+                cancelButtonText: 'Cancel',
+                focusCancel: true,
+                customClass: { popup: 'swal-wide' },
+                didOpen: () => {
+                    // Highlight selected radio's parent label
+                    const radios = Swal.getPopup().querySelectorAll('input[name="swal-uninstall-mode"]');
+                    radios.forEach(r => r.addEventListener('change', () => {
+                        radios.forEach(rb => {
+                            const label = rb.closest('label');
+                            if (rb.checked) {
+                                label.style.borderColor = rb.value === 'keep' ? '#3B82F6' : '#DC2626';
+                                label.style.background = rb.value === 'keep' ? '#EFF6FF' : '#FEF2F2';
+                            } else {
+                                label.style.borderColor = '#D1D5DB';
+                                label.style.background = 'white';
+                            }
+                        });
+                    }));
+                },
+                preConfirm: () => {
+                    if (!hasData) return { keepData: false };
+                    const selected = Swal.getPopup().querySelector('input[name="swal-uninstall-mode"]:checked');
+                    return { keepData: selected?.value === 'keep' };
                 }
-            })
-            .catch(err => {
-                debugLog('ERROR', 'Uninstall error', err);
-                notyf.error('Failed to uninstall package');
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    debugLog('ACTION', 'User cancelled uninstall');
+                    return;
+                }
+
+                const keepData = result.value.keepData;
+
+                // If deleting data, require a second confirmation
+                if (!keepData && hasData) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        html: `<div style="color:#991B1B;font-weight:600;">
+                                 <i class="fas fa-exclamation-triangle"></i>
+                                 This will permanently delete ${count.toLocaleString()} record${count !== 1 ? 's' : ''}.
+                               </div>
+                               <div style="margin-top:8px;color:#4B5563;">This action cannot be undone.</div>`,
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Delete all data & uninstall',
+                        confirmButtonColor: '#d32f2f',
+                        cancelButtonText: 'Go back',
+                        focusCancel: true
+                    }).then((confirm2) => {
+                        if (confirm2.isConfirmed) {
+                            executeUninstall(packageId, false);
+                        }
+                    });
+                } else {
+                    executeUninstall(packageId, keepData);
+                }
             });
+        })
+        .catch(err => {
+            debugLog('ERROR', 'Failed to fetch record count', err);
+            // Fall back to simple confirm
+            Swal.fire({
+                title: 'Uninstall Package?',
+                text: 'This will remove the package and its configuration.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, uninstall',
+                confirmButtonColor: '#d32f2f'
+            }).then((result) => {
+                if (result.isConfirmed) executeUninstall(packageId, false);
+            });
+        });
+}
+
+function executeUninstall(packageId, keepData) {
+    debugLog('ACTION', `Executing uninstall for: ${packageId}, keepData: ${keepData}`);
+    fetch(`/admin/packages/${packageId}/uninstall`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ keep_data: keepData })
+    })
+    .then(r => {
+        debugLog('RESPONSE', 'Uninstall response received', { status: r.status });
+        return r.json();
+    })
+    .then(data => {
+        debugLog('RESPONSE', 'Uninstall data', data);
+        if (data.success) {
+            debugLog('SUCCESS', 'Package uninstalled successfully');
+            notyf.success(data.message || 'Package uninstalled');
+            debugLog('UI', 'Reloading installed packages table...');
+            loadInstalledPackages();
         } else {
-            debugLog('ACTION', 'User cancelled uninstall');
+            debugLog('ERROR', 'Uninstall failed', data);
+            notyf.error(data.error || 'Uninstall failed');
         }
+    })
+    .catch(err => {
+        debugLog('ERROR', 'Uninstall error', err);
+        notyf.error('Failed to uninstall package');
     });
 }
 
@@ -620,7 +773,7 @@ async function searchRepositoryPackages(bustCache = false) {
         });
 
         const data = await response.json();
-        
+
         console.log('📦 Package Repository API Response:', data);
         console.log('📋 Total packages found:', data.packages?.length || 0);
         console.log('🔍 Package details:', data.packages);
@@ -663,7 +816,7 @@ function renderDiscoveryPackages(packages) {
     console.log('🎨 Rendering packages - Total:', packages.length);
     console.log('📊 Current filters:', currentFilter);
     console.log('🔢 Current sort:', currentSort);
-    
+
     const resultsDiv = document.getElementById('discoveryResults');
 
     if (packages.length === 0) {

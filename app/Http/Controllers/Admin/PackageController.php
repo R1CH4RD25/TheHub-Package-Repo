@@ -194,6 +194,67 @@ class PackageController extends Controller
     }
 
     /**
+     * Get record count for a package (used by uninstall confirmation modal).
+     */
+    public function recordCount(Request $request, string $packageId): JsonResponse
+    {
+        try {
+            $db = \Hub\Database::getInstance();
+            $installation = $db->fetchOne(
+                "SELECT si.section_id, s.display_name FROM section_installations si
+                 JOIN sections s ON si.section_id = s.id
+                 WHERE si.package_id = ?",
+                [$packageId]
+            );
+
+            if (!$installation) {
+                return response()->json(['record_count' => 0, 'display_name' => 'Unknown']);
+            }
+
+            $count = $db->fetchOne(
+                "SELECT COUNT(*) as cnt FROM section_records WHERE section_id = ?",
+                [$installation['section_id']]
+            );
+
+            return response()->json([
+                'record_count' => (int) ($count['cnt'] ?? 0),
+                'display_name' => $installation['display_name'] ?? 'Unknown'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['record_count' => 0, 'display_name' => 'Unknown']);
+        }
+    }
+
+    /**
+     * Upgrade an installed package to the latest available version.
+     */
+    public function upgrade(Request $request, string $packageId): JsonResponse
+    {
+        $currentUser = $request->attributes->get('user');
+
+        try {
+            $db = \Hub\Database::getInstance();
+
+            // Find the latest package record for this package_id
+            $packageRecord = $db->fetchOne(
+                "SELECT id FROM section_packages WHERE package_id = ? ORDER BY uploaded_at DESC LIMIT 1",
+                [$packageId]
+            );
+
+            if (!$packageRecord) {
+                return response()->json(['success' => false, 'error' => 'Package not found'], 404);
+            }
+
+            $packageManager = new PackageManager();
+            $result = $packageManager->upgradePackage((int) $packageRecord['id'], $currentUser['id']);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => 'Upgrade failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Uninstall a package.
      */
     public function uninstall(Request $request, string $packageId): JsonResponse
@@ -201,8 +262,13 @@ class PackageController extends Controller
         $currentUser = $request->attributes->get('user');
 
         try {
+            $keepData = filter_var(
+                $request->input('keep_data', false),
+                FILTER_VALIDATE_BOOLEAN
+            );
+
             $packageManager = new PackageManager();
-            $result = $packageManager->uninstallPackage($packageId, $currentUser['id']);
+            $result = $packageManager->uninstallPackage($packageId, $currentUser['id'], $keepData);
 
             // Audit logging already handled in PackageManager->uninstallPackage()
 
