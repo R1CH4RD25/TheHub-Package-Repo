@@ -717,13 +717,20 @@ class PackageManager
 
     /**
      * Get installed packages
+     *
+     * @param bool $skipCache  When true, bypass cache and read fresh from DB.
+     *                         Mutations (install/upgrade/uninstall) clear cache,
+     *                         but callers like checkForUpdates() should always
+     *                         pass true so stale data never hides a version change.
      */
-    public function getInstalledPackages(): array
+    public function getInstalledPackages(bool $skipCache = false): array
     {
-        // Try cache first (5 minute TTL)
-        $cached = Cache::get('packages:installed');
-        if ($cached !== null) {
-            return $cached;
+        // Try cache first (5 minute TTL) unless caller wants fresh data
+        if (!$skipCache) {
+            $cached = Cache::get('packages:installed');
+            if ($cached !== null) {
+                return $cached;
+            }
         }
 
         $packages = $this->db->fetchAll("
@@ -749,7 +756,8 @@ class PackageManager
     public function checkForUpdates(): array
     {
         $updates = [];
-        $installed = $this->getInstalledPackages();
+        // Always read fresh from DB — update detection must never serve stale data
+        $installed = $this->getInstalledPackages(true);
 
         foreach ($installed as $pkg) {
             if (
