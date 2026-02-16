@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Mon Feb 16 05:35:58 PM UTC 2026
+ * Generated: Mon Feb 16 05:38:24 PM UTC 2026
  */
 
 
@@ -3100,7 +3100,7 @@ html {
     background: white;
     box-shadow: 2px 0 8px rgba(0, 0, 0, var(--shadow-light));
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible;
     position: relative;
     z-index: 100;
 }
