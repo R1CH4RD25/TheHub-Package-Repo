@@ -941,22 +941,23 @@
     text-align: left;
 }
 
-/* Google Admin caret: tiny inline triangle that lives in the padding zone.
-   Negative margins make it occupy zero effective width so icons stay aligned
-   with non-expandable items. The caret visually sits in the left padding space. */
+/* Google Admin caret: absolutely positioned inside the trigger's left padding.
+   The trigger has padding-left:12px, so placing at left:1px keeps it within 
+   the element bounds (no overflow clipping) while occupying zero flex space. */
 .nav-expand-icon {
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    width: 0;
-    overflow: visible;
+    position: absolute;
+    left: 1px;
+    top: 0;
+    bottom: 0;
+    width: 10px;
     font-size: 10px;
     color: rgba(0, 0, 0, 0.45);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     transform: rotate(0deg);
-    margin-left: -10px;
-    margin-right: -2px;
+    pointer-events: none;
 }
 
 /* Expanded state: rotate caret from right-pointing ▸ to down-pointing ▾ */
@@ -966,8 +967,7 @@
 
 /* Nested expandable caret */
 .nav-nested-expandable > .nav-expandable-trigger > .nav-expand-icon {
-    margin-left: -10px;
-    margin-right: -2px;
+    left: 29px;
 }
 
 .nav-submenu {
