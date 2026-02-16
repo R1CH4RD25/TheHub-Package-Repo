@@ -1,6 +1,6 @@
 /**
  * Admin Bundle - Concatenated CSS
- * Generated: Mon Feb 16 06:52:18 PM UTC 2026
+ * Generated: Mon Feb 16 06:53:49 PM UTC 2026
  */
 
 
@@ -2542,7 +2542,7 @@ html {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-base);
+    border-radius: 0 999px 999px 0; /* Google-style half-circle right edge */
     text-decoration: none;
     color: var(--gray-800);
     font-size: var(--text-md);
@@ -2574,7 +2574,7 @@ html {
 .mgmt-sidebar.collapsed .mgmt-nav-link.active {
     background: var(--nd-gold);
     color: white;
-    border-radius: var(--radius-base);
+    border-radius: 0 999px 999px 0;
 }
 
 .admin-nav-link i,
