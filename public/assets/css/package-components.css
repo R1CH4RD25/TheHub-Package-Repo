@@ -371,11 +371,12 @@
 
 .pkg-filter-field {
     flex: 0 0 auto;
-    min-width: 140px;
+    min-width: 160px;
 }
 
 .pkg-filter-field:first-child {
-    flex: 1 1 260px;
+    flex: 2 1 320px;
+    min-width: 240px;
 }
 
 .pkg-filter-label {

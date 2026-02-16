@@ -81,6 +81,11 @@ class FilterRenderer implements ComponentRendererInterface
 
         $html = '<div class="pkg-filter-field">';
 
+        // Search fields get a default label if none provided
+        if (!$label && $type === 'search') {
+            $label = 'Search';
+        }
+
         if ($label) {
             $html .= '<label class="pkg-filter-label">' . e($label) . '</label>';
         }
