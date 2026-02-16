@@ -99,8 +99,10 @@ class PackageController extends Controller
         $packageManager = new PackageManager();
 
         try {
+            $fresh = $request->query('fresh') === '1';
+
             if ($type === 'installed') {
-                $packages = $packageManager->getInstalledPackages();
+                $packages = $packageManager->getInstalledPackages($fresh);
             } elseif ($type === 'updates') {
                 $packages = $packageManager->checkForUpdates();
             } else {

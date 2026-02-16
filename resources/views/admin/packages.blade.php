@@ -126,9 +126,10 @@ function loadSubtabData(subtab) {
     }
 }
 
-function loadInstalledPackages() {
+function loadInstalledPackages(fresh = false) {
     debugLog('API', 'Loading installed packages');
-    fetch('/admin/packages/list?type=installed')
+    const qs = fresh ? '&fresh=1' : '';
+    fetch(`/admin/packages/list?type=installed${qs}`)
         .then(r => {
             debugLog('RESPONSE', 'Installed packages response received', { status: r.status });
             return r.json();
@@ -307,7 +308,7 @@ function upgradePackage(packageId) {
                 debugLog('RESPONSE', 'Upgrade data', data);
                 if (data.success) {
                     notyf.success(data.message || 'Package upgraded successfully');
-                    loadInstalledPackages();
+                    loadInstalledPackages(true);
                     loadPackageUpdates();
                 } else {
                     notyf.error(data.error || 'Upgrade failed');
@@ -347,7 +348,7 @@ function installPackage(packageId) {
                     debugLog('SUCCESS', 'Package installed successfully');
                     notyf.success('Package installed successfully');
                     debugLog('UI', 'Reloading installed and available packages tables...');
-                    loadInstalledPackages();
+                    loadInstalledPackages(true);
                     loadAvailablePackages();
                 } else {
                     debugLog('ERROR', 'Installation failed', data);
@@ -513,7 +514,7 @@ function executeUninstall(packageId, keepData) {
             debugLog('SUCCESS', 'Package uninstalled successfully');
             notyf.success(data.message || 'Package uninstalled');
             debugLog('UI', 'Reloading installed packages table...');
-            loadInstalledPackages();
+            loadInstalledPackages(true);
         } else {
             debugLog('ERROR', 'Uninstall failed', data);
             notyf.error(data.error || 'Uninstall failed');
