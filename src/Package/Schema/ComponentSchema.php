@@ -2,6 +2,8 @@
 
 namespace Hub\Package\Schema;
 
+use Hub\Package\VisualConfig;
+
 /**
  * Component Schema — "Stack" Type Definitions
  *
@@ -358,6 +360,7 @@ class ComponentSchema
                         'items'       => self::quickLinkSchema(),
                         'maxItems'    => 12,
                     ],
+                    'visual' => self::visualConfigSchema(),
                 ],
             ],
         ];
@@ -529,6 +532,7 @@ class ComponentSchema
                     'exportable' => [
                         'type' => 'boolean', 'description' => 'Show export button', 'default' => false,
                     ],
+                    'visual' => self::visualConfigSchema(),
                 ],
             ],
         ];
@@ -672,6 +676,7 @@ class ComponentSchema
                         'items'       => self::fieldSchema(),
                         'maxItems'    => 100,
                     ],
+                    'visual' => self::visualConfigSchema(),
                 ],
                 'oneOf' => [
                     ['required' => ['sections']],
@@ -943,6 +948,7 @@ class ComponentSchema
                     'backUrl' => [
                         'type' => 'string', 'description' => 'Route for "Back" button',
                     ],
+                    'visual' => self::visualConfigSchema(),
                 ],
             ],
         ];
@@ -1020,6 +1026,7 @@ class ComponentSchema
                         'minItems' => 1,
                         'maxItems' => 10,
                     ],
+                    'visual' => self::visualConfigSchema(),
                 ],
             ],
         ];
@@ -1067,6 +1074,24 @@ class ComponentSchema
                 'endParam'   => ['type' => 'string', 'description' => 'For date_range: end param name'],
             ],
         ];
+    }
+
+    // ──────────────────────────────────────────────────────
+    //  VISUAL CONFIG SCHEMA
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * Schema for the optional visual config section.
+     *
+     * Allows components to specify a preset and/or individual token overrides
+     * for spacing, colors, sizing, density, etc.
+     *
+     * @see VisualConfig for the full token registry
+     * @see VisualPresets for available presets
+     */
+    public static function visualConfigSchema(): array
+    {
+        return VisualConfig::jsonSchema();
     }
 
     // ──────────────────────────────────────────────────────

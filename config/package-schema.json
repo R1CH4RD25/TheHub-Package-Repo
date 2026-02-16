@@ -1,0 +1,454 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hub.woodson.org/schemas/package.json",
+  "title": "Hub Layer 3 Package Schema",
+  "description": "JSON schema for validating Hub Layer 3 package definitions",
+  "type": "object",
+  "required": ["id", "version", "name", "publisher", "pages"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+\\.[a-z0-9\\-]+\\.[a-z0-9\\-]+$",
+      "description": "Reverse domain notation (e.g., com.woodson.student-directory)"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (e.g., 1.0.0)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Human-readable package name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Package description"
+    },
+    "publisher": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Publisher name or organization"
+    },
+    "icon": {
+      "type": "string",
+      "pattern": "^fa-[a-z0-9\\-]+$",
+      "description": "FontAwesome icon class (e.g., fa-users)"
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "hubVersion": {
+          "type": "string",
+          "description": "Minimum Hub version required"
+        },
+        "phpVersion": {
+          "type": "string",
+          "description": "Minimum PHP version required"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+\\.[a-z0-9\\-]+\\.[a-z0-9\\-]+$"
+          },
+          "description": "Other package IDs this package depends on"
+        },
+        "composer": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Composer packages required"
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/page"
+      },
+      "description": "Array of package pages (presentation layer)"
+    },
+    "queries": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z][a-zA-Z0-9_]*$": {
+          "$ref": "#/definitions/query"
+        }
+      },
+      "description": "Query handlers (data layer, read-only)"
+    },
+    "mutations": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z][a-zA-Z0-9_]*$": {
+          "$ref": "#/definitions/mutation"
+        }
+      },
+      "description": "Mutation handlers (data layer, write operations)"
+    },
+    "policies": {
+      "type": "object",
+      "properties": {
+        "defaultRole": {
+          "type": "string",
+          "enum": ["admin", "manager", "standard", "guest"],
+          "description": "Minimum role required to access this package"
+        },
+        "scope": {
+          "type": "object",
+          "description": "Row-level security rules"
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Package-specific settings schema"
+    },
+    "migrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "sql"],
+        "properties": {
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "sql": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Database migrations"
+    }
+  },
+  "definitions": {
+    "page": {
+      "type": "object",
+      "required": ["id", "title", "components"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9\\-]+$",
+          "description": "Page identifier (URL slug)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Page title"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "icon": {
+          "type": "string",
+          "pattern": "^fa-[a-z0-9\\-]+$"
+        },
+        "requiredRole": {
+          "type": "string",
+          "enum": ["admin", "manager", "standard", "guest"],
+          "description": "Minimum role required to access page"
+        },
+        "requiredPermission": {
+          "type": "string",
+          "description": "Optional specific permission required"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/component"
+          },
+          "description": "Page components"
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["table", "form", "detail", "dashboard", "wizard", "report", "chart"],
+          "description": "Component type"
+        },
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "query": {
+          "type": "string",
+          "description": "Query name to fetch data (for table, detail, chart)"
+        },
+        "mutation": {
+          "type": "string",
+          "description": "Mutation name for form submission"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/column"
+          },
+          "description": "Table columns or form fields"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/action"
+          },
+          "description": "Row actions or form buttons"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Filter options for tables"
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "perPage": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          }
+        },
+        "visual": {
+          "$ref": "#/definitions/visualConfig"
+        }
+      }
+    },
+    "column": {
+      "type": "object",
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Field key (database column or JSON path)"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "date", "datetime", "boolean", "email", "url", "select", "textarea", "password", "file"],
+          "default": "text"
+        },
+        "dataClass": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "regulated", "secret"],
+          "default": "internal",
+          "description": "Data classification for masking"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "sortable": {
+          "type": "boolean",
+          "default": false
+        },
+        "searchable": {
+          "type": "boolean",
+          "default": false
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": ["string", "number", "boolean"]
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Options for select fields"
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string",
+          "pattern": "^fa-[a-z0-9\\-]+$"
+        },
+        "mutation": {
+          "type": "string",
+          "description": "Mutation to execute"
+        },
+        "confirm": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "description": "Confirmation dialog"
+        },
+        "style": {
+          "type": "string",
+          "enum": ["primary", "secondary", "success", "danger", "warning", "info"],
+          "default": "secondary"
+        }
+      }
+    },
+    "query": {
+      "type": "object",
+      "required": ["handler"],
+      "properties": {
+        "handler": {
+          "type": "string",
+          "pattern": "^[A-Z][a-zA-Z0-9\\\\]*$",
+          "description": "Fully-qualified handler class name"
+        },
+        "description": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Expected query parameters schema"
+        },
+        "requiredPermission": {
+          "type": "string",
+          "description": "Optional specific permission required"
+        }
+      }
+    },
+    "mutation": {
+      "type": "object",
+      "required": ["handler", "requiredPermission"],
+      "properties": {
+        "handler": {
+          "type": "string",
+          "pattern": "^[A-Z][a-zA-Z0-9\\\\]*$",
+          "description": "Fully-qualified handler class name"
+        },
+        "description": {
+          "type": "string"
+        },
+        "requiredPermission": {
+          "type": "string",
+          "description": "Permission required to execute mutation"
+        },
+        "inputSchema": {
+          "type": "object",
+          "description": "JSON schema for input validation"
+        },
+        "isSensitive": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, returns token instead of data"
+        },
+        "invalidatesCaches": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cache tags to invalidate after mutation"
+        },
+        "backgroundJobs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Background jobs to queue after mutation"
+        }
+      }
+    },
+    "visualConfig": {
+      "type": "object",
+      "description": "Visual configuration tokens for component styling. Uses --v-{name} CSS custom properties. Apply a preset as a starting point, then override individual tokens.",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "description": "Built-in density/style preset to use as base",
+          "enum": ["comfortable", "compact", "spacious", "print", "data-grid"],
+          "default": "comfortable"
+        },
+        "tokens": {
+          "type": "object",
+          "description": "Individual token overrides. Each key maps to a --v-{key} CSS custom property.",
+          "properties": {
+            "table-row-height":       { "type": "string", "description": "Height of each table row" },
+            "table-cell-padding-x":   { "type": "string", "description": "Horizontal padding inside cells" },
+            "table-cell-padding-y":   { "type": "string", "description": "Vertical padding inside cells" },
+            "table-header-padding-x": { "type": "string", "description": "Horizontal padding in header cells" },
+            "table-header-padding-y": { "type": "string", "description": "Vertical padding in header cells" },
+            "table-font-size":        { "type": "string", "description": "Base font size for table body" },
+            "table-header-font-size": { "type": "string", "description": "Font size for table headers" },
+            "table-border-radius":    { "type": "string", "description": "Corner rounding on table container" },
+            "table-border-color":     { "type": "string", "description": "Border color for table and dividers" },
+            "table-header-bg":        { "type": "string", "description": "Background of table header row" },
+            "table-header-color":     { "type": "string", "description": "Text color of table header row" },
+            "table-row-bg":           { "type": "string", "description": "Default row background" },
+            "table-row-hover":        { "type": "string", "description": "Row hover background" },
+            "table-row-stripe":       { "type": "string", "description": "Alternating row color" },
+            "table-text-color":       { "type": "string", "description": "Default text color in cells" },
+            "table-divider-color":    { "type": "string", "description": "Color of row divider lines" },
+            "table-shadow":           { "type": "string", "description": "Box shadow on table container" },
+            "filter-input-width":     { "type": "string", "description": "Width of search/text filter inputs" },
+            "filter-select-width":    { "type": "string", "description": "Width of dropdown filters" },
+            "filter-input-height":    { "type": "string", "description": "Height of filter inputs" },
+            "filter-gap":             { "type": "string", "description": "Gap between filter fields" },
+            "filter-padding":         { "type": "string", "description": "Padding inside filter bar" },
+            "filter-bg":              { "type": "string", "description": "Background of filter bar" },
+            "filter-border-radius":   { "type": "string", "description": "Corner rounding on filter bar" },
+            "filter-border-color":    { "type": "string", "description": "Border color of filter bar" },
+            "filter-label-size":      { "type": "string", "description": "Font size for filter labels" },
+            "filter-label-color":     { "type": "string", "description": "Color of filter labels" },
+            "card-columns":           { "type": "number", "description": "Number of card columns", "minimum": 1, "maximum": 6 },
+            "card-gap":               { "type": "string", "description": "Gap between cards" },
+            "card-padding":           { "type": "string", "description": "Internal padding of cards" },
+            "card-radius":            { "type": "string", "description": "Corner rounding on cards" },
+            "card-shadow":            { "type": "string", "description": "Shadow on cards" },
+            "card-border":            { "type": "string", "description": "Border style on cards" },
+            "card-icon-size":         { "type": "string", "description": "Size of stat card icon" },
+            "card-value-size":        { "type": "string", "description": "Font size of KPI value" },
+            "action-btn-size":        { "type": "string", "description": "Font size of action buttons" },
+            "action-gap":             { "type": "string", "description": "Gap between action buttons" },
+            "badge-font-size":        { "type": "string", "description": "Font size inside badges" },
+            "badge-radius":           { "type": "string", "description": "Border radius on badges" },
+            "pagination-gap":         { "type": "string", "description": "Gap between page buttons" },
+            "pagination-btn-size":    { "type": "string", "description": "Font size of page buttons" }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}

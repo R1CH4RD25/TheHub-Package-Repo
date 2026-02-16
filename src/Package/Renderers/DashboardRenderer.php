@@ -3,6 +3,8 @@
 namespace Hub\Package\Renderers;
 
 use Hub\Package\Contracts\ComponentRendererInterface;
+use Hub\Package\IconMapper;
+use Hub\Package\VisualConfig;
 
 /**
  * Dashboard Renderer
@@ -47,7 +49,19 @@ class DashboardRenderer implements ComponentRendererInterface
         $cardData = $data['data'] ?? $data;
         $baseUrl = rtrim($context['baseUrl'] ?? '', '/');
 
-        $html = '<div class="pkg-dashboard" id="' . e($componentId) . '">';
+        $html = '';
+
+        // Emit visual token overrides as a scoped <style> block
+        if (!empty($config['visual'])) {
+            $preset = $config['visual']['preset'] ?? 'comfortable';
+            $tokens = $config['visual']['tokens'] ?? [];
+            $resolved = VisualConfig::resolveConfig($preset, $tokens);
+            if (!empty($resolved)) {
+                $html .= VisualConfig::toStyleBlock($resolved, '', $componentId);
+            }
+        }
+
+        $html .= '<div class="pkg-dashboard" id="' . e($componentId) . '">';
 
         // Render cards section
         $cards = $config['cards'] ?? $config['items'] ?? [];
@@ -121,6 +135,7 @@ class DashboardRenderer implements ComponentRendererInterface
         $html = '<' . $tag . ' class="pkg-dashboard-card pkg-card-' . e($color) . '"' . $href . '>';
 
         if ($icon) {
+            $icon = IconMapper::map($icon);
             $html .= '<div class="pkg-card-icon"><i class="' . e($icon) . '"></i></div>';
         }
 
@@ -232,6 +247,7 @@ class DashboardRenderer implements ComponentRendererInterface
                 $link = $item['link'] ?? '';
                 $variant = $item['variant'] ?? 'primary';
                 $icon = $item['icon'] ?? 'bi-arrow-right';
+                $icon = IconMapper::map($icon);
 
                 if ($dataKey && isset($data[$dataKey])) {
                     $count = $data[$dataKey];
@@ -274,6 +290,9 @@ class DashboardRenderer implements ComponentRendererInterface
         foreach ($links as $link) {
             $label = $link['label'] ?? '';
             $icon = $link['icon'] ?? '';
+            if ($icon) {
+                $icon = IconMapper::map($icon);
+            }
             $url = $link['url'] ?? $link['link'] ?? '#';
             $variant = $link['variant'] ?? 'outline-primary';
             $description = $link['description'] ?? '';

@@ -4,6 +4,7 @@ namespace Hub\Package\Renderers;
 
 use Hub\Package\Contracts\ComponentRendererInterface;
 use Hub\Package\IconMapper;
+use Hub\Package\VisualConfig;
 
 /**
  * Filter Renderer
@@ -36,7 +37,19 @@ class FilterRenderer implements ComponentRendererInterface
 
         $currentParams = $context['queryParams'] ?? $_GET ?? [];
 
-        $html = '<div class="pkg-filters" id="' . e($componentId) . '"';
+        $html = '';
+
+        // Emit visual token overrides as a scoped <style> block
+        if (!empty($config['visual'])) {
+            $preset = $config['visual']['preset'] ?? 'comfortable';
+            $tokens = $config['visual']['tokens'] ?? [];
+            $resolved = VisualConfig::resolveConfig($preset, $tokens);
+            if (!empty($resolved)) {
+                $html .= VisualConfig::toStyleBlock($resolved, '', $componentId);
+            }
+        }
+
+        $html .= '<div class="pkg-filters" id="' . e($componentId) . '"';
         if ($targetTable) {
             $html .= ' data-target-table="' . e($targetTable) . '"';
         }
