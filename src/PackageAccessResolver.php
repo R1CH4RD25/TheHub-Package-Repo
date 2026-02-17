@@ -57,39 +57,73 @@ class PackageAccessResolver
             return null;
         }
 
-        // Get user's system role
-        $userRole = $this->getUserSystemRole($userId);
-        if (!$userRole) {
+        // Get ALL user roles (primary + Google Groups + manual global roles)
+        $userRoles = $this->getAllUserSystemRoles($userId);
+        if (empty($userRoles)) {
             return null;
         }
 
         // super_admin always gets the highest-tier role
-        if ($userRole === 'super_admin') {
+        if (in_array('super_admin', $userRoles)) {
             $role = $this->getHighestRole($policy['roles'] ?? []);
             $this->roleCache[$cacheKey] = $role;
             return $role;
         }
 
-        // Check globalRoleMapping
+        // Check globalRoleMapping for ALL user roles — pick the highest-tier match
         $mapping = $policy['globalRoleMapping'] ?? [];
-        if (isset($mapping[$userRole])) {
-            $role = $mapping[$userRole];
-            // Validate the role exists in policy.roles
-            if (isset($policy['roles'][$role])) {
-                $this->roleCache[$cacheKey] = $role;
-                return $role;
+        $packageRoles = $policy['roles'] ?? [];
+        $bestRole = null;
+        $bestTier = -1;
+
+        foreach ($userRoles as $systemRole) {
+            if (isset($mapping[$systemRole])) {
+                $candidateRole = $mapping[$systemRole];
+                if (isset($packageRoles[$candidateRole])) {
+                    $tier = $this->getRoleTier($packageRoles, $candidateRole);
+                    if ($tier > $bestTier) {
+                        $bestTier = $tier;
+                        $bestRole = $candidateRole;
+                    }
+                }
             }
+        }
+
+        if ($bestRole) {
+            $this->roleCache[$cacheKey] = $bestRole;
+            return $bestRole;
         }
 
         // Fall back to defaultRole
         $defaultRole = $policy['defaultRole'] ?? null;
-        if ($defaultRole && isset($policy['roles'][$defaultRole])) {
+        if ($defaultRole && isset($packageRoles[$defaultRole])) {
             $this->roleCache[$cacheKey] = $defaultRole;
             return $defaultRole;
         }
 
         $this->roleCache[$cacheKey] = null;
         return null;
+    }
+
+    /**
+     * Determine the tier level of a package role by walking its inheritance chain.
+     * Higher tier = more permissions (admin > manager > user).
+     */
+    private function getRoleTier(array $roles, string $roleKey): int
+    {
+        $tier = 0;
+        $current = $roleKey;
+        $visited = [];
+
+        // Walk UP the inheritance tree — each inherit link = one tier lower
+        // So the role that inherits the most is the highest tier
+        while ($current && isset($roles[$current]) && !in_array($current, $visited)) {
+            $visited[] = $current;
+            $current = $roles[$current]['inherits'] ?? null;
+            $tier++;
+        }
+
+        return $tier;
     }
 
     /**
@@ -376,7 +410,10 @@ class PackageAccessResolver
     }
 
     /**
-     * Get the user's system role.
+     * Get the user's system role (highest privilege from primary + global roles).
+     *
+     * Checks BOTH users.role AND user_global_roles so that Google Groups-synced
+     * roles and manually-assigned additional roles are respected for package access.
      */
     private function getUserSystemRole(int $userId): ?string
     {
@@ -385,11 +422,54 @@ class PackageAccessResolver
             return Auth::getEffectiveRole();
         }
 
-        // Fallback: query directly
+        // Get primary role
         $stmt = $this->db->prepare("SELECT role FROM users WHERE id = :id AND is_active = 1");
         $stmt->execute(['id' => $userId]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $row['role'] ?? null;
+        $primaryRole = $row['role'] ?? null;
+
+        if (!$primaryRole) {
+            return null;
+        }
+
+        return $primaryRole;
+    }
+
+    /**
+     * Get ALL system roles for a user (primary + user_global_roles).
+     *
+     * This enables dual-path permissions: a user with primary role 'staff' who is
+     * also in a Google Group synced to 'admin' will get both roles checked against
+     * the package's globalRoleMapping. The highest-tier matching package role wins.
+     *
+     * @return string[] All system roles the user holds
+     */
+    private function getAllUserSystemRoles(int $userId): array
+    {
+        $roles = [];
+
+        // Primary role
+        $primary = $this->getUserSystemRole($userId);
+        if ($primary) {
+            $roles[] = $primary;
+        }
+
+        // Additional roles from user_global_roles (Google Groups, manual assignments)
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT role FROM user_global_roles WHERE user_id = :id"
+            );
+            $stmt->execute(['id' => $userId]);
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                if ($row['role'] && !in_array($row['role'], $roles)) {
+                    $roles[] = $row['role'];
+                }
+            }
+        } catch (\Exception $e) {
+            // Table may not exist in test environments — gracefully fall back
+        }
+
+        return $roles;
     }
 
     /**

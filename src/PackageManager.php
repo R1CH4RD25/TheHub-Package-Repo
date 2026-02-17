@@ -405,6 +405,13 @@ class PackageManager
 
             $this->db->commit();
 
+            // ========================================
+            // Post-commit: Run database migrations
+            // DDL (CREATE TABLE) can't be rolled back in MySQL, so this runs outside the transaction.
+            // If migrations fail, the package is still installed but flagged with a warning.
+            // ========================================
+            $migrationResult = $this->runPackageDatabaseMigrations($pkgId, $packageData, $sectionId, $installedBy);
+
             // Clear installed packages cache
             Cache::delete('packages:installed');
 
@@ -421,7 +428,8 @@ class PackageManager
                 'success' => true,
                 'section_id' => $sectionId,
                 'installation_id' => $installId,
-                'message' => "Package '{$pkgDisplayName}' installed successfully"
+                'message' => "Package '{$pkgDisplayName}' installed successfully",
+                'database_migration' => $migrationResult ?? null
             ];
         } catch (Exception $e) {
             $this->db->rollback();
@@ -1196,6 +1204,234 @@ class PackageManager
                     'executed_at' => date('Y-m-d H:i:s')
                 ]);
             }
+        }
+    }
+
+    /**
+     * Run database migrations for a package during installation.
+     *
+     * Checks two sources in priority order:
+     * 1. SQL files in the package's local directory: packages/local/{pkgId}/migrations/*.sql
+     * 2. database/schema.sql in the package's local directory
+     *
+     * Tables are created in the hub database (woodson_hub) — table prefixes (vm_, sd_, etc.)
+     * provide namespace isolation. This avoids needing CREATE DATABASE privileges and enables
+     * native foreign keys to the users table.
+     *
+     * @return array Migration result with status and details
+     */
+    private function runPackageDatabaseMigrations(string $pkgId, array $packageData, int $sectionId, int $installedBy): array
+    {
+        $result = ['status' => 'skipped', 'tables_created' => 0, 'details' => []];
+
+        // Normalize package ID for directory lookup (dots → dashes)
+        $dirName = str_replace('.', '-', $pkgId);
+        $basePaths = [
+            self::PACKAGE_DIR . 'local/' . $dirName,
+            self::PACKAGE_DIR . 'local/' . $pkgId,
+        ];
+
+        $sqlFiles = [];
+
+        foreach ($basePaths as $basePath) {
+            if (!is_dir($basePath)) {
+                continue;
+            }
+
+            // Priority 1: migrations/*.sql files (numbered, run in order)
+            $migrationsDir = $basePath . '/migrations';
+            if (is_dir($migrationsDir)) {
+                $files = scandir($migrationsDir);
+                foreach ($files as $file) {
+                    if (pathinfo($file, PATHINFO_EXTENSION) === 'sql') {
+                        $sqlFiles[] = [
+                            'path' => $migrationsDir . '/' . $file,
+                            'name' => $file,
+                            'source' => 'migrations'
+                        ];
+                    }
+                }
+                usort($sqlFiles, fn($a, $b) => strcmp($a['name'], $b['name']));
+                break;
+            }
+
+            // Priority 2: database/schema.sql (single file)
+            $schemaPath = $basePath . '/database/schema.sql';
+            if (file_exists($schemaPath)) {
+                $sqlFiles[] = [
+                    'path' => $schemaPath,
+                    'name' => 'schema.sql',
+                    'source' => 'database'
+                ];
+                break;
+            }
+        }
+
+        if (empty($sqlFiles)) {
+            $result['details'][] = 'No migration files found';
+            return $result;
+        }
+
+        // Check if migrations already ran for this package
+        $this->ensurePackageMigrationsTable();
+        try {
+            $existing = $this->db->fetchOne(
+                "SELECT id FROM package_migrations WHERE package_id = ? AND migration = 'initial_install'",
+                [$pkgId]
+            );
+            if ($existing) {
+                $result['status'] = 'already_run';
+                $result['details'][] = 'Database migrations already executed';
+                return $result;
+            }
+        } catch (\Exception $e) {
+            // Swallow — table may have just been created
+        }
+
+        // Execute each SQL file
+        $result['status'] = 'running';
+        $tablesCreated = 0;
+
+        foreach ($sqlFiles as $sqlFile) {
+            try {
+                $sql = file_get_contents($sqlFile['path']);
+                if (empty(trim($sql))) {
+                    continue;
+                }
+
+                $statements = $this->splitSqlStatements($sql);
+
+                foreach ($statements as $stmt) {
+                    $stmt = trim($stmt);
+                    if (empty($stmt)) {
+                        continue;
+                    }
+
+                    $this->db->getConnection()->exec($stmt);
+
+                    if (preg_match('/CREATE\s+TABLE/i', $stmt)) {
+                        $tablesCreated++;
+                    }
+                }
+
+                $result['details'][] = "Executed {$sqlFile['name']} ({$sqlFile['source']})";
+
+            } catch (\Exception $e) {
+                $result['status'] = 'partial';
+                $result['details'][] = "Error in {$sqlFile['name']}: " . $e->getMessage();
+                error_log("PackageManager: Migration error for {$pkgId}: " . $e->getMessage());
+            }
+        }
+
+        $result['tables_created'] = $tablesCreated;
+
+        // Record migration
+        try {
+            $this->db->insert('package_migrations', [
+                'package_id' => $pkgId,
+                'migration' => 'initial_install',
+                'description' => "Auto-migration: {$tablesCreated} tables created",
+                'executed_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            error_log("PackageManager: Failed to record migration for {$pkgId}: " . $e->getMessage());
+        }
+
+        if ($result['status'] === 'running') {
+            $result['status'] = 'success';
+        }
+
+        // Audit log
+        $this->auditLogger->log('package_db_migration', 'sections', $sectionId, null, [
+            'package_id' => $pkgId,
+            'tables_created' => $tablesCreated,
+            'files_executed' => count($sqlFiles),
+            'status' => $result['status']
+        ], $installedBy);
+
+        return $result;
+    }
+
+    /**
+     * Split a SQL file into individual statements.
+     * Handles semicolons inside string literals and comments.
+     */
+    private function splitSqlStatements(string $sql): array
+    {
+        $statements = [];
+        $current = '';
+        $inString = false;
+        $stringChar = '';
+        $len = strlen($sql);
+
+        for ($i = 0; $i < $len; $i++) {
+            $char = $sql[$i];
+
+            if (!$inString && ($char === "'" || $char === '"')) {
+                $inString = true;
+                $stringChar = $char;
+                $current .= $char;
+                continue;
+            } elseif ($inString && $char === $stringChar && ($i === 0 || $sql[$i - 1] !== '\\')) {
+                $inString = false;
+                $current .= $char;
+                continue;
+            }
+
+            // Line comments
+            if (!$inString && $char === '-' && $i + 1 < $len && $sql[$i + 1] === '-') {
+                $eol = strpos($sql, "\n", $i);
+                if ($eol === false) break;
+                $i = $eol;
+                continue;
+            }
+
+            // Block comments
+            if (!$inString && $char === '/' && $i + 1 < $len && $sql[$i + 1] === '*') {
+                $end = strpos($sql, '*/', $i + 2);
+                if ($end === false) break;
+                $i = $end + 1;
+                continue;
+            }
+
+            if (!$inString && $char === ';') {
+                $stmt = trim($current);
+                if (!empty($stmt)) {
+                    $statements[] = $stmt;
+                }
+                $current = '';
+            } else {
+                $current .= $char;
+            }
+        }
+
+        $stmt = trim($current);
+        if (!empty($stmt)) {
+            $statements[] = $stmt;
+        }
+
+        return $statements;
+    }
+
+    /**
+     * Ensure the package_migrations tracking table exists.
+     */
+    private function ensurePackageMigrationsTable(): void
+    {
+        try {
+            $this->db->getConnection()->exec("
+                CREATE TABLE IF NOT EXISTS package_migrations (
+                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    package_id VARCHAR(255) NOT NULL,
+                    migration VARCHAR(255) NOT NULL,
+                    description TEXT DEFAULT NULL,
+                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_package (package_id),
+                    UNIQUE KEY uk_package_migration (package_id, migration)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        } catch (\Exception $e) {
+            // Already exists — fine
         }
     }
 

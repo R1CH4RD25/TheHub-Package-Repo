@@ -9,10 +9,14 @@ Every package is defined by a `package.json` manifest that describes **everythin
 ```
 packages/[category]/[package-id]/
 ├── package.json                       # The manifest (required)
-├── [PackageName]Handler.php           # Data handler (queries & mutations)
-├── [PackageName]QueryHandler.php      # Query-only handler (optional split)
+├── [PackageName]Handler.php           # Data handler (optional — GenericPackageHandler covers most cases)
 ├── README.md                          # Package documentation
 ├── CHANGELOG.md                       # Version history
+├── migrations/                        # Database migrations (auto-run on install)
+│   ├── 001_create_tables.sql          # DDL — CREATE TABLE IF NOT EXISTS
+│   └── 002_seed_data.sql             # Seed data — INSERT IGNORE
+├── database/
+│   └── schema.sql                     # Fallback schema (if no migrations/ dir)
 └── screenshots/                       # At least 2 screenshots
 ```
 
@@ -57,11 +61,39 @@ Always use `"schemaVersion": "3.0.0"` at the root of your `package.json`.
 
 ```json
 "database": {
-    "connection": "woodson_students",
-    "primaryTable": "students",
-    "auditTable": "audit_log"
+    "connection": "woodson_hub",
+    "primaryTable": "vm_vehicles",
+    "auditTable": "vm_audit_logs"
 }
 ```
+
+> **⚠️ RULE: All package tables live in `woodson_hub`.** Use a short prefix (`vm_`, `sd_`, `br_`) to namespace your tables. Do NOT create separate databases — the Hub's `GenericPackageHandler` and migration system expect tables in the primary database. This enables native foreign keys to `users.id`, single-backup coverage, and zero DBA intervention.
+>
+> If your package reads from an **existing external database** (e.g., `woodson_students` for student records), you may reference it — but all tables your package **creates** must go in `woodson_hub`.
+
+### Database Migrations
+
+Package tables are created automatically during installation. Place SQL files in your package directory:
+
+```
+packages/local/my-package/
+├── migrations/                        # Preferred: numbered SQL files
+│   ├── 001_create_tables.sql         # DDL — CREATE TABLE IF NOT EXISTS
+│   └── 002_seed_data.sql             # Seed data — INSERT IGNORE
+└── database/
+    └── schema.sql                     # Fallback: single schema file
+```
+
+**Migration Rules:**
+- `PackageManager::installPackage()` auto-runs migrations after metadata install
+- Priority: `migrations/*.sql` files (sorted by filename) → `database/schema.sql` fallback
+- All `CREATE TABLE` must use `IF NOT EXISTS`
+- All seed `INSERT` must use `INSERT IGNORE`
+- Execution is tracked in `package_migrations` table — will not re-run
+- Use `CHAR(26)` ULID primary keys for portability
+- Use `INT UNSIGNED` for foreign keys to `users.id`
+- Always include `created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`
+- Use `is_deleted BOOLEAN DEFAULT FALSE` for soft deletes — **never hard delete operational data**
 
 ---
 
@@ -478,34 +510,110 @@ Search and filter controls that target a table component on the same page.
 
 ### Policy Block
 
+Define package-specific roles with **inheritance** and map them to district system roles:
+
 ```json
 "policy": {
-    "roles": ["viewer", "editor", "admin"],
-    "defaultRole": "viewer",
+    "roles": {
+        "user": {
+            "label": "User",
+            "description": "View data and submit records",
+            "queries": ["listRecords", "getRecord"],
+            "mutations": ["createRecord"]
+        },
+        "manager": {
+            "label": "Manager",
+            "inherits": "user",
+            "description": "Review, approve, and configure",
+            "queries": ["getStats"],
+            "mutations": ["updateRecord", "approveRecord", "rejectRecord"]
+        },
+        "admin": {
+            "label": "Administrator",
+            "inherits": "manager",
+            "description": "Full control including settings",
+            "queries": ["listAll"],
+            "mutations": ["deleteRecord", "updateSettings"]
+        }
+    },
+    "defaultRole": "user",
     "globalRoleMapping": {
         "super_admin": "admin",
-        "admin": "admin",
-        "manager": "editor",
-        "staff": "viewer",
-        "teacher": "viewer"
+        "admin": "manager",
+        "principal": "manager",
+        "business_manager": "manager",
+        "maintenance_director": "manager",
+        "maintenance_staff": "user",
+        "custodial_manager": "user",
+        "custodial": "user",
+        "staff": "user"
     }
 }
 ```
 
-- `roles` — package-specific roles (at least one required)
-- `defaultRole` — assigned to new users who access the package
-- `globalRoleMapping` — maps global Hub roles to package roles
+**Key concepts:**
+- `roles` — package-specific roles with inheritance chains. `inherits` means the role gets ALL permissions from its parent + its own.
+- `defaultRole` — fallback for unmapped system roles
+- `globalRoleMapping` — maps district system roles to package roles
+
+> **⚠️ RULE: Map ALL known district roles.** The resolver checks BOTH the user's primary role (`users.role`) AND any additional roles from Google Groups (`user_global_roles`). If a user has multiple roles from different sources, the **highest-privilege matching package role wins**. Unmapped roles fall back to `defaultRole`.
+>
+> **Available system roles:** `super_admin`, `admin`, `principal`, `business_manager`, `counselor`, `substitute_manager`, `maintenance_director`, `custodial_manager`, `maintenance_staff`, `custodial`, `cafeteria`, `student`, `staff`
+
+### Dual-Path Permissions (Google Groups + Direct Roles)
+
+The Hub supports two independent permission sources:
+
+| Source | How It's Set | Storage |
+|--------|-------------|--------|
+| **Direct role** | Admin assigns via Users tab | `users.role` column |
+| **Google Groups** | Auto-synced at login via Google Admin SDK | `user_global_roles` table |
+
+`PackageAccessResolver` checks **both sources** and picks the highest-tier package role. This means:
+- A `staff` user in a Google Group that maps to `admin` gets the `admin`-mapped package role
+- A `principal` without any Google Group roles still gets their mapped package role
+- `super_admin` always gets the highest-tier package role regardless of mappings
 
 ### Access Block (Layer 2 Workflow)
+
+For packages that require manager approval of submitted records:
 
 ```json
 "access": {
     "layer2": {
-        "requireApproval": true,
-        "approvalRoles": ["admin"],
-        "selfRegister": true
+        "workflow": {
+            "states": ["submitted", "in_review", "corrected", "approved", "rejected"],
+            "transitions": [
+                {"from": "submitted", "to": "in_review", "actor": ["manager", "admin"]},
+                {"from": "in_review", "to": "approved", "actor": ["manager", "admin"]},
+                {"from": "in_review", "to": "corrected", "actor": ["manager", "admin"]},
+                {"from": "in_review", "to": "rejected", "actor": ["manager", "admin"]}
+            ]
+        },
+        "editBoundaries": {
+            "records": {
+                "editable": ["field1", "field2"],
+                "immutable": ["id", "created_at", "created_by"],
+                "requiresReason": true,
+                "allowedStates": ["in_review", "corrected"]
+            }
+        },
+        "auditEvents": [
+            "RECORD_SUBMITTED",
+            "RECORD_APPROVED",
+            "RECORD_REJECTED"
+        ]
     }
 }
+```
+
+**Layer 2 database requirements:** Tables with workflow must include these columns:
+```sql
+workflow_status ENUM('draft','submitted','in_review','corrected','approved','rejected') DEFAULT 'draft',
+reviewed_by INT UNSIGNED DEFAULT NULL,
+reviewed_at TIMESTAMP NULL DEFAULT NULL,
+review_notes TEXT DEFAULT NULL,
+correction_reason TEXT DEFAULT NULL
 ```
 
 ---
@@ -583,7 +691,15 @@ The wizard generates a valid `package.json` that works with GenericPackageHandle
 - [ ] README.md is complete with screenshots
 - [ ] CHANGELOG.md documents all features
 - [ ] No sensitive data (API keys, passwords, etc.) in package
-- [ ] Package ID follows naming convention: `category-package-name`
+- [ ] Package ID follows naming convention: `category.package-name`
+- [ ] **Database: tables use `woodson_hub` with a unique prefix** (e.g., `vm_`, `sd_`)
+- [ ] **Database: migration files in `migrations/` use `CREATE TABLE IF NOT EXISTS`**
+- [ ] **Database: seed data uses `INSERT IGNORE`**
+- [ ] **Policy: `globalRoleMapping` maps ALL known district roles** (not just `staff`, `admin`, `super_admin`)
+- [ ] **Policy: roles define `inherits` chains for proper permission inheritance**
+- [ ] **Layer 2: workflow tables include `workflow_status`, `reviewed_by`, `reviewed_at` columns**
+- [ ] **Layer 2: edit boundaries specify `editable`, `immutable`, and `requiresReason`**
+- [ ] **Soft deletes: uses `is_deleted` flag — no hard DELETE of operational data**
 
 ## 🎯 Package Naming Convention
 
@@ -616,9 +732,13 @@ cd packages/[category]/[package-id]/
 
 ```
 packages/[category]/[package-id]/
-├── [package-id]_[version].hubpkg     # The package file
+├── package.json                       # The manifest (required)
+├── [package-id]_[version].hubpkg      # Built package file
 ├── README.md                          # Package documentation
 ├── CHANGELOG.md                       # Version history
+├── migrations/                        # Database migrations (auto-run on install)
+│   ├── 001_create_tables.sql          # DDL — CREATE TABLE IF NOT EXISTS
+│   └── 002_seed_data.sql             # Seed data — INSERT IGNORE
 └── screenshots/                       # At least 2 screenshots
     ├── main-view.png
     └── admin-view.png

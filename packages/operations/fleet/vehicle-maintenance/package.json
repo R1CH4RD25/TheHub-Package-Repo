@@ -12,7 +12,7 @@
         "tags": ["fleet", "vehicles", "maintenance", "fuel", "operations"]
     },
     "database": {
-        "connection": "woodson_fleet",
+        "connection": "woodson_hub",
         "primaryTable": "vm_vehicles",
         "auditTable": "vm_audit_logs"
     },
@@ -1376,6 +1376,12 @@
         "globalRoleMapping": {
             "super_admin": "admin",
             "admin": "manager",
+            "principal": "manager",
+            "business_manager": "manager",
+            "maintenance_director": "manager",
+            "maintenance_staff": "user",
+            "custodial_manager": "user",
+            "custodial": "user",
             "staff": "user"
         }
     },

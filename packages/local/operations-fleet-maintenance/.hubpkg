@@ -11,7 +11,9 @@
   "dependencies": [],
   "conflicts": [],
   "database": {
+    "connection": "woodson_hub",
     "schema_file": "database/schema.sql",
+    "migrations_dir": "migrations",
     "tables": [
       "vm_vehicles",
       "vm_trip_categories",
