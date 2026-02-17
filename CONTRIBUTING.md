@@ -216,11 +216,13 @@ Consumers **must** query the platform-owned view as the **supported contract int
 | Action | Provider | Consumer | Platform |
 |--------|----------|----------|----------|
 | CREATE/ALTER TABLE on source table | ✅ | ❌ Never | ❌ |
-| CREATE OR REPLACE VIEW | ✅ (creates at install) | ❌ | ✅ (validates contract compliance; regenerates on contract upgrade) |
+| CREATE OR REPLACE VIEW | ✅ (defines at install) | ❌ | ✅ (validates against contract; blocks non-compliant definitions) |
 | INSERT/UPDATE/DELETE rows | ✅ | ❌ (read-only) | ❌ |
 | SELECT from view | ✅ | ✅ | ✅ |
 | Register/deregister resource | ✅ (at install) | ❌ | ✅ (manual override) |
 | Upgrade contract version | ✅ (owns table) | ❌ (must update `requires`) | ✅ (approves) |
+
+> **View authority:** The provider package is the source of truth for the view definition. The platform validates that the view exposes all required contract columns and respects the contract filter. On contract upgrades, the platform regenerates the view from the new contract spec.
 
 #### Contract versioning rules
 

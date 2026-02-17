@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-This document verifies the compatibility of the Vehicle Maintenance & Fleet Tracking package with The Hub's infrastructure before development begins. Three systemic gaps were identified during the audit and have been resolved. The package is now cleared for build.
+This document verifies the compatibility of the Vehicle Maintenance & Fleet Tracking package with The Hub's infrastructure before development begins. Ten systemic gaps were identified during the audit (see Section 6) and have been resolved at the design or infrastructure level. The package core is cleared for build; Vehicle Sharing will ship disabled until `PackageManager` install-time resolution and `PackageValidator` contract compliance checks are implemented (see Section 2.3 Implementation Status).
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -156,9 +156,11 @@ Columns **not** exposed (internal to fleet): `assigned_driver_id`, `is_shared` (
 | Action | Fleet Package (Provider) | Consumer Packages | Platform |
 |--------|--------------------------|-------------------|----------|
 | ALTER TABLE `vm_vehicles` | ✅ | ❌ Never | ❌ |
-| CREATE OR REPLACE VIEW | ✅ (creates at install) | ❌ | ✅ (validates contract compliance; regenerates on contract upgrade) |
+| CREATE OR REPLACE VIEW | ✅ (defines at install) | ❌ | ✅ (validates against contract; blocks non-compliant definitions) |
 | INSERT/UPDATE/DELETE rows | ✅ | ❌ (read-only) | ❌ |
 | SELECT from `hub_vehicles_v1` | ✅ | ✅ | ✅ |
+
+> **View authority:** The provider package is the source of truth for the view definition. The platform validates that the view exposes all required contract columns and respects the contract filter. On contract upgrades, the platform regenerates the view from the new contract spec.
 
 This architecture means a future **Trip Planning** or **Purchase Order** package can select shared vehicles without duplicating the vehicle table, and with a clean upgrade path via SemVer contract versioning.
 
@@ -201,7 +203,7 @@ The `vm_settings` table contains **22 boolean toggles** organized into 7 groups.
 
 **Design rationale:** Woodson ISD indicated fuel cost tracking is not a priority — they primarily need to track *when*, *how much fuel*, *who*, *what vehicle*, and *trip purpose*. The settings system allows districts that **do** need cost analysis to enable it without burdening those that don't.
 
-**Implementation pattern:** Package UI uses `showIf: {settingsKey: "track_*"}` on form fields, table columns, detail view fields, and dashboard cards. This is an **official platform capability** documented in `CONTRIBUTING.md` § "Conditional Field Visibility." The `GenericPackageHandler` fetches settings once per request (cached 600s) and evaluates visibility server-side.
+**Implementation pattern:** Package UI uses `showIf: {settingsKey: "track_*"}` on form fields, table columns, detail view fields, and dashboard cards. This is an **official platform capability** documented in `CONTRIBUTING.md` § "Conditional Field Visibility." The `GenericPackageHandler` fetches settings once per request (cached 600s) and evaluates visibility server-side. Settings updates should invalidate the cache immediately; otherwise changes propagate within 10 minutes.
 
 ### 2.5 Data Integrity
 
