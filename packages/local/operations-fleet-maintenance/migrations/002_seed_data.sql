@@ -26,12 +26,34 @@ INSERT IGNORE INTO vm_maintenance_items (id, name, description, default_mileage_
 ('01JMVEHICLEMAINT1007', 'Coolant Flush', 'Engine coolant system flush and refill', 50000, 730, 7),
 ('01JMVEHICLEMAINT1008', 'Battery Check', 'Battery load test and terminal cleaning', NULL, 180, 8);
 
--- Default Settings (single row)
-INSERT IGNORE INTO vm_settings (id, allow_driver_logging, enable_departments, enable_campuses, maintenance_lead_time_days, maintenance_lead_distance_miles) 
-VALUES ('01JMVEHICLESETTINGS', TRUE, TRUE, TRUE, 30, 500);
+-- Default Settings (single row — all optional fields OFF by default for simplicity)
+-- Admin can turn on what they need: cost tracking, odometer, receipts, etc.
+INSERT IGNORE INTO vm_settings (
+    id,
+    track_odometer, track_fuel_type, track_fuel_cost, track_price_per_gallon,
+    track_vendor, track_receipts, track_purchase_flag,
+    track_maintenance_cost, track_parts_labor_split, track_invoices, track_photos,
+    track_vin, track_license_plate, track_vehicle_color, track_assigned_driver,
+    enable_departments, enable_campuses,
+    require_approval, allow_driver_logging,
+    enable_maintenance_tracking, enable_scheduling,
+    maintenance_lead_time_days, maintenance_lead_distance_miles,
+    share_vehicles
+) VALUES (
+    '01JMVEHICLESETTINGS',
+    TRUE, FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE, FALSE,
+    TRUE, TRUE,
+    TRUE, TRUE,
+    TRUE, TRUE,
+    30, 500,
+    TRUE
+);
 
 -- Sample Bus Maintenance Template
-INSERT IGNORE INTO vm_maintenance_templates (id, name, description, created_by) 
+INSERT IGNORE INTO vm_maintenance_templates (id, name, description, created_by)
 VALUES ('01JMVEHICLETEMPL001', 'Standard Bus Template', 'Recommended maintenance schedule for school buses', 1);
 
 INSERT IGNORE INTO vm_template_items (id, template_id, maintenance_item_id, mileage_interval, time_interval_days, sort_order) VALUES

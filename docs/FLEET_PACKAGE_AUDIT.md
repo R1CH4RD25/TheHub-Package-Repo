@@ -22,6 +22,8 @@ This document verifies the compatibility of the Vehicle Maintenance & Fleet Trac
 | Audit Trail | ✅ PASS | Package-level + system-level audit logging |
 | Admin Dashboard | ✅ PASS | Section toggle matrix, role management, Google Sync UI |
 | Reporting | ✅ PASS | SQL queries against `vm_*` tables via standard tools |
+| Settings-Driven UI | ✅ PASS | 22 toggle switches control field visibility district-wide |
+| Vehicle Sharing | ✅ PASS | Cross-package vehicle reference via `is_shared` flag |
 
 ---
 
@@ -103,10 +105,42 @@ All fleet tables reside in `woodson_hub` (the primary Hub database) with namespa
 | `vm_vehicle_schedules` | Per-vehicle maintenance schedule | CHAR(26) ULID | → `vm_vehicles`, `vm_maintenance_items` |
 | `vm_departments` | Organizational grouping | CHAR(26) ULID | — |
 | `vm_campuses` | Campus assignment | CHAR(26) ULID | — |
-| `vm_settings` | Package configuration (single row) | CHAR(26) ULID | — |
+| `vm_settings` | Package configuration (single row, 22 toggles) | CHAR(26) ULID | — |
 | `vm_audit_logs` | Package audit trail | BIGINT AUTO | → `users.id` |
 
-### 2.3 Data Integrity
+### 2.3 Vehicle Sharing (Cross-Package)
+
+Vehicles are a **shared district resource**. The `vm_vehicles` table includes an `is_shared` boolean flag — when `TRUE`, other Hub packages can reference the vehicle via `database.sharedTables` in their own `package.json`. The fleet package exposes a read-only view with explicit column filtering:
+
+| Column | Exposed | Reason |
+|--------|---------|--------|
+| `id`, `unit_number`, `name`, `year`, `make`, `model` | ✅ | Identification |
+| `status`, `is_shared` | ✅ | Availability check |
+| `color`, `vin`, `license_plate`, `current_odometer` | ✅ | Detail fields (if enabled) |
+| `assigned_driver_id`, `department_id`, `campus_id` | ❌ | Internal to fleet package |
+| `is_deleted` | Filter only | `WHERE is_shared = 1 AND is_deleted = 0` |
+
+This means a future **Trip Planning** or **Purchase Order** package can select from shared vehicles without duplicating the vehicle table.
+
+### 2.4 Settings-Driven Field Visibility
+
+The `vm_settings` table contains **22 boolean toggles** organized into 7 groups. Admins control which optional fields appear in forms, tables, detail views, and dashboard cards. All underlying database columns always exist — only the UI visibility changes.
+
+| Group | Toggle Count | Default | Purpose |
+|-------|-------------|---------|---------|
+| Fuel Logging | 7 | All OFF except odometer | Cost, vendor, receipt, fuel type, price/gal, purchase flag |
+| Maintenance | 6 | Costs OFF, scheduling ON | Cost tracking, parts/labor split, invoices, photos |
+| Vehicle Details | 4 | All OFF | VIN, license plate, color, assigned driver |
+| Organization | 2 | Both ON | Departments, campuses |
+| Workflow | 2 | Both ON | Approval workflow, driver tracking |
+| Scheduling | 3 | ON with defaults | Schedule engine, lead time (30 days), lead distance (500 mi) |
+| Sharing | 1 | ON | Cross-package vehicle sharing |
+
+**Design rationale:** Woodson ISD indicated fuel cost tracking is not a priority — they primarily need to track *when*, *how much fuel*, *who*, *what vehicle*, and *trip purpose*. The settings system allows districts that **do** need cost analysis to enable it without burdening those that don't.
+
+**Implementation pattern:** Package UI uses `showIf: {settingsKey: "track_*"}` on form fields, table columns, detail view fields, and dashboard cards. The GenericPackageHandler fetches settings once per request (cached 600s) and evaluates visibility server-side.
+
+### 2.5 Data Integrity
 
 - All tables use `InnoDB` engine with `utf8mb4` character set
 - Foreign keys enforce referential integrity (`ON DELETE RESTRICT` for operational data, `ON DELETE SET NULL` for optional references, `ON DELETE CASCADE` for template items)

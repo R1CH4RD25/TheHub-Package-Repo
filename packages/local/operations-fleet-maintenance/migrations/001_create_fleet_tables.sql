@@ -30,22 +30,25 @@ CREATE TABLE IF NOT EXISTS vm_campuses (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 1. VEHICLES (Fleet Inventory)
+-- 1. VEHICLES (Fleet Inventory — shared resource for cross-package use)
 CREATE TABLE IF NOT EXISTS vm_vehicles (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     unit_number VARCHAR(50) NOT NULL UNIQUE COMMENT 'District identifier like BUS-01',
     name VARCHAR(255) NOT NULL COMMENT 'Display name like Elementary Bus #1',
-    vin VARCHAR(32) DEFAULT NULL COMMENT 'Vehicle Identification Number',
-    license_plate VARCHAR(20) DEFAULT NULL,
+    vin VARCHAR(32) DEFAULT NULL COMMENT 'Vehicle Identification Number (optional via settings)',
+    license_plate VARCHAR(20) DEFAULT NULL COMMENT 'Optional via settings',
     year INT DEFAULT NULL COMMENT 'Model year (1900-2100)',
     make VARCHAR(100) DEFAULT NULL COMMENT 'Ford, Chevy, International, etc.',
     model VARCHAR(100) DEFAULT NULL COMMENT 'Transit, Express, CE, etc.',
+    color VARCHAR(50) DEFAULT NULL COMMENT 'Vehicle color',
     current_odometer INT DEFAULT NULL COMMENT 'Latest odometer reading (updated from logs)',
     department_id CHAR(26) DEFAULT NULL COMMENT 'FK to vm_departments',
     campus_id CHAR(26) DEFAULT NULL COMMENT 'FK to vm_campuses',
+    assigned_driver_id INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id — default driver',
     is_out_of_service BOOLEAN DEFAULT FALSE,
     out_of_service_reason TEXT DEFAULT NULL,
     out_of_service_date DATE DEFAULT NULL,
+    is_shared BOOLEAN DEFAULT TRUE COMMENT 'If TRUE, other packages can reference this vehicle',
     is_deleted BOOLEAN DEFAULT FALSE COMMENT 'Soft delete',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id',
@@ -55,6 +58,7 @@ CREATE TABLE IF NOT EXISTS vm_vehicles (
     INDEX idx_department (department_id),
     INDEX idx_campus (campus_id),
     INDEX idx_out_of_service (is_out_of_service),
+    INDEX idx_shared (is_shared),
     INDEX idx_deleted (is_deleted),
     CONSTRAINT fk_vm_vehicles_department FOREIGN KEY (department_id) REFERENCES vm_departments(id) ON DELETE SET NULL,
     CONSTRAINT fk_vm_vehicles_campus FOREIGN KEY (campus_id) REFERENCES vm_campuses(id) ON DELETE SET NULL
@@ -207,14 +211,51 @@ CREATE TABLE IF NOT EXISTS vm_vehicle_schedules (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 11. SETTINGS (Package configuration — single row)
+-- 11. SETTINGS (Package configuration — single row, controls field visibility)
 CREATE TABLE IF NOT EXISTS vm_settings (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID — single row configuration',
-    allow_driver_logging BOOLEAN DEFAULT TRUE COMMENT 'Allow Hub users to log fuel',
-    enable_departments BOOLEAN DEFAULT TRUE,
-    enable_campuses BOOLEAN DEFAULT TRUE,
+
+    -- ═══ Fuel Logging Field Visibility ═══
+    -- Core fields (always on): vehicle, date, gallons, trip purpose, logged_by
+    track_odometer BOOLEAN DEFAULT TRUE COMMENT 'Show odometer reading on fuel form',
+    track_fuel_type BOOLEAN DEFAULT FALSE COMMENT 'Show fuel type selector (unleaded/diesel/etc.)',
+    track_fuel_cost BOOLEAN DEFAULT FALSE COMMENT 'Show total cost field',
+    track_price_per_gallon BOOLEAN DEFAULT FALSE COMMENT 'Show price-per-gallon field',
+    track_vendor BOOLEAN DEFAULT FALSE COMMENT 'Show vendor/location fields',
+    track_receipts BOOLEAN DEFAULT FALSE COMMENT 'Allow receipt upload on fuel logs',
+    track_purchase_flag BOOLEAN DEFAULT FALSE COMMENT 'Show purchased-vs-district-tank toggle',
+
+    -- ═══ Maintenance Field Visibility ═══
+    -- Core fields (always on): vehicle, date, maintenance type, logged_by
+    track_maintenance_cost BOOLEAN DEFAULT FALSE COMMENT 'Show cost fields on maintenance events',
+    track_parts_labor_split BOOLEAN DEFAULT FALSE COMMENT 'Split cost into parts + labor (requires track_maintenance_cost)',
+    track_invoices BOOLEAN DEFAULT FALSE COMMENT 'Allow invoice upload on maintenance events',
+    track_photos BOOLEAN DEFAULT FALSE COMMENT 'Allow photo upload on maintenance events',
+
+    -- ═══ Vehicle Detail Fields ═══
+    -- Core fields (always on): unit_number, name, year, make, model
+    track_vin BOOLEAN DEFAULT FALSE COMMENT 'Show VIN field on vehicle form',
+    track_license_plate BOOLEAN DEFAULT FALSE COMMENT 'Show license plate field',
+    track_vehicle_color BOOLEAN DEFAULT FALSE COMMENT 'Show color field',
+    track_assigned_driver BOOLEAN DEFAULT FALSE COMMENT 'Show default driver assignment',
+
+    -- ═══ Organization ═══
+    enable_departments BOOLEAN DEFAULT TRUE COMMENT 'Enable department grouping for vehicles',
+    enable_campuses BOOLEAN DEFAULT TRUE COMMENT 'Enable campus assignment for vehicles',
+
+    -- ═══ Workflow ═══
+    require_approval BOOLEAN DEFAULT TRUE COMMENT 'Enable Layer 2 approval workflow on logs',
+    allow_driver_logging BOOLEAN DEFAULT TRUE COMMENT 'Allow non-manager users to submit logs',
+
+    -- ═══ Maintenance Scheduling ═══
+    enable_maintenance_tracking BOOLEAN DEFAULT TRUE COMMENT 'Enable the maintenance module',
+    enable_scheduling BOOLEAN DEFAULT TRUE COMMENT 'Enable maintenance schedule tracking',
     maintenance_lead_time_days INT DEFAULT 30 COMMENT 'Notify N days before maintenance due',
     maintenance_lead_distance_miles INT DEFAULT 500 COMMENT 'Notify N miles before maintenance due',
+
+    -- ═══ Vehicle Sharing ═══
+    share_vehicles BOOLEAN DEFAULT TRUE COMMENT 'Allow other packages to reference vm_vehicles',
+
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
