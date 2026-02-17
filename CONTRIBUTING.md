@@ -197,9 +197,9 @@ When `PackageManager::uninstallPackage()` runs on a provider:
 2. If consumers exist → warn admin: *"2 packages depend on this resource. Uninstalling will break: Trip Requests, Purchase Orders."*
 3. Admin must confirm → deregisters provider, marks resource as orphaned
 
-#### Platform views (consumer boundary)
+#### Platform views (contract interface)
 
-Consumers **must** query the platform-owned view, not the raw table:
+Consumers **must** query the platform-owned view as the **supported contract interface**. Platform validation prevents packages from binding directly to provider tables. This is a contract boundary enforced by the platform validator, not a database ACL.
 
 | View | Source | Contract | Filter |
 |------|--------|----------|--------|
@@ -216,7 +216,7 @@ Consumers **must** query the platform-owned view, not the raw table:
 | Action | Provider | Consumer | Platform |
 |--------|----------|----------|----------|
 | CREATE/ALTER TABLE on source table | ✅ | ❌ Never | ❌ |
-| CREATE OR REPLACE VIEW | ✅ (at install) | ❌ | ✅ (at contract upgrade) |
+| CREATE OR REPLACE VIEW | ✅ (creates at install) | ❌ | ✅ (validates contract compliance; regenerates on contract upgrade) |
 | INSERT/UPDATE/DELETE rows | ✅ | ❌ (read-only) | ❌ |
 | SELECT from view | ✅ | ✅ | ✅ |
 | Register/deregister resource | ✅ (at install) | ❌ | ✅ (manual override) |
@@ -593,7 +593,7 @@ Fields, table columns, detail view fields, dashboard cards, and entire form sect
    ```json
    {"key": "total_cost", "showIf": {"settingsKey": "track_fuel_cost"}}
    ```
-   The handler fetches settings once per request (cached 600s via `getSettings` query) and evaluates `settingsKey` server-side in `GenericPackageHandler`. If the settings key is `FALSE` or missing, the field/column/card is omitted from the rendered output.
+   The handler fetches settings once per request (cached 600s via `getSettings` query) and evaluates `settingsKey` server-side in `GenericPackageHandler`. If the settings key is `FALSE` or missing, the field/column/card is omitted from the rendered output. Settings updates should invalidate the cache immediately; otherwise changes propagate within 10 minutes.
 
 **Applies to:** form fields, table column definitions, detail view fields, dashboard cards, and entire form sections (via `showIf` on the section object).
 

@@ -23,7 +23,7 @@ This document verifies the compatibility of the Vehicle Maintenance & Fleet Trac
 | Admin Dashboard | ✅ PASS | Section toggle matrix, role management, Google Sync UI |
 | Reporting | ✅ PASS | SQL queries against `vm_*` tables via standard tools |
 | Settings-Driven UI | ✅ PASS | 22 toggle switches control field visibility district-wide |
-| Vehicle Sharing | ✅ PASS | Resource Registry with canonical contracts, platform views, ownership tracking |
+| Vehicle Sharing | 🟡 DESIGN APPROVED | Resource Registry spec complete — contracts, views, ownership; install-time resolution not yet coded in `PackageManager` |
 
 ---
 
@@ -116,7 +116,7 @@ Vehicles are a **shared district resource** managed through the platform's **Res
 
 1. **Canonical contract** — `hub_resource_contracts` stores the `operations.vehicles` v1.0.0 contract defining 9 required columns, 6 optional columns, and behavior rules (soft delete semantics, migration authority, etc.)
 2. **Provider registration** — The fleet package registers as the provider of `operations.vehicles` via `hub_resource_providers`, linking to source table `vm_vehicles` and platform view `hub_vehicles_v1`
-3. **Platform view** — `hub_vehicles_v1` is a `CREATE OR REPLACE VIEW` that exposes only contracted columns with `WHERE is_shared = 1 AND is_deleted = 0`. Consumers query **this view only**, never the raw table
+3. **Platform view** — `hub_vehicles_v1` is a `CREATE OR REPLACE VIEW` that exposes only contracted columns with `WHERE is_shared = 1 AND is_deleted = 0`. Consumers query this view as the **supported contract interface**; platform validation prevents packages from binding directly to provider tables. (This is a contract boundary enforced by the platform validator, not a DB ACL.)
 4. **Consumer dependency** — Future packages (Trip Planning, Purchase Orders) declare `resources.requires` in their manifest with `"key": "operations.vehicles"` and a SemVer constraint. Install-time resolution verifies the provider exists with a compatible contract version
 
 #### Contracted columns exposed via `hub_vehicles_v1`
@@ -156,11 +156,26 @@ Columns **not** exposed (internal to fleet): `assigned_driver_id`, `is_shared` (
 | Action | Fleet Package (Provider) | Consumer Packages | Platform |
 |--------|--------------------------|-------------------|----------|
 | ALTER TABLE `vm_vehicles` | ✅ | ❌ Never | ❌ |
-| CREATE OR REPLACE VIEW | ✅ (at install) | ❌ | ✅ (contract upgrade) |
+| CREATE OR REPLACE VIEW | ✅ (creates at install) | ❌ | ✅ (validates contract compliance; regenerates on contract upgrade) |
 | INSERT/UPDATE/DELETE rows | ✅ | ❌ (read-only) | ❌ |
 | SELECT from `hub_vehicles_v1` | ✅ | ✅ | ✅ |
 
 This architecture means a future **Trip Planning** or **Purchase Order** package can select shared vehicles without duplicating the vehicle table, and with a clean upgrade path via SemVer contract versioning.
+
+#### Implementation status
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| Resource registry DDL (3 tables) | ✅ Complete | `database/resource-registry-schema.sql` |
+| Migration CLI | ✅ Complete | `cli/migrate-resource-registry.php` |
+| `hub_vehicles_v1` view | ✅ Complete | `migrations/001_create_fleet_tables.sql` |
+| Contract seed data (`operations.vehicles` v1.0.0) | ✅ Complete | `database/resource-registry-schema.sql` |
+| Package manifest `resources` block | ✅ Complete | `package.json` |
+| `PackageManager` install-time resolution step | 🔴 Not yet coded | `src/PackageManager.php` |
+| `PackageValidator` contract compliance check | 🔴 Not yet coded | `src/PackageValidator.php` |
+| Consumer package example | 🔴 No consuming packages exist yet | — |
+
+> **Build sequence:** Registry tables → PackageManager resolution → PackageValidator rules → first consumer package.
 
 #### Registry tables (platform DDL)
 
