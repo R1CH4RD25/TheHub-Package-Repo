@@ -46,3 +46,6 @@ Thumbs.db
 test-*.php
 test-*.sh
 test-*.html
+
+# Secrets / saved pages
+google backend.txt
