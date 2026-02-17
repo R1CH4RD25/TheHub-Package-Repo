@@ -1567,16 +1567,30 @@
             },
             "editBoundaries": {
                 "fuel_logs": {
-                    "editable": ["gallons", "odometer", "total_cost", "trip_category_id"],
                     "immutable": ["id", "created_at", "logged_by", "vehicle_id", "event_date"],
-                    "requiresReason": true,
-                    "allowedStates": ["in_review", "needs_correction"]
+                    "managerEdits": {
+                        "editable": ["gallons", "odometer", "total_cost", "trip_category_id"],
+                        "allowedStates": ["submitted", "in_review"],
+                        "requiresReason": true
+                    },
+                    "userEdits": {
+                        "editable": ["gallons", "odometer", "total_cost", "trip_category_id", "vendor", "location", "notes"],
+                        "allowedStates": ["draft", "needs_correction"],
+                        "requiresReason": false
+                    }
                 },
                 "maintenance_events": {
-                    "editable": ["odometer", "total_cost", "parts_cost", "labor_cost", "notes"],
                     "immutable": ["id", "created_at", "logged_by", "vehicle_id", "event_date"],
-                    "requiresReason": true,
-                    "allowedStates": ["in_review", "needs_correction"]
+                    "managerEdits": {
+                        "editable": ["odometer", "total_cost", "parts_cost", "labor_cost", "notes"],
+                        "allowedStates": ["submitted", "in_review"],
+                        "requiresReason": true
+                    },
+                    "userEdits": {
+                        "editable": ["odometer", "total_cost", "parts_cost", "labor_cost", "vendor", "notes"],
+                        "allowedStates": ["draft", "needs_correction"],
+                        "requiresReason": false
+                    }
                 }
             },
             "auditEvents": [

@@ -84,6 +84,30 @@ packages/local/my-package/
     └── schema.sql                     # Fallback: single schema file
 ```
 
+### Shared Tables (`database.sharedTables`)
+
+Packages can expose tables for read-only cross-package access:
+
+```json
+"database": {
+    "connection": "woodson_hub",
+    "sharedTables": {
+        "vm_vehicles": {
+            "description": "Fleet vehicles available to other packages",
+            "readColumns": ["id", "unit_number", "name", "year", "make", "model", "status"],
+            "filter": "is_shared = 1 AND is_deleted = 0"
+        }
+    }
+}
+```
+
+**Rules:**
+- Only columns listed in `readColumns` are exposed to consuming packages
+- The `filter` is always appended to queries from other packages (cannot be overridden)
+- Consuming packages reference shared tables via `optionsQuery` with a `sharedTable` source
+- Write access is **never** granted cross-package — only the owning package can INSERT/UPDATE/DELETE
+- The validator checks that `sharedTables` keys match actual tables in the package's migrations
+
 **Migration Rules:**
 - `PackageManager::installPackage()` auto-runs migrations after metadata install
 - Priority: `migrations/*.sql` files (sorted by filename) → `database/schema.sql` fallback
@@ -93,9 +117,10 @@ packages/local/my-package/
 - Use `CHAR(26)` ULID primary keys for portability
 - Use `INT UNSIGNED` for foreign keys to `users.id`
 - Always include `created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`
-- Use `is_deleted BOOLEAN DEFAULT FALSE` for soft deletes — **never hard delete operational data**
+- Use `is_deleted BOOLEAN DEFAULT FALSE` for soft deletes on **operational entities** (vehicles, records) — **never hard delete operational data**
+- Use `is_active BOOLEAN DEFAULT TRUE` for **toggleable lookup/schedule tables** (departments, campuses, maintenance items, templates, trip categories, schedules) — these are paused/resumed, not deleted
 - For records that should never be deleted (fuel logs, audit entries), rely on `workflow_status` instead — no delete column needed
-- *Legacy note:* `GenericPackageHandler` also checks `is_active` for backward compatibility with older tables. New packages should use `is_deleted`.
+- *Legacy note:* `GenericPackageHandler` also checks `is_active` for backward compatibility with older tables. New packages should use `is_deleted` for entities and `is_active` for lookups.
 
 ---
 
@@ -429,7 +454,24 @@ Create/edit forms with sections, grid layout, and field validation.
 - `helpText` — tooltip or description below field
 - `defaultValue` — pre-fill value
 - `colSpan` — grid column span (1 or 2)
-- `showIf` — conditional visibility rule
+- `showIf` — conditional visibility rule (see **Conditional Field Visibility** below)
+
+**Conditional Field Visibility (`showIf`):**
+
+Fields, table columns, detail view fields, dashboard cards, and entire form sections support `showIf` for conditional rendering. Two modes:
+
+1. **Field-dependent** — show a field based on another field's value in the same form:
+   ```json
+   {"key": "parts_cost", "showIf": {"field": "track_maintenance_cost", "equals": true}}
+   ```
+
+2. **Settings-dependent** — show a field based on a package settings toggle (from the package's settings table):
+   ```json
+   {"key": "total_cost", "showIf": {"settingsKey": "track_fuel_cost"}}
+   ```
+   The handler fetches settings once per request (cached 600s via `getSettings` query) and evaluates `settingsKey` server-side in `GenericPackageHandler`. If the settings key is `FALSE` or missing, the field/column/card is omitted from the rendered output.
+
+**Applies to:** form fields, table column definitions, detail view fields, dashboard cards, and entire form sections (via `showIf` on the section object).
 
 **Select/Radio `options` format:**
 ```json

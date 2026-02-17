@@ -56,7 +56,7 @@ admin (full control)
         └── inherits → user (view fleet, submit logs)
 ```
 
-These map to district system roles via `globalRoleMapping`:
+These map to district system roles via `globalRoleMapping`. The 13 system roles are the **canonical set** defined in the `users.role` and `user_global_roles.role` ENUM columns (see `CONTRIBUTING.md` § "Valid system roles for globalRoleMapping"). The package validator warns on any role not in this list:
 
 | District System Role | Fleet Package Role | Access Level |
 |---------------------|-------------------|--------------|
@@ -110,7 +110,7 @@ All fleet tables reside in `woodson_hub` (the primary Hub database) with namespa
 
 ### 2.3 Vehicle Sharing (Cross-Package)
 
-Vehicles are a **shared district resource**. The `vm_vehicles` table includes an `is_shared` boolean flag — when `TRUE`, other Hub packages can reference the vehicle via `database.sharedTables` in their own `package.json`. The fleet package exposes a read-only view with explicit column filtering:
+Vehicles are a **shared district resource**. The `vm_vehicles` table includes an `is_shared` boolean flag — when `TRUE`, other Hub packages can reference the vehicle via the `database.sharedTables` platform capability (see `CONTRIBUTING.md` § "Shared Tables"). The fleet package exposes a read-only view with explicit column filtering:
 
 | Column | Exposed | Reason |
 |--------|---------|--------|
@@ -138,14 +138,15 @@ The `vm_settings` table contains **22 boolean toggles** organized into 7 groups.
 
 **Design rationale:** Woodson ISD indicated fuel cost tracking is not a priority — they primarily need to track *when*, *how much fuel*, *who*, *what vehicle*, and *trip purpose*. The settings system allows districts that **do** need cost analysis to enable it without burdening those that don't.
 
-**Implementation pattern:** Package UI uses `showIf: {settingsKey: "track_*"}` on form fields, table columns, detail view fields, and dashboard cards. The GenericPackageHandler fetches settings once per request (cached 600s) and evaluates visibility server-side.
+**Implementation pattern:** Package UI uses `showIf: {settingsKey: "track_*"}` on form fields, table columns, detail view fields, and dashboard cards. This is an **official platform capability** documented in `CONTRIBUTING.md` § "Conditional Field Visibility." The `GenericPackageHandler` fetches settings once per request (cached 600s) and evaluates visibility server-side.
 
 ### 2.5 Data Integrity
 
 - All tables use `InnoDB` engine with `utf8mb4` character set
 - Foreign keys enforce referential integrity (`ON DELETE RESTRICT` for operational data, `ON DELETE SET NULL` for optional references, `ON DELETE CASCADE` for template items)
-- Soft deletes via `is_deleted` flag on `vm_vehicles` — **no hard deletes**
-- Trip category codes (11, 23, 34, 36, 41) are treated as **constants** — seeded during migration, never repurposed
+- **Soft deletes** via `is_deleted` flag on `vm_vehicles` — **no hard deletes** for operational entities
+- **Toggleable records** use `is_active` flag instead (lookup tables and schedules): `vm_departments`, `vm_campuses`, `vm_maintenance_items`, `vm_maintenance_templates`, `vm_trip_categories`, `vm_vehicle_schedules`. These are paused/resumed, not deleted.
+- Trip categories have an explicit `code VARCHAR(10) NOT NULL UNIQUE` column — the numeric codes (11, 23, 34, 36, 41) are seeded during migration and treated as **constants**. The ULID `id` is the primary key for FK relationships; the `code` is the human-readable identifier.
 
 ---
 
@@ -222,16 +223,25 @@ Fuel logs and maintenance events follow this approval workflow:
 | `approved` | Manager/Admin | Accepted — immutable |
 | `rejected` | Manager/Admin | Denied — requires new submission |
 
-### 4.2 Edit Boundaries
+### 4.2 Edit Boundaries (by Actor)
 
-Once submitted, records enforce edit boundaries:
+Once a record leaves `draft`, edit rules depend on **who** is editing and **what state** the record is in:
 
-| Field Category | Editable? | States Allowed |
-|---------------|-----------|----------------|
-| `gallons`, `odometer`, `total_cost`, `trip_category_id` | ✅ With reason | `in_review`, `needs_correction` |
+**User edits** (the submitter):
+
+| Fields | States Allowed | Requires Reason? |
+|--------|----------------|-------------------|
+| `gallons`, `odometer`, `total_cost`, `trip_category_id`, `vendor`, `location`, `notes` | `draft`, `needs_correction` | No |
 | `id`, `created_at`, `logged_by`, `vehicle_id`, `event_date` | ❌ Never | — |
 
-All edits to submitted records **require a correction reason** (`correction_reason` column).
+**Manager/Admin edits** (the reviewer):
+
+| Fields | States Allowed | Requires Reason? |
+|--------|----------------|-------------------|
+| `gallons`, `odometer`, `total_cost`, `trip_category_id` | `submitted`, `in_review` | Yes (`correction_reason`) |
+| `id`, `created_at`, `logged_by`, `vehicle_id`, `event_date` | ❌ Never | — |
+
+**Rationale:** `needs_correction` is a *user-owned* state — the manager returned the record for the user to fix. Manager edits happen in `submitted`/`in_review` before returning. This prevents conflicting edits between actors.
 
 ### 4.3 Audit Events
 
@@ -277,18 +287,24 @@ ORDER BY total_cost DESC;
 
 **Vehicles overdue for maintenance:**
 ```sql
+-- Note: vm_vehicle_schedules uses is_active (not is_deleted) because
+-- schedules are toggleable — they can be paused and resumed, not soft-deleted.
 SELECT v.unit_number, v.name, mi.name AS maintenance_type,
        vs.next_due_date, vs.next_due_odometer, v.current_odometer
 FROM vm_vehicle_schedules vs
 JOIN vm_vehicles v ON vs.vehicle_id = v.id
 JOIN vm_maintenance_items mi ON vs.maintenance_item_id = mi.id
 WHERE vs.is_active = 1
+  AND v.is_deleted = 0
   AND (vs.next_due_date < CURDATE()
        OR vs.next_due_odometer < v.current_odometer)
 ORDER BY vs.next_due_date ASC;
 ```
 
 **Fleet cost summary by vehicle:**
+
+> **Note:** Cost reports (fuel and maintenance) will only produce meaningful data if cost tracking is enabled in `vm_settings`. By default, `track_fuel_cost` and `track_maintenance_cost` are both `FALSE` for Woodson ISD. Enable them in the Settings page before expecting cost analytics.
+
 ```sql
 SELECT v.unit_number, v.name,
        COALESCE(fuel.total_fuel_cost, 0) AS fuel_cost,
@@ -321,6 +337,9 @@ ORDER BY total_cost DESC;
 | G4 | `globalRoleMapping` only mapped 3 of 13 district roles | **LOW** | Expanded mapping to include all 13 ENUM roles: `principal`, `business_manager`, `maintenance_director`, `maintenance_staff`, `custodial_manager`, `custodial`, `cafeteria`, `student`, `substitute_manager`, `counselor` | `packages/.../package.json` |
 | G5 | Fuel logs/maintenance events had no workflow columns | **MEDIUM** | Added `workflow_status`, `reviewed_by`, `reviewed_at`, `review_notes`, `correction_reason` to both tables | `migrations/001_create_fleet_tables.sql` |
 | G6 | No `vm_audit_logs` table for package-level audit trail | **MEDIUM** | Added table with event_type, entity tracking, before/after JSON | `migrations/001_create_fleet_tables.sql` |
+| G7 | Edit boundaries did not distinguish actor (user vs manager) | **LOW** | Split into `managerEdits` (submitted/in_review, requiresReason) and `userEdits` (draft/needs_correction, no reason required) | `packages/.../package.json` |
+| G8 | `is_active` vs `is_deleted` usage undocumented | **LOW** | Clarified: `is_deleted` for entities (vehicles), `is_active` for toggleable lookups/schedules | Audit report + SQL comments |
+| G9 | Trip category `code` column not mentioned in report | **LOW** | DDL already has `code VARCHAR(10) NOT NULL UNIQUE`; report now references it explicitly | Audit report |
 
 ---
 
@@ -337,7 +356,7 @@ ORDER BY total_cost DESC;
 | Audit logging | AuditLogger + vm_audit_logs | ✅ |
 | File uploads (receipts, invoices) | Upload directory + path storage | ✅ |
 | HTTPS required | Production cookie policy enforces secure | ✅ |
-| Soft deletes | `is_deleted` flags, no hard deletes | ✅ |
+| Soft deletes | `is_deleted` on entities, `is_active` on lookup/schedule tables | ✅ |
 
 ---
 
