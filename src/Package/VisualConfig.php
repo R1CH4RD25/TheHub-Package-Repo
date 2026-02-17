@@ -80,6 +80,7 @@ class VisualConfig
             'toolbar-padding-y'      => ['default' => '0.75rem', 'type' => 'length',   'scope' => 'table', 'description' => 'Vertical padding in the toolbar'],
             'toolbar-gap'            => ['default' => '1rem',    'type' => 'length',   'scope' => 'table', 'description' => 'Gap between toolbar items'],
             'toolbar-info-font-size' => ['default' => '0.875rem', 'type' => 'length',   'scope' => 'table', 'description' => 'Font size of the record count text'],
+            'toolbar-label-color'    => ['default' => '#6b7280', 'type' => 'color',   'scope' => 'table', 'description' => 'Text color for toolbar labels'],
 
             // ─── FILTER TOKENS ─────────────────────────────
             'filter-input-width'     => ['default' => '220px',   'type' => 'length',  'scope' => 'filter', 'min' => '100px', 'max' => '500px', 'description' => 'Width of search/text filter inputs'],
@@ -113,11 +114,12 @@ class VisualConfig
             'badge-radius'           => ['default' => '6px',  'type' => 'length',  'scope' => 'table', 'description' => 'Border radius on badges'],
 
             // ─── CARD/DASHBOARD TOKENS ─────────────────────
+            'card-bg'                => ['default' => '#ffffff', 'type' => 'color',   'scope' => 'card', 'description' => 'Card background color'],
             'card-columns'           => ['default' => '4',       'type' => 'number',  'scope' => 'card', 'min' => 1, 'max' => 6,  'description' => 'Number of card columns on dashboard'],
             'card-gap'               => ['default' => '1rem',  'type' => 'length',  'scope' => 'card', 'description' => 'Gap between cards'],
             'card-padding'           => ['default' => '1.25rem', 'type' => 'length',  'scope' => 'card', 'description' => 'Internal padding of each card'],
             'card-radius'            => ['default' => '8px',    'type' => 'length',  'scope' => 'card', 'description' => 'Corner rounding on cards'],
-            'card-shadow'            => ['default' => '0 1px 3px rgba(0,0,0,0.1)', 'type' => 'shadow', 'scope' => 'card', 'description' => 'Shadow on cards'],
+            'card-shadow'            => ['default' => 'none', 'type' => 'shadow', 'scope' => 'card', 'description' => 'Shadow on cards (hover shadow added via CSS)'],
             'card-border'            => ['default' => '1px solid #e5e7eb', 'type' => 'string', 'scope' => 'card', 'description' => 'Border style on cards'],
             'card-icon-size'         => ['default' => '1.75rem',  'type' => 'length',  'scope' => 'card', 'description' => 'Size of the icon in stat cards'],
             'card-value-size'        => ['default' => '1.5rem',    'type' => 'length',  'scope' => 'card', 'description' => 'Font size of the KPI value'],
@@ -253,6 +255,11 @@ class VisualConfig
      */
     public static function resolveConfig(string $presetName = 'comfortable', array $overrides = []): array
     {
+        $validPresets = VisualPresets::names();
+        if ($presetName !== 'comfortable' && !in_array($presetName, $validPresets, true)) {
+            error_log("[VisualConfig] Unknown preset '{$presetName}' — falling back to 'comfortable'. Valid presets: " . implode(', ', $validPresets));
+            $presetName = 'comfortable';
+        }
         $preset = VisualPresets::get($presetName);
         return array_merge($preset, $overrides);
     }

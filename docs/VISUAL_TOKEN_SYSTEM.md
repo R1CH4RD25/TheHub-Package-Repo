@@ -1,8 +1,8 @@
 # Visual Token & Flexible Component System
 
-**Version**: 1.0.0-draft  
+**Version**: 1.0.0  
 **Date**: February 16, 2026  
-**Status**: Phase 1 Complete, Phase 2-5 In Progress  
+**Status**: Phase 1-4 Complete, Phase 5 (Admin UI) Planned  
 **Author**: Engineering / AI Agent  
 **Depends On**: `PACKAGE_ARCHITECTURE_SPEC.md`, `PACKAGE_CONTRIBUTING.md`
 
@@ -205,9 +205,9 @@ The token registry is the single source of truth for every configurable visual p
 | `filter-padding`         | `1rem`       | length | —        | —        | Filter bar container padding      |
 | `filter-bg`              | `#ffffff`    | color  | —        | —        | Filter bar background             |
 | `filter-border-radius`   | `8px`        | length | —        | —        | Filter bar corner rounding        |
-| `filter-border-color`    | `#e5e7eb`    | color  | —        | —        | Filter bar border color           |
+| `filter-border-color`    | `#EDEBE9`    | color  | —        | —        | Filter bar border color           |
 | `filter-label-size`      | `0.75rem`    | length | —        | —        | Filter label font size            |
-| `filter-label-color`     | `#6b7280`    | color  | —        | —        | Filter label color                |
+| `filter-label-color`     | `#605E5C`    | color  | —        | —        | Filter label color                |
 | `filter-label-weight`    | `600`        | number | —        | —        | Filter label font weight          |
 
 #### Action Button Tokens
@@ -224,31 +224,32 @@ The token registry is the single source of truth for every configurable visual p
 
 | Token                   | Default      | Type   | Description                       |
 |------------------------|--------------|--------|-----------------------------------|
-| `pagination-gap`       | `0.375rem`   | length | Gap between page buttons          |
+| `pagination-gap`       | `0.25rem`    | length | Gap between page buttons          |
 | `pagination-btn-size`  | `0.8rem`     | length | Page button font size             |
-| `pagination-padding`   | `1rem 0`     | string | Pagination bar padding            |
+| `pagination-padding`   | `0.75rem 0`  | string | Pagination bar padding            |
 
 #### Badge Tokens
 
 | Token                  | Default      | Type   | Description                       |
 |-----------------------|--------------|--------|-----------------------------------|
 | `badge-font-size`     | `0.75rem`    | length | Badge text font size              |
-| `badge-padding-x`     | `0.625rem`   | length | Horizontal badge padding          |
+| `badge-padding-x`     | `0.5rem`     | length | Horizontal badge padding          |
 | `badge-padding-y`     | `0.2rem`     | length | Vertical badge padding            |
-| `badge-radius`        | `9999px`     | length | Badge border radius (pill shape)  |
+| `badge-radius`        | `6px`        | length | Badge border radius (rounded)     |
 
 #### Card/Dashboard Tokens
 
 | Token                  | Default                          | Type   | Min | Max | Description                  |
 |-----------------------|---------------------------------|--------|-----|-----|------------------------------|
 | `card-columns`        | `4`                             | number | 1   | 6   | Dashboard card columns       |
-| `card-gap`            | `1.5rem`                        | length | —   | —   | Gap between cards            |
+| `card-bg`             | `#ffffff`                       | color  | —   | —   | Card background color        |
+| `card-gap`            | `1rem`                          | length | —   | —   | Gap between cards            |
 | `card-padding`        | `1.25rem`                       | length | —   | —   | Card internal padding        |
-| `card-radius`         | `12px`                          | length | —   | —   | Card corner rounding         |
-| `card-shadow`         | `0 1px 3px rgba(0,0,0,0.1)`    | shadow | —   | —   | Card shadow                  |
+| `card-radius`         | `8px`                           | length | —   | —   | Card corner rounding         |
+| `card-shadow`         | `none`                          | shadow | —   | —   | Card shadow (hover adds shadow)  |
 | `card-border`         | `1px solid #e5e7eb`             | string | —   | —   | Card border style            |
-| `card-icon-size`      | `2.5rem`                        | length | —   | —   | KPI card icon size           |
-| `card-value-size`     | `2rem`                          | length | —   | —   | KPI card value font size     |
+| `card-icon-size`      | `1.75rem`                       | length | —   | —   | KPI card icon size           |
+| `card-value-size`     | `1.5rem`                        | length | —   | —   | KPI card value font size     |
 
 #### Form Tokens
 
@@ -275,7 +276,7 @@ The token registry is the single source of truth for every configurable visual p
 
 ## 4. Preset System
 
-### File: `src/Package/VisualPresets.php` ⏳ TODO
+### File: `src/Package/VisualPresets.php` ✅ Complete
 
 Presets are named collections of token overrides that provide one-click density/style switching.
 
@@ -287,6 +288,7 @@ Presets are named collections of token overrides that provide one-click density/
 | `comfortable`| Default — balanced spacing (no overrides)| General-purpose               |
 | `spacious`   | Generous padding, larger fonts           | Public-facing, accessibility  |
 | `print`      | Optimized for printed output             | Reports, exports              |
+| `data-grid`  | Spreadsheet-like, minimal chrome         | Raw data review, audits       |
 
 ### Preset Structure
 
@@ -320,7 +322,7 @@ $config = VisualConfig::resolveConfig(
 
 ## 5. Component Definition Model
 
-### File: `src/Package/ComponentDefinition.php` ⏳ TODO
+### File: `src/Package/ComponentDefinition.php` ✅ Complete
 
 A **Component Definition** is a portable, self-contained blueprint that describes:
 - **What** it displays (structural config — columns, fields, cards)
@@ -414,7 +416,7 @@ class ComponentDefinition
 
 ## 6. CSS Architecture
 
-### File: `public/assets/css/package-components.css` ⏳ TODO (Refactor)
+### File: `public/assets/css/package-components.css` ✅ Complete (Refactored)
 
 ### Before (Hardcoded)
 
@@ -530,7 +532,7 @@ tr[data-selected]            → background: var(--v-table-row-selected)
 
 ### How Renderers Emit Tokens
 
-Each renderer (TableRenderer, FilterRenderer, etc.) calls `VisualConfig` to emit a scoped `<style>` block:
+Each renderer (TableRenderer, FilterRenderer, DashboardRenderer, FormRenderer, DetailRenderer) calls `VisualConfig` to emit a scoped `<style>` block:
 
 ```php
 // In TableRenderer::render()
@@ -575,7 +577,7 @@ Multiple tables on the same page can each have different visual configs — they
 
 ## 8. Package JSON Schema Changes
 
-### File: `config/package-schema.json` ⏳ TODO
+### File: `config/package-schema.json` ✅ Complete
 
 Add `visual` to the component definition:
 
@@ -621,9 +623,9 @@ New definition to add:
 }
 ```
 
-### File: `src/Package/Schema/ComponentSchema.php` ⏳ TODO
+### File: `src/Package/Schema/ComponentSchema.php` ✅ Complete
 
-Add `visual` to table, form, detail, dashboard, and filters config schemas.
+Added `visual` to table, form, detail, dashboard, and filters config schemas.
 
 ---
 
@@ -632,15 +634,17 @@ Add `visual` to table, form, detail, dashboard, and filters config schemas.
 | File | Type | Status | Description |
 |------|------|--------|-------------|
 | `src/Package/VisualConfig.php` | PHP | ✅ Complete | Token registry, sanitization, CSS output |
-| `src/Package/VisualPresets.php` | PHP | ⏳ Todo | Built-in density presets |
-| `src/Package/ComponentDefinition.php` | PHP | ⏳ Todo | Portable component blueprint class |
-| `src/Package/Schema/ComponentSchema.php` | PHP | ⏳ Todo | Add `visual` section to all stack schemas |
-| `config/package-schema.json` | JSON | ⏳ Todo | Add `visualConfig` definition |
-| `public/assets/css/package-components.css` | CSS | ⏳ Todo | Refactor hardcoded values to `var(--v-*)` |
-| `src/Package/Renderers/TableRenderer.php` | PHP | ⏳ Todo | Emit visual tokens as scoped style |
-| `src/Package/Renderers/FilterRenderer.php` | PHP | ⏳ Todo | Same |
-| `src/Package/Renderers/DashboardRenderer.php` | PHP | ⏳ Todo | Same |
-| `src/Package/Renderers/FormRenderer.php` | PHP | ⏳ Todo | Same |
+| `src/Package/VisualPresets.php` | PHP | ✅ Complete | Built-in density presets (5 presets) |
+| `src/Package/ComponentDefinition.php` | PHP | ✅ Complete | Portable component blueprint class |
+| `src/Package/ComponentCatalog.php` | PHP | ✅ Complete | Single source of truth for component rules/examples |
+| `src/Package/Schema/ComponentSchema.php` | PHP | ✅ Complete | `visual` section added to all 5 component schemas |
+| `config/package-schema.json` | JSON | ✅ Complete | `visualConfig` definition with all tokens |
+| `public/assets/css/package-components.css` | CSS | ✅ Complete | 45+ hardcoded values replaced with `var(--v-*)` |
+| `src/Package/Renderers/TableRenderer.php` | PHP | ✅ Complete | Emits scoped visual tokens |
+| `src/Package/Renderers/FilterRenderer.php` | PHP | ✅ Complete | Emits scoped visual tokens |
+| `src/Package/Renderers/DashboardRenderer.php` | PHP | ✅ Complete | Emits scoped visual tokens |
+| `src/Package/Renderers/FormRenderer.php` | PHP | ✅ Complete | Emits scoped visual tokens |
+| `src/Package/Renderers/DetailRenderer.php` | PHP | ✅ Complete | Emits scoped visual tokens |
 | `src/Package/ComponentRegistry.php` | PHP | ✅ Exists | No changes needed (already dynamic) |
 
 ### Dependency Chain
@@ -892,24 +896,25 @@ class TableRendererVisualTest extends TestCase
 
 ## 15. Migration Path
 
-### Phase 1: Foundation ✅ (Current)
-- VisualConfig.php with full token registry
+### Phase 1: Foundation ✅
+- VisualConfig.php with full token registry (57+ tokens)
 - Token sanitization and CSS output methods
 
-### Phase 2: Presets + CSS Refactor
-- Create VisualPresets.php with 3-4 built-in presets
-- Refactor package-components.css to use `var(--v-*, fallback)` everywhere
-- **Zero visual change** — all `var()` fallbacks match current hardcoded values
+### Phase 2: Presets + CSS Refactor ✅
+- VisualPresets.php with 5 built-in presets (comfortable, compact, spacious, print, data-grid)
+- Refactored package-components.css — 45+ hardcoded values replaced with `var(--v-*, fallback)`
+- **Zero visual change** — all `var()` fallbacks match previous hardcoded values
 
-### Phase 3: Renderer Integration
-- Update TableRenderer, FilterRenderer, DashboardRenderer, FormRenderer
+### Phase 3: Renderer Integration ✅
+- Updated all 5 renderers: TableRenderer, FilterRenderer, DashboardRenderer, FormRenderer, DetailRenderer
 - Each renderer reads `config['visual']` and emits a scoped `<style>` block
 - Existing packages without `visual` config render exactly as before
 
-### Phase 4: Component Definitions
-- Build ComponentDefinition class
-- Add `visual` to ComponentSchema validation
-- Update package-schema.json
+### Phase 4: Component Definitions & Catalog ✅
+- ComponentDefinition.php — portable blueprint with fluent builder
+- ComponentCatalog.php — single source of truth for all 5 component types, rules, examples
+- Added `visual` to ComponentSchema validation (all 5 types)
+- Updated package-schema.json with full `visualConfig` definition
 
 ### Phase 5: Admin UI (Future)
 - Admin panel for visual token customization with live preview

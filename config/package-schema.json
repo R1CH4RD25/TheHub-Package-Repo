@@ -181,7 +181,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["table", "form", "detail", "dashboard", "wizard", "report", "chart"],
+          "enum": ["table", "form", "detail", "dashboard", "filters", "wizard", "report", "chart"],
           "description": "Component type"
         },
         "title": {
@@ -444,9 +444,36 @@
             "badge-font-size":        { "type": "string", "description": "Font size inside badges" },
             "badge-radius":           { "type": "string", "description": "Border radius on badges" },
             "pagination-gap":         { "type": "string", "description": "Gap between page buttons" },
-            "pagination-btn-size":    { "type": "string", "description": "Font size of page buttons" }
+            "pagination-btn-size":    { "type": "string", "description": "Font size of page buttons" },
+            "pagination-padding":    { "type": "string", "description": "Padding around pagination bar" },
+            "toolbar-padding-x":     { "type": "string", "description": "Horizontal padding in the toolbar" },
+            "toolbar-padding-y":     { "type": "string", "description": "Vertical padding in the toolbar" },
+            "toolbar-gap":           { "type": "string", "description": "Gap between toolbar items" },
+            "toolbar-info-font-size":{ "type": "string", "description": "Font size of the record count text" },
+            "toolbar-label-color":   { "type": "string", "description": "Text color for toolbar labels" },
+            "table-row-selected":    { "type": "string", "description": "Background for selected rows" },
+            "table-max-width":       { "type": "string", "description": "Maximum width of the table container" },
+            "table-min-width":       { "type": "string", "description": "Minimum width of the table" },
+            "action-btn-padding-x":  { "type": "string", "description": "Horizontal padding on action buttons" },
+            "action-btn-padding-y":  { "type": "string", "description": "Vertical padding on action buttons" },
+            "action-btn-radius":     { "type": "string", "description": "Border radius on action buttons" },
+            "badge-padding-x":       { "type": "string", "description": "Horizontal padding inside badges" },
+            "badge-padding-y":       { "type": "string", "description": "Vertical padding inside badges" },
+            "filter-label-weight":   { "type": "string", "description": "Font weight of filter labels" },
+            "card-bg":               { "type": "string", "description": "Card background color" },
+            "form-label-size":       { "type": "string", "description": "Font size for form labels" },
+            "form-label-weight":     { "type": "string", "description": "Font weight for form labels" },
+            "form-input-height":     { "type": "string", "description": "Height of form inputs" },
+            "form-input-radius":     { "type": "string", "description": "Border radius of form inputs" },
+            "form-section-gap":      { "type": "string", "description": "Gap between form sections" },
+            "form-field-gap":        { "type": "string", "description": "Gap between form fields" },
+            "form-grid-gap":         { "type": "string", "description": "Gap in grid layout forms" },
+            "page-max-width":        { "type": "string", "description": "Maximum page content width" },
+            "page-padding-x":        { "type": "string", "description": "Horizontal page padding" },
+            "page-padding-y":        { "type": "string", "description": "Vertical page padding" },
+            "page-bg":               { "type": "string", "description": "Page background color" }
           },
-          "additionalProperties": false
+          "additionalProperties": true
         }
       }
     }

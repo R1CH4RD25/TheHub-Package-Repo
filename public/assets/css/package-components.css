@@ -74,11 +74,11 @@
 
 .pkg-table-count .count-label {
     font-size: var(--v-toolbar-info-font-size, 0.875rem);
-    color: #6b7280;
+    color: var(--v-toolbar-label-color, #6b7280);
 }
 
 .pkg-table-count strong {
-    color: #1f2937;
+    color: var(--v-table-text-color, #1f2937);
 }
 
 .pkg-bulk-actions {
@@ -98,7 +98,7 @@
     overflow-x: auto;
     border: 1px solid var(--v-table-border-color, #e5e7eb);
     border-radius: var(--v-table-border-radius, 8px);
-    background: var(--v-table-row-bg, #fff);
+    background: var(--v-table-row-bg, #ffffff);
     box-shadow: var(--v-table-shadow, none);
     max-width: var(--v-table-max-width, 100%);
     width: 100%;
@@ -150,7 +150,7 @@
 }
 
 .pkg-col-sortable:hover {
-    background: #f3f4f6;
+    background: var(--v-table-row-hover, #f9fafb);
 }
 
 .pkg-sort-icon {
@@ -358,17 +358,17 @@
    FILTER COMPONENT (Enterprise Style)
    ======================================== */
 .pkg-filters {
-    background: var(--v-filter-bg, #fff);
+    background: var(--v-filter-bg, #ffffff);
     border: 1px solid var(--v-filter-border-color, #EDEBE9);
     border-radius: var(--v-filter-border-radius, 8px);
-    padding: var(--v-filter-padding, 12px 16px);
+    padding: var(--v-filter-padding, 1rem);
     margin-bottom: var(--space-4, 16px);
 }
 
 .pkg-filters-row {
     display: flex;
     align-items: flex-end;
-    gap: var(--v-filter-gap, 12px);
+    gap: var(--v-filter-gap, 1rem);
     flex-wrap: wrap;
 }
 
@@ -384,7 +384,7 @@
 
 .pkg-filter-label {
     display: block;
-    font-size: var(--v-filter-label-size, 12px);
+    font-size: var(--v-filter-label-size, 0.75rem);
     font-weight: var(--v-filter-label-weight, 600);
     color: var(--v-filter-label-color, #605E5C);
     margin-bottom: 4px;
@@ -775,10 +775,11 @@
 }
 
 .pkg-dashboard-card {
-    background: #fff;
+    background: var(--v-card-bg, #ffffff);
     border: var(--v-card-border, 1px solid #e5e7eb);
     border-radius: var(--v-card-radius, 8px);
     padding: var(--v-card-padding, 1.25rem);
+    box-shadow: var(--v-card-shadow, none);
     display: flex;
     align-items: center;
     gap: 1rem;
