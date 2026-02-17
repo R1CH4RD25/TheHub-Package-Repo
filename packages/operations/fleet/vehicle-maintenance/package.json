@@ -546,9 +546,11 @@
                                     "type": "select",
                                     "label": "Status",
                                     "options": [
+                                        {"value": "draft", "label": "Draft"},
                                         {"value": "submitted", "label": "Submitted"},
                                         {"value": "in_review", "label": "In Review"},
-                                        {"value": "corrected", "label": "Corrected"},
+                                        {"value": "needs_correction", "label": "Needs Correction"},
+                                        {"value": "resubmitted", "label": "Resubmitted"},
                                         {"value": "approved", "label": "Approved"},
                                         {"value": "rejected", "label": "Rejected"}
                                     ]
@@ -1288,9 +1290,9 @@
                 "audit": true,
                 "confirm": true
             },
-            "correctFuelLog": {
-                "description": "Correct fuel log fields with reason (Layer 2)",
-                "handler": "FuelMutationHandler::correctFuelLog",
+            "returnFuelLog": {
+                "description": "Return fuel log for correction with reason (Layer 2)",
+                "handler": "FuelMutationHandler::returnFuelLog",
                 "audit": true
             },
             "createMaintenanceEvent": {
@@ -1309,9 +1311,9 @@
                 "audit": true,
                 "confirm": true
             },
-            "correctMaintenanceEvent": {
-                "description": "Correct maintenance event fields (Layer 2)",
-                "handler": "MaintenanceMutationHandler::correctMaintenanceEvent",
+            "returnMaintenanceEvent": {
+                "description": "Return maintenance event for correction with reason (Layer 2)",
+                "handler": "MaintenanceMutationHandler::returnMaintenanceEvent",
                 "audit": true
             }
         }
@@ -1355,10 +1357,10 @@
                     "toggleOOS",
                     "approveFuelLog",
                     "rejectFuelLog",
-                    "correctFuelLog",
+                    "returnFuelLog",
                     "approveMaintenanceEvent",
                     "rejectMaintenanceEvent",
-                    "correctMaintenanceEvent"
+                    "returnMaintenanceEvent"
                 ]
             },
             "admin": {
@@ -1379,48 +1381,56 @@
             "principal": "manager",
             "business_manager": "manager",
             "maintenance_director": "manager",
+            "substitute_manager": "user",
+            "counselor": "user",
             "maintenance_staff": "user",
             "custodial_manager": "user",
             "custodial": "user",
+            "cafeteria": "user",
+            "student": "user",
             "staff": "user"
         }
     },
     "access": {
         "layer2": {
             "workflow": {
-                "states": ["submitted", "in_review", "corrected", "approved", "rejected"],
+                "states": ["draft", "submitted", "in_review", "needs_correction", "resubmitted", "approved", "rejected"],
                 "transitions": [
                     {"from": "submitted", "to": "in_review", "actor": ["manager", "admin"]},
-                    {"from": "in_review", "to": "corrected", "actor": ["manager", "admin"]},
+                    {"from": "in_review", "to": "needs_correction", "actor": ["manager", "admin"]},
                     {"from": "in_review", "to": "approved", "actor": ["manager", "admin"]},
                     {"from": "in_review", "to": "rejected", "actor": ["manager", "admin"]},
-                    {"from": "corrected", "to": "approved", "actor": ["manager", "admin"]},
-                    {"from": "corrected", "to": "rejected", "actor": ["manager", "admin"]}
+                    {"from": "needs_correction", "to": "resubmitted", "actor": ["user", "manager", "admin"]},
+                    {"from": "resubmitted", "to": "in_review", "actor": ["manager", "admin"]},
+                    {"from": "resubmitted", "to": "approved", "actor": ["manager", "admin"]},
+                    {"from": "resubmitted", "to": "rejected", "actor": ["manager", "admin"]}
                 ]
             },
             "editBoundaries": {
                 "fuel_logs": {
-                    "editable": ["fuel_gallons", "odometer_reading", "fuel_cost", "trip_category_id"],
-                    "immutable": ["id", "created_at", "created_by_user_id", "vehicle_id", "fuel_date"],
+                    "editable": ["gallons", "odometer", "total_cost", "trip_category_id"],
+                    "immutable": ["id", "created_at", "logged_by", "vehicle_id", "event_date"],
                     "requiresReason": true,
-                    "allowedStates": ["in_review", "corrected"]
+                    "allowedStates": ["in_review", "needs_correction"]
                 },
                 "maintenance_events": {
-                    "editable": ["odometer_reading", "maintenance_cost", "notes"],
-                    "immutable": ["id", "created_at", "created_by_user_id", "vehicle_id", "maintenance_date"],
+                    "editable": ["odometer", "total_cost", "parts_cost", "labor_cost", "notes"],
+                    "immutable": ["id", "created_at", "logged_by", "vehicle_id", "event_date"],
                     "requiresReason": true,
-                    "allowedStates": ["in_review", "corrected"]
+                    "allowedStates": ["in_review", "needs_correction"]
                 }
             },
             "auditEvents": [
                 "FUEL_LOG_SUBMITTED",
                 "FUEL_LOG_REVIEW_STARTED",
-                "FUEL_LOG_CORRECTED",
+                "FUEL_LOG_NEEDS_CORRECTION",
+                "FUEL_LOG_RESUBMITTED",
                 "FUEL_LOG_APPROVED",
                 "FUEL_LOG_REJECTED",
                 "MAINTENANCE_EVENT_SUBMITTED",
                 "MAINTENANCE_EVENT_REVIEW_STARTED",
-                "MAINTENANCE_EVENT_CORRECTED",
+                "MAINTENANCE_EVENT_NEEDS_CORRECTION",
+                "MAINTENANCE_EVENT_RESUBMITTED",
                 "MAINTENANCE_EVENT_APPROVED",
                 "MAINTENANCE_EVENT_REJECTED",
                 "VEHICLE_CREATED",

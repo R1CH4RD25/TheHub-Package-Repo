@@ -1,10 +1,10 @@
 # Fleet Package Compatibility Audit Report
 
-**Prepared for:** Woodson ISD Auditor  
-**Date:** February 17, 2026  
-**System:** The Hub v3.0 — Package Platform  
-**Package:** Vehicle Maintenance & Fleet Tracking v2.1.0  
-**Prepared by:** Technology Department  
+**Prepared for:** Woodson ISD Auditor
+**Date:** February 17, 2026
+**System:** The Hub v3.0 — Package Platform
+**Package:** Vehicle Maintenance & Fleet Tracking v2.1.0
+**Prepared by:** Technology Department
 
 ---
 
@@ -17,7 +17,7 @@ This document verifies the compatibility of the Vehicle Maintenance & Fleet Trac
 | Permission Model | ✅ PASS | Dual-path resolved (Google Groups + direct roles) |
 | Database Architecture | ✅ PASS | Hub-native tables with `vm_` prefix |
 | Auto-Migration | ✅ PASS | Tables created automatically on package install |
-| Role Mapping | ✅ PASS | All 10 district roles mapped to package roles |
+| Role Mapping | ✅ PASS | All 13 district roles mapped to package roles |
 | Layer 2 Workflow | ✅ PASS | Approval states on fuel logs + maintenance events |
 | Audit Trail | ✅ PASS | Package-level + system-level audit logging |
 | Admin Dashboard | ✅ PASS | Section toggle matrix, role management, Google Sync UI |
@@ -63,11 +63,14 @@ These map to district system roles via `globalRoleMapping`:
 | `principal` | `manager` | Approve/reject, configure |
 | `business_manager` | `manager` | Approve/reject, configure |
 | `maintenance_director` | `manager` | Approve/reject, configure |
+| `substitute_manager` | `user` | View fleet, submit logs |
+| `counselor` | `user` | View fleet, submit logs |
 | `maintenance_staff` | `user` | View fleet, submit logs |
 | `custodial_manager` | `user` | View fleet, submit logs |
 | `custodial` | `user` | View fleet, submit logs |
+| `cafeteria` | `user` | View fleet, submit logs |
+| `student` | `user` | View fleet, submit logs |
 | `staff` | `user` | View fleet, submit logs |
-| *(unmapped roles)* | `user` | Falls back to `defaultRole` |
 
 ### 1.3 Section Visibility
 
@@ -170,7 +173,7 @@ Fuel logs and maintenance events follow this approval workflow:
 ```
   draft → submitted → in_review → approved
                          ↓
-                     corrected → approved
+                   needs_correction → resubmitted → in_review → approved
                          ↓
                      rejected
 ```
@@ -180,7 +183,8 @@ Fuel logs and maintenance events follow this approval workflow:
 | `draft` | User | Initial entry, not yet submitted |
 | `submitted` | User | Submitted for manager review |
 | `in_review` | Manager/Admin | Under active review |
-| `corrected` | Manager/Admin | Sent back for correction with notes |
+| `needs_correction` | Manager/Admin | Returned to user for fixes with notes |
+| `resubmitted` | User | User fixed issues and resubmitted |
 | `approved` | Manager/Admin | Accepted — immutable |
 | `rejected` | Manager/Admin | Denied — requires new submission |
 
@@ -190,8 +194,8 @@ Once submitted, records enforce edit boundaries:
 
 | Field Category | Editable? | States Allowed |
 |---------------|-----------|----------------|
-| `fuel_gallons`, `odometer_reading`, `fuel_cost`, `trip_category_id` | ✅ With reason | `in_review`, `corrected` |
-| `id`, `created_at`, `created_by_user_id`, `vehicle_id`, `fuel_date` | ❌ Never | — |
+| `gallons`, `odometer`, `total_cost`, `trip_category_id` | ✅ With reason | `in_review`, `needs_correction` |
+| `id`, `created_at`, `logged_by`, `vehicle_id`, `event_date` | ❌ Never | — |
 
 All edits to submitted records **require a correction reason** (`correction_reason` column).
 
@@ -203,10 +207,13 @@ Every workflow transition is logged to `vm_audit_logs`:
 |-------|---------|
 | `FUEL_LOG_SUBMITTED` | User submits fuel log |
 | `FUEL_LOG_REVIEW_STARTED` | Manager begins review |
-| `FUEL_LOG_CORRECTED` | Manager sends back for correction |
+| `FUEL_LOG_NEEDS_CORRECTION` | Manager returns for correction |
+| `FUEL_LOG_RESUBMITTED` | User re-submits after correction |
 | `FUEL_LOG_APPROVED` | Manager approves |
 | `FUEL_LOG_REJECTED` | Manager rejects |
 | `MAINTENANCE_EVENT_SUBMITTED` | User submits maintenance event |
+| `MAINTENANCE_EVENT_NEEDS_CORRECTION` | Manager returns for correction |
+| `MAINTENANCE_EVENT_RESUBMITTED` | User re-submits after correction |
 | `MAINTENANCE_EVENT_APPROVED` | Manager approves |
 | `VEHICLE_CREATED` | Admin adds vehicle |
 | `VEHICLE_UPDATED` | Admin updates vehicle |
@@ -242,7 +249,7 @@ FROM vm_vehicle_schedules vs
 JOIN vm_vehicles v ON vs.vehicle_id = v.id
 JOIN vm_maintenance_items mi ON vs.maintenance_item_id = mi.id
 WHERE vs.is_active = 1
-  AND (vs.next_due_date < CURDATE() 
+  AND (vs.next_due_date < CURDATE()
        OR vs.next_due_odometer < v.current_odometer)
 ORDER BY vs.next_due_date ASC;
 ```
@@ -277,7 +284,7 @@ ORDER BY total_cost DESC;
 | G1 | PackageAccessResolver ignored `user_global_roles` | **HIGH** | Added `getAllUserSystemRoles()` — now checks primary role + all global roles, picks highest-tier match | `src/PackageAccessResolver.php` |
 | G2 | No auto-DB migration on package install | **MEDIUM** | Added `runPackageDatabaseMigrations()` to `PackageManager::installPackage()` — auto-runs SQL from `migrations/` or `database/schema.sql` | `src/PackageManager.php` |
 | G3 | Fleet package used separate database (`woodson_fleet`) | **MEDIUM** | Changed to `woodson_hub` — avoids DBA intervention, enables native FKs | `packages/.../package.json` |
-| G4 | `globalRoleMapping` only mapped 3 of 10+ district roles | **LOW** | Expanded mapping to include `principal`, `business_manager`, `maintenance_director`, `maintenance_staff`, `custodial_manager`, `custodial` | `packages/.../package.json` |
+| G4 | `globalRoleMapping` only mapped 3 of 13 district roles | **LOW** | Expanded mapping to include all 13 ENUM roles: `principal`, `business_manager`, `maintenance_director`, `maintenance_staff`, `custodial_manager`, `custodial`, `cafeteria`, `student`, `substitute_manager`, `counselor` | `packages/.../package.json` |
 | G5 | Fuel logs/maintenance events had no workflow columns | **MEDIUM** | Added `workflow_status`, `reviewed_by`, `reviewed_at`, `review_notes`, `correction_reason` to both tables | `migrations/001_create_fleet_tables.sql` |
 | G6 | No `vm_audit_logs` table for package-level audit trail | **MEDIUM** | Added table with event_type, entity tracking, before/after JSON | `migrations/001_create_fleet_tables.sql` |
 

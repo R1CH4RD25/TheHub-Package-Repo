@@ -2,7 +2,7 @@
 -- Vehicle Maintenance & Fleet Tracking — Initial Schema
 -- Migration: 001_create_fleet_tables.sql
 -- Version: 2.1.0
--- 
+--
 -- All tables live in woodson_hub with vm_ prefix for namespace isolation.
 -- Tables use CHAR(26) ULID primary keys for portability.
 -- Foreign keys to users.id are INT UNSIGNED (native hub FK).
@@ -91,11 +91,11 @@ CREATE TABLE IF NOT EXISTS vm_fuel_logs (
     receipt_path VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded receipt',
     notes TEXT DEFAULT NULL,
     logged_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id — who submitted this log',
-    workflow_status ENUM('draft','submitted','in_review','corrected','approved','rejected') DEFAULT 'draft' COMMENT 'Layer 2 workflow state',
+    workflow_status ENUM('draft','submitted','in_review','needs_correction','resubmitted','approved','rejected') DEFAULT 'draft' COMMENT 'Layer 2 workflow state',
     reviewed_by INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id — manager who reviewed',
     reviewed_at TIMESTAMP NULL DEFAULT NULL,
     review_notes TEXT DEFAULT NULL COMMENT 'Manager notes on approval/rejection',
-    correction_reason TEXT DEFAULT NULL COMMENT 'Reason for correction (required by editBoundaries)',
+    correction_reason TEXT DEFAULT NULL COMMENT 'Reason for returning (required by editBoundaries)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (vehicle_id) REFERENCES vm_vehicles(id) ON DELETE RESTRICT,
@@ -138,11 +138,11 @@ CREATE TABLE IF NOT EXISTS vm_maintenance_events (
     photo_paths JSON DEFAULT NULL COMMENT 'Array of uploaded photo paths',
     notes TEXT DEFAULT NULL,
     logged_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id — who performed/logged this',
-    workflow_status ENUM('draft','submitted','in_review','corrected','approved','rejected') DEFAULT 'draft' COMMENT 'Layer 2 workflow state',
+    workflow_status ENUM('draft','submitted','in_review','needs_correction','resubmitted','approved','rejected') DEFAULT 'draft' COMMENT 'Layer 2 workflow state',
     reviewed_by INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id — manager who reviewed',
     reviewed_at TIMESTAMP NULL DEFAULT NULL,
     review_notes TEXT DEFAULT NULL COMMENT 'Manager notes on approval/rejection',
-    correction_reason TEXT DEFAULT NULL COMMENT 'Reason for correction (required by editBoundaries)',
+    correction_reason TEXT DEFAULT NULL COMMENT 'Reason for returning (required by editBoundaries)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (vehicle_id) REFERENCES vm_vehicles(id) ON DELETE RESTRICT,

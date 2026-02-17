@@ -94,6 +94,8 @@ packages/local/my-package/
 - Use `INT UNSIGNED` for foreign keys to `users.id`
 - Always include `created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`
 - Use `is_deleted BOOLEAN DEFAULT FALSE` for soft deletes — **never hard delete operational data**
+- For records that should never be deleted (fuel logs, audit entries), rely on `workflow_status` instead — no delete column needed
+- *Legacy note:* `GenericPackageHandler` also checks `is_active` for backward compatibility with older tables. New packages should use `is_deleted`.
 
 ---
 
@@ -176,7 +178,7 @@ As of v3.0.0, packages **do not need custom PHP handler classes**. The Hub's `Ge
 - Query names containing `options` → DISTINCT value queries for dropdowns
 - Mutations named `create*` → INSERT
 - Mutations named `update*` → UPDATE
-- Mutations named `delete*` → soft DELETE (`is_active = 0`)
+- Mutations named `delete*` → soft DELETE (`is_deleted = 1` if column exists, else `is_active = 0` for legacy tables)
 
 **Query-level overrides** — add these inside any query definition:
 ```json
@@ -543,9 +545,13 @@ Define package-specific roles with **inheritance** and map them to district syst
         "principal": "manager",
         "business_manager": "manager",
         "maintenance_director": "manager",
+        "substitute_manager": "user",
+        "counselor": "user",
         "maintenance_staff": "user",
         "custodial_manager": "user",
         "custodial": "user",
+        "cafeteria": "user",
+        "student": "user",
         "staff": "user"
     }
 }
@@ -582,20 +588,22 @@ For packages that require manager approval of submitted records:
 "access": {
     "layer2": {
         "workflow": {
-            "states": ["submitted", "in_review", "corrected", "approved", "rejected"],
+            "states": ["submitted", "in_review", "needs_correction", "resubmitted", "approved", "rejected"],
             "transitions": [
                 {"from": "submitted", "to": "in_review", "actor": ["manager", "admin"]},
                 {"from": "in_review", "to": "approved", "actor": ["manager", "admin"]},
-                {"from": "in_review", "to": "corrected", "actor": ["manager", "admin"]},
-                {"from": "in_review", "to": "rejected", "actor": ["manager", "admin"]}
+                {"from": "in_review", "to": "needs_correction", "actor": ["manager", "admin"]},
+                {"from": "in_review", "to": "rejected", "actor": ["manager", "admin"]},
+                {"from": "needs_correction", "to": "resubmitted", "actor": ["user", "manager", "admin"]},
+                {"from": "resubmitted", "to": "in_review", "actor": ["manager", "admin"]}
             ]
         },
         "editBoundaries": {
             "records": {
                 "editable": ["field1", "field2"],
-                "immutable": ["id", "created_at", "created_by"],
+                "immutable": ["id", "created_at", "logged_by"],
                 "requiresReason": true,
-                "allowedStates": ["in_review", "corrected"]
+                "allowedStates": ["in_review", "needs_correction"]
             }
         },
         "auditEvents": [
@@ -609,12 +617,23 @@ For packages that require manager approval of submitted records:
 
 **Layer 2 database requirements:** Tables with workflow must include these columns:
 ```sql
-workflow_status ENUM('draft','submitted','in_review','corrected','approved','rejected') DEFAULT 'draft',
+workflow_status ENUM('draft','submitted','in_review','needs_correction','resubmitted','approved','rejected') DEFAULT 'draft',
 reviewed_by INT UNSIGNED DEFAULT NULL,
 reviewed_at TIMESTAMP NULL DEFAULT NULL,
 review_notes TEXT DEFAULT NULL,
 correction_reason TEXT DEFAULT NULL
 ```
+
+**Workflow state semantics:**
+| State | Meaning | Who Transitions |
+|-------|---------|----------------|
+| `draft` | Not yet submitted | User |
+| `submitted` | Awaiting manager review | User |
+| `in_review` | Manager is actively reviewing | Manager/Admin |
+| `needs_correction` | Manager returned for fixes | Manager/Admin |
+| `resubmitted` | User fixed and resubmitted | User |
+| `approved` | Accepted — record is immutable | Manager/Admin |
+| `rejected` | Denied — requires new submission | Manager/Admin |
 
 ---
 
@@ -635,7 +654,9 @@ The Hub validates every `package.json` before it's installed. The validator chec
 
 **Valid layouts:** `full`, `standard`, `sidebar`, `narrow`, `split`
 
-**Valid system roles for globalRoleMapping:** `super_admin`, `admin`, `district_admin`, `campus_admin`, `principal`, `manager`, `department_head`, `coordinator`, `counselor`, `teacher`, `staff`, `aide`, `paraprofessional`, `viewer`
+**Valid system roles for globalRoleMapping:** `super_admin`, `admin`, `principal`, `business_manager`, `counselor`, `substitute_manager`, `maintenance_director`, `custodial_manager`, `maintenance_staff`, `custodial`, `cafeteria`, `student`, `staff`
+
+> These are the 13 roles defined in the `users.role` and `user_global_roles.role` ENUM columns. The validator will warn on any role not in this list. Do **not** invent roles like `district_admin`, `campus_admin`, or `viewer` — they don't exist in the database.
 
 ### Running Validation
 
@@ -698,20 +719,24 @@ The wizard generates a valid `package.json` that works with GenericPackageHandle
 - [ ] **Policy: `globalRoleMapping` maps ALL known district roles** (not just `staff`, `admin`, `super_admin`)
 - [ ] **Policy: roles define `inherits` chains for proper permission inheritance**
 - [ ] **Layer 2: workflow tables include `workflow_status`, `reviewed_by`, `reviewed_at` columns**
-- [ ] **Layer 2: edit boundaries specify `editable`, `immutable`, and `requiresReason`**
-- [ ] **Soft deletes: uses `is_deleted` flag — no hard DELETE of operational data**
+- [ ] **Layer 2: uses correct workflow states** (`needs_correction` for send-back, `resubmitted` for re-submit)
+- [ ] **Layer 2: edit boundaries use actual SQL column names** (not presentation aliases)
+- [ ] **Soft deletes: new tables use `is_deleted` flag** (legacy `is_active` also supported) — **no hard DELETE of operational data**
 
 ## 🎯 Package Naming Convention
 
-**Package ID Format:** `category-descriptive-name`
+**Package ID Format:** `category.descriptive-name`
 
 Examples:
-- ✅ `bullying-report`
-- ✅ `employee-evaluation`
-- ✅ `maintenance-request`
-- ❌ `MyPackage` (not descriptive)
-- ❌ `bullying_report` (use hyphens, not underscores)
+- ✅ `district.bullying-report`
+- ✅ `operations.vehicle-maintenance`
+- ✅ `campus.employee-evaluation`
+- ❌ `bullying-report` (missing category prefix)
+- ❌ `MyPackage` (not descriptive, no category)
+- ❌ `district/bullying_report` (use dots + hyphens, not slashes + underscores)
 - ❌ `report` (too generic)
+
+The `category` prefix must match the `category` field in your `package.json` and the folder structure under `packages/`.
 
 ## 📦 Submission Process
 

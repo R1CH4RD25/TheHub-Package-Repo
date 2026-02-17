@@ -3,7 +3,8 @@
 **Welcome to The Hub Package Development!** This guide will get you creating packages in minutes.
 
 > **📘 Documentation Reference:**
-> - [PACKAGE_SPECIFICATION_V2.md](./PACKAGE_SPECIFICATION_V2.md) - Complete technical specification
+> - [CONTRIBUTING.md](../CONTRIBUTING.md) - **Canonical v3 package specification** (schema v3.0.0)
+> - [PACKAGE_SPECIFICATION_V2.md](./PACKAGE_SPECIFICATION_V2.md) - Legacy v2 specification (for reference only)
 > - [MODULE_CATALOG_V2.md](./MODULE_CATALOG_V2.md) - **All 12+ module types with rules**
 
 ---
@@ -607,7 +608,8 @@ Create multi-step approval processes:
 
 ## 🎓 Learning Resources
 
-- **Package Specification**: See [PACKAGE_SPECIFICATION_V2.md](PACKAGE_SPECIFICATION_V2.md)
+- **Package Specification (v3)**: See [CONTRIBUTING.md](../CONTRIBUTING.md)
+- **Legacy Spec (v2)**: See [PACKAGE_SPECIFICATION_V2.md](PACKAGE_SPECIFICATION_V2.md)
 - **Example Packages**: Browse `packages/local/employee-evaluation/`
 - **Bootstrap Icons**: https://icons.getbootstrap.com/
 - **Semantic Versioning**: https://semver.org/

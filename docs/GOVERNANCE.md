@@ -92,10 +92,11 @@ If users see or experience something different:
 If you touch packages, modules, or capabilities:
 
 9. ✅ **Package Documentation**
-   - Update `docs/PACKAGE_SPECIFICATION_V2.md` if spec changes
+   - Update `CONTRIBUTING.md` if spec or workflow changes
    - Update `docs/PACKAGE_CREATION_GUIDE.md` if workflow changes
    - Update `docs/MODULE_CATALOG_V2.md` if adding/removing packages
    - Update `docs/PACKAGE_PERMISSIONS_QUICKREF.md` if permissions change
+   - *Legacy:* `docs/PACKAGE_SPECIFICATION_V2.md` is superseded by `CONTRIBUTING.md` (schema v3)
 
 ### API Endpoint Changes
 
@@ -516,14 +517,15 @@ $navItems = [
 
 ### Package Structure
 
-See `docs/PACKAGE_SPECIFICATION_V2.md` for complete spec.
+See `CONTRIBUTING.md` for the complete v3 package specification.
+
+> *Legacy:* `docs/PACKAGE_SPECIFICATION_V2.md` documents the v2 schema. All new packages should use schema v3.0.0 as described in `CONTRIBUTING.md`.
 
 Required files in packages:
-- `package.json` - Metadata and configuration
-- `index.php` - Entry point
-- `icon.svg` - Module icon
+- `package.json` - Manifest (v3 schema — the single source of truth)
 - `README.md` - User documentation
-- `schema.sql` - Database schema (if needed)
+- `migrations/` - Database migration SQL files (auto-run on install)
+- `screenshots/` - At least 2 screenshots
 
 ### Package Permissions
 
