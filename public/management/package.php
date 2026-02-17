@@ -179,7 +179,7 @@ if ($pageId && $pageId !== 'index') {
     <title><?= htmlspecialchars($pageTitle) ?> - <?= htmlspecialchars($mgmtDisplayName) ?> - <?= htmlspecialchars($siteName) ?></title>
 
     <!-- MGMT BUNDLE (Enterprise Design) -->
-    <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
+    <link rel="stylesheet" href="/assets/css/mgmt-bundle.css?v=<?= filemtime(__DIR__ . '/../assets/css/mgmt-bundle.css') ?>">
 
     <!-- Package component styles -->
     <link rel="stylesheet" href="/assets/css/package-components.css?v=<?= filemtime(__DIR__ . '/../assets/css/package-components.css') ?: time() ?>">

@@ -1,6 +1,6 @@
 /**
  * Management Bundle - Concatenated CSS
- * Generated: Mon Feb 16 05:47:45 PM UTC 2026
+ * Generated: auto
  */
 
 
@@ -965,10 +965,12 @@ html {
 }
 
 /* Admin Navigation Links */
-.admin-nav {
+.admin-nav,
+.mgmt-nav {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+    padding-left: 10px; /* Caret gutter — inside sidebar overflow bounds */
 }
 
 .admin-nav-link {
@@ -976,7 +978,7 @@ html {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-base);
+    border-radius: 0 999px 999px 0; /* Google-style half-circle right edge */
     text-decoration: none;
     color: rgba(255, 255, 255, 0.8);
     font-size: var(--text-md);
@@ -2197,34 +2199,37 @@ html {
 
 /* SIDEBAR NAVIGATION LINKS */
 
-/* All nav items share the same gutter + icon + text alignment.
-   Gutter (18px padding-left) reserves space for the ::before caret.
-   Regular links have empty gutter; expandable triggers show a caret there.
+/* All nav items extend to the sidebar edge via margin-left: -10px
+   (cancels .admin-nav's 10px left padding). Padding-left is increased
+   by 10px to compensate, keeping text/icons aligned.
 
-   Layout:  [18px gutter] [ICON 20px] [12px gap] [TEXT...]
-   The icon starts at 18px from left for ALL items — perfect alignment.
+   Layout from sidebar edge:  [0px edge] [20px pad] [ICON 20px] [12px gap] [TEXT]
+   Caret at left:2px (always 2px from sidebar edge, inside bounds).
+   border-radius: 0 999px = flat left edge, round right = pill to edge.
    ======================================== */
 
 .admin-nav-link,
 .mgmt-nav-link {
-    padding-left: 18px;
+    margin-left: -10px;
+    padding-left: 24px; /* 14px + 10px margin compensation */
+    border-radius: 0 999px 999px 0;
+    margin-right: 4px;
 }
 
 /* ========================================
    EXPANDABLE NAVIGATION ITEMS (Google Admin Style)
 
-   Caret is a CSS ::before pseudo-element, positioned absolutely
-   in the 18px gutter. No DOM element = no flex conflicts.
+   ALL items extend to the sidebar edge via margin-left: -10px.
+   Caret is a CSS ::before at left:2px (2px from sidebar edge).
 
-   Positions (measured from item left edge):
-     Caret:     absolute, centered in 0–18px gutter
-     Icon:      18px (padding-left)
-     Text:      18 + 20(icon) + 12(gap) = 50px
-     L2 text:   padding-left 50px  (aligns under L1 text)
-     L3 text:   padding-left 66px  (+16px step from L2)
+   Positions (from sidebar left edge):
+     Caret:     2px (left:2px on trigger at edge)
+     Icon:      20px (padding-left)
+     Text:      20 + 20(icon) + 12(gap) = 52px
+     L2 text:   padding-left 52px
+     L3 text:   padding-left 68px  (+16px step)
 
-   Active pill extends to sidebar edge via margin-left: -12px
-   with padding-left compensation to keep content in place.
+   Active states only change colors — no margin/padding overrides needed.
    ======================================== */
 
 .nav-expandable {
@@ -2238,10 +2243,10 @@ html {
     margin: 0;
 }
 
-/* Trigger button — same layout as regular nav links */
+/* Trigger button — extends to sidebar edge like all nav items */
 .nav-expandable-trigger {
     position: relative; /* Anchor for ::before caret */
-    width: 100%;
+    width: calc(100% + 10px); /* Compensate for negative margin */
     border: none;
     background: transparent;
     cursor: pointer;
@@ -2250,19 +2255,22 @@ html {
     align-items: center;
     gap: var(--space-3); /* 12px — same as .admin-nav-link */
     padding: var(--space-2) var(--space-3);
-    padding-left: 18px; /* Same gutter as nav links — icons align */
+    padding-left: 24px; /* 14px + 10px margin compensation */
     margin: 0;
+    margin-left: -10px; /* Extend to sidebar edge */
+    margin-right: 4px;
+    border-radius: 0 999px 999px 0;
     color: inherit;
     font: inherit;
 }
 
-/* ===== CARET via ::before — lives in the 18px gutter ===== */
+/* ===== CARET via ::before — 2px from sidebar edge ===== */
 .nav-expandable-trigger::before {
     content: '\f0da'; /* FontAwesome fa-caret-right */
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
-    left: 2px; /* Inside the 18px padding — always visible regardless of overflow */
+    left: 2px; /* 2px from sidebar edge (trigger is at edge via margin-left:-10px) */
     top: 50%;
     transform: translateY(-50%) rotate(0deg);
     font-size: 11px;
@@ -2295,7 +2303,7 @@ html {
 /* ===== LEVEL 2: Sublinks (text items under L1 expandable) ===== */
 .admin-nav-link.nav-sublink,
 .mgmt-nav-link.nav-sublink {
-    padding-left: 50px !important; /* Aligns text under L1 text (18+20+12=50) */
+    padding-left: 56px !important; /* 46px indent + 10px margin compensation */
     font-size: var(--text-md) !important;
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
@@ -2313,14 +2321,14 @@ html {
 
 /* ===== LEVEL 2: Nested expandable trigger (package under category) ===== */
 .nav-nested-expandable > .nav-expandable-trigger {
-    padding-left: 50px !important; /* Text aligns with L2 sublinks */
+    padding-left: 56px !important; /* Aligns with L2 sublinks (46 + 10 compensation) */
     font-weight: var(--font-normal) !important;
     opacity: 0.85;
 }
 
 /* Nested caret — repositioned for L2 indentation */
 .nav-nested-expandable > .nav-expandable-trigger::before {
-    left: 35px; /* ~15px before the 50px text start */
+    left: 41px; /* ~15px before the 56px text start */
 }
 
 .nav-nested-expandable > .nav-expandable-trigger:hover {
@@ -2329,7 +2337,7 @@ html {
 
 /* ===== LEVEL 3: Leaf links (pages inside packages) ===== */
 .nav-submenu-nested .nav-leaf-link {
-    padding-left: 66px !important; /* +16px from L2 (50+16) */
+    padding-left: 72px !important; /* +16px from L2 (56+16) */
     font-size: var(--text-md) !important;
 }
 
@@ -2346,8 +2354,7 @@ html {
 }
 
 /* ===== ACTIVE PILL STATES ===== */
-/* All active pills extend to sidebar edge via margin-left: -12px
-   (nav padding is 12px) with padding-left increased to compensate */
+/* All items already extend to sidebar edge — active only changes colors */
 
 /* Level 2 sublink active */
 .admin-nav-link.nav-sublink.active,
@@ -2356,9 +2363,6 @@ html {
     opacity: 1;
     font-weight: var(--font-medium) !important;
     color: #2D1F05;
-    border-radius: 0 999px 999px 0;
-    margin-left: -12px; /* Extend pill to sidebar edge */
-    padding-left: calc(50px + 12px) !important; /* L2 (50) + margin compensation (12) */
     margin-right: var(--space-2);
 }
 
@@ -2368,9 +2372,6 @@ html {
     opacity: 1;
     font-weight: var(--font-medium) !important;
     color: #2D1F05;
-    border-radius: 0 999px 999px 0;
-    margin-left: -12px;
-    padding-left: calc(66px + 12px) !important; /* L3 (66) + margin compensation (12) */
     margin-right: var(--space-2);
 }
 
@@ -2383,16 +2384,11 @@ html {
 .nav-expandable-trigger.active {
     background: var(--nd-gold) !important;
     color: white !important;
-    border-radius: 0 999px 999px 0 !important;
-    margin-left: -12px !important;
-    padding-left: calc(18px + 12px) !important; /* gutter (18) + margin compensation (12) = 30px */
-    margin-right: 4px !important;
 }
 
 /* Caret color in active state */
 .nav-expandable-trigger.active::before {
     color: white !important;
-    left: 14px; /* Normal (2px) + 12px margin-left compensation */
 }
 
 .nav-expandable-trigger.active i {
@@ -2403,22 +2399,408 @@ html {
 .admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger,
 .mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger {
     border: 2px solid rgba(201, 151, 0, 0.6) !important;
-    border-radius: 0 999px 999px 0 !important;
     border-left: none !important;
-    margin-left: -12px !important;
-    padding-left: calc(18px + 12px) !important; /* 30px — caret auto-adjusts */
-    margin-right: 4px !important;
-}
-
-/* Caret position for gold border state */
-.admin-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before,
-.mgmt-nav > .nav-expandable.expanded:not(.has-active-child) > .nav-expandable-trigger::before {
-    left: 14px; /* Normal (2px) + 12px margin-left compensation */
 }
 
 /* Collapsed sidebar handling */
 .admin-sidebar.collapsed .nav-submenu {
     display: none !important;
+}
+
+/* ========== shared/enterprise-header-sidebar.css ========== */
+
+/**
+ * ============================================================================
+ * ENTERPRISE HEADER & SIDEBAR - Shared Components
+ * ============================================================================
+ * Styles for EnterpriseHeader and EnterpriseSidebar PHP components
+ * Used by both Admin Dashboard and Management Console
+ * ============================================================================
+ */
+
+/* ========== SIDEBAR STYLES ========== */
+
+.admin-sidebar,
+.mgmt-sidebar {
+    grid-row: 1 / span 2;
+    background: var(--gray-900);
+    color: white;
+    padding: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.sidebar-header a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: white;
+}
+
+.sidebar-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--nd-gold);
+    border-radius: var(--radius-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: white;
+}
+
+/* Navigation Styles */
+.admin-nav,
+.mgmt-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3);
+}
+
+.admin-nav-link,
+.mgmt-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-base);
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-md);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.admin-nav-link:hover,
+.mgmt-nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.admin-nav-link.active,
+.mgmt-nav-link.active {
+    background: var(--nd-gold);
+    color: white;
+}
+
+.admin-nav-link i,
+.mgmt-nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.admin-nav-link span:last-child,
+.mgmt-nav-link span:last-child {
+    flex: 1;
+}
+
+/* Badge for notifications */
+.sidebar-badge {
+    background: #d32f2f;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* ========== HEADER STYLES ========== */
+
+.admin-header,
+.mgmt-header {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--gray-300);
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    min-height: 64px;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.breadcrumb a {
+    color: var(--nd-gold);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+    color: var(--nd-gold-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb span:not([class]) {
+    color: var(--gray-400);
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.header-search {
+    position: relative;
+}
+
+.header-search .search-input {
+    width: 240px;
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-8);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-base);
+    font-size: var(--text-sm);
+    background: var(--gray-50);
+    transition: all var(--transition-fast);
+}
+
+.header-search .search-input:focus {
+    outline: none;
+    border-color: var(--nd-gold);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(201, 151, 0, 0.1);
+}
+
+.header-search .search-icon {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-500);
+    pointer-events: none;
+}
+
+/* Notification Button */
+.btn-icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--gray-300);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--gray-700);
+}
+
+.btn-icon:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #d32f2f;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* ========== RESPONSIVE STYLES ========== */
+
+@media (max-width: 1024px) {
+    .admin-sidebar,
+    .mgmt-sidebar {
+        width: 240px;
+    }
+    
+    .header-search .search-input {
+        width: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto minmax(0, 1fr);
+    }
+    
+    .admin-sidebar,
+    .mgmt-sidebar {
+        grid-row: 2;
+        grid-column: 1;
+        width: 100%;
+        max-height: 300px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .admin-header,
+    .mgmt-header {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    
+    .admin-main {
+        grid-column: 1;
+        grid-row: 3;
+    }
+    
+    .breadcrumb {
+        font-size: 12px;
+    }
+    
+    .header-search {
+        display: none;
+    }
+}
+
+/* ========== shared/footer.css ========== */
+
+/* ==========================================================================
+   FOOTER STYLES
+   Shared across Hub and Dashboard pages
+   ========================================================================== */
+
+/* Footer Container */
+footer.footer,
+.admin-footer {
+    grid-row: 3;
+    background: var(--footer-bg-color, #F3F4F6);
+    border-top: 1px solid var(--border-primary, #e0e0e0);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    font-size: var(--footer-text-size, 0.875rem);
+    color: var(--footer-text-color, #6B7280);
+    min-height: var(--footer-height, 40px);
+    max-height: var(--footer-height, 40px);
+    height: var(--footer-height, 40px);
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+/* Footer Content Layout */
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Footer Sections */
+.footer-left,
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Footer Separator */
+.footer-separator {
+    color: var(--text-disabled, #9CA3AF);
+    user-select: none;
+}
+
+/* Footer Links */
+.footer-right strong {
+    color: var(--primary-color, #C99700);
+    font-weight: 600;
+}
+
+.footer-content a {
+    color: var(--footer-text-color, #6B7280);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+    color: var(--primary-color, #C99700);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    footer.footer,
+    .admin-footer {
+        padding: 0 1rem;
+        font-size: 0.75rem;
+        min-height: auto;
+        height: auto;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: center;
+        padding: 0.5rem 0;
+    }
+
+    .footer-left,
+    .footer-right {
+        gap: 0.5rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    footer.footer,
+    .admin-footer {
+        font-size: 0.7rem;
+    }
+
+    .footer-separator {
+        display: none;
+    }
+
+    .footer-left,
+    .footer-right {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
 }
 
 /* ========== admin/admin-layout.css ========== */
@@ -2555,8 +2937,10 @@ html {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-base);
+    padding: var(--space-2) var(--space-3) var(--space-2) 24px;
+    margin-left: -10px;
+    margin-right: 4px;
+    border-radius: 0 999px 999px 0;
     text-decoration: none;
     color: var(--gray-800);
     font-size: var(--text-md);
@@ -2565,7 +2949,7 @@ html {
     cursor: pointer;
     border: none;
     background: transparent;
-    width: 100%;
+    width: calc(100% + 6px); /* Compensate for negative margin + margin-right */
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
@@ -2588,7 +2972,7 @@ html {
 .mgmt-sidebar.collapsed .mgmt-nav-link.active {
     background: var(--nd-gold);
     color: white;
-    border-radius: var(--radius-base);
+    border-radius: 0 999px 999px 0;
 }
 
 .admin-nav-link i,
@@ -2613,7 +2997,7 @@ html {
 .admin-sidebar.collapsed .admin-nav-link,
 .mgmt-sidebar.collapsed .mgmt-nav-link {
     /* Don't center or resize - let icons stay in original position */
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2) var(--space-3) var(--space-2) 24px;
 }
 
 /* Hide text and badges after sidebar finishes collapsing */
@@ -8327,6 +8711,574 @@ input[type="checkbox"]:checked+label::before {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ========== management.css ========== */
+
+/**
+ * ============================================================================
+ * MANAGEMENT SYSTEM (formerly Command Center) - THEME-AWARE STYLES
+ * ============================================================================
+ * Professional management interface for tracking and processing submissions.
+ * 
+ * THEME INHERITANCE:
+ * - Uses CSS custom properties from site_settings
+ * - All colors/fonts/spacing inherit from admin theme
+ * - No hardcoded values - fully customizable via Admin Dashboard
+ * 
+ * PACKAGE DEVELOPERS:
+ * Copy this pattern for theme-aware styling:
+ * 1. Use var(--primary-color) instead of #667eea
+ * 2. Use var(--text-primary) instead of #2c3e50
+ * 3. Use var(--spacing-md) instead of 20px
+ * 4. Leverage existing .card, .btn classes from production.css
+ * 
+ * Generated: 2025-11-18
+ * ============================================================================
+ */
+
+/* ============================================================================
+   LAYOUT - Flexbox structure for proper footer positioning
+   ============================================================================ */
+.mgmt-container,
+.mgmt-section-container,
+.mgmt-submission-container {
+    flex: 1 0 auto;
+    max-width: var(--container-max-width, 1600px);
+    margin: 0 auto;
+    padding: var(--spacing-lg, 20px);
+    width: 100%;
+}
+
+/* ============================================================================
+   SELECTOR PAGE - Section chooser interface
+   ============================================================================ */
+.mgmt-selector-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl, 40px);
+}
+
+.mgmt-selector-header h1 {
+    font-size: var(--font-size-xxl, 32px);
+    font-weight: 600;
+    color: var(--text-primary, #2c3e50);
+    margin-bottom: var(--spacing-sm, 10px);
+}
+
+.mgmt-selector-header p {
+    font-size: var(--font-size-md, 16px);
+    color: var(--text-muted, #7f8c8d);
+}
+
+/* Summary Stats - Gradient cards with theme colors */
+.mgmt-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg, 20px);
+    margin-bottom: var(--spacing-xl, 40px);
+}
+
+.mgmt-summary-stat {
+    background: linear-gradient(135deg, var(--primary-color, #667eea) 0%, var(--accent-color, #764ba2) 100%);
+    color: white;
+    padding: var(--spacing-lg, 25px);
+    border-radius: var(--border-radius-lg, 12px);
+    text-align: center;
+    box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mgmt-summary-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg, 0 8px 16px rgba(0,0,0,0.15));
+}
+
+.mgmt-summary-stat.pending {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.mgmt-summary-stat.urgent {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.mgmt-summary-stat .number {
+    font-size: var(--font-size-xxxl, 36px);
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.mgmt-summary-stat .label {
+    font-size: var(--font-size-sm, 14px);
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Section Table - Professional data view */
+.mgmt-section-table {
+    background: var(--bg-card, white);
+    border-radius: var(--border-radius-lg, 12px);
+    box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.08));
+    overflow: hidden;
+}
+
+.mgmt-section-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mgmt-section-table thead {
+    background: linear-gradient(135deg, var(--primary-color, #667eea) 0%, var(--accent-color, #764ba2) 100%);
+    color: white;
+}
+
+.mgmt-section-table thead th {
+    padding: var(--spacing-md, 15px) var(--spacing-lg, 20px);
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--font-size-sm, 13px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mgmt-section-table tbody tr {
+    border-bottom: 1px solid var(--border-color, #f1f3f5);
+    transition: background-color 0.2s ease;
+}
+
+.mgmt-section-table tbody tr:hover {
+    background-color: var(--bg-hover, #f8f9fa);
+}
+
+.mgmt-section-table tbody td {
+    padding: var(--spacing-md, 15px) var(--spacing-lg, 20px);
+    color: var(--text-primary, #2c3e50);
+}
+
+/* Section badges */
+.mgmt-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--border-radius-pill, 12px);
+    font-size: var(--font-size-xs, 11px);
+    font-weight: 600;
+    margin: 0 4px;
+}
+
+.mgmt-badge.total {
+    background: var(--info-color, #3498db);
+    color: white;
+}
+
+.mgmt-badge.pending {
+    background: var(--warning-color, #f39c12);
+    color: white;
+}
+
+.mgmt-badge.urgent {
+    background: var(--danger-color, #e74c3c);
+    color: white;
+    animation: pulse-urgent 2s infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Empty state */
+.mgmt-empty-state,
+.mgmt-empty-modules {
+    text-align: center;
+    padding: var(--spacing-xxxl, 60px) var(--spacing-lg, 20px);
+    color: var(--text-muted, #95a5a6);
+}
+
+.mgmt-empty-state i,
+.mgmt-empty-modules i {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg, 20px);
+    opacity: 0.3;
+}
+
+.mgmt-empty-state h3,
+.mgmt-empty-modules h3 {
+    font-size: var(--font-size-lg, 20px);
+    margin-bottom: var(--spacing-sm, 10px);
+    color: var(--text-secondary, #7f8c8d);
+}
+
+/* ============================================================================
+   MODULE CARDS GRID (Management Console Dashboard)
+   ============================================================================ */
+.mgmt-module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-5, 20px);
+}
+
+.mgmt-module-card {
+    background: var(--gray-50, #fafafa);
+    border: 1px solid var(--gray-300, #e0e0e0);
+    border-radius: var(--radius-lg, 12px);
+    padding: var(--space-5, 20px);
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 12px);
+}
+
+.mgmt-module-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: var(--gray-400, #bdbdbd);
+    transform: translateY(-2px);
+}
+
+.mgmt-module-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3, 12px);
+}
+
+.mgmt-module-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-base, 8px);
+    background: var(--gray-200, #e8e8e8);
+    font-size: 20px;
+    color: var(--gray-700, #616161);
+    flex-shrink: 0;
+}
+
+.mgmt-module-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mgmt-module-title {
+    font-size: var(--text-md, 15px);
+    font-weight: var(--font-semibold, 600);
+    color: var(--gray-900, #212121);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.mgmt-module-subtitle {
+    font-size: var(--text-xs, 12px);
+    color: var(--gray-600, #757575);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 2px 0 0;
+}
+
+.mgmt-module-description {
+    font-size: var(--text-sm, 13px);
+    color: var(--gray-600, #757575);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mgmt-module-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: var(--space-2, 8px);
+    padding: var(--space-3, 12px) 0;
+    border-top: 1px solid var(--gray-200, #e8e8e8);
+    border-bottom: 1px solid var(--gray-200, #e8e8e8);
+}
+
+.mgmt-module-stat {
+    text-align: center;
+}
+
+.mgmt-module-stat-value {
+    display: block;
+    font-size: var(--text-xl, 20px);
+    font-weight: var(--font-semibold, 600);
+    color: var(--gray-900, #212121);
+    line-height: 1.2;
+}
+
+.mgmt-module-stat-label {
+    display: block;
+    font-size: var(--text-xs, 11px);
+    color: var(--gray-500, #9e9e9e);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.mgmt-module-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2, 8px);
+}
+
+.mgmt-module-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2, 6px);
+    color: var(--ms-blue, #0078d4);
+    font-size: var(--text-sm, 13px);
+    font-weight: var(--font-medium, 500);
+    text-decoration: none;
+    padding: var(--space-1, 4px) var(--space-2, 8px);
+    border-radius: var(--radius-base, 6px);
+    transition: background 0.15s;
+}
+
+.mgmt-module-action:hover {
+    background: rgba(0, 120, 212, 0.08);
+    text-decoration: none;
+}
+
+.mgmt-module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs, 11px);
+    font-weight: var(--font-medium, 500);
+    padding: 3px 8px;
+    border-radius: var(--radius-full, 999px);
+    background: var(--error-light, #fef2f2);
+    color: var(--error, #dc2626);
+}
+
+@media (max-width: 640px) {
+    .mgmt-module-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+    .mgmt-module-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================================
+   SECTION PAGE - Submissions list with DataTables
+   ============================================================================ */
+.mgmt-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl, 30px);
+    padding: var(--spacing-lg, 20px);
+    background: var(--bg-card, white);
+    border-radius: var(--border-radius-md, 8px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+.mgmt-section-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 15px);
+}
+
+.mgmt-section-icon-large {
+    font-size: 48px;
+    opacity: 0.8;
+    color: var(--primary-color, #667eea);
+}
+
+.mgmt-section-details h1 {
+    margin: 0;
+    font-size: var(--font-size-xxl, 28px);
+    font-weight: 600;
+    color: var(--text-primary, #2c3e50);
+}
+
+.mgmt-section-subtitle {
+    font-size: var(--font-size-sm, 14px);
+    color: var(--text-muted, #7f8c8d);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* Filters bar */
+.mgmt-filters-bar {
+    background: var(--bg-card, white);
+    padding: var(--spacing-lg, 20px);
+    border-radius: var(--border-radius-md, 8px);
+    margin-bottom: var(--spacing-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+.mgmt-filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md, 15px);
+    align-items: end;
+}
+
+.mgmt-filter-group label {
+    display: block;
+    font-size: var(--font-size-xs, 13px);
+    font-weight: 600;
+    color: var(--text-secondary, #7f8c8d);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Bulk actions bar */
+.mgmt-bulk-actions {
+    display: none;
+    background: #fff3cd;
+    padding: var(--spacing-md, 15px) var(--spacing-lg, 20px);
+    border-radius: var(--border-radius-md, 8px);
+    margin-bottom: var(--spacing-lg, 20px);
+    border-left: 4px solid #ffc107;
+}
+
+.mgmt-bulk-actions.active {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 15px);
+}
+
+.mgmt-bulk-actions-label {
+    font-weight: 600;
+    color: #856404;
+}
+
+/* DataTables styling */
+.mgmt-table-container {
+    background: var(--bg-card, white);
+    border-radius: var(--border-radius-md, 8px);
+    padding: var(--spacing-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+table.mgmt-datatable {
+    border-collapse: collapse !important;
+    width: 100%;
+}
+
+table.mgmt-datatable thead th {
+    background: var(--bg-secondary, #f8f9fa);
+    color: var(--text-primary, #2c3e50);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--font-size-xs, 12px);
+    letter-spacing: 0.5px;
+    padding: var(--spacing-md, 15px) var(--spacing-sm, 10px);
+    border-bottom: 2px solid var(--border-color, #e9ecef);
+}
+
+table.mgmt-datatable tbody td {
+    padding: var(--spacing-sm, 12px) var(--spacing-sm, 10px);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color-light, #f1f3f5);
+}
+
+table.mgmt-datatable tbody tr:nth-child(even) {
+    background-color: var(--bg-alternate, rgba(0,0,0,0.02));
+}
+
+table.mgmt-datatable tbody tr:hover {
+    background: var(--bg-hover, #f8f9fa);
+}
+
+/* Status & Priority badges */
+.mgmt-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--border-radius-pill, 12px);
+    font-size: var(--font-size-xs, 11px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.mgmt-priority-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--border-radius-sm, 4px);
+    font-size: var(--font-size-xxs, 10px);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mgmt-priority-urgent { background: var(--danger-color, #e74c3c); color: white; }
+.mgmt-priority-high { background: var(--warning-color, #f39c12); color: white; }
+.mgmt-priority-normal { background: var(--info-color, #3498db); color: white; }
+.mgmt-priority-low { background: var(--muted-color, #95a5a6); color: white; }
+
+.mgmt-display-id {
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-weight: 600;
+    color: var(--text-primary, #2c3e50);
+}
+
+/* ============================================================================
+   SUBMISSION DETAIL PAGE
+   ============================================================================ */
+.mgmt-submission-header {
+    background: var(--bg-card, white);
+    padding: var(--spacing-lg, 20px);
+    border-radius: var(--border-radius-md, 8px);
+    margin-bottom: var(--spacing-lg, 20px);
+    box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.08));
+}
+
+.mgmt-submission-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-lg, 20px);
+}
+
+.mgmt-submission-title h1 {
+    margin: 0 0 var(--spacing-sm, 10px);
+    font-size: var(--font-size-xxxl, 32px);
+    font-weight: 700;
+    color: var(--text-primary, #2c3e50);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 768px) {
+    .mgmt-summary-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .mgmt-filters-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mgmt-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md, 15px);
+    }
+}
+
+/* ============================================================================
+   ANIMATION & TRANSITIONS
+   ============================================================================ */
+.mgmt-section-table tbody tr,
+.mgmt-card,
+.mgmt-summary-stat {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects */
+.mgmt-card:hover,
+.mgmt-section-table tbody tr:hover {
+    box-shadow: var(--shadow-lg, 0 8px 16px rgba(0,0,0,0.1));
 }
 
 /* ========== shared/shared-media.css ========== */

@@ -181,7 +181,7 @@ $navItems = \Hub\Components\EnterpriseSidebar::buildManagementNavItems(
     <title><?= htmlspecialchars($pageTitle) ?> - <?= htmlspecialchars($siteName) ?></title>
 
     <!-- MGMT BUNDLE -->
-    <link rel="stylesheet" href="/assets/css/mgmt-bundle.css">
+    <link rel="stylesheet" href="/assets/css/mgmt-bundle.css?v=<?= filemtime(__DIR__ . '/../assets/css/mgmt-bundle.css') ?>">
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
