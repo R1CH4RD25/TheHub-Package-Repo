@@ -33,6 +33,12 @@ class PackageSchemaValidator
     private array $referencedMutations = [];
 
     /**
+     * System roles are admin-configured via org_roles table.
+     * The schema validator only checks format — runtime validation
+     * against actual org_roles happens in PackageValidator (DB-aware).
+     */
+
+    /**
      * Validate a complete package definition
      *
      * @param array $packageData Decoded package JSON
@@ -73,7 +79,20 @@ class PackageSchemaValidator
             $this->validatePolicy($packageData['policy']);
         }
 
-        // 7. Cross-reference validation
+        // 7. Resources (provides / requires)
+        if (isset($packageData['resources'])) {
+            $this->validateResources($packageData['resources']);
+        }
+
+        // 8. Access (layer2 workflow + edit boundaries)
+        if (isset($packageData['access'])) {
+            $this->validateAccess($packageData['access'], $packageData);
+        }
+
+        // 9. ShowIf cross-references
+        $this->validateShowIfReferences($packageData);
+
+        // 10. Cross-reference validation
         $this->validateCrossReferences($packageData);
 
         $errorCount = count($this->errors);
@@ -743,24 +762,290 @@ class PackageSchemaValidator
 
         if (isset($policy['defaultRole'])) {
             $roles = $policy['roles'] ?? [];
-            if (!empty($roles) && !in_array($policy['defaultRole'], $roles)) {
+            // Roles can be an array of strings OR an object keyed by role name
+            $roleNames = $this->extractRoleNames($roles);
+            if (!empty($roleNames) && !in_array($policy['defaultRole'], $roleNames)) {
                 $this->addWarning("{$path}.defaultRole", "Default role '{$policy['defaultRole']}' is not in the roles list — will still work if role exists in the system");
             }
         }
 
         if (isset($policy['globalRoleMapping']) && is_array($policy['globalRoleMapping'])) {
             $roles = $policy['roles'] ?? [];
-            $validSystemRoles = ['super_admin', 'admin', 'manager', 'user', 'viewer', 'staff', 'principal', 'counselor', 'teacher'];
+            $roleNames = $this->extractRoleNames($roles);
 
             foreach ($policy['globalRoleMapping'] as $sysRole => $pkgRole) {
-                if (!in_array($sysRole, $validSystemRoles)) {
-                    $this->addWarning("{$path}.globalRoleMapping.{$sysRole}", "Custom system role '{$sysRole}' — ensure it exists in your Hub");
+                // Validate key format: snake_case or PascalCase org role names
+                if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_ \/()-]*$/', $sysRole)) {
+                    $this->addError("{$path}.globalRoleMapping.{$sysRole}", "Invalid system role name format: '{$sysRole}'");
                 }
-                if (!empty($roles) && !in_array($pkgRole, $roles)) {
-                    $this->addWarning("{$path}.globalRoleMapping.{$sysRole}", "Mapped package role '{$pkgRole}' is not in roles list — ensure it's a valid role");
+
+                // If package defines roles, mapped value should reference one
+                if (!empty($roleNames) && !in_array($pkgRole, $roleNames)) {
+                    $this->addWarning("{$path}.globalRoleMapping.{$sysRole}", "Mapped package role '{$pkgRole}' is not in the package roles list");
+                }
+            }
+
+            if (empty($policy['globalRoleMapping'])) {
+                $this->addWarning("{$path}.globalRoleMapping", "globalRoleMapping is empty — no system roles will map to package roles on install");
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────
+    //  RESOURCES (PROVIDES / REQUIRES)
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * Validate the resources block (cross-package resource sharing)
+     */
+    private function validateResources(array $resources): void
+    {
+        $path = '$.resources';
+
+        // Validate provides
+        if (isset($resources['provides'])) {
+            if (!is_array($resources['provides'])) {
+                $this->addError("{$path}.provides", "Must be an array of resource declarations");
+            } else {
+                foreach ($resources['provides'] as $i => $res) {
+                    $rPath = "{$path}.provides[{$i}]";
+
+                    if (empty($res['key'])) {
+                        $this->addError("{$rPath}.key", "Resource must have a 'key' (e.g., 'operations.vehicles')", [
+                            'fix' => '"key": "category.resource-name"',
+                        ]);
+                    } elseif (!preg_match('/^[a-z]+\.[a-z0-9_-]+$/', $res['key'])) {
+                        $this->addError("{$rPath}.key", "Resource key must be lowercase category.name format: '{$res['key']}'");
+                    }
+
+                    if (empty($res['contract'])) {
+                        $this->addError("{$rPath}.contract", "Resource must declare a contract version (semver)", [
+                            'fix' => '"contract": "1.0.0"',
+                        ]);
+                    } elseif (!preg_match('/^\d+\.\d+\.\d+$/', $res['contract'])) {
+                        $this->addError("{$rPath}.contract", "Contract version must be semver: '{$res['contract']}'");
+                    }
+
+                    if (empty($res['table'])) {
+                        $this->addError("{$rPath}.table", "Resource must specify a source table", [
+                            'fix' => '"table": "your_primary_table"',
+                        ]);
+                    }
+
+                    if (empty($res['view'])) {
+                        $this->addWarning("{$rPath}.view", "Resource without a view — consumers will query the raw table, which is fragile", [
+                            'fix' => '"view": "hub_vehicles_v1" — a contract-stable view for consumers',
+                        ]);
+                    }
                 }
             }
         }
+
+        // Validate requires
+        if (isset($resources['requires'])) {
+            if (!is_array($resources['requires'])) {
+                $this->addError("{$path}.requires", "Must be an array of required resource declarations");
+            } else {
+                foreach ($resources['requires'] as $i => $req) {
+                    $rPath = "{$path}.requires[{$i}]";
+
+                    if (empty($req['key'])) {
+                        $this->addError("{$rPath}.key", "Required resource must have a 'key'");
+                    }
+
+                    if (empty($req['contract'])) {
+                        $this->addError("{$rPath}.contract", "Required resource must declare a minimum contract version", [
+                            'fix' => '"contract": ">=1.0.0"',
+                        ]);
+                    }
+
+                    // Optional flag
+                    if (isset($req['optional']) && !is_bool($req['optional'])) {
+                        $this->addError("{$rPath}.optional", "Must be a boolean (true/false)");
+                    }
+                }
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────
+    //  ACCESS (LAYER2 WORKFLOW + EDIT BOUNDARIES)
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * Validate the access block (workflow states, transitions, edit boundaries)
+     */
+    private function validateAccess(array $access, array $packageData): void
+    {
+        $path = '$.access';
+
+        if (!isset($access['layer2'])) {
+            return; // access block without layer2 is fine (no workflow)
+        }
+
+        $layer2 = $access['layer2'];
+        $l2Path = "{$path}.layer2";
+
+        // Validate workflow
+        if (isset($layer2['workflow'])) {
+            $wfPath = "{$l2Path}.workflow";
+            $workflow = $layer2['workflow'];
+
+            // States must be an array of strings
+            $definedStates = [];
+            if (empty($workflow['states'])) {
+                $this->addError("{$wfPath}.states", "Workflow must define at least one state", [
+                    'fix' => '"states": ["draft", "submitted", "approved", "rejected"]',
+                ]);
+            } else {
+                $definedStates = $workflow['states'];
+                $canonicalStates = ['draft', 'submitted', 'in_review', 'needs_correction', 'resubmitted', 'approved', 'rejected'];
+                foreach ($definedStates as $state) {
+                    if (!in_array($state, $canonicalStates)) {
+                        $this->addWarning("{$wfPath}.states", "Custom workflow state '{$state}' — ensure it's handled in your mutation handlers");
+                    }
+                }
+            }
+
+            // Transitions
+            if (isset($workflow['transitions'])) {
+                foreach ($workflow['transitions'] as $i => $transition) {
+                    $tPath = "{$wfPath}.transitions[{$i}]";
+
+                    if (empty($transition['from'])) {
+                        $this->addError("{$tPath}.from", "Transition must have a 'from' state");
+                    } elseif (!empty($definedStates) && !in_array($transition['from'], $definedStates)) {
+                        $this->addError("{$tPath}.from", "Transition references undefined state: '{$transition['from']}'");
+                    }
+
+                    if (empty($transition['to'])) {
+                        $this->addError("{$tPath}.to", "Transition must have a 'to' state");
+                    } elseif (!empty($definedStates) && !in_array($transition['to'], $definedStates)) {
+                        $this->addError("{$tPath}.to", "Transition references undefined state: '{$transition['to']}'");
+                    }
+
+                    if (empty($transition['actor'])) {
+                        $this->addWarning("{$tPath}.actor", "Transition without actor list — any role can perform this transition");
+                    }
+                }
+            }
+        }
+
+        // Validate edit boundaries (managerEdits / userEdits)
+        $policyRoles = array_keys($packageData['policy']['roles'] ?? []);
+
+        foreach (['managerEdits', 'userEdits'] as $editType) {
+            if (isset($layer2[$editType])) {
+                $ePath = "{$l2Path}.{$editType}";
+                $editConfig = $layer2[$editType];
+
+                if (isset($editConfig['allowedInStates'])) {
+                    if (!is_array($editConfig['allowedInStates'])) {
+                        $this->addError("{$ePath}.allowedInStates", "Must be an array of state names");
+                    } else {
+                        $definedStates = $layer2['workflow']['states'] ?? [];
+                        foreach ($editConfig['allowedInStates'] as $state) {
+                            if (!empty($definedStates) && !in_array($state, $definedStates)) {
+                                $this->addError("{$ePath}.allowedInStates", "References undefined workflow state: '{$state}'");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────
+    //  SHOWIF CROSS-REFERENCES
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * Validate all showIf conditions reference valid settings keys
+     */
+    private function validateShowIfReferences(array $packageData): void
+    {
+        // Collect all defined settings keys from data.queries (settings-type queries)
+        $definedSettings = [];
+        if (isset($packageData['data']['settings'])) {
+            $definedSettings = array_keys($packageData['data']['settings']);
+        }
+
+        // Some packages store settings as entries in queries map
+        if (isset($packageData['data']['queries'])) {
+            foreach ($packageData['data']['queries'] as $name => $query) {
+                if (str_starts_with($name, 'getSetting') || str_starts_with($name, 'setting')) {
+                    $definedSettings[] = $name;
+                }
+            }
+        }
+
+        // Walk the entire tree to find showIf blocks
+        $showIfs = [];
+        $this->collectShowIfs($packageData, '$', $showIfs);
+
+        if (empty($showIfs)) {
+            return;
+        }
+
+        // Validate each showIf
+        foreach ($showIfs as $entry) {
+            $showIf = $entry['value'];
+            $path = $entry['path'];
+
+            if (!is_array($showIf)) {
+                $this->addError("{$path}.showIf", "showIf must be an object with 'settingsKey' or 'condition'");
+                continue;
+            }
+
+            if (empty($showIf['settingsKey']) && empty($showIf['condition']) && empty($showIf['field'])) {
+                $this->addError("{$path}.showIf", "showIf must have 'settingsKey', 'field', or 'condition' property", [
+                    'fix' => '"showIf": { "settingsKey": "setting_name" } or { "field": "other_field", "equals": true }',
+                ]);
+            }
+
+            // settingsKey should be snake_case
+            if (!empty($showIf['settingsKey']) && !preg_match('/^[a-z][a-z0-9_]*$/', $showIf['settingsKey'])) {
+                $this->addWarning("{$path}.showIf.settingsKey", "Settings key should be snake_case: '{$showIf['settingsKey']}'");
+            }
+        }
+
+        if (!empty($showIfs)) {
+            $this->addCheck_info('showIf', count($showIfs) . " showIf condition(s) validated");
+        }
+    }
+
+    /**
+     * Recursively collect all showIf blocks from the package tree
+     */
+    private function collectShowIfs(mixed $data, string $path, array &$results): void
+    {
+        if (!is_array($data)) {
+            return;
+        }
+
+        if (isset($data['showIf'])) {
+            $results[] = ['path' => $path, 'value' => $data['showIf']];
+        }
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $childPath = is_int($key) ? "{$path}[{$key}]" : "{$path}.{$key}";
+                $this->collectShowIfs($value, $childPath, $results);
+            }
+        }
+    }
+
+    /**
+     * Add an informational message (not error, not warning)
+     */
+    private function addCheck_info(string $context, string $message): void
+    {
+        // Intentionally not added to errors or warnings — just for structured output
+        $this->warnings[] = [
+            'path'    => $context,
+            'message' => "✓ {$message}",
+            'level'   => 'info',
+        ];
     }
 
     // ──────────────────────────────────────────────────────
@@ -804,6 +1089,27 @@ class PackageSchemaValidator
     // ──────────────────────────────────────────────────────
     //  ERROR / WARNING HELPERS
     // ──────────────────────────────────────────────────────
+
+    /**
+     * Extract role names from roles definition.
+     * Handles both formats:
+     *   - Array of strings: ["user", "manager", "admin"]
+     *   - Object keyed by role: { "user": { "label": "..." }, "manager": { ... } }
+     */
+    private function extractRoleNames(array $roles): array
+    {
+        if (empty($roles)) {
+            return [];
+        }
+
+        // If keys are sequential integers, it's a flat array of role strings
+        if (array_is_list($roles)) {
+            return $roles;
+        }
+
+        // Otherwise it's an object — keys are the role names
+        return array_keys($roles);
+    }
 
     private function addError(string $path, string $message, array $meta = []): void
     {

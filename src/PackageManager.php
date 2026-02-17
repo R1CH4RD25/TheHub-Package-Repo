@@ -6,6 +6,7 @@ use Exception;
 use PDO;
 use ZipArchive;
 use Hub\Cache;
+use Hub\Package\Schema\PackageSchemaValidator;
 
 /**
  * PackageManager - Complete section package lifecycle management
@@ -112,9 +113,56 @@ class PackageManager
                 [$packageId]
             );
 
-            // Validate package
+            // Validate package (runtime checks: system reqs, deps, conflicts, security)
             $installType = $existing ? 'upgrade' : 'new';
             $validation = $this->validator->validate($packageData, $installType);
+
+            // Schema validation (v3 structure: pages, fields, resources, policy, access, showIf)
+            $schemaVersion = $packageData['schemaVersion'] ?? null;
+            if ($schemaVersion && version_compare($schemaVersion, '3.0.0', '>=')) {
+                $schemaValidator = new PackageSchemaValidator();
+                $schemaResult = $schemaValidator->validate($packageData);
+
+                // Merge schema errors into runtime validation
+                if (!$schemaResult['valid']) {
+                    $validation['can_install'] = false;
+                    $validation['overall_status'] = 'fail';
+                    foreach ($schemaResult['errors'] as $err) {
+                        $validation['checks'][] = [
+                            'check_type' => 'schema',
+                            'check_name' => $err['path'],
+                            'required_value' => null,
+                            'actual_value' => null,
+                            'status' => 'fail',
+                            'severity' => 'error',
+                            'message' => $err['message'],
+                            'resolution' => $err['fix'] ?? null,
+                            'checked_at' => date('Y-m-d H:i:s'),
+                        ];
+                        $validation['errors'][] = end($validation['checks']);
+                    }
+                    $validation['summary']['failed'] = ($validation['summary']['failed'] ?? 0) + count($schemaResult['errors']);
+                }
+
+                // Merge schema warnings
+                foreach ($schemaResult['warnings'] as $warn) {
+                    $validation['checks'][] = [
+                        'check_type' => 'schema',
+                        'check_name' => $warn['path'],
+                        'required_value' => null,
+                        'actual_value' => null,
+                        'status' => 'warning',
+                        'severity' => 'warning',
+                        'message' => $warn['message'],
+                        'resolution' => $warn['fix'] ?? null,
+                        'checked_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $validation['warnings'][] = end($validation['checks']);
+                }
+                $validation['summary']['warnings'] = ($validation['summary']['warnings'] ?? 0) + count($schemaResult['warnings']);
+                $validation['summary']['total_checks'] = count($validation['checks']);
+                $validation['schema_validation'] = $schemaResult;
+            }
 
             // Store package record with 'pending' status initially
             $pkgName = $pkg['name'] ?? $pkg['id'] ?? $packageId;
@@ -201,17 +249,17 @@ class PackageManager
             // Parse package data
             $packageData = json_decode($pkgRecord['package_data'], true);
             $pkg = $packageData['package'];
-            
+
             // Detect schema version
             $schemaVersion = $packageData['schemaVersion'] ?? $packageData['schema_version'] ?? '1.0.0';
             $isV3 = version_compare($schemaVersion, '3.0.0', '>=');
-            
+
             // Normalize package identity — v3 uses 'id' + 'display_name', older uses 'name'
             $pkgId = $pkg['id'] ?? $pkg['name'] ?? $pkgRecord['package_id'];
             $pkgName = $pkg['name'] ?? $pkg['id'] ?? $pkgRecord['name'];
             $pkgDisplayName = $pkg['display_name'] ?? $pkg['name'] ?? $pkgId;
             $pkgSlug = $this->generateSlug($pkgName);
-            
+
             // v2 schema fields (may be empty for v3)
             $fields = $packageData['fields'] ?? [];
             $permissions = $packageData['permissions'] ?? [];
@@ -263,7 +311,7 @@ class PackageManager
             // ========================================
             // V2 Schema: fields, permissions, hub_cards, management_sections, menu_items
             // ========================================
-            
+
             // Install fields (v2)
             foreach ($fields as $field) {
                 $this->installField($sectionId, $field);
@@ -281,13 +329,13 @@ class PackageManager
 
             // Install menu items - support both legacy and v2 spec
             $menuOrder = 1;
-            
+
             // Legacy: menu_items array
             foreach ($menuItems as $menuItem) {
                 $normalized = $this->normalizeMenuItem($menuItem, $menuOrder++);
                 $this->installMenuItem($sectionId, $normalized);
             }
-            
+
             // V2 Spec: hub_cards → menu items
             if (!empty($packageData['hub_cards'])) {
                 foreach ($packageData['hub_cards'] as $card) {
@@ -300,7 +348,7 @@ class PackageManager
                     $this->installMenuItem($sectionId, $normalized);
                 }
             }
-            
+
             // V2 Spec: management_sections → menu items
             if (!empty($packageData['management_sections'])) {
                 foreach ($packageData['management_sections'] as $section) {
@@ -353,8 +401,8 @@ class PackageManager
                 // Install role access from policy.globalRoleMapping
                 if (!empty($packageData['policy']['globalRoleMapping'])) {
                     $this->installPolicyRoleAccess(
-                        $sectionId, 
-                        $packageData['policy']['globalRoleMapping'], 
+                        $sectionId,
+                        $packageData['policy']['globalRoleMapping'],
                         $installedBy
                     );
                 } else {
@@ -376,7 +424,7 @@ class PackageManager
                     [$capabilitiesJson, $sectionId]
                 );
             }
-            
+
             // Warn if no menu items created
             if ($menuOrder === 1) {
                 error_log("PackageManager: Warning - No menu items created for package {$pkgId}");
@@ -913,9 +961,19 @@ class PackageManager
     {
         // Valid database roles from ENUM
         $validDbRoles = [
-            'staff', 'student', 'maintenance_staff', 'custodial', 'cafeteria',
-            'custodial_manager', 'maintenance_director', 'business_manager',
-            'substitute_manager', 'counselor', 'principal', 'admin', 'super_admin'
+            'staff',
+            'student',
+            'maintenance_staff',
+            'custodial',
+            'cafeteria',
+            'custodial_manager',
+            'maintenance_director',
+            'business_manager',
+            'substitute_manager',
+            'counselor',
+            'principal',
+            'admin',
+            'super_admin'
         ];
 
         // Map custom role names to database ENUM roles
@@ -923,7 +981,7 @@ class PackageManager
             // Hub package standard roles
             'hub_user' => 'staff',
             'hub_student' => 'student',
-            
+
             // Management roles
             'management_crew' => 'maintenance_staff',
             'management_custodial' => 'custodial',
@@ -935,7 +993,7 @@ class PackageManager
             'management_counselor' => 'counselor',
             'management_principal' => 'principal',
             'management_admin' => 'admin',
-            
+
             // Direct database role names (pass through)
             'staff' => 'staff',
             'student' => 'student',
@@ -1024,9 +1082,19 @@ class PackageManager
     {
         // Valid database role ENUMs for section_role_access table
         $validDbRoles = [
-            'staff', 'student', 'maintenance_staff', 'custodial', 'cafeteria',
-            'custodial_manager', 'maintenance_director', 'business_manager',
-            'substitute_manager', 'counselor', 'principal', 'admin', 'super_admin'
+            'staff',
+            'student',
+            'maintenance_staff',
+            'custodial',
+            'cafeteria',
+            'custodial_manager',
+            'maintenance_director',
+            'business_manager',
+            'substitute_manager',
+            'counselor',
+            'principal',
+            'admin',
+            'super_admin'
         ];
 
         // Clear existing for this section
@@ -1315,7 +1383,6 @@ class PackageManager
                 }
 
                 $result['details'][] = "Executed {$sqlFile['name']} ({$sqlFile['source']})";
-
             } catch (\Exception $e) {
                 $result['status'] = 'partial';
                 $result['details'][] = "Error in {$sqlFile['name']}: " . $e->getMessage();
@@ -1605,7 +1672,7 @@ class PackageManager
 
     /**
      * Rebuild menu items for a package (idempotent recovery tool)
-     * 
+     *
      * @param string $packageId Package identifier
      * @param int $rebuiltBy User ID performing the action
      * @return array Result with success status
@@ -1615,35 +1682,35 @@ class PackageManager
         try {
             // Get installation and package data
             $installation = $this->db->fetchOne(
-                "SELECT si.*, s.id as section_id, sp.package_data 
-                 FROM section_installations si 
-                 JOIN sections s ON si.section_id = s.id 
+                "SELECT si.*, s.id as section_id, sp.package_data
+                 FROM section_installations si
+                 JOIN sections s ON si.section_id = s.id
                  JOIN section_packages sp ON si.package_record_id = sp.id
                  WHERE si.package_id = ?",
                 [$packageId]
             );
-            
+
             if (!$installation) {
                 throw new Exception('Package not installed');
             }
-            
+
             $sectionId = $installation['section_id'];
             $packageData = json_decode($installation['package_data'], true);
-            
+
             if (!$packageData) {
                 throw new Exception('Invalid package data');
             }
-            
+
             // Delete existing menu items for this section
             $this->db->execute(
                 "DELETE FROM section_menu_items WHERE section_id = ?",
                 [$sectionId]
             );
-            
+
             // Rebuild menu items using same logic as install
             $menuOrder = 1;
             $itemsCreated = 0;
-            
+
             // Legacy: menu_items array
             if (!empty($packageData['menu_items'])) {
                 foreach ($packageData['menu_items'] as $menuItem) {
@@ -1652,7 +1719,7 @@ class PackageManager
                     $itemsCreated++;
                 }
             }
-            
+
             // V2 Spec: hub_cards
             if (!empty($packageData['hub_cards'])) {
                 foreach ($packageData['hub_cards'] as $card) {
@@ -1666,7 +1733,7 @@ class PackageManager
                     $itemsCreated++;
                 }
             }
-            
+
             // V2 Spec: management_sections
             if (!empty($packageData['management_sections'])) {
                 foreach ($packageData['management_sections'] as $section) {
@@ -1680,7 +1747,7 @@ class PackageManager
                     $itemsCreated++;
                 }
             }
-            
+
             // Log rebuild
             $this->auditLogger->log(
                 'package_menu_rebuild',
@@ -1694,13 +1761,12 @@ class PackageManager
                 ],
                 $rebuiltBy
             );
-            
+
             return [
                 'success' => true,
                 'message' => "Rebuilt {$itemsCreated} menu items for package {$packageId}",
                 'items_created' => $itemsCreated
             ];
-            
         } catch (Exception $e) {
             return [
                 'success' => false,

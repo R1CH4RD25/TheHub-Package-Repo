@@ -82,6 +82,9 @@ class PackageValidator
             // 9. Resource check (disk space, etc.)
             $this->checkResources($packageData);
 
+            // 10. Validate globalRoleMapping keys against actual org_roles (runtime check)
+            $this->validateGlobalRoleMappingRuntime($packageData);
+
         } catch (Exception $e) {
             $this->addCheck('exception', 'Exception During Validation', null, null,
                 self::STATUS_FAIL, self::SEVERITY_CRITICAL,
@@ -751,6 +754,59 @@ class PackageValidator
             $this->addCheck('resources', 'Disk Space', '>= 100MB', $this->formatBytes($freeSpace),
                 self::STATUS_PASS, self::SEVERITY_INFO,
                 "Sufficient disk space available");
+        }
+    }
+
+    // ========================================================================
+    // Runtime Role Validation (checks against actual org_roles table)
+    // ========================================================================
+
+    /**
+     * Validate globalRoleMapping keys against actual org_roles in the database.
+     * Org roles are admin-configured so we warn (not fail) on unknown names.
+     */
+    private function validateGlobalRoleMappingRuntime(array $packageData): void
+    {
+        $mapping = $packageData['policy']['globalRoleMapping'] ?? [];
+        if (empty($mapping)) {
+            return;
+        }
+
+        try {
+            $rows = $this->db->fetchAll("SELECT name FROM org_roles WHERE is_active = 1");
+            $dbRoles = array_column($rows, 'name');
+        } catch (Exception $e) {
+            // org_roles table may not exist yet — skip
+            $this->addCheck('roles', 'Org Roles Table', 'accessible', 'unavailable',
+                self::STATUS_WARNING, self::SEVERITY_WARNING,
+                'Could not verify globalRoleMapping against org_roles — table may not exist yet');
+            return;
+        }
+
+        if (empty($dbRoles)) {
+            $this->addCheck('roles', 'Org Roles', '>0 roles', '0 roles',
+                self::STATUS_WARNING, self::SEVERITY_WARNING,
+                'No org_roles defined — globalRoleMapping keys will be ignored until roles are configured',
+                'Add organization roles in Admin → Settings before installing');
+            return;
+        }
+
+        $unmapped = [];
+        foreach (array_keys($mapping) as $roleName) {
+            if (!in_array($roleName, $dbRoles)) {
+                $unmapped[] = $roleName;
+            }
+        }
+
+        if (!empty($unmapped)) {
+            $this->addCheck('roles', 'globalRoleMapping → org_roles', 'all mapped', count($unmapped) . ' unmatched',
+                self::STATUS_WARNING, self::SEVERITY_WARNING,
+                'globalRoleMapping references org roles not in this Hub: ' . implode(', ', $unmapped),
+                'Create these roles in Admin → Settings, or they will be ignored at install');
+        } else {
+            $this->addCheck('roles', 'globalRoleMapping → org_roles', 'all mapped', 'all matched',
+                self::STATUS_PASS, self::SEVERITY_INFO,
+                'All globalRoleMapping keys match existing org_roles');
         }
     }
 

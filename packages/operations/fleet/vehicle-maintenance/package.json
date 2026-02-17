@@ -1412,6 +1412,10 @@
                 "description": "Get fleet package settings (single row)",
                 "handler": "SettingsQueryHandler::getSettings",
                 "cache": 600
+            },
+            "getUserOptions": {
+                "description": "Get users list for driver assignment dropdowns",
+                "handler": "UserQueryHandler::getUserOptions"
             }
         },
         "mutations": {
