@@ -23,7 +23,7 @@ This document verifies the compatibility of the Vehicle Maintenance & Fleet Trac
 | Admin Dashboard | ✅ PASS | Section toggle matrix, role management, Google Sync UI |
 | Reporting | ✅ PASS | SQL queries against `vm_*` tables via standard tools |
 | Settings-Driven UI | ✅ PASS | 22 toggle switches control field visibility district-wide |
-| Vehicle Sharing | ✅ PASS | Cross-package vehicle reference via `is_shared` flag |
+| Vehicle Sharing | ✅ PASS | Resource Registry with canonical contracts, platform views, ownership tracking |
 
 ---
 
@@ -108,19 +108,67 @@ All fleet tables reside in `woodson_hub` (the primary Hub database) with namespa
 | `vm_settings` | Package configuration (single row, 22 toggles) | CHAR(26) ULID | — |
 | `vm_audit_logs` | Package audit trail | BIGINT AUTO | → `users.id` |
 
-### 2.3 Vehicle Sharing (Cross-Package)
+### 2.3 Vehicle Sharing (Cross-Package Resource Registry)
 
-Vehicles are a **shared district resource**. The `vm_vehicles` table includes an `is_shared` boolean flag — when `TRUE`, other Hub packages can reference the vehicle via the `database.sharedTables` platform capability (see `CONTRIBUTING.md` § "Shared Tables"). The fleet package exposes a read-only view with explicit column filtering:
+Vehicles are a **shared district resource** managed through the platform's **Resource Registry** — a production-grade contract system that prevents duplicate tables, enforces schema boundaries, and tracks ownership. Full specification is in `CONTRIBUTING.md` § "Shared Resources."
 
-| Column | Exposed | Reason |
-|--------|---------|--------|
-| `id`, `unit_number`, `name`, `year`, `make`, `model` | ✅ | Identification |
-| `status`, `is_shared` | ✅ | Availability check |
-| `color`, `vin`, `license_plate`, `current_odometer` | ✅ | Detail fields (if enabled) |
-| `assigned_driver_id`, `department_id`, `campus_id` | ❌ | Internal to fleet package |
-| `is_deleted` | Filter only | `WHERE is_shared = 1 AND is_deleted = 0` |
+#### How it works
 
-This means a future **Trip Planning** or **Purchase Order** package can select from shared vehicles without duplicating the vehicle table.
+1. **Canonical contract** — `hub_resource_contracts` stores the `operations.vehicles` v1.0.0 contract defining 9 required columns, 6 optional columns, and behavior rules (soft delete semantics, migration authority, etc.)
+2. **Provider registration** — The fleet package registers as the provider of `operations.vehicles` via `hub_resource_providers`, linking to source table `vm_vehicles` and platform view `hub_vehicles_v1`
+3. **Platform view** — `hub_vehicles_v1` is a `CREATE OR REPLACE VIEW` that exposes only contracted columns with `WHERE is_shared = 1 AND is_deleted = 0`. Consumers query **this view only**, never the raw table
+4. **Consumer dependency** — Future packages (Trip Planning, Purchase Orders) declare `resources.requires` in their manifest with `"key": "operations.vehicles"` and a SemVer constraint. Install-time resolution verifies the provider exists with a compatible contract version
+
+#### Contracted columns exposed via `hub_vehicles_v1`
+
+| Column | Contract Status | Type | Purpose |
+|--------|----------------|------|----------|
+| `id` | Required | CHAR(26) | ULID primary key |
+| `unit_number` | Required | VARCHAR(50) | District identifier |
+| `name` | Required | VARCHAR(255) | Display name |
+| `year`, `make`, `model` | Required | INT/VARCHAR | Vehicle identification |
+| `is_out_of_service` | Required | BOOLEAN | Availability check |
+| `is_deleted` | Required (filter) | BOOLEAN | Always FALSE in view |
+| `created_at` | Required | TIMESTAMP | Creation time |
+| `color`, `vin`, `license_plate` | Optional | Various | Detail fields |
+| `current_odometer` | Optional | INT | Latest mileage |
+| `department_id`, `campus_id` | Optional | CHAR(26) | Organizational assignment |
+
+Columns **not** exposed (internal to fleet): `assigned_driver_id`, `is_shared` (used in filter only), `updated_at`, and any future provider-internal columns.
+
+#### Package manifest declaration
+
+```json
+"resources": {
+    "provides": [{
+        "key": "operations.vehicles",
+        "contract": "1.0.0",
+        "table": "vm_vehicles",
+        "view": "hub_vehicles_v1",
+        "settingsGate": "share_vehicles"
+    }],
+    "requires": []
+}
+```
+
+#### Ownership rules
+
+| Action | Fleet Package (Provider) | Consumer Packages | Platform |
+|--------|--------------------------|-------------------|----------|
+| ALTER TABLE `vm_vehicles` | ✅ | ❌ Never | ❌ |
+| CREATE OR REPLACE VIEW | ✅ (at install) | ❌ | ✅ (contract upgrade) |
+| INSERT/UPDATE/DELETE rows | ✅ | ❌ (read-only) | ❌ |
+| SELECT from `hub_vehicles_v1` | ✅ | ✅ | ✅ |
+
+This architecture means a future **Trip Planning** or **Purchase Order** package can select shared vehicles without duplicating the vehicle table, and with a clean upgrade path via SemVer contract versioning.
+
+#### Registry tables (platform DDL)
+
+| Table | Purpose |
+|-------|---------|
+| `hub_resource_contracts` | Canonical definitions — required/optional columns, behavior rules, SemVer |
+| `hub_resource_providers` | Ownership registry — which package provides which resource, via which view |
+| `hub_resource_consumers` | Dependency links — which packages consume which resources, with capability + min version |
 
 ### 2.4 Settings-Driven Field Visibility
 
@@ -340,6 +388,7 @@ ORDER BY total_cost DESC;
 | G7 | Edit boundaries did not distinguish actor (user vs manager) | **LOW** | Split into `managerEdits` (submitted/in_review, requiresReason) and `userEdits` (draft/needs_correction, no reason required) | `packages/.../package.json` |
 | G8 | `is_active` vs `is_deleted` usage undocumented | **LOW** | Clarified: `is_deleted` for entities (vehicles), `is_active` for toggleable lookups/schedules | Audit report + SQL comments |
 | G9 | Trip category `code` column not mentioned in report | **LOW** | DDL already has `code VARCHAR(10) NOT NULL UNIQUE`; report now references it explicitly | Audit report |
+| G10 | Vehicle sharing used informal `sharedTables` pattern | **MEDIUM** | Replaced with production-grade Resource Registry: canonical contracts (`hub_resource_contracts`), provider ownership (`hub_resource_providers`), consumer dependency tracking (`hub_resource_consumers`), platform views (`hub_vehicles_v1`), SemVer contract versioning, deterministic install-time resolution | `database/resource-registry-schema.sql`, `CONTRIBUTING.md`, `package.json`, `001_create_fleet_tables.sql` |
 
 ---
 

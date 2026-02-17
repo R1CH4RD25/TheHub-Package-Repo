@@ -14,15 +14,20 @@
     "database": {
         "connection": "woodson_hub",
         "primaryTable": "vm_vehicles",
-        "auditTable": "vm_audit_logs",
-        "sharedTables": {
-            "vm_vehicles": {
-                "description": "District vehicle inventory — available to any package when share_vehicles is ON",
-                "foreignKey": "vehicle_id CHAR(26) REFERENCES vm_vehicles(id)",
-                "readColumns": ["id", "unit_number", "name", "year", "make", "model", "color", "department_id", "campus_id", "is_out_of_service"],
-                "filter": "is_shared = 1 AND is_deleted = 0"
+        "auditTable": "vm_audit_logs"
+    },
+    "resources": {
+        "provides": [
+            {
+                "key": "operations.vehicles",
+                "contract": "1.0.0",
+                "table": "vm_vehicles",
+                "view": "hub_vehicles_v1",
+                "description": "District vehicle inventory — consumers query the platform view, not the raw table",
+                "settingsGate": "share_vehicles"
             }
-        }
+        ],
+        "requires": []
     },
     "presentation": {
         "pages": {

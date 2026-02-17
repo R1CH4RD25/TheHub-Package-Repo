@@ -277,3 +277,36 @@ CREATE TABLE IF NOT EXISTS vm_audit_logs (
     INDEX idx_user (user_id),
     INDEX idx_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- PLATFORM VIEW: hub_vehicles_v1
+-- Consumer-facing view for cross-package access. Consumers MUST query this
+-- view — never the raw vm_vehicles table. This enforces the resource contract
+-- (operations.vehicles v1.0.0) by exposing only contracted columns and
+-- applying the required filter (is_shared + is_deleted).
+--
+-- The provider package (fleet) owns the raw table and can add private columns
+-- without breaking consumers. Only the provider may run DDL against vm_vehicles.
+-- ============================================================================
+CREATE OR REPLACE VIEW hub_vehicles_v1 AS
+SELECT
+    -- Required columns (contract v1.0.0)
+    v.id,
+    v.unit_number,
+    v.name,
+    v.year,
+    v.make,
+    v.model,
+    v.is_out_of_service,
+    v.is_deleted,
+    v.created_at,
+    -- Optional columns (exposed if provider populates them)
+    v.color,
+    v.current_odometer,
+    v.vin,
+    v.license_plate,
+    v.department_id,
+    v.campus_id
+FROM vm_vehicles v
+WHERE v.is_shared = 1
+  AND v.is_deleted = 0;

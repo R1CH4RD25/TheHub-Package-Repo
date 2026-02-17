@@ -84,29 +84,153 @@ packages/local/my-package/
     └── schema.sql                     # Fallback: single schema file
 ```
 
-### Shared Tables (`database.sharedTables`)
+### Shared Resources (`resources` block)
 
-Packages can expose tables for read-only cross-package access:
+Packages can share data across the platform using a **resource registry** with canonical contracts. This prevents duplicate tables, enforces schema consistency, and provides clean upgrade paths.
+
+#### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Platform Layer (hub-owned)                             │
+│                                                         │
+│  hub_resource_contracts    ← canonical definitions       │
+│  hub_resource_providers    ← who owns what               │
+│  hub_resource_consumers    ← who depends on what         │
+│  hub_vehicles_v1 (VIEW)   ← consumer-facing boundary    │
+└─────────────────────────────────────────────────────────┘
+         ▲ register               ▲ query (read-only)
+         │                        │
+┌────────┴─────────┐    ┌────────┴──────────┐
+│  Provider Package │    │  Consumer Package  │
+│  (fleet)          │    │  (trip request)    │
+│                   │    │                    │
+│  vm_vehicles      │    │  "I need vehicles" │
+│  (raw table)      │    │  → hub_vehicles_v1 │
+└───────────────────┘    └───────────────────┘
+```
+
+#### Resource Contracts
+
+Every shareable resource type has a **canonical contract** stored in `hub_resource_contracts`:
+
+| Field | Purpose |
+|-------|---------|
+| `resource_key` | Canonical namespace: `operations.vehicles`, `operations.locations` |
+| `contract_version` | SemVer — breaking changes bump major |
+| `required_columns` | JSON array of columns every provider MUST expose |
+| `optional_columns` | JSON array of columns a provider MAY expose |
+| `behavior_rules` | Soft delete rules, immutability, status enums, migration authority |
+
+**A package may extend the resource, but it cannot violate the required contract.**
+
+Example contract (`operations.vehicles` v1.0.0):
+
+| Column | Required? | Type | Semantic Meaning |
+|--------|-----------|------|------------------|
+| `id` | ✅ | CHAR(26) | ULID primary key — never reassigned |
+| `unit_number` | ✅ | VARCHAR(50) | Unique district identifier |
+| `name` | ✅ | VARCHAR(255) | Human-readable display name |
+| `year`, `make`, `model` | ✅ | INT/VARCHAR | Vehicle identification |
+| `is_out_of_service` | ✅ | BOOLEAN | Availability — consumers should filter/warn |
+| `is_deleted` | ✅ | BOOLEAN | Soft delete — consumers must filter on FALSE |
+| `created_at` | ✅ | TIMESTAMP | Record creation time |
+| `color`, `vin`, `license_plate` | Optional | Various | Detail fields (if provider populates them) |
+| `current_odometer` | Optional | INT | Latest mileage reading |
+| `department_id`, `campus_id` | Optional | CHAR(26) | Organizational assignment |
+
+#### Package manifest
+
+Providers and consumers declare resources in a top-level `resources` block:
 
 ```json
-"database": {
-    "connection": "woodson_hub",
-    "sharedTables": {
-        "vm_vehicles": {
-            "description": "Fleet vehicles available to other packages",
-            "readColumns": ["id", "unit_number", "name", "year", "make", "model", "status"],
-            "filter": "is_shared = 1 AND is_deleted = 0"
-        }
+{
+    "resources": {
+        "provides": [
+            {
+                "key": "operations.vehicles",
+                "contract": "1.0.0",
+                "table": "vm_vehicles",
+                "view": "hub_vehicles_v1",
+                "description": "District vehicle inventory",
+                "settingsGate": "share_vehicles"
+            }
+        ],
+        "requires": []
     }
 }
 ```
 
-**Rules:**
-- Only columns listed in `readColumns` are exposed to consuming packages
-- The `filter` is always appended to queries from other packages (cannot be overridden)
-- Consuming packages reference shared tables via `optionsQuery` with a `sharedTable` source
-- Write access is **never** granted cross-package — only the owning package can INSERT/UPDATE/DELETE
-- The validator checks that `sharedTables` keys match actual tables in the package's migrations
+Consumer example (hypothetical trip request package):
+
+```json
+{
+    "resources": {
+        "provides": [],
+        "requires": [
+            {
+                "key": "operations.vehicles",
+                "contract": ">=1.0.0",
+                "mode": "read",
+                "required": true,
+                "usage": "Vehicle selection for trip requests"
+            }
+        ]
+    }
+}
+```
+
+#### Install-time resolution algorithm
+
+When `PackageManager::installPackage()` runs, for each `requires` entry:
+
+1. **Check registry** — query `hub_resource_providers` for `resource_key`
+2. **If provider exists + contract version satisfies** → register consumer in `hub_resource_consumers`, link to existing view
+3. **If provider exists + contract version too old** → fail with: *"Package requires operations.vehicles >=2.0.0, but provider offers 1.0.0"*
+4. **If no provider + this package also provides** → register as provider, run migrations, create view
+5. **If no provider + required=true** → fail with: *"Requires 'operations.vehicles' but no provider is installed. Install the Fleet package first."*
+6. **If no provider + required=false** → install continues, consumer features gracefully disabled
+7. **Audit-log** every decision with before/after state
+
+When `PackageManager::uninstallPackage()` runs on a provider:
+1. Check `hub_resource_consumers` for active consumers
+2. If consumers exist → warn admin: *"2 packages depend on this resource. Uninstalling will break: Trip Requests, Purchase Orders."*
+3. Admin must confirm → deregisters provider, marks resource as orphaned
+
+#### Platform views (consumer boundary)
+
+Consumers **must** query the platform-owned view, not the raw table:
+
+| View | Source | Contract | Filter |
+|------|--------|----------|--------|
+| `hub_vehicles_v1` | `vm_vehicles` | `operations.vehicles` v1.0.0 | `is_shared = 1 AND is_deleted = 0` |
+
+**Why views?**
+- Prevents coupling to private columns (the provider can add internal columns without breaking consumers)
+- Contract enforcement is trivial (view only exposes contracted columns)
+- Auditors can verify the boundary by inspecting the view definition
+- Future contract upgrades create `hub_vehicles_v2` without breaking v1 consumers
+
+#### Ownership + migration authority
+
+| Action | Provider | Consumer | Platform |
+|--------|----------|----------|----------|
+| CREATE/ALTER TABLE on source table | ✅ | ❌ Never | ❌ |
+| CREATE OR REPLACE VIEW | ✅ (at install) | ❌ | ✅ (at contract upgrade) |
+| INSERT/UPDATE/DELETE rows | ✅ | ❌ (read-only) | ❌ |
+| SELECT from view | ✅ | ✅ | ✅ |
+| Register/deregister resource | ✅ (at install) | ❌ | ✅ (manual override) |
+| Upgrade contract version | ✅ (owns table) | ❌ (must update `requires`) | ✅ (approves) |
+
+#### Contract versioning rules
+
+- **Patch** (1.0.0 → 1.0.1): Bug fixes to behavior rules, no column changes
+- **Minor** (1.0.0 → 1.1.0): New optional columns added, no breaking changes
+- **Major** (1.0.0 → 2.0.0): Required columns changed, view recreated as `_v2`, old view kept for backward compat
+
+#### Registry tables (platform DDL)
+
+Located in `database/resource-registry-schema.sql`, run via `php cli/migrate-resource-registry.php`:
 
 **Migration Rules:**
 - `PackageManager::installPackage()` auto-runs migrations after metadata install
