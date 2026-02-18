@@ -12,9 +12,22 @@
         "tags": ["fleet", "vehicles", "maintenance", "fuel", "operations"]
     },
     "database": {
-        "connection": "woodson_fleet",
+        "connection": "woodson_hub",
         "primaryTable": "vm_vehicles",
         "auditTable": "vm_audit_logs"
+    },
+    "resources": {
+        "provides": [
+            {
+                "key": "operations.vehicles",
+                "contract": "1.0.0",
+                "table": "vm_vehicles",
+                "view": "hub_vehicles_v1",
+                "description": "District vehicle inventory — consumers query the platform view, not the raw table",
+                "settingsGate": "share_vehicles"
+            }
+        ],
+        "requires": []
     },
     "presentation": {
         "pages": {
@@ -101,6 +114,7 @@
                                     "key": "display_name",
                                     "label": "Vehicle",
                                     "sortable": true,
+                                    "primary": true,
                                     "width": "22%"
                                 },
                                 {
@@ -150,8 +164,8 @@
                                 "direction": "asc"
                             },
                             "pagination": {
-                                "perPage": 50,
-                                "pageSizes": [25, 50, 100]
+                                "perPage": 25,
+                                "pageSizes": [10, 25, 50]
                             },
                             "emptyState": {
                                 "icon": "lucide-truck",
@@ -204,13 +218,16 @@
                                     "fields": [
                                         {"key": "unit_number", "label": "Unit Number", "copyable": true},
                                         {"key": "display_name", "label": "Year / Make / Model"},
-                                        {"key": "vin", "label": "VIN", "copyable": true},
-                                        {"key": "license_plate", "label": "License Plate"},
-                                        {"key": "current_odometer", "label": "Current Odometer"},
+                                        {"key": "color", "label": "Color", "showIf": {"settingsKey": "track_vehicle_color"}},
+                                        {"key": "vin", "label": "VIN", "copyable": true, "showIf": {"settingsKey": "track_vin"}},
+                                        {"key": "license_plate", "label": "License Plate", "showIf": {"settingsKey": "track_license_plate"}},
+                                        {"key": "current_odometer", "label": "Current Odometer", "showIf": {"settingsKey": "track_odometer"}},
+                                        {"key": "assigned_driver_name", "label": "Assigned Driver", "showIf": {"settingsKey": "track_assigned_driver"}},
+                                        {"key": "is_shared", "label": "Shared Vehicle", "type": "badge", "showIf": {"settingsKey": "share_vehicles"}},
                                         {"key": "status_badge", "label": "Status", "type": "badge"},
                                         {"key": "oos_reason", "label": "OOS Reason"},
-                                        {"key": "department_name", "label": "Department", "type": "badge"},
-                                        {"key": "campus_name", "label": "Campus", "type": "badge"}
+                                        {"key": "department_name", "label": "Department", "type": "badge", "showIf": {"settingsKey": "enable_departments"}},
+                                        {"key": "campus_name", "label": "Campus", "type": "badge", "showIf": {"settingsKey": "enable_campuses"}}
                                     ]
                                 },
                                 {
@@ -290,13 +307,22 @@
                                             "type": "text",
                                             "label": "VIN",
                                             "placeholder": "17-character VIN",
-                                            "validation": {"maxLength": 17, "pattern": "^[A-HJ-NPR-Z0-9]{17}$"}
+                                            "validation": {"maxLength": 17, "pattern": "^[A-HJ-NPR-Z0-9]{17}$"},
+                                            "showIf": {"settingsKey": "track_vin"}
                                         },
                                         {
                                             "key": "license_plate",
                                             "type": "text",
                                             "label": "License Plate",
-                                            "placeholder": "e.g. TX 1234567"
+                                            "placeholder": "e.g. TX 1234567",
+                                            "showIf": {"settingsKey": "track_license_plate"}
+                                        },
+                                        {
+                                            "key": "color",
+                                            "type": "text",
+                                            "label": "Color",
+                                            "placeholder": "e.g. Yellow, White",
+                                            "showIf": {"settingsKey": "track_vehicle_color"}
                                         },
                                         {
                                             "key": "current_odometer",
@@ -304,27 +330,45 @@
                                             "label": "Current Odometer",
                                             "step": 1,
                                             "placeholder": "Current mileage",
-                                            "validation": {"min": 0, "max": 999999}
+                                            "validation": {"min": 0, "max": 999999},
+                                            "showIf": {"settingsKey": "track_odometer"}
                                         }
                                     ]
                                 },
                                 {
-                                    "title": "Assignment",
+                                    "title": "Assignment & Sharing",
                                     "grid": 2,
                                     "fields": [
+                                        {
+                                            "key": "assigned_driver_id",
+                                            "type": "select",
+                                            "label": "Assigned Driver",
+                                            "optionsQuery": "getUserOptions",
+                                            "helpText": "Primary driver for this vehicle",
+                                            "showIf": {"settingsKey": "track_assigned_driver"}
+                                        },
                                         {
                                             "key": "department_id",
                                             "type": "select",
                                             "label": "Department",
                                             "optionsQuery": "getDepartments",
-                                            "helpText": "Optional — assign to a department"
+                                            "helpText": "Optional — assign to a department",
+                                            "showIf": {"settingsKey": "enable_departments"}
                                         },
                                         {
                                             "key": "campus_id",
                                             "type": "select",
                                             "label": "Campus",
                                             "optionsQuery": "getCampuses",
-                                            "helpText": "Optional — assign to a campus"
+                                            "helpText": "Optional — assign to a campus",
+                                            "showIf": {"settingsKey": "enable_campuses"}
+                                        },
+                                        {
+                                            "key": "is_shared",
+                                            "type": "checkbox",
+                                            "label": "Available to Other Packages",
+                                            "helpText": "Allow other packages to reference this vehicle",
+                                            "showIf": {"settingsKey": "share_vehicles"}
                                         },
                                         {
                                             "key": "template_id",
@@ -366,7 +410,7 @@
                                             "optionsQuery": "getVehicleOptions"
                                         },
                                         {
-                                            "key": "fuel_date",
+                                            "key": "event_date",
                                             "type": "date",
                                             "label": "Date",
                                             "required": true
@@ -374,19 +418,19 @@
                                         {
                                             "key": "trip_category_id",
                                             "type": "select",
-                                            "label": "Trip Category",
+                                            "label": "Trip Purpose",
                                             "required": true,
                                             "optionsQuery": "getTripCategories",
-                                            "helpText": "11=Extracurricular, 23=Transport, 34=Business, 36=Training, 41=Maintenance"
+                                            "helpText": "Select the purpose of this trip"
                                         },
                                         {
-                                            "key": "odometer_reading",
+                                            "key": "odometer",
                                             "type": "number",
                                             "label": "Odometer Reading",
-                                            "required": true,
                                             "step": 1,
                                             "placeholder": "Current mileage",
-                                            "validation": {"min": 0, "max": 999999}
+                                            "validation": {"min": 0, "max": 999999},
+                                            "showIf": {"settingsKey": "track_odometer"}
                                         }
                                     ]
                                 },
@@ -395,19 +439,7 @@
                                     "grid": 2,
                                     "fields": [
                                         {
-                                            "key": "fuel_type",
-                                            "type": "select",
-                                            "label": "Fuel Type",
-                                            "required": true,
-                                            "options": [
-                                                {"value": "unleaded", "label": "Unleaded"},
-                                                {"value": "diesel", "label": "Diesel"},
-                                                {"value": "propane", "label": "Propane"},
-                                                {"value": "other", "label": "Other"}
-                                            ]
-                                        },
-                                        {
-                                            "key": "fuel_gallons",
+                                            "key": "gallons",
                                             "type": "number",
                                             "label": "Gallons",
                                             "required": true,
@@ -415,19 +447,45 @@
                                             "validation": {"min": 0.01, "max": 9999.99}
                                         },
                                         {
-                                            "key": "is_purchased",
+                                            "key": "fuel_type",
+                                            "type": "select",
+                                            "label": "Fuel Type",
+                                            "options": [
+                                                {"value": "unleaded", "label": "Unleaded"},
+                                                {"value": "diesel", "label": "Diesel"},
+                                                {"value": "propane", "label": "Propane"},
+                                                {"value": "other", "label": "Other"}
+                                            ],
+                                            "showIf": {"settingsKey": "track_fuel_type"}
+                                        },
+                                        {
+                                            "key": "total_cost",
+                                            "type": "currency",
+                                            "label": "Total Cost",
+                                            "showIf": {"settingsKey": "track_fuel_cost"}
+                                        },
+                                        {
+                                            "key": "price_per_gallon",
+                                            "type": "currency",
+                                            "label": "Price per Gallon",
+                                            "showIf": {"settingsKey": "track_price_per_gallon"}
+                                        },
+                                        {
+                                            "key": "is_purchase",
                                             "type": "checkbox",
                                             "label": "Purchased Fuel (not district tank)",
-                                            "helpText": "Check if fuel was purchased from an external vendor"
+                                            "helpText": "Check if fuel was purchased from an external vendor",
+                                            "showIf": {"settingsKey": "track_purchase_flag"}
                                         }
                                     ]
                                 },
                                 {
-                                    "title": "Purchase Details",
-                                    "description": "Complete if fuel was purchased externally",
+                                    "title": "Vendor & Receipt",
+                                    "description": "Purchase details for externally-sourced fuel",
                                     "collapsible": true,
                                     "collapsed": true,
                                     "grid": 2,
+                                    "showIf": {"settingsKey": "track_vendor"},
                                     "fields": [
                                         {
                                             "key": "vendor",
@@ -442,22 +500,13 @@
                                             "placeholder": "City or address"
                                         },
                                         {
-                                            "key": "fuel_cost",
-                                            "type": "currency",
-                                            "label": "Total Cost"
-                                        },
-                                        {
-                                            "key": "price_per_gallon",
-                                            "type": "currency",
-                                            "label": "Price per Gallon"
-                                        },
-                                        {
-                                            "key": "receipt",
+                                            "key": "receipt_path",
                                             "type": "file",
                                             "label": "Receipt Upload",
                                             "accept": ".pdf,.jpg,.jpeg,.png",
                                             "fullWidth": true,
-                                            "helpText": "PDF, JPG, or PNG — max 5 MB"
+                                            "helpText": "PDF, JPG, or PNG — max 5 MB",
+                                            "showIf": {"settingsKey": "track_receipts"}
                                         }
                                     ]
                                 },
@@ -506,13 +555,15 @@
                                     "dataKey": "total_cost",
                                     "icon": "lucide-dollar-sign",
                                     "color": "success",
-                                    "format": "currency"
+                                    "format": "currency",
+                                    "showIf": {"settingsKey": "track_fuel_cost"}
                                 },
                                 {
                                     "title": "Pending Review",
                                     "dataKey": "pending_review",
                                     "icon": "lucide-clock",
-                                    "color": "warning"
+                                    "color": "warning",
+                                    "showIf": {"settingsKey": "require_approval"}
                                 }
                             ]
                         },
@@ -546,9 +597,11 @@
                                     "type": "select",
                                     "label": "Status",
                                     "options": [
+                                        {"value": "draft", "label": "Draft"},
                                         {"value": "submitted", "label": "Submitted"},
                                         {"value": "in_review", "label": "In Review"},
-                                        {"value": "corrected", "label": "Corrected"},
+                                        {"value": "needs_correction", "label": "Needs Correction"},
+                                        {"value": "resubmitted", "label": "Resubmitted"},
                                         {"value": "approved", "label": "Approved"},
                                         {"value": "rejected", "label": "Rejected"}
                                     ]
@@ -562,7 +615,7 @@
                             "id": "pkg-table-fuel",
                             "columns": [
                                 {
-                                    "key": "fuel_date",
+                                    "key": "event_date",
                                     "label": "Date",
                                     "sortable": true,
                                     "style": "date",
@@ -572,36 +625,38 @@
                                     "key": "unit_number",
                                     "label": "Vehicle",
                                     "sortable": true,
-                                    "width": "12%"
+                                    "width": "14%"
                                 },
                                 {
                                     "key": "trip_code",
-                                    "label": "Trip",
+                                    "label": "Trip Purpose",
                                     "style": "badge",
-                                    "width": "8%"
+                                    "width": "12%"
                                 },
                                 {
-                                    "key": "fuel_gallons",
+                                    "key": "gallons",
                                     "label": "Gallons",
                                     "sortable": true,
                                     "width": "10%"
                                 },
                                 {
-                                    "key": "odometer_reading",
+                                    "key": "odometer",
                                     "label": "Odometer",
                                     "width": "10%",
-                                    "responsive": "hide-mobile"
+                                    "responsive": "hide-mobile",
+                                    "showIf": {"settingsKey": "track_odometer"}
                                 },
                                 {
-                                    "key": "fuel_cost",
+                                    "key": "total_cost",
                                     "label": "Cost",
                                     "style": "currency",
                                     "width": "10%",
-                                    "responsive": "hide-mobile"
+                                    "responsive": "hide-mobile",
+                                    "showIf": {"settingsKey": "track_fuel_cost"}
                                 },
                                 {
                                     "key": "driver_name",
-                                    "label": "Driver",
+                                    "label": "Logged By",
                                     "responsive": "hide-mobile",
                                     "width": "15%"
                                 },
@@ -609,7 +664,8 @@
                                     "key": "workflow_status",
                                     "label": "Status",
                                     "style": "badge",
-                                    "width": "10%"
+                                    "width": "10%",
+                                    "showIf": {"settingsKey": "require_approval"}
                                 }
                             ],
                             "actions": [
@@ -622,12 +678,12 @@
                                 }
                             ],
                             "defaultSort": {
-                                "column": "fuel_date",
+                                "column": "event_date",
                                 "direction": "desc"
                             },
                             "pagination": {
-                                "perPage": 50,
-                                "pageSizes": [25, 50, 100, 200]
+                                "perPage": 25,
+                                "pageSizes": [10, 25, 50]
                             },
                             "emptyState": {
                                 "icon": "lucide-fuel",
@@ -673,12 +729,12 @@
                                     "icon": "lucide-map-pin",
                                     "columns": 2,
                                     "fields": [
-                                        {"key": "fuel_date", "label": "Date", "type": "date"},
+                                        {"key": "event_date", "label": "Date", "type": "date"},
                                         {"key": "unit_number", "label": "Vehicle"},
-                                        {"key": "trip_code", "label": "Trip Category", "type": "badge"},
-                                        {"key": "odometer_reading", "label": "Odometer Reading"},
-                                        {"key": "driver_name", "label": "Submitted By"},
-                                        {"key": "workflow_status", "label": "Status", "type": "badge"}
+                                        {"key": "trip_code", "label": "Trip Purpose", "type": "badge"},
+                                        {"key": "odometer", "label": "Odometer Reading", "showIf": {"settingsKey": "track_odometer"}},
+                                        {"key": "driver_name", "label": "Logged By"},
+                                        {"key": "workflow_status", "label": "Status", "type": "badge", "showIf": {"settingsKey": "require_approval"}}
                                     ]
                                 },
                                 {
@@ -686,10 +742,18 @@
                                     "icon": "lucide-fuel",
                                     "columns": 2,
                                     "fields": [
-                                        {"key": "fuel_type", "label": "Fuel Type", "type": "badge"},
-                                        {"key": "fuel_gallons", "label": "Gallons"},
-                                        {"key": "fuel_cost", "label": "Cost", "type": "currency"},
-                                        {"key": "price_per_gallon", "label": "Price/Gallon", "type": "currency"},
+                                        {"key": "gallons", "label": "Gallons"},
+                                        {"key": "fuel_type", "label": "Fuel Type", "type": "badge", "showIf": {"settingsKey": "track_fuel_type"}},
+                                        {"key": "total_cost", "label": "Cost", "type": "currency", "showIf": {"settingsKey": "track_fuel_cost"}},
+                                        {"key": "price_per_gallon", "label": "Price/Gallon", "type": "currency", "showIf": {"settingsKey": "track_price_per_gallon"}}
+                                    ]
+                                },
+                                {
+                                    "title": "Vendor & Location",
+                                    "icon": "lucide-store",
+                                    "collapsible": true,
+                                    "showIf": {"settingsKey": "track_vendor"},
+                                    "fields": [
                                         {"key": "vendor", "label": "Vendor"},
                                         {"key": "location", "label": "Location"}
                                     ]
@@ -700,7 +764,7 @@
                                     "collapsible": true,
                                     "fields": [
                                         {"key": "notes", "label": "Notes"},
-                                        {"key": "receipt_url", "label": "Receipt", "type": "link"}
+                                        {"key": "receipt_path", "label": "Receipt", "type": "link", "showIf": {"settingsKey": "track_receipts"}}
                                     ]
                                 }
                             ]
@@ -749,19 +813,20 @@
                                             "required": true
                                         },
                                         {
-                                            "key": "odometer_reading",
+                                            "key": "odometer",
                                             "type": "number",
                                             "label": "Odometer at Service",
-                                            "required": true,
                                             "step": 1,
                                             "placeholder": "Current mileage",
-                                            "validation": {"min": 0, "max": 999999}
+                                            "validation": {"min": 0, "max": 999999},
+                                            "showIf": {"settingsKey": "track_odometer"}
                                         }
                                     ]
                                 },
                                 {
                                     "title": "Vendor & Costs",
                                     "grid": 2,
+                                    "showIf": {"settingsKey": "track_maintenance_cost"},
                                     "fields": [
                                         {
                                             "key": "vendor",
@@ -770,20 +835,21 @@
                                             "placeholder": "e.g. WISD Bus Barn, Pep Boys"
                                         },
                                         {
+                                            "key": "total_cost",
+                                            "type": "currency",
+                                            "label": "Total Cost"
+                                        },
+                                        {
                                             "key": "parts_cost",
                                             "type": "currency",
-                                            "label": "Parts Cost"
+                                            "label": "Parts Cost",
+                                            "showIf": {"settingsKey": "track_parts_labor_split"}
                                         },
                                         {
                                             "key": "labor_cost",
                                             "type": "currency",
-                                            "label": "Labor Cost"
-                                        },
-                                        {
-                                            "key": "total_cost",
-                                            "type": "currency",
-                                            "label": "Total Cost",
-                                            "helpText": "Auto-calculated if parts + labor provided"
+                                            "label": "Labor Cost",
+                                            "showIf": {"settingsKey": "track_parts_labor_split"}
                                         }
                                     ]
                                 },
@@ -804,14 +870,16 @@
                                             "type": "file",
                                             "label": "Invoice Upload",
                                             "accept": ".pdf,.jpg,.jpeg,.png",
-                                            "helpText": "PDF, JPG, or PNG — max 5 MB"
+                                            "helpText": "PDF, JPG, or PNG — max 5 MB",
+                                            "showIf": {"settingsKey": "track_invoices"}
                                         },
                                         {
                                             "key": "photos",
                                             "type": "file",
                                             "label": "Service Photos",
                                             "accept": ".jpg,.jpeg,.png",
-                                            "helpText": "JPG or PNG — max 10 MB"
+                                            "helpText": "JPG or PNG — max 10 MB",
+                                            "showIf": {"settingsKey": "track_photos"}
                                         }
                                     ]
                                 }
@@ -842,14 +910,16 @@
                                     "dataKey": "total_parts_cost",
                                     "icon": "lucide-package",
                                     "color": "info",
-                                    "format": "currency"
+                                    "format": "currency",
+                                    "showIf": {"settingsKey": "track_parts_labor_split"}
                                 },
                                 {
                                     "title": "Total Labor Cost",
                                     "dataKey": "total_labor_cost",
                                     "icon": "lucide-hard-hat",
                                     "color": "warning",
-                                    "format": "currency"
+                                    "format": "currency",
+                                    "showIf": {"settingsKey": "track_parts_labor_split"}
                                 },
                                 {
                                     "title": "Pending Review",
@@ -932,19 +1002,22 @@
                                     "label": "Cost",
                                     "style": "currency",
                                     "sortable": true,
-                                    "width": "10%"
+                                    "width": "10%",
+                                    "showIf": {"settingsKey": "track_maintenance_cost"}
                                 },
                                 {
-                                    "key": "odometer_reading",
+                                    "key": "odometer",
                                     "label": "Odometer",
                                     "responsive": "hide-mobile",
-                                    "width": "10%"
+                                    "width": "10%",
+                                    "showIf": {"settingsKey": "track_odometer"}
                                 },
                                 {
                                     "key": "workflow_status",
                                     "label": "Status",
                                     "style": "badge",
-                                    "width": "10%"
+                                    "width": "10%",
+                                    "showIf": {"settingsKey": "require_approval"}
                                 }
                             ],
                             "actions": [
@@ -961,8 +1034,8 @@
                                 "direction": "desc"
                             },
                             "pagination": {
-                                "perPage": 50,
-                                "pageSizes": [25, 50, 100]
+                                "perPage": 25,
+                                "pageSizes": [10, 25, 50]
                             },
                             "emptyState": {
                                 "icon": "lucide-wrench",
@@ -1136,6 +1209,87 @@
                         "dataQuery": "listTemplates"
                     }
                 ]
+            },
+
+            "settings": {
+                "title": "Fleet Settings",
+                "route": "/config/settings",
+                "layout": "standard",
+                "access": ["admin"],
+                "components": [
+                    {
+                        "type": "form",
+                        "config": {
+                            "mutation": "updateSettings",
+                            "submitLabel": "Save Settings",
+                            "loadQuery": "getSettings",
+                            "sections": [
+                                {
+                                    "title": "Fuel Logging — Optional Fields",
+                                    "description": "Core fields (vehicle, date, gallons, trip purpose) are always visible. Toggle additional fields below.",
+                                    "icon": "lucide-fuel",
+                                    "grid": 2,
+                                    "fields": [
+                                        {"key": "track_odometer", "type": "checkbox", "label": "Track Odometer Reading", "helpText": "Record mileage on each fuel log"},
+                                        {"key": "track_fuel_type", "type": "checkbox", "label": "Track Fuel Type", "helpText": "Unleaded, diesel, propane, etc."},
+                                        {"key": "track_fuel_cost", "type": "checkbox", "label": "Track Fuel Cost", "helpText": "Total cost per fill-up"},
+                                        {"key": "track_price_per_gallon", "type": "checkbox", "label": "Track Price per Gallon", "helpText": "Unit cost tracking"},
+                                        {"key": "track_purchase_flag", "type": "checkbox", "label": "Purchased vs. District Tank", "helpText": "Distinguish external purchases from district pump fills"},
+                                        {"key": "track_vendor", "type": "checkbox", "label": "Track Vendor & Location", "helpText": "Where the fuel was purchased"},
+                                        {"key": "track_receipts", "type": "checkbox", "label": "Allow Receipt Upload", "helpText": "PDF/image upload on fuel logs"}
+                                    ]
+                                },
+                                {
+                                    "title": "Maintenance — Optional Fields",
+                                    "description": "Core fields (vehicle, date, maintenance type) are always visible.",
+                                    "icon": "lucide-wrench",
+                                    "grid": 2,
+                                    "fields": [
+                                        {"key": "enable_maintenance_tracking", "type": "checkbox", "label": "Enable Maintenance Module", "helpText": "Turn off to hide all maintenance features"},
+                                        {"key": "enable_scheduling", "type": "checkbox", "label": "Enable Schedule Tracking", "helpText": "Track upcoming due dates for maintenance items"},
+                                        {"key": "track_maintenance_cost", "type": "checkbox", "label": "Track Maintenance Cost", "helpText": "Record cost on maintenance events"},
+                                        {"key": "track_parts_labor_split", "type": "checkbox", "label": "Split Parts & Labor", "helpText": "Separate parts and labor costs (requires cost tracking)", "showIf": {"field": "track_maintenance_cost", "equals": true}},
+                                        {"key": "track_invoices", "type": "checkbox", "label": "Allow Invoice Upload", "helpText": "PDF/image upload on maintenance events"},
+                                        {"key": "track_photos", "type": "checkbox", "label": "Allow Photo Upload", "helpText": "Upload photos of completed work"},
+                                        {"key": "maintenance_lead_time_days", "type": "number", "label": "Lead Time (Days)", "helpText": "Notify this many days before service is due", "showIf": {"field": "enable_scheduling", "equals": true}},
+                                        {"key": "maintenance_lead_distance_miles", "type": "number", "label": "Lead Distance (Miles)", "helpText": "Notify this many miles before service is due", "showIf": {"field": "enable_scheduling", "equals": true}}
+                                    ]
+                                },
+                                {
+                                    "title": "Vehicle Details — Optional Fields",
+                                    "description": "Core fields (unit number, name, year, make, model) are always visible.",
+                                    "icon": "lucide-truck",
+                                    "grid": 2,
+                                    "fields": [
+                                        {"key": "track_vin", "type": "checkbox", "label": "Track VIN", "helpText": "Vehicle Identification Number"},
+                                        {"key": "track_license_plate", "type": "checkbox", "label": "Track License Plate"},
+                                        {"key": "track_vehicle_color", "type": "checkbox", "label": "Track Color"},
+                                        {"key": "track_assigned_driver", "type": "checkbox", "label": "Track Assigned Driver", "helpText": "Default driver per vehicle"}
+                                    ]
+                                },
+                                {
+                                    "title": "Organization & Workflow",
+                                    "icon": "lucide-settings",
+                                    "grid": 2,
+                                    "fields": [
+                                        {"key": "enable_departments", "type": "checkbox", "label": "Enable Departments", "helpText": "Group vehicles by department"},
+                                        {"key": "enable_campuses", "type": "checkbox", "label": "Enable Campuses", "helpText": "Assign vehicles to campuses"},
+                                        {"key": "require_approval", "type": "checkbox", "label": "Require Approval", "helpText": "Enable Layer 2 manager approval workflow for logs"},
+                                        {"key": "allow_driver_logging", "type": "checkbox", "label": "Allow Driver Logging", "helpText": "Let non-manager users submit fuel/maintenance logs"}
+                                    ]
+                                },
+                                {
+                                    "title": "Vehicle Sharing",
+                                    "description": "Allow other Hub packages to reference your vehicle records (e.g., trip planning, asset tracking).",
+                                    "icon": "lucide-share-2",
+                                    "fields": [
+                                        {"key": "share_vehicles", "type": "checkbox", "label": "Share Vehicles Cross-Package", "helpText": "Other packages can read vehicle data via vm_vehicles table"}
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         }
     },
@@ -1254,6 +1408,15 @@
             "listTemplates": {
                 "description": "List all maintenance templates for admin config",
                 "handler": "MaintenanceQueryHandler::listTemplates"
+            },
+            "getSettings": {
+                "description": "Get fleet package settings (single row)",
+                "handler": "SettingsQueryHandler::getSettings",
+                "cache": 600
+            },
+            "getUserOptions": {
+                "description": "Get users list for driver assignment dropdowns",
+                "handler": "UserQueryHandler::getUserOptions"
             }
         },
         "mutations": {
@@ -1288,9 +1451,9 @@
                 "audit": true,
                 "confirm": true
             },
-            "correctFuelLog": {
-                "description": "Correct fuel log fields with reason (Layer 2)",
-                "handler": "FuelMutationHandler::correctFuelLog",
+            "returnFuelLog": {
+                "description": "Return fuel log for correction with reason (Layer 2)",
+                "handler": "FuelMutationHandler::returnFuelLog",
                 "audit": true
             },
             "createMaintenanceEvent": {
@@ -1309,9 +1472,14 @@
                 "audit": true,
                 "confirm": true
             },
-            "correctMaintenanceEvent": {
-                "description": "Correct maintenance event fields (Layer 2)",
-                "handler": "MaintenanceMutationHandler::correctMaintenanceEvent",
+            "returnMaintenanceEvent": {
+                "description": "Return maintenance event for correction with reason (Layer 2)",
+                "handler": "MaintenanceMutationHandler::returnMaintenanceEvent",
+                "audit": true
+            },
+            "updateSettings": {
+                "description": "Update fleet package settings",
+                "handler": "SettingsMutationHandler::updateSettings",
                 "audit": true
             }
         }
@@ -1355,10 +1523,10 @@
                     "toggleOOS",
                     "approveFuelLog",
                     "rejectFuelLog",
-                    "correctFuelLog",
+                    "returnFuelLog",
                     "approveMaintenanceEvent",
                     "rejectMaintenanceEvent",
-                    "correctMaintenanceEvent"
+                    "returnMaintenanceEvent"
                 ]
             },
             "admin": {
@@ -1367,54 +1535,85 @@
                 "inherits": "manager",
                 "queries": [
                     "listTripCategories",
-                    "listTemplates"
+                    "listTemplates",
+                    "getSettings"
                 ],
-                "mutations": []
+                "mutations": [
+                    "updateSettings"
+                ]
             }
         },
         "defaultRole": "user",
         "globalRoleMapping": {
             "super_admin": "admin",
             "admin": "manager",
+            "principal": "manager",
+            "business_manager": "manager",
+            "maintenance_director": "manager",
+            "substitute_manager": "user",
+            "counselor": "user",
+            "maintenance_staff": "user",
+            "custodial_manager": "user",
+            "custodial": "user",
+            "cafeteria": "user",
+            "student": "user",
             "staff": "user"
         }
     },
     "access": {
         "layer2": {
             "workflow": {
-                "states": ["submitted", "in_review", "corrected", "approved", "rejected"],
+                "states": ["draft", "submitted", "in_review", "needs_correction", "resubmitted", "approved", "rejected"],
                 "transitions": [
                     {"from": "submitted", "to": "in_review", "actor": ["manager", "admin"]},
-                    {"from": "in_review", "to": "corrected", "actor": ["manager", "admin"]},
+                    {"from": "in_review", "to": "needs_correction", "actor": ["manager", "admin"]},
                     {"from": "in_review", "to": "approved", "actor": ["manager", "admin"]},
                     {"from": "in_review", "to": "rejected", "actor": ["manager", "admin"]},
-                    {"from": "corrected", "to": "approved", "actor": ["manager", "admin"]},
-                    {"from": "corrected", "to": "rejected", "actor": ["manager", "admin"]}
+                    {"from": "needs_correction", "to": "resubmitted", "actor": ["user", "manager", "admin"]},
+                    {"from": "resubmitted", "to": "in_review", "actor": ["manager", "admin"]},
+                    {"from": "resubmitted", "to": "approved", "actor": ["manager", "admin"]},
+                    {"from": "resubmitted", "to": "rejected", "actor": ["manager", "admin"]}
                 ]
             },
             "editBoundaries": {
                 "fuel_logs": {
-                    "editable": ["fuel_gallons", "odometer_reading", "fuel_cost", "trip_category_id"],
-                    "immutable": ["id", "created_at", "created_by_user_id", "vehicle_id", "fuel_date"],
-                    "requiresReason": true,
-                    "allowedStates": ["in_review", "corrected"]
+                    "immutable": ["id", "created_at", "logged_by", "vehicle_id", "event_date"],
+                    "managerEdits": {
+                        "editable": ["gallons", "odometer", "total_cost", "trip_category_id"],
+                        "allowedStates": ["submitted", "in_review"],
+                        "requiresReason": true
+                    },
+                    "userEdits": {
+                        "editable": ["gallons", "odometer", "total_cost", "trip_category_id", "vendor", "location", "notes"],
+                        "allowedStates": ["draft", "needs_correction"],
+                        "requiresReason": false
+                    }
                 },
                 "maintenance_events": {
-                    "editable": ["odometer_reading", "maintenance_cost", "notes"],
-                    "immutable": ["id", "created_at", "created_by_user_id", "vehicle_id", "maintenance_date"],
-                    "requiresReason": true,
-                    "allowedStates": ["in_review", "corrected"]
+                    "immutable": ["id", "created_at", "logged_by", "vehicle_id", "event_date"],
+                    "managerEdits": {
+                        "editable": ["odometer", "total_cost", "parts_cost", "labor_cost", "notes"],
+                        "allowedStates": ["submitted", "in_review"],
+                        "requiresReason": true
+                    },
+                    "userEdits": {
+                        "editable": ["odometer", "total_cost", "parts_cost", "labor_cost", "vendor", "notes"],
+                        "allowedStates": ["draft", "needs_correction"],
+                        "requiresReason": false
+                    }
                 }
             },
             "auditEvents": [
                 "FUEL_LOG_SUBMITTED",
                 "FUEL_LOG_REVIEW_STARTED",
-                "FUEL_LOG_CORRECTED",
+                "FUEL_LOG_NEEDS_CORRECTION",
+                "FUEL_LOG_RESUBMITTED",
                 "FUEL_LOG_APPROVED",
                 "FUEL_LOG_REJECTED",
                 "MAINTENANCE_EVENT_SUBMITTED",
                 "MAINTENANCE_EVENT_REVIEW_STARTED",
-                "MAINTENANCE_EVENT_CORRECTED",
+                "MAINTENANCE_EVENT_NEEDS_CORRECTION",
+                "MAINTENANCE_EVENT_RESUBMITTED",
                 "MAINTENANCE_EVENT_APPROVED",
                 "MAINTENANCE_EVENT_REJECTED",
                 "VEHICLE_CREATED",
