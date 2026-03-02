@@ -1,0 +1,816 @@
+{
+  "schemaVersion": "3.0.0",
+
+  "package": {
+    "id": "finance.reimbursement-request",
+    "display_name": "Reimbursement Request & Fuel Tracking",
+    "description": "Unified reimbursement system for monetary expenses and fuel trips with YTD tracking, role-based approval workflow, and analytics",
+    "version": "1.0.0",
+    "author": "Woodson ISD Technology",
+    "icon": "lucide-receipt",
+    "category": "finance",
+    "base_url": "/p/finance.reimbursement-request",
+    "tags": ["reimbursement", "finance", "fuel", "travel", "expenses"]
+  },
+
+  "database": {
+    "connection": "woodson_hub",
+    "primaryTable": "reimb_monetary_requests",
+    "auditTable": "reimb_audit_logs"
+  },
+
+  "resources": {
+    "provides": [],
+    "requires": []
+  },
+
+  "presentation": {
+    "pages": {
+      "index": {
+        "title": "Reimbursement Overview",
+        "route": "/",
+        "layout": "full",
+        "requiredRole": "submitter",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                { "title": "My Pending", "dataKey": "my_pending", "icon": "lucide-clock", "color": "warning" },
+                { "title": "My Approved", "dataKey": "my_approved", "icon": "lucide-check-circle", "color": "success" },
+                { "title": "My YTD Total", "dataKey": "my_ytd_total", "icon": "lucide-dollar-sign", "color": "primary", "format": "currency" },
+                { "title": "My Fuel Balance", "dataKey": "my_fuel_balance", "icon": "lucide-fuel", "color": "info", "suffix": " gal" }
+              ]
+            },
+            "dataQuery": "getMyStats"
+          },
+          {
+            "type": "tabs",
+            "config": {
+              "tabs": [
+                {
+                  "key": "monetary",
+                  "label": "My Requests",
+                  "icon": "lucide-receipt",
+                  "component": {
+                    "type": "table",
+                    "config": {
+                      "columns": [
+                        { "key": "expense_date", "label": "Date", "sortable": true, "format": "date" },
+                        { "key": "category", "label": "Category", "filterable": true },
+                        { "key": "amount", "label": "Amount", "sortable": true, "format": "currency" },
+                        { "key": "vendor_name", "label": "Vendor" },
+                        { "key": "status", "label": "Status", "sortable": true, "filterable": true, "badge": true }
+                      ],
+                      "defaultSort": { "field": "expense_date", "direction": "DESC" },
+                      "actions": [
+                        { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/request/{id}" }
+                      ],
+                      "pagination": { "perPage": 25 }
+                    },
+                    "dataQuery": "listMyRequests"
+                  }
+                },
+                {
+                  "key": "fuel",
+                  "label": "My Fuel Trips",
+                  "icon": "lucide-fuel",
+                  "component": {
+                    "type": "table",
+                    "config": {
+                      "columns": [
+                        { "key": "trip_date", "label": "Date", "sortable": true, "format": "date" },
+                        { "key": "destination", "label": "Destination" },
+                        { "key": "trip_miles", "label": "Miles", "sortable": true },
+                        { "key": "category", "label": "Category", "filterable": true },
+                        { "key": "gallons_earned", "label": "Earned", "sortable": true },
+                        { "key": "gallons_claimed", "label": "Claimed", "sortable": true }
+                      ],
+                      "defaultSort": { "field": "trip_date", "direction": "DESC" },
+                      "actions": [
+                        { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/fuel/{id}" }
+                      ],
+                      "pagination": { "perPage": 25 }
+                    },
+                    "dataQuery": "listMyFuelTrips"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+
+      "monetary-form": {
+        "title": "Submit Reimbursement Request",
+        "route": "/request/new",
+        "layout": "standard",
+        "requiredRole": "submitter",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "Monetary Reimbursement Request",
+              "submitLabel": "Submit Request",
+              "successMessage": "Your reimbursement request has been submitted for review.",
+              "successRoute": "/",
+              "sections": [
+                {
+                  "title": "Expense Details",
+                  "fields": [
+                    {
+                      "key": "expense_date", "type": "date", "label": "Date of Expense",
+                      "required": true, "validation": { "maxDate": "today" },
+                      "helpText": "The date the expense occurred"
+                    },
+                    {
+                      "key": "category", "type": "select", "label": "Category",
+                      "required": true,
+                      "options": [
+                        { "value": "meals", "label": "Meals" },
+                        { "value": "supplies", "label": "Supplies / Classroom" },
+                        { "value": "travel_meals", "label": "Travel Meals" },
+                        { "value": "student_activity", "label": "Student Activity" },
+                        { "value": "other", "label": "Other" }
+                      ]
+                    },
+                    {
+                      "key": "amount", "type": "currency", "label": "Amount",
+                      "required": true,
+                      "validation": { "minValue": 0.01, "maxValue": 10000 }
+                    },
+                    {
+                      "key": "vendor_name", "type": "text", "label": "Vendor / Payee",
+                      "required": false, "validation": { "maxLength": 255 }
+                    }
+                  ]
+                },
+                {
+                  "title": "Receipt",
+                  "fields": [
+                    {
+                      "key": "receipt_type", "type": "select", "label": "Receipt Type",
+                      "required": true,
+                      "helpText": "Choose whether you are uploading a receipt or turning in a physical copy",
+                      "options": [
+                        { "value": "upload", "label": "Upload Now" },
+                        { "value": "physical", "label": "Will Turn In Physical Receipt" }
+                      ]
+                    },
+                    {
+                      "key": "receipt_path", "type": "file", "label": "Upload Receipt",
+                      "required": false,
+                      "showIf": { "receipt_type": "upload" },
+                      "validation": {
+                        "maxSize": 10485760,
+                        "allowedExtensions": ["pdf", "jpg", "jpeg", "png"]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Notes",
+                  "fields": [
+                    {
+                      "key": "notes", "type": "textarea", "label": "Notes / Justification",
+                      "required": false, "rows": 4,
+                      "validation": { "maxLength": 2000 }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "createMonetaryRequest"
+          }
+        ]
+      },
+
+      "fuel-form": {
+        "title": "Log Fuel Trip",
+        "route": "/fuel/new",
+        "layout": "standard",
+        "requiredRole": "submitter",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "Fuel Trip Log",
+              "submitLabel": "Log Trip",
+              "successMessage": "Your fuel trip has been logged.",
+              "successRoute": "/",
+              "sections": [
+                {
+                  "title": "Trip Details",
+                  "fields": [
+                    {
+                      "key": "trip_date", "type": "date", "label": "Trip Date",
+                      "required": true, "validation": { "maxDate": "today" }
+                    },
+                    {
+                      "key": "destination", "type": "text", "label": "Destination",
+                      "required": true, "validation": { "maxLength": 255 }
+                    },
+                    {
+                      "key": "with_trailer", "type": "checkbox", "label": "With Trailer?",
+                      "required": false, "helpText": "Check if you used a trailer on this trip"
+                    },
+                    {
+                      "key": "trip_miles", "type": "number", "label": "Trip Mileage (Round Trip)",
+                      "required": true, "validation": { "minValue": 1, "maxValue": 2000 }
+                    },
+                    {
+                      "key": "category", "type": "select", "label": "Category of Trip",
+                      "required": true,
+                      "options": [
+                        { "value": "athletics", "label": "Athletics" },
+                        { "value": "field_trip", "label": "Field Trip" },
+                        { "value": "training", "label": "Training / PD" },
+                        { "value": "student_transport", "label": "Student Transport" },
+                        { "value": "other", "label": "Other" }
+                      ]
+                    },
+                    {
+                      "key": "notes", "type": "textarea", "label": "Notes",
+                      "required": false, "validation": { "maxLength": 2000 }
+                    }
+                  ]
+                },
+                {
+                  "title": "Fuel Claim",
+                  "fields": [
+                    {
+                      "key": "acquiring_now", "type": "checkbox", "label": "Acquiring Fuel at this time?",
+                      "required": false, "helpText": "Check if you are claiming fuel gallons now"
+                    },
+                    {
+                      "key": "gallons_claimed", "type": "number", "label": "Gallons Being Received Now",
+                      "required": false, "showIf": { "acquiring_now": true },
+                      "validation": { "minValue": 0, "maxValue": 500 }
+                    },
+                    {
+                      "key": "receipt_required", "type": "checkbox", "label": "Receipt Provided?",
+                      "required": false, "showIf": { "acquiring_now": true }
+                    },
+                    {
+                      "key": "receipt_type", "type": "select", "label": "Fuel Receipt Type",
+                      "required": false, "showIf": { "acquiring_now": true },
+                      "options": [
+                        { "value": "upload", "label": "Upload Receipt / Pump Photo" },
+                        { "value": "physical", "label": "Will Turn In Physical Receipt" },
+                        { "value": "none", "label": "No Receipt" }
+                      ]
+                    },
+                    {
+                      "key": "receipt_path", "type": "file", "label": "Upload Fuel Receipt",
+                      "required": false,
+                      "showIf": { "acquiring_now": true, "receipt_type": "upload" },
+                      "validation": {
+                        "maxSize": 10485760,
+                        "allowedExtensions": ["pdf", "jpg", "jpeg", "png"]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "createFuelTrip"
+          }
+        ]
+      },
+
+      "request-detail": {
+        "title": "Reimbursement Detail",
+        "route": "/request/{id}",
+        "layout": "standard",
+        "requiredRole": "submitter",
+        "components": [
+          {
+            "type": "detail",
+            "config": {
+              "backRoute": "/",
+              "actions": [
+                { "label": "Approve", "icon": "lucide-check", "mutation": "approveRequest", "style": "success", "showIf": { "status": ["submitted", "reviewing", "needs_info"] }, "requiredRole": "supervisor" },
+                { "label": "Deny", "icon": "lucide-x", "mutation": "denyRequest", "style": "danger", "showIf": { "status": ["submitted", "reviewing", "needs_info"] }, "requiredRole": "supervisor" },
+                { "label": "Request Info", "icon": "lucide-message-circle", "mutation": "requestInfoOnRequest", "style": "warning", "showIf": { "status": ["submitted", "reviewing"] }, "requiredRole": "supervisor" },
+                { "label": "Mark Paid", "icon": "lucide-banknote", "mutation": "markRequestPaid", "style": "primary", "showIf": { "status": "approved" }, "requiredRole": "business_manager" }
+              ],
+              "sections": [
+                {
+                  "title": "Expense Details",
+                  "icon": "lucide-receipt",
+                  "fields": [
+                    { "key": "expense_date", "label": "Date of Expense", "format": "date" },
+                    { "key": "category", "label": "Category" },
+                    { "key": "amount", "label": "Amount", "format": "currency" },
+                    { "key": "vendor_name", "label": "Vendor / Payee" },
+                    { "key": "receipt_type", "label": "Receipt Type" },
+                    { "key": "notes", "label": "Notes", "format": "text" }
+                  ]
+                },
+                {
+                  "title": "Status",
+                  "icon": "lucide-activity",
+                  "fields": [
+                    { "key": "status", "label": "Status", "format": "badge" },
+                    { "key": "requester_name", "label": "Submitted By" },
+                    { "key": "supervisor_name", "label": "Reviewed By" },
+                    { "key": "paid_date", "label": "Paid Date", "format": "date" },
+                    { "key": "paid_reference", "label": "Payment Reference" },
+                    { "key": "created_at", "label": "Submitted", "format": "datetime" }
+                  ]
+                }
+              ]
+            },
+            "dataQuery": "getMonetaryRequest"
+          }
+        ]
+      },
+
+      "fuel-detail": {
+        "title": "Fuel Trip Detail",
+        "route": "/fuel/{id}",
+        "layout": "standard",
+        "requiredRole": "submitter",
+        "components": [
+          {
+            "type": "detail",
+            "config": {
+              "backRoute": "/",
+              "sections": [
+                {
+                  "title": "Trip Information",
+                  "icon": "lucide-map-pin",
+                  "fields": [
+                    { "key": "trip_date", "label": "Trip Date", "format": "date" },
+                    { "key": "destination", "label": "Destination" },
+                    { "key": "with_trailer", "label": "With Trailer", "format": "boolean" },
+                    { "key": "trip_miles", "label": "Miles" },
+                    { "key": "category", "label": "Category" },
+                    { "key": "notes", "label": "Notes", "format": "text" }
+                  ]
+                },
+                {
+                  "title": "Fuel Claim",
+                  "icon": "lucide-fuel",
+                  "fields": [
+                    { "key": "gallons_earned", "label": "Gallons Earned" },
+                    { "key": "gallons_claimed", "label": "Gallons Claimed" },
+                    { "key": "acquiring_now", "label": "Acquired at Time", "format": "boolean" },
+                    { "key": "receipt_type", "label": "Receipt Type" }
+                  ]
+                }
+              ]
+            },
+            "dataQuery": "getFuelTrip"
+          }
+        ]
+      },
+
+      "admin-monetary": {
+        "title": "Reimbursement Dashboard",
+        "route": "/admin/monetary",
+        "layout": "full",
+        "requiredRole": "supervisor",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                { "title": "Pending Review", "dataKey": "pending_review", "icon": "lucide-clock", "color": "warning" },
+                { "title": "Approved (Unpaid)", "dataKey": "approved_unpaid", "icon": "lucide-check-circle", "color": "info" },
+                { "title": "Paid This Month", "dataKey": "paid_this_month", "icon": "lucide-banknote", "color": "success", "format": "currency" },
+                { "title": "Total YTD", "dataKey": "total_ytd", "icon": "lucide-trending-up", "color": "primary", "format": "currency" }
+              ]
+            },
+            "dataQuery": "getAdminMonetaryStats"
+          },
+          {
+            "type": "table",
+            "config": {
+              "title": "All Reimbursement Requests",
+              "columns": [
+                { "key": "expense_date", "label": "Date", "sortable": true, "format": "date" },
+                { "key": "requester_name", "label": "Requester", "sortable": true },
+                { "key": "category", "label": "Category", "filterable": true },
+                { "key": "amount", "label": "Amount", "sortable": true, "format": "currency" },
+                { "key": "status", "label": "Status", "sortable": true, "filterable": true, "badge": true },
+                { "key": "paid_date", "label": "Paid Date", "sortable": true, "format": "date" }
+              ],
+              "defaultSort": { "field": "created_at", "direction": "DESC" },
+              "actions": [
+                { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/request/{id}" }
+              ],
+              "filters": [
+                { "key": "status", "type": "select", "label": "Status", "options": "getMonetaryStatusOptions" },
+                { "key": "category", "type": "select", "label": "Category", "options": "getExpenseCategoryOptions" },
+                { "key": "expense_date", "type": "dateRange", "label": "Date Range" }
+              ],
+              "pagination": { "perPage": 50 },
+              "export": { "enabled": true, "formats": ["csv", "xlsx"] }
+            },
+            "dataQuery": "listAllRequests"
+          }
+        ]
+      },
+
+      "admin-fuel": {
+        "title": "Fuel Ledger Dashboard",
+        "route": "/admin/fuel",
+        "layout": "full",
+        "requiredRole": "business_manager",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 3,
+              "cards": [
+                { "title": "Total Trips This Month", "dataKey": "trips_this_month", "icon": "lucide-map", "color": "primary" },
+                { "title": "Gallons Earned YTD", "dataKey": "gallons_earned_ytd", "icon": "lucide-fuel", "color": "info" },
+                { "title": "Gallons Claimed YTD", "dataKey": "gallons_claimed_ytd", "icon": "lucide-fuel", "color": "success" }
+              ]
+            },
+            "dataQuery": "getAdminFuelStats"
+          },
+          {
+            "type": "table",
+            "config": {
+              "title": "All Fuel Trips",
+              "columns": [
+                { "key": "trip_date", "label": "Date", "sortable": true, "format": "date" },
+                { "key": "user_name", "label": "User", "sortable": true },
+                { "key": "destination", "label": "Destination" },
+                { "key": "trip_miles", "label": "Miles", "sortable": true },
+                { "key": "category", "label": "Category", "filterable": true },
+                { "key": "gallons_earned", "label": "Earned", "sortable": true },
+                { "key": "gallons_claimed", "label": "Claimed", "sortable": true }
+              ],
+              "defaultSort": { "field": "trip_date", "direction": "DESC" },
+              "actions": [
+                { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/fuel/{id}" }
+              ],
+              "filters": [
+                { "key": "trip_date", "type": "dateRange", "label": "Date Range" },
+                { "key": "category", "type": "select", "label": "Category", "options": "getTripCategoryOptions" }
+              ],
+              "pagination": { "perPage": 50 },
+              "export": { "enabled": true, "formats": ["csv", "xlsx"] }
+            },
+            "dataQuery": "listAllFuelTrips"
+          }
+        ]
+      },
+
+      "analytics": {
+        "title": "Reimbursement Analytics",
+        "route": "/admin/analytics",
+        "layout": "full",
+        "requiredRole": "business_manager",
+        "components": [
+          {
+            "type": "tabs",
+            "config": {
+              "tabs": [
+                {
+                  "key": "monetary",
+                  "label": "Monetary Analytics",
+                  "icon": "lucide-bar-chart",
+                  "component": {
+                    "type": "analytics",
+                    "config": {
+                      "charts": [
+                        { "key": "spend_by_category", "type": "bar", "title": "Spend by Category (Current FY)", "dataQuery": "getSpendByCategory" },
+                        { "key": "spend_over_time", "type": "line", "title": "Monthly Spend (Current FY)", "dataQuery": "getMonthlySpend" }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "fuel",
+                  "label": "Fuel Analytics",
+                  "icon": "lucide-fuel",
+                  "component": {
+                    "type": "analytics",
+                    "config": {
+                      "charts": [
+                        { "key": "gallons_by_user", "type": "bar", "title": "Gallons Earned by User (Current FY)", "dataQuery": "getGallonsByUser" },
+                        { "key": "gallons_over_time", "type": "line", "title": "Gallons Claimed Over Time", "dataQuery": "getMonthlyGallons" }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+
+      "settings": {
+        "title": "Reimbursement Settings",
+        "route": "/admin/settings",
+        "layout": "standard",
+        "requiredRole": "admin",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "System Settings",
+              "submitLabel": "Save Settings",
+              "loadQuery": "getSettings",
+              "successMessage": "Settings saved successfully.",
+              "sections": [
+                {
+                  "title": "Fiscal Year",
+                  "fields": [
+                    {
+                      "key": "fiscal_year_start_month", "type": "number", "label": "Start Month (1–12)",
+                      "required": true, "validation": { "minValue": 1, "maxValue": 12 }
+                    },
+                    {
+                      "key": "fiscal_year_start_day", "type": "number", "label": "Start Day (1–31)",
+                      "required": true, "validation": { "minValue": 1, "maxValue": 31 }
+                    }
+                  ]
+                },
+                {
+                  "title": "Receipt Options",
+                  "fields": [
+                    {
+                      "key": "allow_physical_receipts", "type": "checkbox", "label": "Allow Physical Receipts",
+                      "required": false
+                    }
+                  ]
+                },
+                {
+                  "title": "Notifications",
+                  "fields": [
+                    { "key": "notify_submitter_on_submit", "type": "checkbox", "label": "Notify Submitter on Submit" },
+                    { "key": "notify_submitter_on_approval", "type": "checkbox", "label": "Notify Submitter on Approval" },
+                    { "key": "notify_supervisor_on_submit", "type": "checkbox", "label": "Notify Supervisor on Submit" },
+                    { "key": "notify_bm_on_submit", "type": "checkbox", "label": "Notify Business Manager on Submit" },
+                    { "key": "notify_bm_on_approval", "type": "checkbox", "label": "Notify Business Manager on Approval" },
+                    {
+                      "key": "bm_notification_email", "type": "email", "label": "Business Manager Email",
+                      "required": false, "validation": { "maxLength": 320 }
+                    },
+                    {
+                      "key": "admin_notification_email", "type": "email", "label": "Admin Notification Email",
+                      "required": false, "validation": { "maxLength": 320 }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "updateSettings"
+          }
+        ]
+      }
+    }
+  },
+
+  "data": {
+    "queries": {
+      "getMyStats": {
+        "description": "Personal dashboard statistics (pending, approved, YTD, fuel balance)",
+        "handler": "ReimbQueryHandler::getMyStats",
+        "cache": 60
+      },
+      "listMyRequests": {
+        "description": "List current user's monetary reimbursement requests",
+        "handler": "ReimbQueryHandler::listMyRequests",
+        "parameters": {
+          "status": { "type": "string", "optional": true },
+          "page": { "type": "integer", "optional": true },
+          "pageSize": { "type": "integer", "optional": true },
+          "sort": { "type": "string", "optional": true },
+          "sortDir": { "type": "string", "optional": true }
+        }
+      },
+      "listMyFuelTrips": {
+        "description": "List current user's fuel trips",
+        "handler": "ReimbQueryHandler::listMyFuelTrips",
+        "parameters": {
+          "page": { "type": "integer", "optional": true },
+          "pageSize": { "type": "integer", "optional": true },
+          "sort": { "type": "string", "optional": true },
+          "sortDir": { "type": "string", "optional": true }
+        }
+      },
+      "getMonetaryRequest": {
+        "description": "Get a single monetary request by ID",
+        "handler": "ReimbQueryHandler::getMonetaryRequest",
+        "parameters": {
+          "id": { "type": "integer", "required": true }
+        }
+      },
+      "getFuelTrip": {
+        "description": "Get a single fuel trip by ID",
+        "handler": "ReimbQueryHandler::getFuelTrip",
+        "parameters": {
+          "id": { "type": "integer", "required": true }
+        }
+      },
+      "getAdminMonetaryStats": {
+        "description": "Admin dashboard stats for monetary requests",
+        "handler": "ReimbQueryHandler::getAdminMonetaryStats",
+        "cache": 120
+      },
+      "getAdminFuelStats": {
+        "description": "Admin dashboard stats for fuel trips",
+        "handler": "ReimbQueryHandler::getAdminFuelStats",
+        "cache": 120
+      },
+      "listAllRequests": {
+        "description": "List all monetary requests (admin view)",
+        "handler": "ReimbQueryHandler::listAllRequests",
+        "parameters": {
+          "status": { "type": "string", "optional": true },
+          "category": { "type": "string", "optional": true },
+          "dateFrom": { "type": "string", "optional": true },
+          "dateTo": { "type": "string", "optional": true },
+          "search": { "type": "string", "optional": true },
+          "page": { "type": "integer", "optional": true },
+          "pageSize": { "type": "integer", "optional": true },
+          "sort": { "type": "string", "optional": true },
+          "sortDir": { "type": "string", "optional": true }
+        }
+      },
+      "listAllFuelTrips": {
+        "description": "List all fuel trips (admin view)",
+        "handler": "ReimbQueryHandler::listAllFuelTrips",
+        "parameters": {
+          "dateFrom": { "type": "string", "optional": true },
+          "dateTo": { "type": "string", "optional": true },
+          "category": { "type": "string", "optional": true },
+          "search": { "type": "string", "optional": true },
+          "page": { "type": "integer", "optional": true },
+          "pageSize": { "type": "integer", "optional": true },
+          "sort": { "type": "string", "optional": true },
+          "sortDir": { "type": "string", "optional": true }
+        }
+      },
+      "getMonetaryStatusOptions": {
+        "description": "Status filter options for monetary requests",
+        "handler": "ReimbQueryHandler::getMonetaryStatusOptions",
+        "cache": 3600
+      },
+      "getExpenseCategoryOptions": {
+        "description": "Expense category options",
+        "handler": "ReimbQueryHandler::getExpenseCategoryOptions",
+        "cache": 3600
+      },
+      "getTripCategoryOptions": {
+        "description": "Trip category options for fuel",
+        "handler": "ReimbQueryHandler::getTripCategoryOptions",
+        "cache": 3600
+      },
+      "getSpendByCategory": {
+        "description": "Analytics: spend by category for current fiscal year",
+        "handler": "ReimbQueryHandler::getSpendByCategory",
+        "cache": 300
+      },
+      "getMonthlySpend": {
+        "description": "Analytics: monthly spend for current fiscal year",
+        "handler": "ReimbQueryHandler::getMonthlySpend",
+        "cache": 300
+      },
+      "getGallonsByUser": {
+        "description": "Analytics: gallons earned by user for current fiscal year",
+        "handler": "ReimbQueryHandler::getGallonsByUser",
+        "cache": 300
+      },
+      "getMonthlyGallons": {
+        "description": "Analytics: monthly gallons claimed over time",
+        "handler": "ReimbQueryHandler::getMonthlyGallons",
+        "cache": 300
+      },
+      "getSettings": {
+        "description": "Get current reimbursement settings",
+        "handler": "ReimbQueryHandler::getSettings"
+      }
+    },
+
+    "mutations": {
+      "createMonetaryRequest": {
+        "description": "Submit a new monetary reimbursement request",
+        "handler": "ReimbMutationHandler::createMonetaryRequest",
+        "audit": true
+      },
+      "createFuelTrip": {
+        "description": "Log a new fuel trip",
+        "handler": "ReimbMutationHandler::createFuelTrip",
+        "audit": true
+      },
+      "approveRequest": {
+        "description": "Approve a monetary reimbursement request",
+        "handler": "ReimbMutationHandler::approveRequest",
+        "audit": true
+      },
+      "denyRequest": {
+        "description": "Deny a monetary reimbursement request",
+        "handler": "ReimbMutationHandler::denyRequest",
+        "audit": true
+      },
+      "requestInfoOnRequest": {
+        "description": "Request additional information on a monetary request",
+        "handler": "ReimbMutationHandler::requestInfoOnRequest",
+        "audit": true
+      },
+      "markRequestPaid": {
+        "description": "Mark an approved request as paid",
+        "handler": "ReimbMutationHandler::markRequestPaid",
+        "audit": true
+      },
+      "updateSettings": {
+        "description": "Update reimbursement system settings",
+        "handler": "ReimbMutationHandler::updateSettings",
+        "audit": true
+      }
+    }
+  },
+
+  "policy": {
+    "roles": {
+      "submitter": {
+        "label": "Submitter",
+        "description": "Submit and view own monetary and fuel requests",
+        "queries": ["getMyStats", "listMyRequests", "listMyFuelTrips", "getMonetaryRequest", "getFuelTrip", "getExpenseCategoryOptions", "getTripCategoryOptions", "getMonetaryStatusOptions"],
+        "mutations": ["createMonetaryRequest", "createFuelTrip"]
+      },
+      "supervisor": {
+        "label": "Supervisor",
+        "description": "Review and approve/deny monetary requests",
+        "inherits": "submitter",
+        "queries": ["getAdminMonetaryStats", "listAllRequests"],
+        "mutations": ["approveRequest", "denyRequest", "requestInfoOnRequest"]
+      },
+      "business_manager": {
+        "label": "Business Manager",
+        "description": "Full approval authority, mark paid, manage fuel ledger, view analytics",
+        "inherits": "supervisor",
+        "queries": ["getAdminFuelStats", "listAllFuelTrips", "getSpendByCategory", "getMonthlySpend", "getGallonsByUser", "getMonthlyGallons"],
+        "mutations": ["markRequestPaid"]
+      },
+      "admin": {
+        "label": "Reimbursement Admin",
+        "description": "Full control including system settings",
+        "inherits": "business_manager",
+        "queries": ["getSettings"],
+        "mutations": ["updateSettings"]
+      }
+    },
+    "defaultRole": "submitter",
+    "globalRoleMapping": {
+      "super_admin": "admin",
+      "admin": "admin",
+      "principal": "supervisor",
+      "business_manager": "business_manager",
+      "staff": "submitter",
+      "student": "submitter"
+    }
+  },
+
+  "access": {
+    "layer2": {
+      "workflow": {
+        "states": ["submitted", "reviewing", "needs_info", "approved", "denied", "paid"],
+        "transitions": [
+          { "from": "submitted", "to": "reviewing", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "submitted", "to": "needs_info", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "submitted", "to": "approved", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "submitted", "to": "denied", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "reviewing", "to": "needs_info", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "reviewing", "to": "approved", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "reviewing", "to": "denied", "actor": ["supervisor", "business_manager", "admin"] },
+          { "from": "needs_info", "to": "reviewing", "actor": ["submitter", "supervisor", "business_manager", "admin"] },
+          { "from": "approved", "to": "paid", "actor": ["business_manager", "admin"] }
+        ]
+      },
+      "editBoundaries": {
+        "monetary_requests": {
+          "immutable": ["id", "created_at", "requester_id"],
+          "submitterEdits": {
+            "editable": ["expense_date", "category", "amount", "vendor_name", "receipt_type", "receipt_path", "notes"],
+            "allowedStates": ["submitted", "needs_info"],
+            "requiresReason": false
+          },
+          "supervisorEdits": {
+            "editable": ["status"],
+            "allowedStates": ["submitted", "reviewing", "needs_info"],
+            "requiresReason": true
+          }
+        }
+      },
+      "auditEvents": [
+        "MONETARY_REQUEST_SUBMITTED",
+        "MONETARY_REQUEST_APPROVED",
+        "MONETARY_REQUEST_DENIED",
+        "MONETARY_REQUEST_INFO_REQUESTED",
+        "MONETARY_REQUEST_PAID",
+        "FUEL_TRIP_LOGGED",
+        "SETTINGS_UPDATED"
+      ]
+    }
+  }
+}

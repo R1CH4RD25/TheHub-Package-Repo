@@ -1,0 +1,467 @@
+{
+  "schemaVersion": "3.0.0",
+
+  "package": {
+    "id": "student.bullying-report",
+    "display_name": "Bullying Report",
+    "description": "Confidential bullying incident reporting with counselor review workflow, investigation tracking, and resolution management",
+    "version": "1.0.0",
+    "author": "Woodson ISD Technology",
+    "icon": "lucide-shield-alert",
+    "category": "student",
+    "base_url": "/p/student.bullying-report",
+    "tags": ["safety", "bullying", "student", "reporting", "counselor"]
+  },
+
+  "database": {
+    "connection": "woodson_hub",
+    "primaryTable": "br_reports",
+    "auditTable": "br_audit_logs"
+  },
+
+  "resources": {
+    "provides": [],
+    "requires": []
+  },
+
+  "presentation": {
+    "pages": {
+      "index": {
+        "title": "Bullying Reports Dashboard",
+        "route": "/",
+        "layout": "full",
+        "requiredRole": "counselor",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                { "title": "Total Reports", "dataKey": "total_reports", "icon": "lucide-file-text", "color": "primary" },
+                { "title": "New / Unreviewed", "dataKey": "new_reports", "icon": "lucide-alert-circle", "color": "danger" },
+                { "title": "Under Investigation", "dataKey": "investigating", "icon": "lucide-search", "color": "warning" },
+                { "title": "Resolved", "dataKey": "resolved", "icon": "lucide-check-circle", "color": "success" }
+              ]
+            },
+            "dataQuery": "getReportStats"
+          },
+          {
+            "type": "table",
+            "config": {
+              "title": "Recent Reports",
+              "columns": [
+                { "key": "id", "label": "ID", "width": "60px" },
+                { "key": "report_date", "label": "Incident Date", "sortable": true, "format": "date" },
+                { "key": "location", "label": "Location", "filterable": true },
+                { "key": "description", "label": "Description", "truncate": 80 },
+                { "key": "status", "label": "Status", "sortable": true, "filterable": true, "badge": true },
+                { "key": "assigned_to_name", "label": "Assigned To" },
+                { "key": "created_at", "label": "Submitted", "sortable": true, "format": "datetime" }
+              ],
+              "defaultSort": { "field": "created_at", "direction": "DESC" },
+              "actions": [
+                { "label": "View", "icon": "lucide-eye", "type": "route", "route": "/report/{id}" }
+              ],
+              "pagination": { "perPage": 25 },
+              "filters": [
+                { "key": "status", "type": "select", "label": "Status", "options": "getStatusOptions" },
+                { "key": "report_date", "type": "dateRange", "label": "Incident Date" }
+              ]
+            },
+            "dataQuery": "listReports"
+          }
+        ]
+      },
+
+      "submit": {
+        "title": "Submit Bullying Report",
+        "route": "/submit",
+        "layout": "standard",
+        "requiredRole": "user",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "Bullying Incident Report",
+              "subtitle": "All reports are confidential. You may submit anonymously.",
+              "submitLabel": "Submit Report",
+              "successMessage": "Your report has been submitted. A counselor will review it shortly.",
+              "successRoute": "/submitted",
+              "sections": [
+                {
+                  "title": "Incident Details",
+                  "fields": [
+                    {
+                      "key": "report_date", "type": "date", "label": "Date of Incident",
+                      "required": true, "validation": { "maxDate": "today" }
+                    },
+                    {
+                      "key": "report_time", "type": "time", "label": "Time of Incident",
+                      "required": false
+                    },
+                    {
+                      "key": "location", "type": "select", "label": "Where did this happen?",
+                      "required": true,
+                      "options": [
+                        { "value": "classroom", "label": "Classroom" },
+                        { "value": "hallway", "label": "Hallway" },
+                        { "value": "cafeteria", "label": "Cafeteria" },
+                        { "value": "playground", "label": "Playground / Recess" },
+                        { "value": "gym", "label": "Gym / PE" },
+                        { "value": "bus", "label": "Bus" },
+                        { "value": "bus_stop", "label": "Bus Stop" },
+                        { "value": "bathroom", "label": "Bathroom" },
+                        { "value": "locker_room", "label": "Locker Room" },
+                        { "value": "online", "label": "Online / Cyberbullying" },
+                        { "value": "off_campus", "label": "Off Campus" },
+                        { "value": "other", "label": "Other" }
+                      ]
+                    },
+                    {
+                      "key": "incident_types", "type": "multiselect", "label": "Type of Incident",
+                      "required": true,
+                      "options": [
+                        { "value": "verbal", "label": "Verbal (name-calling, insults, threats)" },
+                        { "value": "physical", "label": "Physical (hitting, pushing, tripping)" },
+                        { "value": "social", "label": "Social / Relational (exclusion, rumors)" },
+                        { "value": "cyber", "label": "Cyberbullying (online, text, social media)" },
+                        { "value": "sexual", "label": "Sexual Harassment" },
+                        { "value": "racial", "label": "Racial / Ethnic" },
+                        { "value": "disability", "label": "Disability-Based" },
+                        { "value": "property", "label": "Property Damage / Theft" },
+                        { "value": "intimidation", "label": "Intimidation" },
+                        { "value": "other", "label": "Other" }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "title": "People Involved",
+                  "fields": [
+                    {
+                      "key": "students_involved", "type": "textarea", "label": "Student(s) Involved",
+                      "required": false, "placeholder": "Names of students involved (if known)",
+                      "validation": { "maxLength": 2000 }
+                    },
+                    {
+                      "key": "witness_present", "type": "radio", "label": "Were there witnesses?",
+                      "required": true,
+                      "options": [
+                        { "value": "1", "label": "Yes" },
+                        { "value": "0", "label": "No" }
+                      ]
+                    },
+                    {
+                      "key": "witness_names", "type": "textarea", "label": "Witness Names",
+                      "required": false, "showIf": { "witness_present": "1" },
+                      "placeholder": "Names of witnesses",
+                      "validation": { "maxLength": 2000 }
+                    }
+                  ]
+                },
+                {
+                  "title": "What Happened",
+                  "fields": [
+                    {
+                      "key": "description", "type": "textarea", "label": "Please describe what happened",
+                      "required": true, "rows": 6,
+                      "validation": { "minLength": 20, "maxLength": 5000 }
+                    },
+                    {
+                      "key": "previous_incidents", "type": "radio", "label": "Has this happened before?",
+                      "required": true,
+                      "options": [
+                        { "value": "1", "label": "Yes" },
+                        { "value": "0", "label": "No" }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "title": "Your Information (Optional)",
+                  "subtitle": "You may leave this blank to report anonymously.",
+                  "fields": [
+                    {
+                      "key": "reporter_name", "type": "text", "label": "Your Name",
+                      "required": false, "validation": { "maxLength": 255 }
+                    },
+                    {
+                      "key": "reporter_grade", "type": "select", "label": "Your Grade",
+                      "required": false,
+                      "options": [
+                        { "value": "K", "label": "Kindergarten" },
+                        { "value": "1", "label": "1st Grade" },
+                        { "value": "2", "label": "2nd Grade" },
+                        { "value": "3", "label": "3rd Grade" },
+                        { "value": "4", "label": "4th Grade" },
+                        { "value": "5", "label": "5th Grade" },
+                        { "value": "6", "label": "6th Grade" },
+                        { "value": "7", "label": "7th Grade" },
+                        { "value": "8", "label": "8th Grade" },
+                        { "value": "9", "label": "9th Grade" },
+                        { "value": "10", "label": "10th Grade" },
+                        { "value": "11", "label": "11th Grade" },
+                        { "value": "12", "label": "12th Grade" },
+                        { "value": "staff", "label": "Staff Member" },
+                        { "value": "parent", "label": "Parent / Guardian" }
+                      ]
+                    },
+                    {
+                      "key": "reporter_email", "type": "email", "label": "Contact Email",
+                      "required": false, "validation": { "maxLength": 320 }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "createReport"
+          }
+        ]
+      },
+
+      "submitted": {
+        "title": "Report Submitted",
+        "route": "/submitted",
+        "layout": "standard",
+        "requiredRole": "user",
+        "components": [
+          {
+            "type": "message",
+            "config": {
+              "icon": "lucide-check-circle",
+              "title": "Thank You",
+              "body": "Your bullying report has been submitted and will be reviewed by a counselor. If you provided your contact information, you may be contacted for follow-up.",
+              "style": "success",
+              "actions": [
+                { "label": "Submit Another Report", "route": "/submit", "style": "primary" }
+              ]
+            }
+          }
+        ]
+      },
+
+      "report": {
+        "title": "Report Details",
+        "route": "/report/{id}",
+        "layout": "standard",
+        "requiredRole": "counselor",
+        "components": [
+          {
+            "type": "detail",
+            "config": {
+              "backRoute": "/",
+              "actions": [
+                { "label": "Begin Review", "icon": "lucide-clipboard-check", "mutation": "updateReportStatus", "params": { "status": "under_review" }, "style": "info", "showIf": { "status": "new" } },
+                { "label": "Investigate", "icon": "lucide-search", "mutation": "updateReportStatus", "params": { "status": "investigating" }, "style": "warning", "showIf": { "status": ["new", "under_review"] } },
+                { "label": "Mark Resolved", "icon": "lucide-check-circle", "mutation": "updateReportStatus", "params": { "status": "resolved" }, "style": "success", "showIf": { "status": ["under_review", "investigating"] } },
+                { "label": "Dismiss", "icon": "lucide-x-circle", "mutation": "updateReportStatus", "params": { "status": "dismissed" }, "style": "secondary", "showIf": { "status": ["new", "under_review", "investigating"] } }
+              ],
+              "sections": [
+                {
+                  "title": "Incident Information",
+                  "icon": "lucide-alert-triangle",
+                  "fields": [
+                    { "key": "report_date", "label": "Date of Incident", "format": "date" },
+                    { "key": "report_time", "label": "Time of Incident", "format": "time" },
+                    { "key": "location", "label": "Location" },
+                    { "key": "incident_types", "label": "Incident Types", "format": "tags" },
+                    { "key": "description", "label": "Description", "format": "text" },
+                    { "key": "previous_incidents", "label": "Previous Incidents", "format": "boolean" }
+                  ]
+                },
+                {
+                  "title": "People Involved",
+                  "icon": "lucide-users",
+                  "fields": [
+                    { "key": "students_involved", "label": "Students Involved", "format": "text" },
+                    { "key": "witness_present", "label": "Witnesses Present", "format": "boolean" },
+                    { "key": "witness_names", "label": "Witness Names", "format": "text" }
+                  ]
+                },
+                {
+                  "title": "Reporter",
+                  "icon": "lucide-user",
+                  "fields": [
+                    { "key": "reporter_name", "label": "Name", "emptyText": "Anonymous" },
+                    { "key": "reporter_grade", "label": "Grade" },
+                    { "key": "reporter_email", "label": "Email" }
+                  ]
+                },
+                {
+                  "title": "Status & Assignment",
+                  "icon": "lucide-clipboard-list",
+                  "fields": [
+                    { "key": "status", "label": "Status", "format": "badge" },
+                    { "key": "assigned_to_name", "label": "Assigned To" },
+                    { "key": "resolution_date", "label": "Resolution Date", "format": "date" },
+                    { "key": "created_at", "label": "Submitted", "format": "datetime" }
+                  ]
+                }
+              ]
+            },
+            "dataQuery": "getReport"
+          },
+          {
+            "type": "form",
+            "config": {
+              "title": "Staff Notes",
+              "inline": true,
+              "sections": [
+                {
+                  "fields": [
+                    {
+                      "key": "assigned_to", "type": "user_select", "label": "Assign To",
+                      "required": false
+                    },
+                    {
+                      "key": "staff_notes", "type": "textarea", "label": "Internal Notes",
+                      "required": false, "rows": 4,
+                      "validation": { "maxLength": 5000 }
+                    },
+                    {
+                      "key": "resolution_date", "type": "date", "label": "Resolution Date",
+                      "required": false
+                    }
+                  ]
+                }
+              ],
+              "submitLabel": "Save Notes"
+            },
+            "mutation": "updateReport"
+          }
+        ]
+      }
+    }
+  },
+
+  "data": {
+    "queries": {
+      "getReportStats": {
+        "description": "Dashboard statistics for bullying reports",
+        "handler": "ReportQueryHandler::getReportStats",
+        "cache": 120
+      },
+      "listReports": {
+        "description": "List reports with search, filter, pagination",
+        "handler": "ReportQueryHandler::listReports",
+        "parameters": {
+          "status": { "type": "string", "optional": true },
+          "dateFrom": { "type": "string", "optional": true },
+          "dateTo": { "type": "string", "optional": true },
+          "search": { "type": "string", "optional": true },
+          "page": { "type": "integer", "optional": true },
+          "pageSize": { "type": "integer", "optional": true },
+          "sort": { "type": "string", "optional": true },
+          "sortDir": { "type": "string", "optional": true }
+        }
+      },
+      "getReport": {
+        "description": "Get a single report by ID with assigned user info",
+        "handler": "ReportQueryHandler::getReport",
+        "parameters": {
+          "id": { "type": "integer", "required": true }
+        }
+      },
+      "getStatusOptions": {
+        "description": "Get available status values",
+        "handler": "ReportQueryHandler::getStatusOptions",
+        "cache": 3600
+      },
+      "getLocationOptions": {
+        "description": "Get location option list",
+        "handler": "ReportQueryHandler::getLocationOptions",
+        "cache": 3600
+      }
+    },
+
+    "mutations": {
+      "createReport": {
+        "description": "Submit a new bullying report",
+        "handler": "ReportMutationHandler::createReport",
+        "audit": true
+      },
+      "updateReport": {
+        "description": "Update staff notes, assignment, and resolution date",
+        "handler": "ReportMutationHandler::updateReport",
+        "audit": true
+      },
+      "updateReportStatus": {
+        "description": "Transition report status (review, investigate, resolve, dismiss)",
+        "handler": "ReportMutationHandler::updateReportStatus",
+        "audit": true
+      }
+    }
+  },
+
+  "policy": {
+    "roles": {
+      "user": {
+        "label": "Reporter",
+        "description": "Can submit bullying reports",
+        "queries": [],
+        "mutations": ["createReport"]
+      },
+      "counselor": {
+        "label": "Counselor",
+        "description": "Review, investigate, and resolve reports; manage assignments",
+        "inherits": "user",
+        "queries": ["getReportStats", "listReports", "getReport", "getStatusOptions", "getLocationOptions"],
+        "mutations": ["updateReport", "updateReportStatus"]
+      },
+      "admin": {
+        "label": "Safety Administrator",
+        "description": "Full access to all reports and configuration",
+        "inherits": "counselor",
+        "queries": [],
+        "mutations": []
+      }
+    },
+    "defaultRole": "user",
+    "globalRoleMapping": {
+      "super_admin": "admin",
+      "admin": "admin",
+      "principal": "counselor",
+      "counselor": "counselor",
+      "business_manager": "counselor",
+      "staff": "user",
+      "student": "user"
+    }
+  },
+
+  "access": {
+    "layer2": {
+      "workflow": {
+        "states": ["new", "under_review", "investigating", "resolved", "dismissed"],
+        "transitions": [
+          { "from": "new", "to": "under_review", "actor": ["counselor", "admin"] },
+          { "from": "new", "to": "investigating", "actor": ["counselor", "admin"] },
+          { "from": "new", "to": "dismissed", "actor": ["counselor", "admin"] },
+          { "from": "under_review", "to": "investigating", "actor": ["counselor", "admin"] },
+          { "from": "under_review", "to": "resolved", "actor": ["counselor", "admin"] },
+          { "from": "under_review", "to": "dismissed", "actor": ["counselor", "admin"] },
+          { "from": "investigating", "to": "resolved", "actor": ["counselor", "admin"] },
+          { "from": "investigating", "to": "dismissed", "actor": ["counselor", "admin"] }
+        ]
+      },
+      "editBoundaries": {
+        "reports": {
+          "immutable": ["id", "created_at", "reported_by"],
+          "counselorEdits": {
+            "editable": ["assigned_to", "staff_notes", "resolution_date", "status"],
+            "allowedStates": ["new", "under_review", "investigating"],
+            "requiresReason": false
+          }
+        }
+      },
+      "auditEvents": [
+        "REPORT_SUBMITTED",
+        "REPORT_REVIEW_STARTED",
+        "REPORT_INVESTIGATION_STARTED",
+        "REPORT_RESOLVED",
+        "REPORT_DISMISSED",
+        "REPORT_NOTES_UPDATED",
+        "REPORT_ASSIGNED"
+      ]
+    }
+  }
+}
