@@ -8,7 +8,8 @@
     "author": "Woodson ISD Technology",
     "icon": "lucide-graduation-cap",
     "category": "district",
-    "base_url": "/p/district.student-directory"
+    "base_url": "/p/district.student-directory",
+    "handlerClass": "Hub\\Package\\StudentDirectory\\StudentDirectoryHandler"
   },
   "database": {
     "connection": "woodson_students",
