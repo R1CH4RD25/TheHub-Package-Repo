@@ -53,9 +53,92 @@
     "presentation": {
         "pages": {
             "index": {
-                "title": "Fleet Overview",
+                "title": "Quick Actions",
                 "route": "/",
+                "layout": "standard",
+                "components": [
+                    {
+                        "type": "action-grid",
+                        "config": {
+                            "vehicleSelect": {
+                                "enabled": true,
+                                "label": "Step 1 — Select a Vehicle",
+                                "placeholder": "Search by unit #, make, or model...",
+                                "optionsQuery": "getVehicleOptions"
+                            },
+                            "actionsLabel": "Step 2 — What do you need to do?",
+                            "columns": 3,
+                            "actions": [
+                                {
+                                    "title": "Log Fuel",
+                                    "description": "Record a fuel fill-up or trip",
+                                    "icon": "lucide-fuel",
+                                    "color": "success",
+                                    "route": "/fuel/add?vehicle_id={vehicle_id}",
+                                    "requiresVehicle": true
+                                },
+                                {
+                                    "title": "Log Maintenance",
+                                    "description": "Record a service or repair",
+                                    "icon": "lucide-wrench",
+                                    "color": "info",
+                                    "route": "/maintenance/add?vehicle_id={vehicle_id}",
+                                    "requiresVehicle": true
+                                },
+                                {
+                                    "title": "View Vehicle",
+                                    "description": "See details, history & status",
+                                    "icon": "lucide-eye",
+                                    "color": "primary",
+                                    "route": "/vehicle/{vehicle_id}",
+                                    "requiresVehicle": true
+                                }
+                            ],
+                            "secondaryActions": {
+                                "label": "Browse",
+                                "actions": [
+                                    {
+                                        "title": "Fuel Logs",
+                                        "icon": "lucide-droplets",
+                                        "route": "/fuel"
+                                    },
+                                    {
+                                        "title": "Maintenance Logs",
+                                        "icon": "lucide-clipboard-list",
+                                        "route": "/maintenance"
+                                    },
+                                    {
+                                        "title": "Fleet Overview",
+                                        "icon": "lucide-layout-dashboard",
+                                        "route": "/fleet",
+                                        "access": [
+                                            "manager",
+                                            "admin"
+                                        ]
+                                    },
+                                    {
+                                        "title": "Schedules",
+                                        "icon": "lucide-calendar-clock",
+                                        "route": "/schedules",
+                                        "access": [
+                                            "manager",
+                                            "admin"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "fleet-overview": {
+                "title": "Fleet Overview",
+                "route": "/fleet",
                 "layout": "full",
+                "access": [
+                    "manager",
+                    "admin"
+                ],
                 "components": [
                     {
                         "type": "dashboard",
@@ -215,7 +298,7 @@
                     {
                         "type": "detail",
                         "config": {
-                            "backRoute": "/",
+                            "backRoute": "/fleet",
                             "actions": [
                                 {
                                     "label": "Edit",
@@ -365,7 +448,7 @@
                         "config": {
                             "mutation": "createVehicle",
                             "submitLabel": "Add Vehicle",
-                            "cancelRoute": "/",
+                            "cancelRoute": "/fleet",
                             "sections": [
                                 {
                                     "title": "Vehicle Information",
