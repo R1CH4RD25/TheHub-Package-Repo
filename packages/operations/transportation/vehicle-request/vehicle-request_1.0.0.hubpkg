@@ -1,0 +1,1264 @@
+{
+  "schemaVersion": "3.0.0",
+  "package": {
+    "id": "operations.vehicle-request",
+    "display_name": "Vehicle Request Form",
+    "description": "Request, approve, and manage school vehicle usage with multi-vehicle assignments, availability checking, and trip analytics",
+    "version": "1.0.0",
+    "author": "Woodson ISD Technology",
+    "icon": "lucide-bus",
+    "category": "operations",
+    "base_url": "/p/operations.vehicle-request",
+    "tags": [
+      "transportation",
+      "vehicles",
+      "requests",
+      "field-trips",
+      "operations"
+    ]
+  },
+  "database": {
+    "connection": "woodson_hub",
+    "primaryTable": "vrf_requests",
+    "auditTable": "vrf_audit_logs",
+    "schema_sql": "-- Vehicle Request Form Schema\n-- Package: operations.vehicle-request v1.0.0\n\nCREATE TABLE IF NOT EXISTS vrf_requests (\n    id                      INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    request_number          VARCHAR(50) NOT NULL,\n    requester_id            INT UNSIGNED NOT NULL COMMENT 'Hub user ID',\n    requester_email         VARCHAR(320) NOT NULL,\n    requester_name          VARCHAR(255) NULL,\n    activity_category       ENUM('athletics','academics','professional_development','administrative','other') NOT NULL DEFAULT 'other',\n    group_name              VARCHAR(255) NULL COMMENT 'Team, class, or department name',\n    activity_purpose        TEXT NOT NULL,\n    destination             VARCHAR(255) NOT NULL,\n    trip_start_date         DATE NOT NULL,\n    estimated_departure     TIME NOT NULL,\n    trip_end_date           DATE NOT NULL,\n    estimated_return        TIME NOT NULL,\n    number_of_students      INT NOT NULL DEFAULT 0,\n    grade_levels            VARCHAR(255) NULL,\n    number_of_staff         INT NOT NULL DEFAULT 0,\n    estimated_miles         DECIMAL(10,2) NULL,\n    driver_name             VARCHAR(255) NULL,\n    transportation_comments TEXT NULL,\n    general_comments        TEXT NULL,\n    approval_status         ENUM('pending','approved','denied','cancelled') NOT NULL DEFAULT 'pending',\n    approval_date           TIMESTAMP NULL,\n    approved_by             INT UNSIGNED NULL,\n    approved_by_name        VARCHAR(255) NULL,\n    denial_reason           TEXT NULL,\n    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    is_active               TINYINT(1) NOT NULL DEFAULT 1,\n    INDEX idx_requester (requester_id),\n    INDEX idx_status (approval_status),\n    INDEX idx_trip_date (trip_start_date, trip_end_date),\n    INDEX idx_request_number (request_number),\n    INDEX idx_category (activity_category)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n\nCREATE TABLE IF NOT EXISTS vrf_vehicles (\n    id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    vehicle_name        VARCHAR(255) NOT NULL,\n    vehicle_type        ENUM('bus','van','suburban','truck','car','other') NOT NULL DEFAULT 'bus',\n    capacity            INT NOT NULL DEFAULT 0,\n    license_plate       VARCHAR(50) NULL,\n    is_available        TINYINT(1) NOT NULL DEFAULT 1,\n    notes               TEXT NULL,\n    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    is_active           TINYINT(1) NOT NULL DEFAULT 1,\n    INDEX idx_type (vehicle_type),\n    INDEX idx_available (is_available)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n\nCREATE TABLE IF NOT EXISTS vrf_request_vehicles (\n    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    request_id      INT UNSIGNED NOT NULL,\n    vehicle_id      INT UNSIGNED NOT NULL,\n    assigned_by     INT UNSIGNED NULL,\n    assigned_at     TIMESTAMP NULL,\n    notes           TEXT NULL,\n    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    INDEX idx_request (request_id),\n    INDEX idx_vehicle (vehicle_id),\n    CONSTRAINT fk_rv_request FOREIGN KEY (request_id) REFERENCES vrf_requests(id) ON DELETE CASCADE,\n    CONSTRAINT fk_rv_vehicle FOREIGN KEY (vehicle_id) REFERENCES vrf_vehicles(id) ON DELETE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n\nCREATE TABLE IF NOT EXISTS vrf_audit_logs (\n    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    entity_type     VARCHAR(50) NOT NULL COMMENT 'request, vehicle, or assignment',\n    entity_id       INT UNSIGNED NOT NULL,\n    action          VARCHAR(100) NOT NULL,\n    actor_id        INT UNSIGNED NULL,\n    old_values      JSON NULL,\n    new_values      JSON NULL,\n    reason          TEXT NULL,\n    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    INDEX idx_entity (entity_type, entity_id),\n    INDEX idx_actor (actor_id),\n    INDEX idx_action (action)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n",
+    "seed_sql": "-- Vehicle Request Seed Data\n\n-- Default vehicles (customize after installation)\nINSERT INTO vrf_vehicles (vehicle_name, vehicle_type, capacity, is_available) VALUES\n    ('Bus #1', 'bus', 48, 1),\n    ('Bus #2', 'bus', 48, 1),\n    ('Bus #3', 'bus', 48, 1),\n    ('Van #1', 'van', 12, 1),\n    ('Van #2', 'van', 12, 1),\n    ('Suburban #1', 'suburban', 8, 1)\nON DUPLICATE KEY UPDATE id=id;\n"
+  },
+  "resources": {
+    "provides": [],
+    "requires": [
+      {
+        "key": "operations.vehicles",
+        "contract": "1.0.0",
+        "optional": true,
+        "description": "If Vehicle Maintenance package is installed, can pull fleet inventory for vehicle assignment"
+      }
+    ]
+  },
+  "presentation": {
+    "pages": {
+      "index": {
+        "title": "Vehicle Requests",
+        "route": "/",
+        "layout": "full",
+        "requiredRole": "requester",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                {
+                  "title": "My Pending",
+                  "dataKey": "my_pending",
+                  "icon": "lucide-clock",
+                  "color": "warning"
+                },
+                {
+                  "title": "My Approved",
+                  "dataKey": "my_approved",
+                  "icon": "lucide-check-circle",
+                  "color": "success"
+                },
+                {
+                  "title": "Upcoming Trips",
+                  "dataKey": "upcoming_trips",
+                  "icon": "lucide-calendar",
+                  "color": "info"
+                },
+                {
+                  "title": "Total This Year",
+                  "dataKey": "my_total_year",
+                  "icon": "lucide-hash",
+                  "color": "primary"
+                }
+              ]
+            },
+            "dataQuery": "getMyRequestStats"
+          },
+          {
+            "type": "table",
+            "config": {
+              "title": "My Vehicle Requests",
+              "columns": [
+                {
+                  "key": "request_number",
+                  "label": "Request #",
+                  "sortable": true
+                },
+                {
+                  "key": "trip_start_date",
+                  "label": "Trip Date",
+                  "sortable": true,
+                  "format": "date"
+                },
+                {
+                  "key": "destination",
+                  "label": "Destination"
+                },
+                {
+                  "key": "activity_category",
+                  "label": "Category",
+                  "filterable": true
+                },
+                {
+                  "key": "number_of_students",
+                  "label": "Students"
+                },
+                {
+                  "key": "approval_status",
+                  "label": "Status",
+                  "sortable": true,
+                  "filterable": true,
+                  "badge": true
+                }
+              ],
+              "defaultSort": {
+                "field": "trip_start_date",
+                "direction": "DESC"
+              },
+              "actions": [
+                {
+                  "label": "View",
+                  "icon": "lucide-eye",
+                  "type": "route",
+                  "route": "/request/{id}"
+                }
+              ],
+              "pagination": {
+                "perPage": 25
+              },
+              "filters": [
+                {
+                  "key": "approval_status",
+                  "type": "select",
+                  "label": "Status",
+                  "options": "getStatusOptions"
+                }
+              ]
+            },
+            "dataQuery": "listMyRequests"
+          }
+        ]
+      },
+      "request-form": {
+        "title": "New Vehicle Request",
+        "route": "/request/new",
+        "layout": "standard",
+        "requiredRole": "requester",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "Vehicle Request Form",
+              "submitLabel": "Submit Request",
+              "successMessage": "Your vehicle request has been submitted for approval.",
+              "successRoute": "/",
+              "sections": [
+                {
+                  "title": "Activity Information",
+                  "fields": [
+                    {
+                      "key": "activity_category",
+                      "type": "select",
+                      "label": "Activity Category",
+                      "required": true,
+                      "options": [
+                        {
+                          "value": "athletics",
+                          "label": "Athletics"
+                        },
+                        {
+                          "value": "academics",
+                          "label": "Academics"
+                        },
+                        {
+                          "value": "professional_development",
+                          "label": "Professional Development"
+                        },
+                        {
+                          "value": "administrative",
+                          "label": "Administrative"
+                        },
+                        {
+                          "value": "other",
+                          "label": "Other"
+                        }
+                      ]
+                    },
+                    {
+                      "key": "group_name",
+                      "type": "text",
+                      "label": "Group / Team / Class",
+                      "required": false,
+                      "validation": {
+                        "maxLength": 255
+                      },
+                      "placeholder": "e.g., Varsity Football, 5th Grade, Admin Team"
+                    },
+                    {
+                      "key": "activity_purpose",
+                      "type": "textarea",
+                      "label": "Purpose of Trip",
+                      "required": true,
+                      "rows": 3,
+                      "validation": {
+                        "maxLength": 2000
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Trip Details",
+                  "fields": [
+                    {
+                      "key": "destination",
+                      "type": "text",
+                      "label": "Destination",
+                      "required": true,
+                      "validation": {
+                        "maxLength": 255
+                      }
+                    },
+                    {
+                      "key": "trip_start_date",
+                      "type": "date",
+                      "label": "Trip Start Date",
+                      "required": true
+                    },
+                    {
+                      "key": "estimated_departure",
+                      "type": "time",
+                      "label": "Estimated Departure Time",
+                      "required": true
+                    },
+                    {
+                      "key": "trip_end_date",
+                      "type": "date",
+                      "label": "Trip End Date",
+                      "required": true
+                    },
+                    {
+                      "key": "estimated_return",
+                      "type": "time",
+                      "label": "Estimated Return Time",
+                      "required": true
+                    },
+                    {
+                      "key": "estimated_miles",
+                      "type": "number",
+                      "label": "Estimated Miles (Round Trip)",
+                      "required": false,
+                      "validation": {
+                        "minValue": 1,
+                        "maxValue": 2000
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Passengers",
+                  "fields": [
+                    {
+                      "key": "number_of_students",
+                      "type": "number",
+                      "label": "Number of Students",
+                      "required": true,
+                      "validation": {
+                        "minValue": 0,
+                        "maxValue": 500
+                      }
+                    },
+                    {
+                      "key": "grade_levels",
+                      "type": "text",
+                      "label": "Grade Levels",
+                      "required": false,
+                      "placeholder": "e.g., 9-12, K-2"
+                    },
+                    {
+                      "key": "number_of_staff",
+                      "type": "number",
+                      "label": "Number of Staff",
+                      "required": true,
+                      "validation": {
+                        "minValue": 1,
+                        "maxValue": 50
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Transportation",
+                  "fields": [
+                    {
+                      "key": "driver_name",
+                      "type": "text",
+                      "label": "Preferred Driver (if any)",
+                      "required": false,
+                      "validation": {
+                        "maxLength": 255
+                      }
+                    },
+                    {
+                      "key": "transportation_comments",
+                      "type": "textarea",
+                      "label": "Transportation Notes",
+                      "required": false,
+                      "rows": 3,
+                      "validation": {
+                        "maxLength": 2000
+                      },
+                      "placeholder": "Special requirements, vehicle preferences, etc."
+                    },
+                    {
+                      "key": "general_comments",
+                      "type": "textarea",
+                      "label": "General Comments",
+                      "required": false,
+                      "rows": 3,
+                      "validation": {
+                        "maxLength": 2000
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "createRequest"
+          }
+        ]
+      },
+      "request-detail": {
+        "title": "Request Detail",
+        "route": "/request/{id}",
+        "layout": "standard",
+        "requiredRole": "requester",
+        "components": [
+          {
+            "type": "detail",
+            "config": {
+              "backRoute": "/",
+              "actions": [
+                {
+                  "label": "Approve",
+                  "icon": "lucide-check",
+                  "mutation": "approveRequest",
+                  "style": "success",
+                  "showIf": {
+                    "approval_status": "pending"
+                  },
+                  "requiredRole": "approver"
+                },
+                {
+                  "label": "Deny",
+                  "icon": "lucide-x",
+                  "mutation": "denyRequest",
+                  "style": "danger",
+                  "showIf": {
+                    "approval_status": "pending"
+                  },
+                  "requiredRole": "approver",
+                  "promptField": {
+                    "key": "denial_reason",
+                    "label": "Reason for Denial",
+                    "type": "textarea",
+                    "required": true
+                  }
+                },
+                {
+                  "label": "Cancel",
+                  "icon": "lucide-ban",
+                  "mutation": "cancelRequest",
+                  "style": "secondary",
+                  "showIf": {
+                    "approval_status": "pending"
+                  },
+                  "requiredRole": "requester"
+                },
+                {
+                  "label": "Assign Vehicles",
+                  "icon": "lucide-truck",
+                  "type": "route",
+                  "route": "/request/{id}/assign",
+                  "style": "info",
+                  "showIf": {
+                    "approval_status": "approved"
+                  },
+                  "requiredRole": "approver"
+                }
+              ],
+              "sections": [
+                {
+                  "title": "Request Information",
+                  "icon": "lucide-file-text",
+                  "fields": [
+                    {
+                      "key": "request_number",
+                      "label": "Request #"
+                    },
+                    {
+                      "key": "requester_name",
+                      "label": "Requested By"
+                    },
+                    {
+                      "key": "requester_email",
+                      "label": "Email"
+                    },
+                    {
+                      "key": "activity_category",
+                      "label": "Category"
+                    },
+                    {
+                      "key": "group_name",
+                      "label": "Group / Team"
+                    },
+                    {
+                      "key": "activity_purpose",
+                      "label": "Purpose",
+                      "format": "text"
+                    }
+                  ]
+                },
+                {
+                  "title": "Trip Details",
+                  "icon": "lucide-map-pin",
+                  "fields": [
+                    {
+                      "key": "destination",
+                      "label": "Destination"
+                    },
+                    {
+                      "key": "trip_start_date",
+                      "label": "Depart",
+                      "format": "date"
+                    },
+                    {
+                      "key": "estimated_departure",
+                      "label": "Departure Time",
+                      "format": "time"
+                    },
+                    {
+                      "key": "trip_end_date",
+                      "label": "Return",
+                      "format": "date"
+                    },
+                    {
+                      "key": "estimated_return",
+                      "label": "Return Time",
+                      "format": "time"
+                    },
+                    {
+                      "key": "estimated_miles",
+                      "label": "Est. Miles"
+                    }
+                  ]
+                },
+                {
+                  "title": "Passengers",
+                  "icon": "lucide-users",
+                  "fields": [
+                    {
+                      "key": "number_of_students",
+                      "label": "Students"
+                    },
+                    {
+                      "key": "grade_levels",
+                      "label": "Grade Levels"
+                    },
+                    {
+                      "key": "number_of_staff",
+                      "label": "Staff"
+                    }
+                  ]
+                },
+                {
+                  "title": "Status",
+                  "icon": "lucide-activity",
+                  "fields": [
+                    {
+                      "key": "approval_status",
+                      "label": "Status",
+                      "format": "badge"
+                    },
+                    {
+                      "key": "approved_by_name",
+                      "label": "Reviewed By"
+                    },
+                    {
+                      "key": "approval_date",
+                      "label": "Review Date",
+                      "format": "datetime"
+                    },
+                    {
+                      "key": "denial_reason",
+                      "label": "Denial Reason",
+                      "format": "text"
+                    },
+                    {
+                      "key": "created_at",
+                      "label": "Submitted",
+                      "format": "datetime"
+                    }
+                  ]
+                },
+                {
+                  "title": "Assigned Vehicles",
+                  "icon": "lucide-truck",
+                  "dataQuery": "getRequestVehicles",
+                  "format": "list",
+                  "fields": [
+                    {
+                      "key": "vehicle_name",
+                      "label": "Vehicle"
+                    },
+                    {
+                      "key": "vehicle_type",
+                      "label": "Type"
+                    },
+                    {
+                      "key": "capacity",
+                      "label": "Capacity"
+                    },
+                    {
+                      "key": "assigned_at",
+                      "label": "Assigned",
+                      "format": "datetime"
+                    }
+                  ]
+                }
+              ]
+            },
+            "dataQuery": "getRequest"
+          }
+        ]
+      },
+      "assign-vehicles": {
+        "title": "Assign Vehicles",
+        "route": "/request/{id}/assign",
+        "layout": "standard",
+        "requiredRole": "approver",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "Assign Vehicles to Request",
+              "loadQuery": "getRequest",
+              "submitLabel": "Save Assignments",
+              "successRoute": "/request/{id}",
+              "sections": [
+                {
+                  "title": "Available Vehicles",
+                  "fields": [
+                    {
+                      "key": "vehicle_ids",
+                      "type": "multiselect",
+                      "label": "Select Vehicles",
+                      "required": true,
+                      "optionsQuery": "getAvailableVehicles",
+                      "helpText": "Select one or more vehicles to assign to this trip"
+                    },
+                    {
+                      "key": "notes",
+                      "type": "textarea",
+                      "label": "Assignment Notes",
+                      "required": false,
+                      "validation": {
+                        "maxLength": 2000
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "assignVehicles"
+          }
+        ]
+      },
+      "admin-requests": {
+        "title": "All Vehicle Requests",
+        "route": "/admin/requests",
+        "layout": "full",
+        "requiredRole": "approver",
+        "components": [
+          {
+            "type": "dashboard",
+            "config": {
+              "columns": 4,
+              "cards": [
+                {
+                  "title": "Pending Approval",
+                  "dataKey": "pending_count",
+                  "icon": "lucide-clock",
+                  "color": "warning"
+                },
+                {
+                  "title": "Approved Upcoming",
+                  "dataKey": "approved_upcoming",
+                  "icon": "lucide-calendar-check",
+                  "color": "success"
+                },
+                {
+                  "title": "This Month",
+                  "dataKey": "this_month",
+                  "icon": "lucide-calendar",
+                  "color": "primary"
+                },
+                {
+                  "title": "Total This Year",
+                  "dataKey": "total_year",
+                  "icon": "lucide-hash",
+                  "color": "info"
+                }
+              ]
+            },
+            "dataQuery": "getAdminRequestStats"
+          },
+          {
+            "type": "table",
+            "config": {
+              "title": "All Requests",
+              "columns": [
+                {
+                  "key": "request_number",
+                  "label": "Request #",
+                  "sortable": true
+                },
+                {
+                  "key": "requester_name",
+                  "label": "Requester",
+                  "sortable": true
+                },
+                {
+                  "key": "trip_start_date",
+                  "label": "Trip Date",
+                  "sortable": true,
+                  "format": "date"
+                },
+                {
+                  "key": "destination",
+                  "label": "Destination"
+                },
+                {
+                  "key": "activity_category",
+                  "label": "Category",
+                  "filterable": true
+                },
+                {
+                  "key": "number_of_students",
+                  "label": "Students"
+                },
+                {
+                  "key": "approval_status",
+                  "label": "Status",
+                  "sortable": true,
+                  "filterable": true,
+                  "badge": true
+                }
+              ],
+              "defaultSort": {
+                "field": "trip_start_date",
+                "direction": "DESC"
+              },
+              "actions": [
+                {
+                  "label": "View",
+                  "icon": "lucide-eye",
+                  "type": "route",
+                  "route": "/request/{id}"
+                }
+              ],
+              "filters": [
+                {
+                  "key": "approval_status",
+                  "type": "select",
+                  "label": "Status",
+                  "options": "getStatusOptions"
+                },
+                {
+                  "key": "activity_category",
+                  "type": "select",
+                  "label": "Category",
+                  "options": "getCategoryOptions"
+                },
+                {
+                  "key": "trip_start_date",
+                  "type": "dateRange",
+                  "label": "Trip Date"
+                }
+              ],
+              "pagination": {
+                "perPage": 50
+              },
+              "export": {
+                "enabled": true,
+                "formats": [
+                  "csv",
+                  "xlsx"
+                ]
+              }
+            },
+            "dataQuery": "listAllRequests"
+          }
+        ]
+      },
+      "vehicles": {
+        "title": "Fleet Vehicles",
+        "route": "/admin/vehicles",
+        "layout": "full",
+        "requiredRole": "fleet_admin",
+        "components": [
+          {
+            "type": "table",
+            "config": {
+              "title": "District Vehicles",
+              "addRoute": "/admin/vehicles/add",
+              "columns": [
+                {
+                  "key": "vehicle_name",
+                  "label": "Name",
+                  "sortable": true
+                },
+                {
+                  "key": "vehicle_type",
+                  "label": "Type",
+                  "filterable": true
+                },
+                {
+                  "key": "capacity",
+                  "label": "Capacity",
+                  "sortable": true
+                },
+                {
+                  "key": "license_plate",
+                  "label": "License Plate"
+                },
+                {
+                  "key": "is_available",
+                  "label": "Available",
+                  "format": "boolean"
+                }
+              ],
+              "defaultSort": {
+                "field": "vehicle_name",
+                "direction": "ASC"
+              },
+              "actions": [
+                {
+                  "label": "Edit",
+                  "icon": "lucide-pencil",
+                  "type": "route",
+                  "route": "/admin/vehicles/{id}/edit"
+                },
+                {
+                  "label": "Toggle Availability",
+                  "icon": "lucide-toggle-right",
+                  "mutation": "toggleVehicleAvailability"
+                }
+              ],
+              "pagination": {
+                "perPage": 50
+              }
+            },
+            "dataQuery": "listVehicles"
+          }
+        ]
+      },
+      "vehicle-form": {
+        "title": "Add Vehicle",
+        "route": "/admin/vehicles/add",
+        "layout": "standard",
+        "requiredRole": "fleet_admin",
+        "components": [
+          {
+            "type": "form",
+            "config": {
+              "title": "Add New Vehicle",
+              "submitLabel": "Add Vehicle",
+              "successRoute": "/admin/vehicles",
+              "sections": [
+                {
+                  "title": "Vehicle Information",
+                  "fields": [
+                    {
+                      "key": "vehicle_name",
+                      "type": "text",
+                      "label": "Vehicle Name",
+                      "required": true,
+                      "validation": {
+                        "maxLength": 255
+                      },
+                      "placeholder": "e.g., Bus #4"
+                    },
+                    {
+                      "key": "vehicle_type",
+                      "type": "select",
+                      "label": "Type",
+                      "required": true,
+                      "options": [
+                        {
+                          "value": "bus",
+                          "label": "Bus"
+                        },
+                        {
+                          "value": "van",
+                          "label": "Van"
+                        },
+                        {
+                          "value": "suburban",
+                          "label": "Suburban"
+                        },
+                        {
+                          "value": "truck",
+                          "label": "Truck"
+                        },
+                        {
+                          "value": "car",
+                          "label": "Car"
+                        },
+                        {
+                          "value": "other",
+                          "label": "Other"
+                        }
+                      ]
+                    },
+                    {
+                      "key": "capacity",
+                      "type": "number",
+                      "label": "Passenger Capacity",
+                      "required": true,
+                      "validation": {
+                        "minValue": 1,
+                        "maxValue": 100
+                      }
+                    },
+                    {
+                      "key": "license_plate",
+                      "type": "text",
+                      "label": "License Plate",
+                      "required": false,
+                      "validation": {
+                        "maxLength": 50
+                      }
+                    },
+                    {
+                      "key": "notes",
+                      "type": "textarea",
+                      "label": "Notes",
+                      "required": false,
+                      "validation": {
+                        "maxLength": 2000
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "mutation": "createVehicle"
+          }
+        ]
+      },
+      "analytics": {
+        "title": "Request Analytics",
+        "route": "/admin/analytics",
+        "layout": "full",
+        "requiredRole": "approver",
+        "components": [
+          {
+            "type": "analytics",
+            "config": {
+              "charts": [
+                {
+                  "key": "requests_by_category",
+                  "type": "bar",
+                  "title": "Requests by Category (This Year)",
+                  "dataQuery": "getRequestsByCategory"
+                },
+                {
+                  "key": "requests_over_time",
+                  "type": "line",
+                  "title": "Monthly Requests",
+                  "dataQuery": "getMonthlyRequests"
+                },
+                {
+                  "key": "vehicle_utilization",
+                  "type": "bar",
+                  "title": "Vehicle Utilization",
+                  "dataQuery": "getVehicleUtilization"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "data": {
+    "queries": {
+      "getMyRequestStats": {
+        "description": "Personal dashboard statistics",
+        "handler": "VRFQueryHandler::getMyRequestStats",
+        "cache": 60
+      },
+      "listMyRequests": {
+        "description": "List current user's vehicle requests",
+        "handler": "VRFQueryHandler::listMyRequests",
+        "parameters": {
+          "approval_status": {
+            "type": "string",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          },
+          "sort": {
+            "type": "string",
+            "optional": true
+          },
+          "sortDir": {
+            "type": "string",
+            "optional": true
+          }
+        }
+      },
+      "getRequest": {
+        "description": "Get a single request with all details",
+        "handler": "VRFQueryHandler::getRequest",
+        "parameters": {
+          "id": {
+            "type": "integer",
+            "required": true
+          }
+        }
+      },
+      "getRequestVehicles": {
+        "description": "Get vehicles assigned to a request",
+        "handler": "VRFQueryHandler::getRequestVehicles",
+        "parameters": {
+          "request_id": {
+            "type": "integer",
+            "required": true
+          }
+        }
+      },
+      "getAdminRequestStats": {
+        "description": "Admin dashboard statistics",
+        "handler": "VRFQueryHandler::getAdminRequestStats",
+        "cache": 120
+      },
+      "listAllRequests": {
+        "description": "List all vehicle requests (admin view)",
+        "handler": "VRFQueryHandler::listAllRequests",
+        "parameters": {
+          "approval_status": {
+            "type": "string",
+            "optional": true
+          },
+          "activity_category": {
+            "type": "string",
+            "optional": true
+          },
+          "dateFrom": {
+            "type": "string",
+            "optional": true
+          },
+          "dateTo": {
+            "type": "string",
+            "optional": true
+          },
+          "search": {
+            "type": "string",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          },
+          "sort": {
+            "type": "string",
+            "optional": true
+          },
+          "sortDir": {
+            "type": "string",
+            "optional": true
+          }
+        }
+      },
+      "listVehicles": {
+        "description": "List all fleet vehicles",
+        "handler": "VRFQueryHandler::listVehicles",
+        "parameters": {
+          "type": {
+            "type": "string",
+            "optional": true
+          },
+          "available_only": {
+            "type": "boolean",
+            "optional": true
+          },
+          "page": {
+            "type": "integer",
+            "optional": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "optional": true
+          }
+        }
+      },
+      "getAvailableVehicles": {
+        "description": "Get vehicles available for a date range",
+        "handler": "VRFQueryHandler::getAvailableVehicles",
+        "parameters": {
+          "start_date": {
+            "type": "string",
+            "optional": true
+          },
+          "end_date": {
+            "type": "string",
+            "optional": true
+          }
+        }
+      },
+      "getStatusOptions": {
+        "description": "Status filter options",
+        "handler": "VRFQueryHandler::getStatusOptions",
+        "cache": 3600
+      },
+      "getCategoryOptions": {
+        "description": "Activity category options",
+        "handler": "VRFQueryHandler::getCategoryOptions",
+        "cache": 3600
+      },
+      "getRequestsByCategory": {
+        "description": "Analytics: requests by activity category",
+        "handler": "VRFQueryHandler::getRequestsByCategory",
+        "cache": 300
+      },
+      "getMonthlyRequests": {
+        "description": "Analytics: monthly request count",
+        "handler": "VRFQueryHandler::getMonthlyRequests",
+        "cache": 300
+      },
+      "getVehicleUtilization": {
+        "description": "Analytics: vehicle utilization rates",
+        "handler": "VRFQueryHandler::getVehicleUtilization",
+        "cache": 300
+      }
+    },
+    "mutations": {
+      "createRequest": {
+        "description": "Submit a new vehicle request",
+        "handler": "VRFMutationHandler::createRequest",
+        "audit": true
+      },
+      "approveRequest": {
+        "description": "Approve a vehicle request",
+        "handler": "VRFMutationHandler::approveRequest",
+        "audit": true
+      },
+      "denyRequest": {
+        "description": "Deny a vehicle request with reason",
+        "handler": "VRFMutationHandler::denyRequest",
+        "audit": true
+      },
+      "cancelRequest": {
+        "description": "Cancel a pending vehicle request",
+        "handler": "VRFMutationHandler::cancelRequest",
+        "audit": true
+      },
+      "assignVehicles": {
+        "description": "Assign vehicles to an approved request",
+        "handler": "VRFMutationHandler::assignVehicles",
+        "audit": true
+      },
+      "createVehicle": {
+        "description": "Add a new vehicle to the fleet",
+        "handler": "VRFMutationHandler::createVehicle",
+        "audit": true
+      },
+      "updateVehicle": {
+        "description": "Update vehicle information",
+        "handler": "VRFMutationHandler::updateVehicle",
+        "audit": true
+      },
+      "toggleVehicleAvailability": {
+        "description": "Toggle vehicle availability status",
+        "handler": "VRFMutationHandler::toggleVehicleAvailability",
+        "audit": true
+      }
+    }
+  },
+  "policy": {
+    "roles": {
+      "requester": {
+        "label": "Requester",
+        "description": "Submit vehicle requests and view own requests",
+        "queries": [
+          "getMyRequestStats",
+          "listMyRequests",
+          "getRequest",
+          "getRequestVehicles",
+          "getStatusOptions",
+          "getCategoryOptions"
+        ],
+        "mutations": [
+          "createRequest",
+          "cancelRequest"
+        ]
+      },
+      "approver": {
+        "label": "Approver",
+        "description": "Review, approve/deny requests, assign vehicles, view analytics",
+        "inherits": "requester",
+        "queries": [
+          "getAdminRequestStats",
+          "listAllRequests",
+          "getAvailableVehicles",
+          "getRequestsByCategory",
+          "getMonthlyRequests",
+          "getVehicleUtilization"
+        ],
+        "mutations": [
+          "approveRequest",
+          "denyRequest",
+          "assignVehicles"
+        ]
+      },
+      "fleet_admin": {
+        "label": "Fleet Administrator",
+        "description": "Manage vehicles and fleet configuration",
+        "inherits": "approver",
+        "queries": [
+          "listVehicles"
+        ],
+        "mutations": [
+          "createVehicle",
+          "updateVehicle",
+          "toggleVehicleAvailability"
+        ]
+      },
+      "admin": {
+        "label": "Transportation Admin",
+        "description": "Full access to all transportation features",
+        "inherits": "fleet_admin",
+        "queries": [],
+        "mutations": []
+      }
+    },
+    "defaultRole": "requester",
+    "globalRoleMapping": {
+      "super_admin": "admin",
+      "admin": "admin",
+      "principal": "approver",
+      "business_manager": "approver",
+      "maintenance_director": "fleet_admin",
+      "staff": "requester",
+      "student": "requester"
+    }
+  },
+  "access": {
+    "layer2": {
+      "workflow": {
+        "states": [
+          "pending",
+          "approved",
+          "denied",
+          "cancelled"
+        ],
+        "transitions": [
+          {
+            "from": "pending",
+            "to": "approved",
+            "actor": [
+              "approver",
+              "fleet_admin",
+              "admin"
+            ]
+          },
+          {
+            "from": "pending",
+            "to": "denied",
+            "actor": [
+              "approver",
+              "fleet_admin",
+              "admin"
+            ]
+          },
+          {
+            "from": "pending",
+            "to": "cancelled",
+            "actor": [
+              "requester",
+              "approver",
+              "fleet_admin",
+              "admin"
+            ]
+          }
+        ]
+      },
+      "editBoundaries": {
+        "requests": {
+          "immutable": [
+            "id",
+            "request_number",
+            "created_at",
+            "requester_id"
+          ],
+          "requesterEdits": {
+            "editable": [
+              "activity_category",
+              "group_name",
+              "activity_purpose",
+              "destination",
+              "trip_start_date",
+              "estimated_departure",
+              "trip_end_date",
+              "estimated_return",
+              "number_of_students",
+              "grade_levels",
+              "number_of_staff",
+              "estimated_miles",
+              "driver_name",
+              "transportation_comments",
+              "general_comments"
+            ],
+            "allowedStates": [
+              "pending"
+            ],
+            "requiresReason": false
+          },
+          "approverEdits": {
+            "editable": [
+              "approval_status",
+              "denial_reason"
+            ],
+            "allowedStates": [
+              "pending"
+            ],
+            "requiresReason": true
+          }
+        }
+      },
+      "auditEvents": [
+        "REQUEST_SUBMITTED",
+        "REQUEST_APPROVED",
+        "REQUEST_DENIED",
+        "REQUEST_CANCELLED",
+        "VEHICLES_ASSIGNED",
+        "VEHICLE_CREATED",
+        "VEHICLE_UPDATED",
+        "VEHICLE_AVAILABILITY_TOGGLED"
+      ]
+    }
+  }
+}
