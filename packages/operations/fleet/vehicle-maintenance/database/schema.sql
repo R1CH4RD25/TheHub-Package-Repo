@@ -1,25 +1,54 @@
--- Vehicle Maintenance & Fleet Tracking Package Database Schema
--- Version: 1.0.0
--- Category: operations-fleet-maintenance
+-- ============================================================================
+-- Vehicle Maintenance & Fleet Tracking — Initial Schema
+-- Migration: 001_create_fleet_tables.sql
+-- Version: 2.1.0
+--
+-- All tables live in woodson_hub with vm_ prefix for namespace isolation.
+-- Tables use CHAR(26) ULID primary keys for portability.
+-- Foreign keys to users.id are INT UNSIGNED (native hub FK).
+-- ============================================================================
 
--- ============================================================================
--- 1. VEHICLES (Fleet Inventory)
--- ============================================================================
+-- 9. DEPARTMENTS (create first — referenced by vehicles)
+CREATE TABLE IF NOT EXISTS vm_departments (
+    id CHAR(26) PRIMARY KEY COMMENT 'ULID',
+    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Transportation, Maintenance, Athletics, etc.',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_name (name),
+    INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. CAMPUSES (create first — referenced by vehicles)
+CREATE TABLE IF NOT EXISTS vm_campuses (
+    id CHAR(26) PRIMARY KEY COMMENT 'ULID',
+    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Elementary, Middle School, High School, etc.',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_name (name),
+    INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 1. VEHICLES (Fleet Inventory — shared resource for cross-package use)
 CREATE TABLE IF NOT EXISTS vm_vehicles (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     unit_number VARCHAR(50) NOT NULL UNIQUE COMMENT 'District identifier like BUS-01',
     name VARCHAR(255) NOT NULL COMMENT 'Display name like Elementary Bus #1',
-    vin VARCHAR(32) DEFAULT NULL COMMENT 'Vehicle Identification Number',
-    license_plate VARCHAR(20) DEFAULT NULL,
+    vin VARCHAR(32) DEFAULT NULL COMMENT 'Vehicle Identification Number (optional via settings)',
+    license_plate VARCHAR(20) DEFAULT NULL COMMENT 'Optional via settings',
     year INT DEFAULT NULL COMMENT 'Model year (1900-2100)',
     make VARCHAR(100) DEFAULT NULL COMMENT 'Ford, Chevy, International, etc.',
     model VARCHAR(100) DEFAULT NULL COMMENT 'Transit, Express, CE, etc.',
+    color VARCHAR(50) DEFAULT NULL COMMENT 'Vehicle color',
     current_odometer INT DEFAULT NULL COMMENT 'Latest odometer reading (updated from logs)',
     department_id CHAR(26) DEFAULT NULL COMMENT 'FK to vm_departments',
     campus_id CHAR(26) DEFAULT NULL COMMENT 'FK to vm_campuses',
+    assigned_driver_id INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id — default driver',
     is_out_of_service BOOLEAN DEFAULT FALSE,
     out_of_service_reason TEXT DEFAULT NULL,
     out_of_service_date DATE DEFAULT NULL,
+    is_shared BOOLEAN DEFAULT TRUE COMMENT 'If TRUE, other packages can reference this vehicle',
     is_deleted BOOLEAN DEFAULT FALSE COMMENT 'Soft delete',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id',
@@ -29,12 +58,13 @@ CREATE TABLE IF NOT EXISTS vm_vehicles (
     INDEX idx_department (department_id),
     INDEX idx_campus (campus_id),
     INDEX idx_out_of_service (is_out_of_service),
-    INDEX idx_deleted (is_deleted)
+    INDEX idx_shared (is_shared),
+    INDEX idx_deleted (is_deleted),
+    CONSTRAINT fk_vm_vehicles_department FOREIGN KEY (department_id) REFERENCES vm_departments(id) ON DELETE SET NULL,
+    CONSTRAINT fk_vm_vehicles_campus FOREIGN KEY (campus_id) REFERENCES vm_campuses(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 2. TRIP CATEGORIES (Constants for trip classification)
--- ============================================================================
+-- 2. TRIP CATEGORIES (Constants for trip classification — codes 11,23,34,36,41)
 CREATE TABLE IF NOT EXISTS vm_trip_categories (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     code VARCHAR(10) NOT NULL UNIQUE COMMENT 'Trip code: 11, 23, 34, 36, 41',
@@ -48,9 +78,7 @@ CREATE TABLE IF NOT EXISTS vm_trip_categories (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 3. FUEL LOGS (Fuel & Trip Tracking)
--- ============================================================================
+-- 3. FUEL LOGS (Fuel & Trip Tracking with Layer 2 workflow)
 CREATE TABLE IF NOT EXISTS vm_fuel_logs (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     vehicle_id CHAR(26) NOT NULL COMMENT 'FK to vm_vehicles.id',
@@ -66,7 +94,12 @@ CREATE TABLE IF NOT EXISTS vm_fuel_logs (
     price_per_gallon DECIMAL(10,2) DEFAULT NULL COMMENT 'Price per gallon',
     receipt_path VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded receipt',
     notes TEXT DEFAULT NULL,
-    logged_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id - who submitted this log',
+    logged_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id — who submitted this log',
+    workflow_status ENUM('draft','submitted','in_review','needs_correction','resubmitted','approved','rejected') DEFAULT 'draft' COMMENT 'Layer 2 workflow state',
+    reviewed_by INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id — manager who reviewed',
+    reviewed_at TIMESTAMP NULL DEFAULT NULL,
+    review_notes TEXT DEFAULT NULL COMMENT 'Manager notes on approval/rejection',
+    correction_reason TEXT DEFAULT NULL COMMENT 'Reason for returning (required by editBoundaries)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (vehicle_id) REFERENCES vm_vehicles(id) ON DELETE RESTRICT,
@@ -75,12 +108,11 @@ CREATE TABLE IF NOT EXISTS vm_fuel_logs (
     INDEX idx_trip_category (trip_category_id),
     INDEX idx_event_date (event_date),
     INDEX idx_logged_by (logged_by),
-    INDEX idx_is_purchase (is_purchase)
+    INDEX idx_is_purchase (is_purchase),
+    INDEX idx_workflow_status (workflow_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
 -- 4. MAINTENANCE ITEMS (Master list of maintenance types)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS vm_maintenance_items (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Oil Change, Tire Rotation, etc.',
@@ -95,9 +127,7 @@ CREATE TABLE IF NOT EXISTS vm_maintenance_items (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 5. MAINTENANCE EVENTS (Completed maintenance logs)
--- ============================================================================
+-- 5. MAINTENANCE EVENTS (Completed maintenance logs with Layer 2 workflow)
 CREATE TABLE IF NOT EXISTS vm_maintenance_events (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     vehicle_id CHAR(26) NOT NULL COMMENT 'FK to vm_vehicles.id',
@@ -111,7 +141,12 @@ CREATE TABLE IF NOT EXISTS vm_maintenance_events (
     invoice_path VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded invoice (PDF/image)',
     photo_paths JSON DEFAULT NULL COMMENT 'Array of uploaded photo paths',
     notes TEXT DEFAULT NULL,
-    logged_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id - who performed/logged this',
+    logged_by INT UNSIGNED NOT NULL COMMENT 'FK to users.id — who performed/logged this',
+    workflow_status ENUM('draft','submitted','in_review','needs_correction','resubmitted','approved','rejected') DEFAULT 'draft' COMMENT 'Layer 2 workflow state',
+    reviewed_by INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id — manager who reviewed',
+    reviewed_at TIMESTAMP NULL DEFAULT NULL,
+    review_notes TEXT DEFAULT NULL COMMENT 'Manager notes on approval/rejection',
+    correction_reason TEXT DEFAULT NULL COMMENT 'Reason for returning (required by editBoundaries)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (vehicle_id) REFERENCES vm_vehicles(id) ON DELETE RESTRICT,
@@ -119,12 +154,11 @@ CREATE TABLE IF NOT EXISTS vm_maintenance_events (
     INDEX idx_vehicle (vehicle_id),
     INDEX idx_maintenance_item (maintenance_item_id),
     INDEX idx_event_date (event_date),
-    INDEX idx_logged_by (logged_by)
+    INDEX idx_logged_by (logged_by),
+    INDEX idx_workflow_status (workflow_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
 -- 6. MAINTENANCE TEMPLATES (Reusable maintenance plans)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS vm_maintenance_templates (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Bus Template, Truck Template, etc.',
@@ -137,9 +171,7 @@ CREATE TABLE IF NOT EXISTS vm_maintenance_templates (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
 -- 7. TEMPLATE ITEMS (Maintenance items within templates)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS vm_template_items (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     template_id CHAR(26) NOT NULL COMMENT 'FK to vm_maintenance_templates.id',
@@ -155,9 +187,7 @@ CREATE TABLE IF NOT EXISTS vm_template_items (
     INDEX idx_maintenance_item (maintenance_item_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
 -- 8. VEHICLE SCHEDULES (Per-vehicle maintenance schedule)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS vm_vehicle_schedules (
     id CHAR(26) PRIMARY KEY COMMENT 'ULID',
     vehicle_id CHAR(26) NOT NULL COMMENT 'FK to vm_vehicles.id',
@@ -181,94 +211,102 @@ CREATE TABLE IF NOT EXISTS vm_vehicle_schedules (
     INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 9. DEPARTMENTS (Optional organizational layer)
--- ============================================================================
-CREATE TABLE IF NOT EXISTS vm_departments (
-    id CHAR(26) PRIMARY KEY COMMENT 'ULID',
-    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Transportation, Maintenance, Athletics, etc.',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_name (name),
-    INDEX idx_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- 10. CAMPUSES (Optional organizational layer)
--- ============================================================================
-CREATE TABLE IF NOT EXISTS vm_campuses (
-    id CHAR(26) PRIMARY KEY COMMENT 'ULID',
-    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Elementary, Middle School, High School, etc.',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_name (name),
-    INDEX idx_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- 11. SETTINGS (Package configuration)
--- ============================================================================
+-- 11. SETTINGS (Package configuration — single row, controls field visibility)
 CREATE TABLE IF NOT EXISTS vm_settings (
-    id CHAR(26) PRIMARY KEY COMMENT 'ULID - single row configuration',
-    allow_driver_logging BOOLEAN DEFAULT TRUE COMMENT 'Allow Hub users to log fuel',
-    enable_departments BOOLEAN DEFAULT TRUE,
-    enable_campuses BOOLEAN DEFAULT TRUE,
+    id CHAR(26) PRIMARY KEY COMMENT 'ULID — single row configuration',
+
+    -- ═══ Fuel Logging Field Visibility ═══
+    -- Core fields (always on): vehicle, date, gallons, trip purpose, logged_by
+    track_odometer BOOLEAN DEFAULT TRUE COMMENT 'Show odometer reading on fuel form',
+    track_fuel_type BOOLEAN DEFAULT FALSE COMMENT 'Show fuel type selector (unleaded/diesel/etc.)',
+    track_fuel_cost BOOLEAN DEFAULT FALSE COMMENT 'Show total cost field',
+    track_price_per_gallon BOOLEAN DEFAULT FALSE COMMENT 'Show price-per-gallon field',
+    track_vendor BOOLEAN DEFAULT FALSE COMMENT 'Show vendor/location fields',
+    track_receipts BOOLEAN DEFAULT FALSE COMMENT 'Allow receipt upload on fuel logs',
+    track_purchase_flag BOOLEAN DEFAULT FALSE COMMENT 'Show purchased-vs-district-tank toggle',
+
+    -- ═══ Maintenance Field Visibility ═══
+    -- Core fields (always on): vehicle, date, maintenance type, logged_by
+    track_maintenance_cost BOOLEAN DEFAULT FALSE COMMENT 'Show cost fields on maintenance events',
+    track_parts_labor_split BOOLEAN DEFAULT FALSE COMMENT 'Split cost into parts + labor (requires track_maintenance_cost)',
+    track_invoices BOOLEAN DEFAULT FALSE COMMENT 'Allow invoice upload on maintenance events',
+    track_photos BOOLEAN DEFAULT FALSE COMMENT 'Allow photo upload on maintenance events',
+
+    -- ═══ Vehicle Detail Fields ═══
+    -- Core fields (always on): unit_number, name, year, make, model
+    track_vin BOOLEAN DEFAULT FALSE COMMENT 'Show VIN field on vehicle form',
+    track_license_plate BOOLEAN DEFAULT FALSE COMMENT 'Show license plate field',
+    track_vehicle_color BOOLEAN DEFAULT FALSE COMMENT 'Show color field',
+    track_assigned_driver BOOLEAN DEFAULT FALSE COMMENT 'Show default driver assignment',
+
+    -- ═══ Organization ═══
+    enable_departments BOOLEAN DEFAULT TRUE COMMENT 'Enable department grouping for vehicles',
+    enable_campuses BOOLEAN DEFAULT TRUE COMMENT 'Enable campus assignment for vehicles',
+
+    -- ═══ Workflow ═══
+    require_approval BOOLEAN DEFAULT TRUE COMMENT 'Enable Layer 2 approval workflow on logs',
+    allow_driver_logging BOOLEAN DEFAULT TRUE COMMENT 'Allow non-manager users to submit logs',
+
+    -- ═══ Maintenance Scheduling ═══
+    enable_maintenance_tracking BOOLEAN DEFAULT TRUE COMMENT 'Enable the maintenance module',
+    enable_scheduling BOOLEAN DEFAULT TRUE COMMENT 'Enable maintenance schedule tracking',
     maintenance_lead_time_days INT DEFAULT 30 COMMENT 'Notify N days before maintenance due',
     maintenance_lead_distance_miles INT DEFAULT 500 COMMENT 'Notify N miles before maintenance due',
+
+    -- ═══ Vehicle Sharing ═══
+    share_vehicles BOOLEAN DEFAULT TRUE COMMENT 'Allow other packages to reference vm_vehicles',
+
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by INT UNSIGNED DEFAULT NULL COMMENT 'FK to users.id'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- FOREIGN KEY CONSTRAINTS FOR OPTIONAL RELATIONSHIPS
--- ============================================================================
-ALTER TABLE vm_vehicles
-    ADD CONSTRAINT fk_vm_vehicles_department 
-        FOREIGN KEY (department_id) REFERENCES vm_departments(id) ON DELETE SET NULL,
-    ADD CONSTRAINT fk_vm_vehicles_campus 
-        FOREIGN KEY (campus_id) REFERENCES vm_campuses(id) ON DELETE SET NULL;
+-- 12. AUDIT LOG (Package-level audit trail for Layer 2 workflow)
+CREATE TABLE IF NOT EXISTS vm_audit_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    event_type VARCHAR(100) NOT NULL COMMENT 'FUEL_LOG_SUBMITTED, VEHICLE_CREATED, etc.',
+    entity_type VARCHAR(100) NOT NULL COMMENT 'fuel_log, maintenance_event, vehicle',
+    entity_id CHAR(26) NOT NULL COMMENT 'FK to the entity record',
+    user_id INT UNSIGNED NOT NULL COMMENT 'FK to users.id',
+    before_data JSON DEFAULT NULL COMMENT 'State before change',
+    after_data JSON DEFAULT NULL COMMENT 'State after change',
+    notes TEXT DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_event_type (event_type),
+    INDEX idx_entity (entity_type, entity_id),
+    INDEX idx_user (user_id),
+    INDEX idx_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
--- SEED DATA: Default Trip Categories (CONSTANTS)
+-- PLATFORM VIEW: hub_vehicles_v1
+-- Consumer-facing view for cross-package access. Consumers MUST query this
+-- view — never the raw vm_vehicles table. This enforces the resource contract
+-- (operations.vehicles v1.0.0) by exposing only contracted columns and
+-- applying the required filter (is_shared + is_deleted).
+--
+-- The provider package (fleet) owns the raw table and can add private columns
+-- without breaking consumers. Only the provider may run DDL against vm_vehicles.
 -- ============================================================================
-INSERT IGNORE INTO vm_trip_categories (id, code, name, description, sort_order) VALUES
-('01JMVEHICLEMAINT0001', '11', 'Extracurricular', 'Athletics, UIL competitions, field trips', 1),
-('01JMVEHICLEMAINT0002', '23', 'Student Transportation', 'Regular bus routes, special education transport', 2),
-('01JMVEHICLEMAINT0003', '34', 'District Business', 'Administrative meetings, professional development', 3),
-('01JMVEHICLEMAINT0004', '36', 'Training & PD', 'Staff training, professional development travel', 4),
-('01JMVEHICLEMAINT0005', '41', 'Maintenance & Operations', 'Vehicle maintenance, facility operations', 5);
-
--- ============================================================================
--- SEED DATA: Default Maintenance Items
--- ============================================================================
-INSERT IGNORE INTO vm_maintenance_items (id, name, description, default_mileage_interval, default_time_interval_days, sort_order) VALUES
-('01JMVEHICLEMAINT1001', 'Oil Change', 'Engine oil and filter replacement', 5000, 90, 1),
-('01JMVEHICLEMAINT1002', 'Tire Rotation', 'Rotate tires for even wear', 7500, 180, 2),
-('01JMVEHICLEMAINT1003', 'Air Filter', 'Replace engine air filter', 15000, 365, 3),
-('01JMVEHICLEMAINT1004', 'Annual Inspection', 'State-required annual safety inspection', NULL, 365, 4),
-('01JMVEHICLEMAINT1005', 'Brake Inspection', 'Inspect brake pads, rotors, fluid', 25000, 180, 5),
-('01JMVEHICLEMAINT1006', 'Transmission Service', 'Transmission fluid and filter service', 50000, 730, 6),
-('01JMVEHICLEMAINT1007', 'Coolant Flush', 'Engine coolant system flush and refill', 50000, 730, 7),
-('01JMVEHICLEMAINT1008', 'Battery Check', 'Battery load test and terminal cleaning', NULL, 180, 8);
-
--- ============================================================================
--- SEED DATA: Default Settings (Single Row)
--- ============================================================================
-INSERT IGNORE INTO vm_settings (id, allow_driver_logging, enable_departments, enable_campuses, maintenance_lead_time_days, maintenance_lead_distance_miles) 
-VALUES ('01JMVEHICLESETTINGS', TRUE, TRUE, TRUE, 30, 500);
-
--- ============================================================================
--- SEED DATA: Sample Maintenance Template
--- ============================================================================
-INSERT IGNORE INTO vm_maintenance_templates (id, name, description, created_by) 
-VALUES ('01JMVEHICLETEMPL001', 'Standard Bus Template', 'Recommended maintenance schedule for school buses', 1);
-
--- Link maintenance items to template
-INSERT IGNORE INTO vm_template_items (id, template_id, maintenance_item_id, mileage_interval, time_interval_days, sort_order) VALUES
-('01JMVEHICLETEMPLI01', '01JMVEHICLETEMPL001', '01JMVEHICLEMAINT1001', 5000, 90, 1),
-('01JMVEHICLETEMPLI02', '01JMVEHICLETEMPL001', '01JMVEHICLEMAINT1002', 7500, 180, 2),
-('01JMVEHICLETEMPLI03', '01JMVEHICLETEMPL001', '01JMVEHICLEMAINT1003', 15000, 365, 3),
-('01JMVEHICLETEMPLI04', '01JMVEHICLETEMPL001', '01JMVEHICLEMAINT1004', NULL, 365, 4),
-('01JMVEHICLETEMPLI05', '01JMVEHICLETEMPL001', '01JMVEHICLEMAINT1005', 25000, 180, 5);
+CREATE OR REPLACE VIEW hub_vehicles_v1 AS
+SELECT
+    -- Required columns (contract v1.0.0)
+    v.id,
+    v.unit_number,
+    v.name,
+    v.year,
+    v.make,
+    v.model,
+    v.is_out_of_service,
+    v.is_deleted,
+    v.created_at,
+    -- Optional columns (exposed if provider populates them)
+    v.color,
+    v.current_odometer,
+    v.vin,
+    v.license_plate,
+    v.department_id,
+    v.campus_id
+FROM vm_vehicles v
+WHERE v.is_shared = 1
+  AND v.is_deleted = 0;
